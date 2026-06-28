@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NovaStation 5.5</title>
+  <style>
+    :root{
+      --bg:#07090f; --panel:#101522; --panel2:#151b2b; --text:#f4f7fb; --muted:#9ba7b8;
+      --line:rgba(255,255,255,.12); --a:#34d2ff; --b:#ffcd38; --c:#ff4d7d; --ok:#66f0a8;
+      --shadow:0 24px 70px rgba(0,0,0,.42); --r:8px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;overflow:hidden;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;letter-spacing:0}
+    body:before{content:"";position:fixed;inset:0;background:
+      radial-gradient(circle at 18% 6%,rgba(52,210,255,.26),transparent 28%),
+      radial-gradient(circle at 84% 8%,rgba(255,77,125,.17),transparent 24%),
+      linear-gradient(135deg,#07090f 0%,#101827 46%,#06080d 100%);pointer-events:none}
+    button{font:inherit;color:inherit;border:0;background:none}
+    .app{position:relative;height:100%;padding:28px clamp(18px,3vw,44px);display:flex;flex-direction:column;gap:20px}
+    .topbar{height:56px;display:flex;align-items:center;justify-content:space-between;gap:18px}
+    .brand{display:flex;align-items:center;gap:12px;min-width:220px}
+    .logo{width:42px;height:42px;border-radius:8px;background:linear-gradient(135deg,var(--a),#6674ff 55%,var(--c));box-shadow:0 12px 34px rgba(52,210,255,.24);display:grid;place-items:center;font-weight:900;color:#fff}
+    .brand h1{font-size:19px;margin:0;line-height:1.05;font-weight:780}
+    .brand span{display:block;font-size:12px;color:var(--muted);font-weight:560;margin-top:3px}
+    .status{display:flex;align-items:center;gap:12px;color:#dce7f6}
+    .pill{height:36px;border:1px solid var(--line);background:rgba(10,14,22,.45);backdrop-filter:blur(14px);border-radius:999px;padding:0 13px;display:flex;align-items:center;gap:8px;font-size:13px;color:#dbe7f5;white-space:nowrap}
+    .dot{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 18px var(--ok)}
+    .screen{min-height:0;flex:1;display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:20px}
+    .home{min-width:0;display:flex;flex-direction:column;gap:18px}
+    .hero{position:relative;min-height:265px;border-radius:var(--r);overflow:hidden;border:1px solid var(--line);box-shadow:var(--shadow);background:#0b1019}
+    .hero canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+    .heroContent{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;justify-content:flex-end;padding:28px;background:linear-gradient(90deg,rgba(5,8,13,.85),rgba(5,8,13,.38) 58%,rgba(5,8,13,.05))}
+    .kicker{font-size:12px;text-transform:uppercase;color:#b9ecff;font-weight:800;letter-spacing:.12em}
+    .hero h2{font-size:clamp(34px,6vw,72px);line-height:.92;margin:9px 0 12px;font-weight:880;max-width:760px}
+    .hero p{max-width:610px;color:#d8e3f1;margin:0 0 22px;font-size:16px;line-height:1.5}
+    .actions{display:flex;gap:10px;flex-wrap:wrap}
+    .primary,.ghost,.smallBtn{height:44px;border-radius:8px;padding:0 16px;display:inline-flex;align-items:center;gap:10px;cursor:pointer;transition:transform .16s ease,background .16s ease,border-color .16s ease;white-space:nowrap}
+    .primary{background:#f8fbff;color:#07101c;font-weight:850;box-shadow:0 14px 34px rgba(255,255,255,.12)}
+    .ghost,.smallBtn{background:rgba(255,255,255,.08);border:1px solid var(--line);color:#edf5ff}
+    .primary:hover,.ghost:hover,.smallBtn:hover{transform:translateY(-1px)}
+    .library{display:grid;grid-template-columns:repeat(3,minmax(160px,1fr));gap:14px}
+    .gameCard{position:relative;min-height:190px;border-radius:8px;padding:16px;overflow:hidden;background:var(--panel);border:1px solid var(--line);box-shadow:0 18px 44px rgba(0,0,0,.24);cursor:pointer;display:flex;flex-direction:column;justify-content:flex-end;transition:transform .18s ease,border-color .18s ease}
+    .gameCard:hover,.gameCard.active{transform:translateY(-3px);border-color:rgba(52,210,255,.55)}
+    .gameCard:before{content:"";position:absolute;inset:0;background:var(--art);opacity:.95}
+    .gameCard:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(4,6,10,.05),rgba(4,6,10,.92))}
+    .gameCard>*{position:relative;z-index:1}
+    .gameCard h3{font-size:20px;margin:0 0 5px}
+    .gameCard p{margin:0;color:#c8d4e4;font-size:13px;line-height:1.35}
+    .tagrow{display:flex;gap:7px;margin-bottom:auto;flex-wrap:wrap}
+    .tag{font-size:11px;color:#07101c;background:rgba(255,255,255,.86);border-radius:999px;padding:5px 8px;font-weight:800}
+    .side{display:flex;flex-direction:column;gap:14px;min-width:0}
+    .panel{border:1px solid var(--line);background:rgba(14,19,31,.72);backdrop-filter:blur(16px);border-radius:8px;padding:16px;box-shadow:0 18px 42px rgba(0,0,0,.22)}
+    .panel h3{font-size:15px;margin:0 0 13px;color:#f7fbff}
+    .profile{display:flex;gap:12px;align-items:center}
+    .avatar{width:50px;height:50px;border-radius:8px;background:linear-gradient(135deg,var(--b),var(--c));display:grid;place-items:center;color:#08101d;font-weight:900}
+    .profile strong{display:block;font-size:15px}.profile span{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+    .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .stat{padding:12px;border:1px solid var(--line);border-radius:8px;background:rgba(255,255,255,.05)}
+    .stat b{font-size:20px}.stat span{display:block;color:var(--muted);font-size:11px;margin-top:3px}
+    .list{display:flex;flex-direction:column;gap:10px}
+    .row{display:flex;justify-content:space-between;gap:12px;align-items:center;color:#dce6f3;font-size:13px}
+    .row small{color:var(--muted)}
+    .bar{height:8px;background:rgba(255,255,255,.09);border-radius:99px;overflow:hidden;margin-top:6px}
+    .bar i{display:block;height:100%;width:var(--w);background:linear-gradient(90deg,var(--a),var(--ok))}
+    .gameView{position:fixed;inset:0;z-index:50;background:#03060b;display:none}
+    .gameView.on{display:block}
+    #gameCanvas{width:100%;height:100%;display:block;background:#06080c}
+    .hud{position:absolute;left:18px;right:18px;top:16px;display:flex;justify-content:space-between;gap:12px;pointer-events:none;align-items:flex-start}
+    .hudBox{pointer-events:auto;border:1px solid rgba(255,255,255,.15);background:rgba(7,10,16,.68);backdrop-filter:blur(14px);border-radius:8px;padding:12px 14px;box-shadow:0 16px 46px rgba(0,0,0,.34)}
+    .hudTitle{font-size:14px;font-weight:850;margin-bottom:4px}.hudText{font-size:12px;color:#c6d2e2;line-height:1.45}
+    .score{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+    .score .pill{height:34px;background:rgba(7,10,16,.75)}
+    .bottomHud{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);display:flex;gap:8px;align-items:center;pointer-events:auto;max-width:calc(100% - 28px);overflow:auto;padding-bottom:2px}
+    .key{min-width:34px;height:32px;border:1px solid rgba(255,255,255,.18);border-bottom-color:rgba(255,255,255,.32);background:rgba(255,255,255,.09);border-radius:7px;display:grid;place-items:center;font-size:12px;font-weight:850;color:#fff}
+    .hint{font-size:12px;color:#dbe7f5;white-space:nowrap;margin-right:8px}
+    .menuBtn{position:absolute;right:18px;bottom:18px;z-index:4;pointer-events:auto}
+    .toast{position:absolute;left:50%;top:78px;transform:translateX(-50%);padding:10px 14px;border-radius:8px;background:rgba(248,251,255,.94);color:#07101c;font-size:13px;font-weight:800;opacity:0;transition:opacity .25s ease;pointer-events:none}
+    .toast.show{opacity:1}
+    @media(max-width:930px){
+      .app{padding:18px}.screen{grid-template-columns:1fr}.side{display:grid;grid-template-columns:1fr 1fr}.library{grid-template-columns:1fr}.hero{min-height:330px}.status .pill:nth-child(2){display:none}
+    }
+    @media(max-width:620px){
+      .topbar{height:auto;align-items:flex-start}.status{flex-direction:column;align-items:flex-end;gap:6px}.pill{height:32px;font-size:12px}.side{display:none}.heroContent{padding:20px}.hero h2{font-size:40px}.hero p{font-size:14px}.primary,.ghost{height:40px}.gameCard{min-height:145px}.hud{left:10px;right:10px;top:10px}.score{max-width:46%;}.hudBox{padding:10px}.bottomHud{bottom:10px}.menuBtn{right:10px;bottom:54px}
+    }
+  </style>
+</head>
+<body>
+  <div class="app" id="home">
+    <header class="topbar">
+      <div class="brand"><div class="logo">N</div><div><h1>NovaStation 5.5</h1><span>4K shell • cloud saves • 60 FPS target</span></div></div>
+      <div class="status">
+        <div class="pill"><span class="dot"></span><span id="net">Online</span></div>
+        <div class="pill">GPU EcoBoost</div>
+        <div class="pill" id="clock">--:--</div>
+      </div>
+    </header>
+    <main class="screen">
+      <section class="home">
+        <div class="hero">
+          <canvas id="heroCanvas"></canvas>
+          <div class="heroContent">
+            <div class="kicker">Игровая система</div>
+            <h2 id="heroTitle">Выбери мир и играй сразу</h2>
+            <p id="heroCopy">Три быстрые 3D-игры запускаются внутри интерфейса: блоковое строительство, турнир на арене и городской заезд с миссиями.</p>
+            <div class="actions">
+              <button class="primary" id="playBtn">▶ Запустить выбранное</button>
+              <button class="ghost" id="shuffleBtn">↻ Случайная игра</button>
+            </div>
+          </div>
+        </div>
+        <div class="library" id="library"></div>
+      </section>
+      <aside class="side">
+        <div class="panel">
+          <div class="profile"><div class="avatar">PX</div><div><strong>Player X</strong><span>Уровень 18 • 9 серий побед</span></div></div>
+        </div>
+        <div class="panel">
+          <h3>Система</h3>
+          <div class="stats">
+            <div class="stat"><b id="fps">60</b><span>FPS меню</span></div>
+            <div class="stat"><b>3</b><span>Игры установлены</span></div>
+            <div class="stat"><b>1.2 GB</b><span>Сейвы</span></div>
+            <div class="stat"><b>38 ms</b><span>Input lag</span></div>
+          </div>
+        </div>
+        <div class="panel">
+          <h3>Загрузки и сейвы</h3>
+          <div class="list">
+            <div><div class="row"><span>BlockCraft Arena</span><small>100%</small></div><div class="bar" style="--w:100%"><i></i></div></div>
+            <div><div class="row"><span>Cage Strike</span><small>100%</small></div><div class="bar" style="--w:100%"><i></i></div></div>
+            <div><div class="row"><span>Metro Drift</span><small>100%</small></div><div class="bar" style="--w:100%"><i></i></div></div>
+          </div>
+        </div>
+        <div class="panel">
+          <h3>Управление</h3>
+          <div class="row"><span>WASD / стрелки</span><small>движение</small></div>
+          <div class="row"><span>Пробел / мышь</span><small>действие</small></div>
+          <div class="row"><span>Esc</span><small>домой</small></div>
+        </div>
+      </aside>
+    </main>
+  </div>
+  <div class="gameView" id="gameView">
+    <canvas id="gameCanvas"></canvas>
+    <div class="hud">
+      <div class="hudBox"><div class="hudTitle" id="gameTitle">Game</div><div class="hudText" id="gameHelp"></div></div>
+      <div class="score" id="score"></div>
+    </div>
+    <button class="smallBtn menuBtn" id="homeBtn">← Домой</button>
+    <div class="toast" id="toast">Сохранено</div>
+    <div class="bottomHud" id="keys"></div>
+  </div>
+  <script type="module">
+    import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+
+    const games=[
+      {id:'block',name:'BlockCraft Arena',genre:'строительство',color:'#54d36f',title:'BlockCraft Arena',copy:'Собирай светящиеся кристаллы, ставь кубы и строй маршрут через остров. Мир генерируется каждый запуск.',tags:['3D voxel','craft','survival'],art:'linear-gradient(135deg,#285f32,#67c86f 44%,#7b5b38 45%,#2a2019)'},
+      {id:'fight',name:'Cage Strike',genre:'арена',color:'#ffcd38',title:'Cage Strike',copy:'Держи дистанцию, бей сериями, уходи от рывков соперника. Побеждает тот, кто первым заберёт три раунда.',tags:['fighter','AI','arena'],art:'radial-gradient(circle at 50% 18%,#fff4a8,transparent 20%),linear-gradient(135deg,#262b35,#9b1d35 52%,#12090d)'},
+      {id:'city',name:'Metro Drift',genre:'город',color:'#34d2ff',title:'Metro Drift',copy:'Ночной город, чекпоинты и дрифт. Собери все маркеры до окончания таймера и не улети с трассы.',tags:['driving','city','missions'],art:'linear-gradient(145deg,#101727,#1a7fb8 42%,#ff4d7d 43%,#1a0d18)'}
+    ];
+    let selected=0, active=null, renderer, scene, camera, raf=0, last=performance.now(), frames=0, fpsTime=0;
+    const $=id=>document.getElementById(id);
+    const lib=$('library'), heroTitle=$('heroTitle'), heroCopy=$('heroCopy'), score=$('score'), keys=$('keys');
+    const state={keys:{}, mouse:false};
+
+    function setupHome(){
+      games.forEach((g,i)=>{
+        const card=document.createElement('button'); card.className='gameCard'; card.style.setProperty('--art',g.art); card.innerHTML=`<div class="tagrow">${g.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div><h3>${g.name}</h3><p>${g.copy}</p>`;
+        card.onclick=()=>selectGame(i); lib.appendChild(card);
+      });
+      $('playBtn').onclick=()=>startGame(games[selected].id);
+      $('shuffleBtn').onclick=()=>{selectGame(Math.floor(Math.random()*games.length)); startGame(games[selected].id)};
+      $('homeBtn').onclick=goHome;
+      addEventListener('keydown',e=>{state.keys[e.code]=true;if(e.code==='Escape'&&active)goHome(); if(!active&&['ArrowLeft','ArrowRight'].includes(e.code)){selectGame((selected+(e.code==='ArrowRight'?1:games.length-1))%games.length)}});
+      addEventListener('keyup',e=>state.keys[e.code]=false);
+      addEventListener('pointerdown',()=>state.mouse=true); addEventListener('pointerup',()=>state.mouse=false);
+      selectGame(0); tickClock(); setInterval(tickClock,1000); heroLoop();
+    }
+    function tickClock(){const d=new Date();$('clock').textContent=d.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})}
+    function selectGame(i){selected=i;[...lib.children].forEach((c,n)=>c.classList.toggle('active',n===i));heroTitle.textContent=games[i].title;heroCopy.textContent=games[i].copy}
+
+    function makeRenderer(canvas){
+      const r=new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance'});
+      r.setPixelRatio(Math.min(devicePixelRatio,1.5)); r.shadowMap.enabled=true; r.shadowMap.type=THREE.PCFSoftShadowMap; return r;
+    }
+    function fit(){ if(!renderer||!camera)return; const c=renderer.domElement,w=c.clientWidth,h=c.clientHeight; if(c.width!==Math.floor(w*renderer.getPixelRatio())||c.height!==Math.floor(h*renderer.getPixelRatio())){renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();}}
+    function mat(c,rough=.75,metal=0){return new THREE.MeshStandardMaterial({color:c,roughness:rough,metalness:metal})}
+    function cube(w,h,d,m){const x=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);x.castShadow=x.receiveShadow=true;return x}
+    function cyl(r,h,m,n=32){const x=new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,n),m);x.castShadow=x.receiveShadow=true;return x}
+    function lightBase(s){
+      scene.background=new THREE.Color(0x07101a); scene.fog=new THREE.Fog(0x07101a,24,72);
+      const hemi=new THREE.HemisphereLight(0xaedfff,0x1f2632,1.4);scene.add(hemi);
+      const sun=new THREE.DirectionalLight(0xffffff,2.4);sun.position.set(9,16,8);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);s.add(sun);
+    }
+    function setScore(items){score.innerHTML=items.map(x=>`<div class="pill">${x}</div>`).join('')}
+    function setKeys(items){keys.innerHTML=`<span class="hint">Управление</span>`+items.map(k=>`<span class="key">${k}</span>`).join('')}
+    function toast(t){$('toast').textContent=t;$('toast').classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>$('toast').classList.remove('show'),1200)}
+
+    function startGame(id){
+      cancelAnimationFrame(raf); $('gameView').classList.add('on'); $('home').style.display='none';
+      renderer=makeRenderer($('gameCanvas')); scene=new THREE.Scene(); camera=new THREE.PerspectiveCamera(64,1,.1,150); lightBase(scene);
+      active = id==='block'?new BlockGame():id==='fight'?new FightGame():new CityGame();
+      $('gameTitle').textContent=active.title; $('gameHelp').innerHTML=active.help; setKeys(active.keys); active.init(); last=performance.now(); loop(last);
+    }
+    function goHome(){ if(!active)return; cancelAnimationFrame(raf); active.dispose?.(); active=null; renderer.dispose(); $('gameView').classList.remove('on'); $('home').style.display='flex'; toast('Прогресс сохранён') }
+    function loop(t){raf=requestAnimationFrame(loop); const dt=Math.min((t-last)/1000,.033); last=t; fit(); active.update(dt,t/1000); renderer.render(scene,camera); frames++; if(t-fpsTime>500){$('fps').textContent=Math.round(frames*1000/(t-fpsTime));frames=0;fpsTime=t}}
+
+    class BlockGame{
+      constructor(){this.title='BlockCraft Arena';this.help='Собери 8 кристаллов. ЛКМ или пробел ставит куб рядом с игроком.';this.keys=['W','A','S','D','Space','Mouse'];this.blocks=[];this.pickups=[];this.player=null;this.score=0;this.buildCooldown=0}
+      init(){
+        camera.position.set(8,8,10); camera.lookAt(0,0,0);
+        const ground=cube(30,.6,30,mat(0x357b46)); ground.position.y=-.3; scene.add(ground);
+        const dirt=mat(0x7a5438), grass=mat(0x55a65a), gem=mat(0x4ef2ff,.25,.2);
+        for(let x=-7;x<=7;x+=2)for(let z=-7;z<=7;z+=2){if(Math.random()>.72){const b=cube(1,1,1,dirt);b.position.set(x,.5,z);scene.add(b);this.blocks.push(b)}}
+        for(let i=0;i<8;i++){const g=new THREE.Mesh(new THREE.OctahedronGeometry(.38),gem);g.position.set((Math.random()-.5)*22,.75,(Math.random()-.5)*22);g.castShadow=true;scene.add(g);this.pickups.push(g)}
+        this.player=cube(.8,1.4,.8,mat(0x2f67ff)); this.player.position.set(0,.7,0); scene.add(this.player);
+        for(let i=0;i<22;i++){const t=cube(.5,2+Math.random()*3,.5,mat(0x5a3826));t.position.set((Math.random()-.5)*28,t.geometry.parameters.height/2-.05,(Math.random()-.5)*28);const crown=cube(1.8,1.4,1.8,grass);crown.position.set(t.position.x,t.position.y+t.geometry.parameters.height/2+1,t.position.z);scene.add(t,crown)}
+      }
+      update(dt,time){
+        const v=new THREE.Vector3((state.keys.KeyD?1:0)-(state.keys.KeyA?1:0),0,(state.keys.KeyS?1:0)-(state.keys.KeyW?1:0)); if(v.length())v.normalize().multiplyScalar(6*dt); this.player.position.add(v); this.player.position.x=THREE.MathUtils.clamp(this.player.position.x,-14,14);this.player.position.z=THREE.MathUtils.clamp(this.player.position.z,-14,14);
+        this.buildCooldown-=dt; if((state.keys.Space||state.mouse)&&this.buildCooldown<=0){const b=cube(1,1,1,mat(0x8b6b4d));b.position.copy(this.player.position).add(new THREE.Vector3(0,.1,-1.2));b.position.x=Math.round(b.position.x);b.position.z=Math.round(b.position.z);scene.add(b);this.blocks.push(b);this.buildCooldown=.24}
+        for(const g of this.pickups){g.rotation.y+=dt*2.8;g.position.y=.78+Math.sin(time*3+g.position.x)*.16;if(g.visible&&g.position.distanceTo(this.player.position)<1.25){g.visible=false;this.score++;toast('Кристалл найден')}}
+        camera.position.lerp(new THREE.Vector3(this.player.position.x+8,8,this.player.position.z+10),.08); camera.lookAt(this.player.position);
+        setScore([`Кристаллы ${this.score}/8`,`Кубы ${this.blocks.length}`,this.score>=8?'Портал открыт':'Остров активен']);
+      }
+    }
+    class FightGame{
+      constructor(){this.title='Cage Strike';this.help='Подойди к сопернику и бей. Shift — уклонение назад. AI атакует рывками.';this.keys=['W','A','S','D','Space','Shift'];this.pHP=100;this.eHP=100;this.round=1;this.cool=0;this.enemyCool=0}
+      fighter(color){const group=new THREE.Group();const body=cyl(.42,1.15,mat(color),24);body.position.y=1.05;const head=new THREE.Mesh(new THREE.SphereGeometry(.32,24,16),mat(0xffc7a8));head.position.y=1.88;const l=cyl(.12,.75,mat(color),12);l.rotation.z=.25;l.position.set(-.42,1.18,0);const r=l.clone();r.position.x=.42;r.rotation.z=-.25;group.add(body,head,l,r);return group}
+      init(){
+        camera.position.set(0,8,11); camera.lookAt(0,0,0); const floor=cyl(6,.25,mat(0x222a36),64);floor.receiveShadow=true;scene.add(floor);
+        for(let i=0;i<16;i++){const p=cyl(.05,2.2,mat(0xd7e0ec,.35,.5),8);const a=i/16*Math.PI*2;p.position.set(Math.cos(a)*6,1.05,Math.sin(a)*6);scene.add(p)}
+        const ring=new THREE.Mesh(new THREE.TorusGeometry(6,.035,8,96),mat(0xd7e0ec,.35,.5));ring.rotation.x=Math.PI/2;ring.position.y=2.05;scene.add(ring);
+        this.player=this.fighter(0x2778ff);this.enemy=this.fighter(0xe1354f);this.player.position.set(-2,0,0);this.enemy.position.set(2,0,0);scene.add(this.player,this.enemy);
+      }
+      update(dt,time){
+        const speed=state.keys.ShiftLeft?8:4.8; const v=new THREE.Vector3((state.keys.KeyD?1:0)-(state.keys.KeyA?1:0),0,(state.keys.KeyS?1:0)-(state.keys.KeyW?1:0)); if(v.length())v.normalize().multiplyScalar(speed*dt); if(state.keys.ShiftLeft)v.multiplyScalar(-.9); this.player.position.add(v);
+        if(this.player.position.length()>5.5)this.player.position.setLength(5.5);
+        const toP=this.player.position.clone().sub(this.enemy.position); if(toP.length()>1.25)this.enemy.position.add(toP.normalize().multiplyScalar(3.2*dt)); this.enemy.position.y=0;
+        this.player.lookAt(this.enemy.position.x,0,this.enemy.position.z); this.enemy.lookAt(this.player.position.x,0,this.player.position.z);
+        this.cool-=dt;this.enemyCool-=dt; const d=this.player.position.distanceTo(this.enemy.position);
+        if((state.keys.Space||state.mouse)&&this.cool<=0){this.cool=.38;this.player.scale.set(1.08,.94,1.08);setTimeout(()=>this.player.scale.set(1,1,1),90); if(d<1.55){this.eHP=Math.max(0,this.eHP-9-Math.random()*8);toast('Попадание')}}
+        if(d<1.45&&this.enemyCool<=0){this.enemyCool=.72; if(!state.keys.ShiftLeft)this.pHP=Math.max(0,this.pHP-7-Math.random()*9)}
+        if(this.eHP<=0||this.pHP<=0){toast(this.eHP<=0?'Раунд выигран':'Раунд проигран');this.round++;this.pHP=100;this.eHP=100;this.player.position.set(-2,0,0);this.enemy.position.set(2,0,0)}
+        this.player.position.y=Math.abs(Math.sin(time*8))*0.03;this.enemy.position.y=Math.abs(Math.sin(time*7))*0.03;
+        camera.position.lerp(new THREE.Vector3(0,7.5,10),.08); camera.lookAt(0,0.8,0);
+        setScore([`Ты ${Math.round(this.pHP)} HP`,`Соперник ${Math.round(this.eHP)} HP`,`Раунд ${this.round}`]);
+      }
+    }
+    class CityGame{
+      constructor(){this.title='Metro Drift';this.help='Собери 10 чекпоинтов. Машина ускоряется на W, тормозит S, поворачивает A/D.';this.keys=['W','A','S','D'];this.speed=0;this.angle=0;this.got=0;this.time=90;this.points=[]}
+      init(){
+        scene.background=new THREE.Color(0x080a12); scene.fog=new THREE.Fog(0x080a12,28,90); camera.position.set(0,9,13);
+        const road=mat(0x222631), lane=mat(0xeceff5), glass=mat(0x46d8ff,.2,.1);
+        const base=cube(46,.25,46,mat(0x111722));base.position.y=-.13;scene.add(base);
+        for(let i=-20;i<=20;i+=10){const r1=cube(46,.04,3.4,road);r1.position.set(0,.03,i);scene.add(r1);const r2=cube(3.4,.04,46,road);r2.position.set(i,.04,0);scene.add(r2)}
+        for(let i=0;i<48;i++){const b=cube(1.6+Math.random()*2,2+Math.random()*8,1.6+Math.random()*2,mat(Math.random()>.5?0x26384d:0x31283e));b.position.set((Math.random()-.5)*42,b.geometry.parameters.height/2,(Math.random()-.5)*42); if(Math.abs(b.position.x%10)<2||Math.abs(b.position.z%10)<2){b.position.x+=3;b.position.z+=3} scene.add(b); if(Math.random()>.45){const w=cube(b.geometry.parameters.width+.04,.08,b.geometry.parameters.depth+.04,glass);w.position.set(b.position.x,b.position.y+.4,b.position.z);scene.add(w)}}
+        this.car=new THREE.Group();const body=cube(1.1,.42,2.05,mat(0x34d2ff,.35,.2));body.position.y=.42;const cabin=cube(.86,.45,.9,mat(0x101827,.25,.4));cabin.position.set(0,.86,-.18);this.car.add(body,cabin);this.car.position.set(0,0,0);scene.add(this.car);
+        for(let i=0;i<10;i++){const p=new THREE.Mesh(new THREE.TorusGeometry(.75,.09,8,32),mat(0xffcd38,.2,.1));p.rotation.x=Math.PI/2;p.position.set((Math.random()-.5)*36,.9,(Math.random()-.5)*36);scene.add(p);this.points.push(p)}
+      }
+      update(dt,time){
+        this.time=Math.max(0,this.time-dt); const accel=(state.keys.KeyW?1:0)-(state.keys.KeyS?1:0); this.speed+=accel*13*dt; this.speed*=.985; this.speed=THREE.MathUtils.clamp(this.speed,-5,14);
+        const turn=(state.keys.KeyA?1:0)-(state.keys.KeyD?1:0); this.angle+=turn*this.speed*.055*dt; this.car.rotation.y=this.angle; const dir=new THREE.Vector3(Math.sin(this.angle),0,Math.cos(this.angle)); this.car.position.add(dir.multiplyScalar(this.speed*dt));
+        if(Math.abs(this.car.position.x)>22||Math.abs(this.car.position.z)>22){this.car.position.x=THREE.MathUtils.clamp(this.car.position.x,-22,22);this.car.position.z=THREE.MathUtils.clamp(this.car.position.z,-22,22);this.speed*=-.35}
+        for(const p of this.points){p.rotation.z+=dt*2;p.position.y=.9+Math.sin(time*3+p.position.x)*.18;if(p.visible&&p.position.distanceTo(this.car.position)<1.55){p.visible=false;this.got++;this.time+=8;toast('Чекпоинт +8 сек')}}
+        const camTarget=this.car.position.clone().add(new THREE.Vector3(-Math.sin(this.angle)*7,5.8,-Math.cos(this.angle)*8));camera.position.lerp(camTarget,.1);camera.lookAt(this.car.position.x,.45,this.car.position.z);
+        setScore([`Чекпоинты ${this.got}/10`,`Скорость ${Math.abs(Math.round(this.speed*12))}`,`Время ${Math.ceil(this.time)}с`,this.got>=10?'Миссия выполнена':'Ночной рейд']);
+      }
+    }
+
+    function heroLoop(){
+      const canvas=$('heroCanvas'), r=makeRenderer(canvas), s=new THREE.Scene(), c=new THREE.PerspectiveCamera(55,1,.1,80); c.position.set(0,3.2,8); s.background=null;
+      const amb=new THREE.HemisphereLight(0xbfefff,0x101724,1.8), dl=new THREE.DirectionalLight(0xffffff,2);dl.position.set(5,8,6);s.add(amb,dl);
+      const group=new THREE.Group();s.add(group);
+      for(let i=0;i<34;i++){const geo=i%3===0?new THREE.BoxGeometry(.7,.7,.7):i%3===1?new THREE.OctahedronGeometry(.48):new THREE.TetrahedronGeometry(.55);const m=mat([0x34d2ff,0xffcd38,0xff4d7d,0x66f0a8][i%4],.38,.12);const o=new THREE.Mesh(geo,m);o.position.set((Math.random()-.5)*10,(Math.random()-.5)*4,(Math.random()-.5)*7);o.rotation.set(Math.random()*3,Math.random()*3,0);group.add(o)}
+      const platform=cyl(3.4,.16,mat(0x121a2a,.55,.2),80);platform.position.y=-1.6;group.add(platform);
+      let prev=performance.now(), fr=0, ft=prev;
+      function h(t){requestAnimationFrame(h);const dt=Math.min((t-prev)/1000,.033);prev=t;const w=canvas.clientWidth,hg=canvas.clientHeight;if(canvas.width!==Math.floor(w*r.getPixelRatio())||canvas.height!==Math.floor(hg*r.getPixelRatio())){r.setSize(w,hg,false);c.aspect=w/hg;c.updateProjectionMatrix()}group.rotation.y+=dt*.22;group.children.forEach((o,i)=>{if(i<34){o.rotation.x+=dt*(.35+i*.01);o.rotation.y+=dt*(.25+i*.008)}});r.render(s,c);fr++;if(t-ft>500&&!active){$('fps').textContent=Math.round(fr*1000/(t-ft));fr=0;ft=t}}
+      h(prev);
+    }
+    setupHome();
+  </script>
+</body>
+</html>

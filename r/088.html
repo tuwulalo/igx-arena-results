@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Сравнение тарифов</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f4f7fb;
+  --surface:#ffffff;
+  --text:#1a1f36;
+  --text-secondary:#4e5d78;
+  --text-muted:#8792a2;
+  --border:#e3e8ee;
+  --accent:#635bff;
+  --accent-light:#7a73ff;
+  --accent-bg:rgba(99,91,255,0.06);
+  --accent-border:rgba(99,91,255,0.25);
+  --green:#0cce6e;
+  --green-bg:rgba(12,206,110,0.1);
+  --red:#e25959;
+  --red-bg:rgba(226,89,89,0.08);
+  --popular-gradient:linear-gradient(135deg,#635bff 0%,#7a73ff 50%,#a78bfa 100%);
+  --shadow-sm:0 1px 3px rgba(0,0,0,0.06),0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md:0 4px 12px rgba(0,0,0,0.07),0 2px 4px rgba(0,0,0,0.04);
+  --shadow-lg:0 12px 40px rgba(0,0,0,0.1),0 4px 12px rgba(0,0,0,0.05);
+  --shadow-popular:0 12px 48px rgba(99,91,255,0.2),0 4px 16px rgba(99,91,255,0.1);
+  --radius:16px;
+  --radius-sm:10px;
+  --radius-xs:8px;
+  --transition:0.3s cubic-bezier(0.4,0,0.2,1);
+}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.6;
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+.container{
+  max-width:1200px;
+  margin:0 auto;
+  padding:60px 24px 80px;
+}
+.header{
+  text-align:center;
+  margin-bottom:48px;
+}
+.header-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  background:var(--accent-bg);
+  border:1px solid var(--accent-border);
+  color:var(--accent);
+  font-size:13px;
+  font-weight:600;
+  padding:6px 16px;
+  border-radius:100px;
+  margin-bottom:20px;
+  letter-spacing:0.02em;
+}
+.header-badge svg{
+  width:14px;
+  height:14px;
+}
+.header h1{
+  font-size:clamp(32px,5vw,48px);
+  font-weight:800;
+  letter-spacing:-0.03em;
+  line-height:1.15;
+  margin-bottom:16px;
+  background:linear-gradient(135deg,var(--text) 0%,var(--text-secondary) 100%);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.header p{
+  font-size:18px;
+  color:var(--text-secondary);
+  max-width:540px;
+  margin:0 auto;
+  line-height:1.7;
+}
+.toggle-wrapper{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:16px;
+  margin-bottom:48px;
+}
+.toggle-label{
+  font-size:15px;
+  font-weight:600;
+  color:var(--text-muted);
+  transition:color var(--transition);
+  cursor:pointer;
+  user-select:none;
+}
+.toggle-label.active{
+  color:var(--text);
+}
+.toggle-switch{
+  position:relative;
+  width:56px;
+  height:30px;
+  background:var(--border);
+  border-radius:100px;
+  cursor:pointer;
+  transition:background var(--transition);
+  flex-shrink:0;
+}
+.toggle-switch.active{
+  background:var(--accent);
+}
+.toggle-switch::after{
+  content:'';
+  position:absolute;
+  top:3px;
+  left:3px;
+  width:24px;
+  height:24px;
+  background:#fff;
+  border-radius:50%;
+  box-shadow:0 1px 4px rgba(0,0,0,0.15);
+  transition:transform var(--transition);
+}
+.toggle-switch.active::after{
+  transform:translateX(26px);
+}
+.save-badge{
+  background:var(--green-bg);
+  color:var(--green);
+  font-size:12px;
+  font-weight:700;
+  padding:4px 10px;
+  border-radius:100px;
+  letter-spacing:0.02em;
+  opacity:0;
+  transform:scale(0.8);
+  transition:all var(--transition);
+}
+.save-badge.visible{
+  opacity:1;
+  transform:scale(1);
+}
+.plans-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:24px;
+  margin-bottom:64px;
+  align-items:start;
+}
+@media(max-width:900px){
+  .plans-grid{grid-template-columns:1fr;max-width:440px;margin-left:auto;margin-right:auto;}
+  .plan-card.popular{transform:none;}
+}
+.plan-card{
+  background:var(--surface);
+  border:1.5px solid var(--border);
+  border-radius:var(--radius);
+  padding:36px 28px 32px;
+  position:relative;
+  transition:all var(--transition);
+  box-shadow:var(--shadow-sm);
+}
+.plan-card:hover{
+  box-shadow:var(--shadow-md);
+  transform:translateY(-2px);
+}
+.plan-card.popular{
+  border-color:var(--accent);
+  border-width:2px;
+  box-shadow:var(--shadow-popular);
+  transform:scale(1.04);
+  z-index:2;
+  padding-top:48px;
+}
+.plan-card.popular:hover{
+  transform:scale(1.04) translateY(-2px);
+  box-shadow:0 16px 56px rgba(99,91,255,0.25),0 6px 20px rgba(99,91,255,0.12);
+}
+.popular-tag{
+  position:absolute;
+  top:-1px;
+  left:50%;
+  transform:translateX(-50%);
+  background:var(--popular-gradient);
+  color:#fff;
+  font-size:12px;
+  font-weight:700;
+  padding:5px 20px;
+  border-radius:0 0 10px 10px;
+  letter-spacing:0.05em;
+  text-transform:uppercase;
+}
+.plan-icon{
+  width:48px;
+  height:48px;
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin-bottom:20px;
+}
+.plan-card:nth-child(1) .plan-icon{background:#eef2ff;color:#6366f1;}
+.plan-card:nth-child(2) .plan-icon{background:var(--accent-bg);color:var(--accent);}
+.plan-card:nth-child(3) .plan-icon{background:#fef3c7;color:#d97706;}
+.plan-icon svg{width:24px;height:24px;}
+.plan-name{
+  font-size:20px;
+  font-weight:700;
+  margin-bottom:6px;
+  letter-spacing:-0.01em;
+}
+.plan-desc{
+  font-size:14px;
+  color:var(--text-muted);
+  margin-bottom:24px;
+  line-height:1.5;
+}
+.plan-price{
+  display:flex;
+  align-items:baseline;
+  gap:4px;
+  margin-bottom:6px;
+}
+.plan-price .currency{
+  font-size:22px;
+  font-weight:700;
+  color:var(--text-secondary);
+  align-self:flex-start;
+  margin-top:6px;
+}
+.plan-price .amount{
+  font-size:48px;
+  font-weight:800;
+  letter-spacing:-0.03em;
+  line-height:1;
+  transition:all 0.4s ease;
+}
+.plan-price .period{
+  font-size:15px;
+  color:var(--text-muted);
+  font-weight:500;
+}
+.plan-price-old{
+  font-size:14px;
+  color:var(--text-muted);
+  text-decoration:line-through;
+  margin-bottom:4px;
+  min-height:20px;
+  transition:opacity var(--transition);
+}
+.plan-billing-note{
+  font-size:13px;
+  color:var(--text-muted);
+  margin-bottom:24px;
+  min-height:18px;
+}
+.plan-cta{
+  display:block;
+  width:100%;
+  padding:14px 24px;
+  border-radius:var(--radius-xs);
+  font-size:15px;
+  font-weight:650;
+  text-align:center;
+  cursor:pointer;
+  transition:all var(--transition);
+  border:none;
+  outline:none;
+  letter-spacing:0.01em;
+}
+.plan-cta.outline{
+  background:var(--surface);
+  color:var(--text);
+  border:1.5px solid var(--border);
+}
+.plan-cta.outline:hover{
+  border-color:var(--accent);
+  color:var(--accent);
+  background:var(--accent-bg);
+}
+.plan-cta.filled{
+  background:var(--popular-gradient);
+  color:#fff;
+  border:none;
+  box-shadow:0 4px 16px rgba(99,91,255,0.3);
+}
+.plan-cta.filled:hover{
+  box-shadow:0 6px 24px rgba(99,91,255,0.4);
+  transform:translateY(-1px);
+}
+.plan-cta.dark{
+  background:var(--text);
+  color:#fff;
+  border:none;
+}
+.plan-cta.dark:hover{
+  background:#2d3348;
+  box-shadow:0 4px 16px rgba(26,31,54,0.25);
+}
+.plan-features-mini{
+  margin-top:24px;
+  padding-top:24px;
+  border-top:1px solid var(--border);
+  list-style:none;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.plan-features-mini li{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-size:14px;
+  color:var(--text-secondary);
+}
+.plan-features-mini li svg{
+  width:18px;
+  height:18px;
+  flex-shrink:0;
+}
+.check-icon{color:var(--green);}
+.cross-icon{color:var(--text-muted);opacity:0.4;}
+
+.comparison-section{
+  margin-top:24px;
+}
+.comparison-section h2{
+  text-align:center;
+  font-size:clamp(24px,3.5vw,32px);
+  font-weight:800;
+  letter-spacing:-0.02em;
+  margin-bottom:8px;
+}
+.comparison-section .subtitle{
+  text-align:center;
+  font-size:16px;
+  color:var(--text-secondary);
+  margin-bottom:40px;
+}
+.table-container{
+  background:var(--surface);
+  border-radius:var(--radius);
+  border:1.5px solid var(--border);
+  box-shadow:var(--shadow-sm);
+  overflow:hidden;
+}
+.comparison-table{
+  width:100%;
+  border-collapse:collapse;
+}
+.comparison-table thead th{
+  padding:20px 24px;
+  font-size:14px;
+  font-weight:700;
+  text-align:center;
+  border-bottom:1.5px solid var(--border);
+  background:var(--bg);
+  color:var(--text-secondary);
+  text-transform:uppercase;
+  letter-spacing:0.06em;
+}
+.comparison-table thead th:first-child{
+  text-align:left;
+  color:var(--text);
+  font-size:13px;
+}
+.comparison-table thead th.popular-col{
+  color:var(--accent);
+  background:var(--accent-bg);
+  position:relative;
+}
+.comparison-table tbody td{
+  padding:16px 24px;
+  border-bottom:1px solid var(--border);
+  text-align:center;
+  font-size:14px;
+  color:var(--text-secondary);
+  vertical-align:middle;
+}
+.comparison-table tbody tr:last-child td{
+  border-bottom:none;
+}
+.comparison-table tbody td:first-child{
+  text-align:left;
+  font-weight:500;
+  color:var(--text);
+}
+.comparison-table tbody td.popular-col{
+  background:rgba(99,91,255,0.02);
+}
+.comparison-table tbody tr:hover{
+  background:rgba(99,91,255,0.015);
+}
+.category-row td{
+  background:var(--bg) !important;
+  font-size:12px !important;
+  font-weight:700 !important;
+  text-transform:uppercase;
+  letter-spacing:0.08em;
+  color:var(--text-muted) !important;
+  padding:12px 24px !important;
+}
+.table-check{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:26px;
+  height:26px;
+  border-radius:50%;
+  background:var(--green-bg);
+  color:var(--green);
+}
+.table-check svg{width:14px;height:14px;}
+.table-cross{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:26px;
+  height:26px;
+  border-radius:50%;
+  background:var(--red-bg);
+  color:var(--red);
+  opacity:0.6;
+}
+.table-cross svg{width:12px;height:12px;}
+.table-text{
+  font-weight:600;
+  color:var(--text);
+}
+.faq-section{
+  margin-top:80px;
+}
+.faq-section h2{
+  text-align:center;
+  font-size:clamp(24px,3.5vw,32px);
+  font-weight:800;
+  letter-spacing:-0.02em;
+  margin-bottom:8px;
+}
+.faq-section .subtitle{
+  text-align:center;
+  font-size:16px;
+  color:var(--text-secondary);
+  margin-bottom:40px;
+}
+.faq-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:16px;
+  max-width:900px;
+  margin:0 auto;
+}
+@media(max-width:700px){
+  .faq-grid{grid-template-columns:1fr;}
+}
+.faq-item{
+  background:var(--surface);
+  border:1.5px solid var(--border);
+  border-radius:var(--radius-sm);
+  padding:24px;
+  transition:all var(--transition);
+  cursor:pointer;
+}
+.faq-item:hover{
+  border-color:var(--accent-border);
+  box-shadow:var(--shadow-sm);
+}
+.faq-item .q{
+  font-size:15px;
+  font-weight:650;
+  margin-bottom:8px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  color:var(--text);
+}
+.faq-item .q svg{
+  width:18px;
+  height:18px;
+  color:var(--accent);
+  flex-shrink:0;
+}
+.faq-item .a{
+  font-size:14px;
+  color:var(--text-secondary);
+  line-height:1.65;
+  padding-left:28px;
+}
+.footer-note{
+  text-align:center;
+  margin-top:64px;
+  padding-top:32px;
+  border-top:1px solid var(--border);
+  font-size:13px;
+  color:var(--text-muted);
+}
+.footer-note a{
+  color:var(--accent);
+  text-decoration:none;
+}
+.footer-note a:hover{text-decoration:underline;}
+
+.price-animate{
+  animation:priceSwap 0.35s ease;
+}
+@keyframes priceSwap{
+  0%{opacity:0;transform:translateY(8px);}
+  100%{opacity:1;transform:translateY(0);}
+}
+
+.guarantee-bar{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:32px;
+  flex-wrap:wrap;
+  margin-top:32px;
+  padding:20px;
+  background:var(--surface);
+  border-radius:var(--radius-sm);
+  border:1px solid var(--border);
+}
+.guarantee-item{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:13px;
+  font-weight:600;
+  color:var(--text-secondary);
+}
+.guarantee-item svg{
+  width:18px;
+  height:18px;
+  color:var(--green);
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="header-badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      Тарифные планы
+    </div>
+    <h1>Выберите подходящий план</h1>
+    <p>Начните бесплатно и масштабируйтесь по мере роста. Без скрытых платежей, отмена в любой момент.</p>
+  </div>
+
+  <div class="toggle-wrapper">
+    <span class="toggle-label active" data-period="monthly" onclick="setPeriod('monthly')">Ежемесячно</span>
+    <div class="toggle-switch" id="toggleSwitch" onclick="togglePeriod()"></div>
+    <span class="toggle-label" data-period="yearly" onclick="setPeriod('yearly')">Ежегодно</span>
+    <span class="save-badge" id="saveBadge">−20%</span>
+  </div>
+
+  <div class="plans-grid" id="plansGrid">
+
+    <div class="plan-card">
+      <div class="plan-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      </div>
+      <div class="plan-name">Стартер</div>
+      <div class="plan-desc">Для личных проектов и небольших команд</div>
+      <div class="plan-price-old" data-old-monthly="" data-old-yearly="">&nbsp;</div>
+      <div class="plan-price">
+        <span class="currency">₽</span>
+        <span class="amount" data-monthly="0" data-yearly="0">0</span>
+      </div>
+      <div class="plan-billing-note" data-note-monthly="Бесплатно навсегда" data-note-yearly="Бесплатно навсегда">Бесплатно навсегда</div>
+      <button class="plan-cta outline">Начать бесплатно</button>
+      <ul class="plan-features-mini">
+        <li><svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>До 3 проектов</li>
+        <li><svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>1 ГБ хранилища</li>
+        <li><svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Базовая аналитика</li>
+        <li><svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Поддержка по email</li>
+      </ul>
+    </div>
+
+    <div class="plan-card popular">
+      <div class="popular-tag">Популярный</div>
+      <div class="plan-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      </div>
+      <div class="plan-name">Про</div>
+      <div class="plan-desc">Для растущих команд и серьёзных задач</div>
+      <div class="plan-price-old" data-old-monthly="" data-old-yearly="2 388 ₽/мес">2 388 ₽/мес</div>
+      <div class="plan-price">
+        <span class="currency">₽</span>
+        <span class="amount" data-monthly="1990" data-yearly="1 592">1 990</span>
+        <span class="period" data-period-text-monthly="/мес" data-period-text-yearly="/мес">/мес</span>
+      </div>
+      <div class="plan-billing-note" data-note-monthly="Оплата ежемесячно" data-note-yearly="19 104 ₽ в год">Оплата ежемесячно</div>
+      <button class="plan-cta filled">Попробовать 14 дней</button>
+      <ul class="plan-features-mini">
+        <li><svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Безлимит проектов</li>
+        <li><svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>50 ГБ хранилища</li>
+        <li><svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Продвинутая аналитика</li>
+        <li><svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Приоритетная поддержка</li>
+        <li><svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>API-доступ</li>
+      </ul>
+    </div>
+
+    <div class="plan-card">
+      <div class="plan-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
+      </div>
+      <div class="plan-name">Бизнес</div>
+      <div class="plan-desc">Для крупных компаний с высокими требованиями</div>
+      <div class="plan-price-old" data-old-monthly="" data-old-yearly="5 988 ₽/мес">5 988 ₽/мес</div>
+      <div class="plan-price">
+        <span class="currency">₽</span>
+        <span class="amount" data-monthly="4990" data-yearly="3 992">4 990</span>
+        <span class="period" data-period-text-monthly="/мес" data-period-text-yearly="/мес">/мес</span>
+      </div>
+      <div class="plan-billing-note" data-note-monthly="Оплата ежемесячно" data-note-yearly="47 904 ₽ в год">Оплата ежемесячно</div>
+      <button class="plan-cta dark">Связаться с нами</button>
+      <ul class="plan-features-mini">
+        <li><svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Всё из плана Про</li>
+        <li><svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>500 ГБ хранилища</li>
+        <li><svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>SSO и SAML</li>
+        <li><svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Выделенный менеджер</li>
+        <li><svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>SLA 99.99%</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <div class="guarantee-bar">
+    <div class="guarantee-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      14 дней бесплатно
+    </div>
+    <div class="guarantee-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      Без привязки карты
+    </div>
+    <div class="guarantee-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Отмена в любой момент
+    </div>
+    <div class="guarantee-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+      Возврат за 30 дней
+    </div>
+  </div>
+
+  <div class="comparison-section">
+    <h2>Подробное сравнение</h2>
+    <p class="subtitle">Все возможности и ограничения каждого плана в одной таблице</p>
+
+    <div class="table-container">
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th>Возможности</th>
+            <th>Стартер</th>
+            <th class="popular-col">Про</th>
+            <th>Бизнес</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="category-row"><td colspan="4">Основные</td></tr>
+          <tr>
+            <td>Количество проектов</td>
+            <td><span class="table-text">3</span></td>
+            <td class="popular-col"><span class="table-text">Безлимит</span></td>
+            <td><span class="table-text">Безлимит</span></td>
+          </tr>
+          <tr>
+            <td>Облачное хранилище</td>
+            <td><span class="table-text">1 ГБ</span></td>
+            <td class="popular-col"><span class="table-text">50 ГБ</span></td>
+            <td><span class="table-text">500 ГБ</span></td>
+          </tr>
+          <tr>
+            <td>Участники команды</td>
+            <td><span class="table-text">1</span></td>
+            <td class="popular-col"><span class="table-text">До 20</span></td>
+            <td><span class="table-text">Безлимит</span></td>
+          </tr>
+          <tr>
+            <td>Пользовательский домен</td>
+            <td><span class="table-cross"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span></td>
+            <td class="popular-col"><span class="table-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+            <td><span class="table-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+          </tr>
+
+          <tr class="category-row"><td colspan="4">Аналитика и отчёты</td></tr>
+          <tr>
+            <td>Базовая аналитика</td>
+            <td><span class="table-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+            <td class="popular-col"><span class="table-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+            <td><span class="table-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+          </tr>
+          <tr>
+            <td>Продвинутые дашборды</td>
+            <td><span class="table-cross"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span></td>
+            <td class="popular-col"><span class="table-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+            <td><span class="table-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+          </tr>
+          <tr>
+            <td>Экспорт данных (CSV, PDF)</td>
+            <td><span class="table-cross"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span></td>
+            <td class="popular-col"><span class="table-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+            <td><span class="table-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+          </tr>
+          <tr>
+            <td>Кастомные отчёты</td>
+            <td><span class="table-cross"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span></td>
+            <td class="popular-col"><span class="table-cross"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span></td>
+            <td><span class="table-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+          </tr>
+
+          <tr class="category-row"><td colspan="4">Интеграции и API</td></tr>
+          <tr>
+            <td>REST API</td>
+            <td><span class="table-cross"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span></td>
+            <td class="popular-col"><span class="table-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+            <td><span class="table-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+          </tr>
+          <tr>
+            <td>Webhooks</td>
+            <td><span class="table-cross"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span></td>
+            <td class="popular-col"><span class="table-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+            <td><span class="table-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+          </tr>
+          <tr>
+            <td>Интеграция с Slack / Telegram</td>
+            <td><span class="table-cross"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span></td>
+            <td class="popular-col"><span class="table-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+            <td><span class="table-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+          </tr>
+          <tr>
+            <td>Кастомные интеграции</td>
+            <td><span class="table-cross"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span></td>
+            <td class="popular-col"><span class="table-cross"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span></td>
+            <td><span class="table-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+          </tr>
+
+          <tr class="category-row"><td colspan="4">Безопасность</td></tr>
+          <tr>
+            <td>SSL-шифрование</td>
+            <td><span class="table-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+            <td class="popular-col"><span class="table-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+            <td><span class="table-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+          </tr>
+          <tr>
+            <td>Двухфакторная аутентификация</td>
+            <td><span class="table-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+            <td class="popular-col"><span class="table-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+            <td><span class="table-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+          </tr>
+          <tr>
+            <td>SSO / SAML</td>
+            <td><span class="table-cross"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span></td>
+            <td class="popular-col"><span class="table-cross"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span></td>
+            <td><span class="table-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+          </tr>
+          <tr>
+            <td>Аудит-лог действий</td>
+            <td><span class="table-cross"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span></td>
+            <td class="popular-col"><span class="table-cross"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span></td>
+            <td><span class="table-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+          </tr>
+
+          <tr class="category-row"><td colspan="4">Поддержка</td></tr>
+          <tr>
+            <td>Email-поддержка</td>
+            <td><span class="table-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+            <td class="popular-col"><span class="table-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+            <td><span class="table-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+          </tr>
+          <tr>
+            <td>Чат поддержки</td>
+            <td><span class="table-cross"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span></td>
+            <td class="popular-col"><span class="table-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+            <td><span class="table-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+          </tr>
+          <tr>
+            <td>Выделенный менеджер</td>
+            <td><span class="table-cross"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span></td>
+            <td class="popular-col"><span class="table-cross"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span></td>
+            <td><span class="table-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+          </tr>
+          <tr>
+            <td>SLA-гарантия</td>
+            <td><span class="table-text">99.5%</span></td>
+            <td class="popular-col"><span class="table-text">99.9%</span></td>
+            <td><span class="table-text">99.99%</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="faq-section">
+    <h2>Частые вопросы</h2>
+    <p class="subtitle">Ответы на популярные вопросы о тарифах и оплате</p>
+    <div class="faq-grid">
+      <div class="faq-item">
+        <div class="q">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Могу ли я сменить тариф позже?
+        </div>
+        <div class="a">Да, вы можете перейти на другой план в любой момент. При повышении разница рассчитывается пропорционально, при понижении — остаток переносится на следующий период.</div>
+      </div>
+      <div class="faq-item">
+        <div class="q">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Есть ли бесплатный пробный период?
+        </div>
+        <div class="a">Да, для планов Про и Бизнес доступен 14-дневный пробный период без привязки карты. Вы получаете полный доступ ко всем функциям выбранного плана.</div>
+      </div>
+      <div class="faq-item">
+        <div class="q">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Какие способы оплаты принимаются?
+        </div>
+        <div class="a">Мы принимаем банковские карты Visa, Mastercard, МИР, а также оплату по счёту для юридических лиц. Для годовых планов доступна оплата в рассрочку.</div>
+      </div>
+      <div class="faq-item">
+        <div class="q">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Что произойдёт после окончания пробного периода?
+        </div>
+        <div class="a">Ваш аккаунт автоматически перейдёт на бесплатный план Стартер. Все данные сохранятся, но доступ к премиум-функциям будет ограничен до оформления подписки.</div>
+      </div>
+      <div class="faq-item">
+        <div class="q">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Можно ли получить возврат средств?
+        </div>
+        <div class="a">Да, мы предоставляем полный возврат в течение 30 дней с момента оплаты, если сервис вам не подошёл. Никаких вопросов и бюрократии.</div>
+      </div>
+      <div class="faq-item">
+        <div class="q">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Нужен ли кастомный план для большой команды?
+        </div>
+        <div class="a">Если ваша команда превышает 50 человек или у вас есть специфические требования — свяжитесь с нами. Мы подготовим индивидуальное предложение с гибкими условиями.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    Все цены указаны без НДС. Возникли вопросы? <a href="#">Свяжитесь с нашей командой</a> — мы поможем выбрать оптимальный план.
+  </div>
+
+</div>
+
+<script>
+(function(){
+  let isYearly = false;
+  const toggle = document.getElementById('toggleSwitch');
+  const badge = document.getElementById('saveBadge');
+  const labels = document.querySelectorAll('.toggle-label');
+  const amounts = document.querySelectorAll('.plan-price .amount');
+  const oldPrices = document.querySelectorAll('.plan-price-old');
+  const billingNotes = document.querySelectorAll('.plan-billing-note');
+
+  function formatNumber(n) {
+    if (n === '0') return '0';
+    return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  }
+
+  function updatePrices() {
+    const period = isYearly ? 'yearly' : 'monthly';
+
+    amounts.forEach(function(el) {
+      const val = el.getAttribute('data-' + period);
+      el.textContent = formatNumber(val);
+      el.classList.remove('price-animate');
+      void el.offsetWidth;
+      el.classList.add('price-animate');
+    });
+
+    oldPrices.forEach(function(el) {
+      const val = el.getAttribute('data-old-' + period);
+      el.innerHTML = val || '&nbsp;';
+      el.style.opacity = val ? '1' : '0';
+    });
+
+    billingNotes.forEach(function(el) {
+      el.textContent = el.getAttribute('data-note-' + period);
+    });
+
+    toggle.classList.toggle('active', isYearly);
+    badge.classList.toggle('visible', isYearly);
+
+    labels.forEach(function(l) {
+      l.classList.toggle('active', l.getAttribute('data-period') === period);
+    });
+  }
+
+  window.togglePeriod = function() {
+    isYearly = !isYearly;
+    updatePrices();
+  };
+
+  window.setPeriod = function(p) {
+    isYearly = (p === 'yearly');
+    updatePrices();
+  };
+
+  updatePrices();
+})();
+</script>
+</body>
+</html>

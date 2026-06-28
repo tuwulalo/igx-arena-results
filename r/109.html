@@ -1,0 +1,1464 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Abyssal — 3D Ocean Emulator</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<style>
+  :root{
+    --hud-bg:rgba(6,18,28,0.62);
+    --hud-bd:rgba(120,210,255,0.35);
+    --hud-fg:#cfeaf6;
+    --accent:#46e6ff;
+    --warn:#ffb74a;
+    --danger:#ff5b6a;
+    --good:#74ffb1;
+    --mono:'JetBrains Mono','Fira Code',ui-monospace,Menlo,monospace;
+    --sans:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{width:100%;height:100%;overflow:hidden;background:#000;color:var(--hud-fg);font-family:var(--sans);-webkit-user-select:none;user-select:none}
+  #c{position:fixed;inset:0;display:block;cursor:grab}
+  #c.grabbing{cursor:grabbing}
+
+  /* Top brand */
+  #brand{
+    position:fixed;top:14px;left:18px;z-index:5;display:flex;align-items:center;gap:10px;
+    padding:8px 14px 8px 10px;background:var(--hud-bg);border:1px solid var(--hud-bd);
+    border-radius:14px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+    box-shadow:0 8px 30px rgba(0,0,0,0.45);
+  }
+  #brand .logo{
+    width:30px;height:30px;border-radius:8px;display:grid;place-items:center;
+    background:radial-gradient(circle at 30% 30%,#46e6ff 0%,#0a4a72 55%,#021626 100%);
+    box-shadow:0 0 14px rgba(70,230,255,0.55), inset 0 0 10px rgba(0,0,0,0.5);
+    font-size:16px;color:#fff;
+  }
+  #brand .title{font-weight:700;letter-spacing:1.2px;font-size:13px}
+  #brand .sub{font-size:10px;opacity:.7;letter-spacing:1.5px;text-transform:uppercase}
+
+  /* Top right controls */
+  #controls{
+    position:fixed;top:14px;right:18px;z-index:5;display:flex;gap:8px;
+  }
+  .btn{
+    background:var(--hud-bg);border:1px solid var(--hud-bd);color:var(--hud-fg);
+    padding:8px 12px;border-radius:10px;font-family:var(--mono);font-size:11px;letter-spacing:.6px;
+    cursor:pointer;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+    transition:all .2s ease;
+  }
+  .btn:hover{background:rgba(70,230,255,0.18);border-color:var(--accent);transform:translateY(-1px)}
+  .btn.active{background:rgba(70,230,255,0.28);border-color:var(--accent);box-shadow:0 0 14px rgba(70,230,255,0.35)}
+
+  /* Bottom-left depth gauge */
+  #depthPanel{
+    position:fixed;bottom:18px;left:18px;z-index:5;width:300px;
+    background:var(--hud-bg);border:1px solid var(--hud-bd);border-radius:16px;
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+    padding:14px 16px 16px;box-shadow:0 8px 30px rgba(0,0,0,0.45);
+  }
+  #depthPanel .label{font-size:10px;opacity:.7;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px}
+  #depthVal{font-family:var(--mono);font-size:34px;font-weight:700;color:var(--accent);line-height:1;
+    text-shadow:0 0 16px rgba(70,230,255,0.55)}
+  #depthUnit{font-size:14px;opacity:.7;margin-left:4px}
+  #zone{font-size:13px;margin-top:4px;font-weight:600}
+  .bar{height:6px;border-radius:6px;background:rgba(255,255,255,0.08);overflow:hidden;margin-top:8px}
+  .bar > div{height:100%;border-radius:6px;transition:width .25s ease}
+  .row{display:flex;justify-content:space-between;font-size:11px;margin-top:6px;font-family:var(--mono)}
+  .row span:last-child{color:var(--accent)}
+
+  /* Compass */
+  #compass{
+    position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:5;
+    width:220px;height:54px;background:var(--hud-bg);border:1px solid var(--hud-bd);
+    border-radius:14px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+    overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,0.45);
+  }
+  #compassStrip{position:absolute;top:8px;height:38px;left:0;display:flex;align-items:center;
+    font-family:var(--mono);font-size:18px;color:var(--hud-fg);transition:none}
+  #compassStrip span{display:inline-block;width:40px;text-align:center;opacity:.85}
+  #compassStrip span.n{color:var(--accent);font-weight:700}
+  #compassNeedle{position:absolute;left:50%;top:0;width:2px;height:100%;background:var(--accent);opacity:.9;transform:translateX(-50%)}
+  #compassNeedle::after{content:"";position:absolute;left:-5px;top:-2px;width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:8px solid var(--accent)}
+
+  /* Bottom right log */
+  #log{
+    position:fixed;bottom:18px;right:18px;z-index:5;width:280px;max-height:200px;
+    background:var(--hud-bg);border:1px solid var(--hud-bd);border-radius:16px;
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+    padding:10px 12px;box-shadow:0 8px 30px rgba(0,0,0,0.45);
+    font-family:var(--mono);font-size:11px;line-height:1.6;overflow:hidden;
+  }
+  #log .head{font-size:10px;opacity:.7;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px}
+  #logList{max-height:160px;overflow:hidden}
+  #logList div{opacity:0;animation:fadein .4s forwards}
+  #logList div .t{opacity:.55;margin-right:6px}
+  @keyframes fadein{to{opacity:1}}
+
+  /* Help */
+  #help{
+    position:fixed;top:80px;right:18px;z-index:5;width:240px;
+    background:var(--hud-bg);border:1px solid var(--hud-bd);border-radius:14px;
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+    padding:10px 14px;font-size:11px;line-height:1.7;box-shadow:0 8px 30px rgba(0,0,0,0.45);
+  }
+  #help .head{font-size:10px;opacity:.7;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px}
+  #help kbd{background:rgba(70,230,255,0.18);border:1px solid var(--hud-bd);padding:1px 6px;border-radius:4px;
+    font-family:var(--mono);font-size:10px;color:var(--accent)}
+
+  /* Loading screen */
+  #loading{
+    position:fixed;inset:0;z-index:50;background:radial-gradient(circle at 50% 50%,#0c3a52 0%,#021626 70%);
+    display:grid;place-items:center;transition:opacity .8s ease;
+  }
+  #loading.gone{opacity:0;pointer-events:none}
+  #loading .box{text-align:center;color:#cfeaf6}
+  #loading .ring{width:80px;height:80px;border-radius:50%;border:3px solid rgba(70,230,255,0.18);
+    border-top-color:var(--accent);margin:0 auto 18px;animation:spin 1s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  #loading .t{font-family:var(--mono);font-size:14px;letter-spacing:2px}
+  #loading .p{margin-top:6px;font-size:11px;opacity:.7;font-family:var(--mono)}
+
+  /* Species panel */
+  #species{
+    position:fixed;top:80px;left:18px;z-index:5;width:230px;max-height:340px;overflow:hidden;
+    background:var(--hud-bg);border:1px solid var(--hud-bd);border-radius:14px;
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+    padding:10px 12px;box-shadow:0 8px 30px rgba(0,0,0,0.45);
+    font-family:var(--mono);font-size:11px;line-height:1.6;
+  }
+  #species .head{font-size:10px;opacity:.7;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;
+    display:flex;justify-content:space-between}
+  #species .row2{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px dashed rgba(255,255,255,0.06)}
+  #species .row2:last-child{border-bottom:none}
+  #species .row2 .n{color:var(--accent);font-weight:700}
+
+  /* Vignette + underwater FX */
+  #vig{
+    position:fixed;inset:0;z-index:3;pointer-events:none;
+    background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,0.55) 100%);
+    mix-blend-mode:multiply;
+  }
+
+  /* Splash when surfacing */
+  #flash{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:6;transition:opacity .4s ease}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="vig"></div>
+<div id="flash"></div>
+
+<div id="brand">
+  <div class="logo">≈</div>
+  <div>
+    <div class="title">ABYSSAL</div>
+    <div class="sub">3D Ocean Emulator</div>
+  </div>
+</div>
+
+<div id="controls">
+  <button class="btn" id="btnFree">FREE LOOK</button>
+  <button class="btn" id="btnSub">SUBMARINE</button>
+  <button class="btn" id="btnSound">SOUND</button>
+  <button class="btn" id="btnAuto">AUTO DIVE</button>
+</div>
+
+<div id="help">
+  <div class="head">CONTROLS</div>
+  <kbd>W A S D</kbd> swim &nbsp; <kbd>Space</kbd> up<br>
+  <kbd>Shift</kbd> down &nbsp; <kbd>Q E</kbd> roll<br>
+  Mouse drag — look around<br>
+  Wheel — speed &nbsp; <kbd>R</kbd> resurface
+</div>
+
+<div id="species">
+  <div class="head"><span>SPECIES NEARBY</span><span id="bioCount">0</span></div>
+  <div id="speciesList"></div>
+</div>
+
+<div id="depthPanel">
+  <div class="label">DEPTH</div>
+  <div><span id="depthVal">0.0</span><span id="depthUnit"> m</span></div>
+  <div id="zone">— Sunlit Zone —</div>
+  <div class="bar"><div id="depthBar" style="width:0%;background:linear-gradient(90deg,#46e6ff,#0a4a72)"></div></div>
+  <div class="row"><span>OXYGEN</span><span id="oxy">98%</span></div>
+  <div class="bar"><div id="oxyBar" style="width:98%;background:linear-gradient(90deg,#74ffb1,#46e6ff)"></div></div>
+  <div class="row"><span>PRESSURE</span><span id="pres">1.0 atm</span></div>
+  <div class="row"><span>SPEED</span><span id="spd">0.0 m/s</span></div>
+  <div class="row"><span>VISIBILITY</span><span id="vis">100%</span></div>
+</div>
+
+<div id="compass">
+  <div id="compassStrip"></div>
+  <div id="compassNeedle"></div>
+</div>
+
+<div id="log">
+  <div class="head">MISSION LOG</div>
+  <div id="logList"></div>
+</div>
+
+<div id="loading">
+  <div class="box">
+    <div class="ring"></div>
+    <div class="t">DIVING IN PROGRESS</div>
+    <div class="p" id="loadP">Initialising sonar…</div>
+  </div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+
+/* ========================================================================
+   ABYSSAL — single-file 3D ocean emulator
+   Zones: 0–40m sunlit · 40–200m twilight · 200–1000m midnight · 1000m+ abyss
+   ======================================================================== */
+
+const MAX_DEPTH = 4000;
+const SEA_LEVEL = 0;
+
+/* -------------------- Renderer / Scene / Camera -------------------- */
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true, powerPreference:'high-performance'});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0x0a3a55, 0.012);
+
+const camera = new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 0.1, 8000);
+camera.position.set(0, 5, 0);
+
+/* -------------------- Sky dome -------------------- */
+const skyGeo = new THREE.SphereGeometry(3500, 32, 16);
+const skyMat = new THREE.ShaderMaterial({
+  side: THREE.BackSide,
+  uniforms:{uTime:{value:0}, uCamY:{value:0}},
+  vertexShader:`
+    varying vec3 vWorld;
+    void main(){
+      vec4 wp = modelMatrix * vec4(position,1.0);
+      vWorld = wp.xyz;
+      gl_Position = projectionMatrix * viewMatrix * wp;
+    }`,
+  fragmentShader:`
+    varying vec3 vWorld;
+    uniform float uTime;
+    uniform float uCamY;
+    void main(){
+      vec3 dir = normalize(vWorld);
+      float y = dir.y;
+      float t = clamp(uCamY/400.0, 0.0, 1.0);
+      // Above water: bright sky w/ sun & gradient. Below: blue→black gradient by depth.
+      vec3 skyDay = mix(vec3(0.55,0.78,0.95), vec3(0.18,0.42,0.78), smoothstep(-0.1, 0.6, y));
+      skyDay += vec3(1.0,0.85,0.55) * pow(max(dot(dir, normalize(vec3(0.4,0.6,0.2))),0.0), 64.0) * 0.6;
+      vec3 skyUnd = mix(vec3(0.04,0.18,0.32), vec3(0.0,0.01,0.03), smoothstep(-0.2, -0.9, y));
+      vec3 col = mix(skyDay, skyUnd, t);
+      // subtle stars when deep
+      float starSeed = fract(sin(dot(dir, vec3(12.9898,78.233,37.719))) * 43758.5453);
+      float star = step(0.997, starSeed) * t * (1.0 - smoothstep(-0.2, -0.8, y));
+      col += vec3(star);
+      gl_FragColor = vec4(col, 1.0);
+    }`
+});
+const sky = new THREE.Mesh(skyGeo, skyMat);
+scene.add(sky);
+
+/* -------------------- Sun light + ambient -------------------- */
+const sun = new THREE.DirectionalLight(0xfff2c2, 1.4);
+sun.position.set(120, 200, 80);
+scene.add(sun);
+const ambient = new THREE.AmbientLight(0x6090b0, 0.6);
+scene.add(ambient);
+
+/* -------------------- Water surface (custom shader) -------------------- */
+const waterGeo = new THREE.PlaneGeometry(6000, 6000, 200, 200);
+waterGeo.rotateX(-Math.PI/2);
+const waterMat = new THREE.ShaderMaterial({
+  transparent:true,
+  uniforms:{
+    uTime:{value:0},
+    uCamY:{value:0},
+    uColorDeep:{value:new THREE.Color(0x062336)},
+    uColorShallow:{value:new THREE.Color(0x46c5e6)},
+    uSunDir:{value:new THREE.Vector3(0.4,0.6,0.2).normalize()},
+  },
+  vertexShader:`
+    uniform float uTime;
+    varying vec3 vWorld;
+    varying vec3 vNormal;
+    varying float vWave;
+    // sum of gerstner-ish waves
+    float wave(vec2 p, vec2 dir, float wavelen, float amp, float speed, float t){
+      float phase = dot(normalize(dir), p) * (6.2831853/wavelen) + t*speed;
+      return sin(phase) * amp;
+    }
+    void main(){
+      vec3 pos = position;
+      vec2 p = pos.xz;
+      float h = 0.0;
+      h += wave(p, vec2(1.0,0.3), 90.0, 0.55, 0.6, uTime);
+      h += wave(p, vec2(0.4,1.0), 60.0, 0.42, 0.85, uTime);
+      h += wave(p, vec2(-0.7,0.7), 35.0, 0.28, 1.25, uTime);
+      h += wave(p, vec2(0.9,-0.5), 22.0, 0.16, 1.7, uTime);
+      h += wave(p, vec2(-0.3,-0.9), 14.0, 0.10, 2.2, uTime);
+      pos.y += h;
+      // approximate normal by finite difference
+      float eps = 1.0;
+      float hx = wave(p+vec2(eps,0.0), vec2(1.0,0.3), 90.0, 0.55, 0.6, uTime)
+               + wave(p+vec2(eps,0.0), vec2(0.4,1.0), 60.0, 0.42, 0.85, uTime)
+               + wave(p+vec2(eps,0.0), vec2(-0.7,0.7), 35.0, 0.28, 1.25, uTime)
+               + wave(p+vec2(eps,0.0), vec2(0.9,-0.5), 22.0, 0.16, 1.7, uTime)
+               + wave(p+vec2(eps,0.0), vec2(-0.3,-0.9), 14.0, 0.10, 2.2, uTime);
+      float hz = wave(p+vec2(0.0,eps), vec2(1.0,0.3), 90.0, 0.55, 0.6, uTime)
+               + wave(p+vec2(0.0,eps), vec2(0.4,1.0), 60.0, 0.42, 0.85, uTime)
+               + wave(p+vec2(0.0,eps), vec2(-0.7,0.7), 35.0, 0.28, 1.25, uTime)
+               + wave(p+vec2(0.0,eps), vec2(0.9,-0.5), 22.0, 0.16, 1.7, uTime)
+               + wave(p+vec2(0.0,eps), vec2(-0.3,-0.9), 14.0, 0.10, 2.2, uTime);
+      vec3 n = normalize(vec3(h - hx, eps, h - hz));
+      vNormal = n;
+      vWave = h;
+      vec4 wp = modelMatrix * vec4(pos,1.0);
+      vWorld = wp.xyz;
+      gl_Position = projectionMatrix * viewMatrix * wp;
+    }`,
+  fragmentShader:`
+    varying vec3 vWorld;
+    varying vec3 vNormal;
+    varying float vWave;
+    uniform float uTime;
+    uniform float uCamY;
+    uniform vec3 uColorDeep;
+    uniform vec3 uColorShallow;
+    uniform vec3 uSunDir;
+    void main(){
+      // visible only above sea level (camera looking up at surface)
+      if(vWorld.y > 0.5 && uCamY > -0.5) discard;
+      vec3 V = normalize(cameraPosition - vWorld);
+      float fres = pow(1.0 - max(dot(V, vec3(0.0,1.0,0.0)),0.0), 3.0);
+      vec3 refl = vec3(0.55,0.78,0.95);
+      refl += vec3(1.0,0.85,0.55) * pow(max(dot(reflect(-V, vec3(0,1,0)), normalize(uSunDir)),0.0), 32.0) * 0.8;
+      vec3 col = mix(uColorDeep, refl, fres);
+      // foam on wave crests
+      float foam = smoothstep(0.55, 0.95, vWave);
+      col = mix(col, vec3(0.95), foam*0.7);
+      // from below: glint
+      float glint = pow(max(dot(reflect(-V, vec3(0,1,0)), normalize(uSunDir)),0.0), 80.0);
+      col += vec3(1.0,0.9,0.7) * glint * 0.6;
+      gl_FragColor = vec4(col, 0.78);
+    }`
+});
+const water = new THREE.Mesh(waterGeo, waterMat);
+water.position.y = 0;
+scene.add(water);
+
+/* -------------------- Ocean floor (depth-coloured terrain) -------------------- */
+function makeFloor(){
+  const seg = 220;
+  const size = 8000;
+  const geo = new THREE.PlaneGeometry(size, size, seg, seg);
+  geo.rotateX(-Math.PI/2);
+  const pos = geo.attributes.position;
+  // generate ridges, trenches, plateau
+  for(let i=0;i<pos.count;i++){
+    const x = pos.getX(i), z = pos.getZ(i);
+    const d = Math.sqrt(x*x + z*z);
+    // trench around r≈1200
+    const trench = -50 * Math.exp(-Math.pow((d-1100)/220,2));
+    // big mountains range
+    const ridge = 35 * Math.sin(x*0.004) * Math.cos(z*0.004);
+    // rolling hills
+    const hills = 18 * Math.sin(x*0.01 + z*0.007) + 12 * Math.sin(z*0.013 - x*0.005);
+    // abyssal plain at -3200
+    const plain = -3200 + 60 * Math.sin(x*0.002) * Math.sin(z*0.0021);
+    const blend = smoothstep(600, 1800, d); // 0 near shore, 1 deep
+    const deep = plain * blend + (ridge + hills - 30) * (1.0 - blend);
+    const y = deep + trench * (1.0 - blend*0.5);
+    pos.setY(i, y);
+  }
+  geo.computeVertexNormals();
+  const mat = new THREE.ShaderMaterial({
+    uniforms:{uCamY:{value:0}, uTime:{value:0}},
+    fog:true,
+    vertexShader:`
+      varying vec3 vN; varying vec3 vW; varying float vH;
+      void main(){
+        vN = normalize(normalMatrix * normal);
+        vec4 wp = modelMatrix * vec4(position,1.0);
+        vW = wp.xyz;
+        vH = position.y;
+        gl_Position = projectionMatrix * viewMatrix * wp;
+      }`,
+    fragmentShader:`
+      varying vec3 vN; varying vec3 vW; varying float vH;
+      uniform float uCamY;
+      #include <fog_pars_fragment>
+      void main(){
+        vec3 sand    = vec3(0.78,0.68,0.50);
+        vec3 silt    = vec3(0.42,0.36,0.30);
+        vec3 rock    = vec3(0.22,0.22,0.26);
+        vec3 abyss   = vec3(0.04,0.06,0.10);
+        float t1 = smoothstep(-100.0, -800.0, vH);
+        float t2 = smoothstep(-1200.0, -2500.0, vH);
+        vec3 col = mix(sand, silt, t1);
+        col = mix(col, rock, t2);
+        col = mix(col, abyss, smoothstep(-2200.0, -3200.0, vH));
+        // simple lambert
+        float l = max(dot(vN, normalize(vec3(0.4,1.0,0.2))),0.15);
+        col *= l;
+        // sediment grain
+        float g = fract(sin(dot(vW.xz, vec2(12.9898,78.233)))*43758.5453);
+        col *= 0.85 + 0.3*g;
+        gl_FragColor = vec4(col, 1.0);
+        #include <fog_fragment>
+      }`
+  });
+  // include fog uniforms
+  mat.onBeforeCompile = (s)=>{ s.uniforms.fogColor = {value: scene.fog.color}; s.uniforms.fogDensity = {value: scene.fog.density}; };
+  // attach via define hooks
+  THREE.ShaderChunk.fog = `
+    uniform vec3 fogColor;
+    uniform float fogDensity;
+    #ifdef USE_FOG
+      varying float vFogDepth;
+    #endif`;
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.receiveShadow = true;
+  return mesh;
+}
+function smoothstep(a,b,x){ const t=Math.max(0,Math.min(1,(x-a)/(b-a))); return t*t*(3-2*t); }
+const floor = makeFloor();
+scene.add(floor);
+
+/* -------------------- God rays (volumetric light shafts) -------------------- */
+function makeGodRays(){
+  const count = 14;
+  const geo = new THREE.PlaneGeometry(40, 1200);
+  const mat = new THREE.ShaderMaterial({
+    transparent:true, depthWrite:false, blending:THREE.AdditiveBlending,
+    uniforms:{uTime:{value:0}},
+    vertexShader:`varying vec2 vUv; void main(){vUv=uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);}`,
+    fragmentShader:`
+      varying vec2 vUv; uniform float uTime;
+      void main(){
+        float x = vUv.x - 0.5;
+        float radial = smoothstep(0.5,0.0,abs(x)*2.0);
+        float fade = smoothstep(0.0,0.2,vUv.y) * (1.0 - smoothstep(0.7,1.0,vUv.y));
+        float shimmer = 0.5 + 0.5*sin(uTime*1.5 + vUv.y*4.0 + x*6.0);
+        float a = radial * fade * (0.18 + 0.18*shimmer);
+        gl_FragColor = vec4(0.65,0.9,1.0, a);
+      }`
+  });
+  const group = new THREE.Group();
+  const rays = [];
+  for(let i=0;i<count;i++){
+    const m = new THREE.Mesh(geo, mat.clone());
+    m.position.set((Math.random()-0.5)*900, -550, (Math.random()-0.5)*900);
+    m.rotation.z = (Math.random()-0.5)*0.2;
+    m.rotation.y = Math.random()*Math.PI*2;
+    m.userData.phase = Math.random()*10;
+    group.add(m); rays.push(m);
+  }
+  return {group, rays, mat};
+}
+const godRays = makeGodRays();
+scene.add(godRays.group);
+
+/* -------------------- Caustics projector on floor -------------------- */
+function makeCaustics(){
+  const tex = makeCausticTexture();
+  const mat = new THREE.MeshBasicMaterial({map:tex, transparent:true, opacity:0.4, blending:THREE.AdditiveBlending, depthWrite:false, color:0x88ccff});
+  // place a thin disc projector
+  const g = new THREE.CircleGeometry(2200, 64);
+  g.rotateX(-Math.PI/2);
+  const m = new THREE.Mesh(g, mat);
+  m.position.y = 0.05;
+  m.userData.tex = tex;
+  return m;
+}
+function makeCausticTexture(){
+  const size = 256;
+  const c = document.createElement('canvas'); c.width = c.height = size;
+  const ctx = c.getContext('2d');
+  const img = ctx.createImageData(size,size);
+  for(let y=0;y<size;y++){
+    for(let x=0;x<size;x++){
+      const u = x/size, v = y/size;
+      const n = causticNoise(u*6, v*6) + 0.5*causticNoise(u*12+3, v*12+1);
+      const val = Math.max(0, Math.min(1, n*0.5 + 0.5));
+      const i = (y*size+x)*4;
+      img.data[i] = 180 + val*75;
+      img.data[i+1] = 220 + val*35;
+      img.data[i+2] = 255;
+      img.data[i+3] = 255 * Math.pow(val, 1.5);
+    }
+  }
+  ctx.putImageData(img,0,0);
+  const t = new THREE.CanvasTexture(c);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  t.repeat.set(40,40);
+  return t;
+}
+function causticNoise(x,y){
+  return Math.sin(x*1.3 + Math.cos(y*1.1)) + Math.sin(y*1.7 + Math.cos(x*1.5)) + Math.sin((x+y)*0.9);
+}
+const caustics = makeCaustics();
+scene.add(caustics);
+
+/* -------------------- Bubbles particle system -------------------- */
+function makeBubbles(count){
+  const geo = new THREE.BufferGeometry();
+  const pos = new Float32Array(count*3);
+  const vel = new Float32Array(count*3);
+  const size = new Float32Array(count);
+  for(let i=0;i<count;i++){
+    pos[i*3]   = (Math.random()-0.5)*1200;
+    pos[i*3+1] = -Math.random()*MAX_DEPTH;
+    pos[i*3+2] = (Math.random()-0.5)*1200;
+    vel[i*3]   = (Math.random()-0.5)*0.05;
+    vel[i*3+1] = 0.4 + Math.random()*1.2;
+    vel[i*3+2] = (Math.random()-0.5)*0.05;
+    size[i]    = 0.15 + Math.random()*0.8;
+  }
+  geo.setAttribute('position', new THREE.BufferAttribute(pos,3));
+  geo.setAttribute('aSize', new THREE.BufferAttribute(size,1));
+  const mat = new THREE.ShaderMaterial({
+    transparent:true, depthWrite:false, blending:THREE.NormalBlending,
+    uniforms:{
+      uCamY:{value:0},
+      uPx:{value: window.innerHeight}
+    },
+    vertexShader:`
+      attribute float aSize; uniform float uPx; uniform float uCamY;
+      varying float vAlpha;
+      void main(){
+        vec4 mv = modelViewMatrix * vec4(position,1.0);
+        gl_Position = projectionMatrix * mv;
+        gl_PointSize = aSize * (uPx * 0.0015) / max(0.1, -mv.z);
+        float depth = -position.y;
+        float surface = smoothstep(50.0, -2.0, position.y);
+        vAlpha = 0.7 * surface;
+      }`,
+    fragmentShader:`
+      varying float vAlpha;
+      void main(){
+        vec2 uv = gl_PointCoord - 0.5;
+        float d = length(uv);
+        if(d > 0.5) discard;
+        float ring = smoothstep(0.5, 0.45, d) * smoothstep(0.42, 0.46, d);
+        float core = smoothstep(0.45, 0.0, d);
+        float a = (ring*0.9 + core*0.3) * vAlpha;
+        vec3 col = mix(vec3(0.7,0.85,1.0), vec3(1.0), ring);
+        gl_FragColor = vec4(col, a);
+      }`
+  });
+  const pts = new THREE.Points(geo, mat);
+  pts.userData.vel = vel;
+  return pts;
+}
+const bubbles = makeBubbles(900);
+scene.add(bubbles);
+
+/* -------------------- Plankton (bioluminescent dust) -------------------- */
+function makePlankton(count){
+  const geo = new THREE.BufferGeometry();
+  const pos = new Float32Array(count*3);
+  const phase = new Float32Array(count);
+  for(let i=0;i<count;i++){
+    pos[i*3] = (Math.random()-0.5)*1600;
+    pos[i*3+1] = -Math.random()*MAX_DEPTH;
+    pos[i*3+2] = (Math.random()-0.5)*1600;
+    phase[i] = Math.random()*10;
+  }
+  geo.setAttribute('position', new THREE.BufferAttribute(pos,3));
+  geo.setAttribute('aPhase', new THREE.BufferAttribute(phase,1));
+  const mat = new THREE.ShaderMaterial({
+    transparent:true, depthWrite:false, blending:THREE.AdditiveBlending,
+    uniforms:{uTime:{value:0}, uCamY:{value:0}, uPx:{value: window.innerHeight}},
+    vertexShader:`
+      attribute float aPhase; uniform float uTime; uniform float uCamY; uniform float uPx;
+      varying float vGlow;
+      void main(){
+        vec3 p = position;
+        p.x += sin(uTime*0.3 + aPhase)*1.5;
+        p.y += cos(uTime*0.25 + aPhase*1.7)*0.8;
+        p.z += sin(uTime*0.22 + aPhase*0.7)*1.5;
+        vec4 mv = modelViewMatrix * vec4(p,1.0);
+        gl_Position = projectionMatrix * mv;
+        gl_PointSize = 4.0 * (uPx*0.0006) / max(0.1, -mv.z);
+        float glow = 0.5 + 0.5*sin(uTime*2.0 + aPhase*6.28);
+        vGlow = glow * smoothstep(800.0, 200.0, -p.y);
+      }`,
+    fragmentShader:`
+      varying float vGlow;
+      void main(){
+        vec2 uv = gl_PointCoord - 0.5;
+        float d = length(uv);
+        if(d>0.5) discard;
+        float a = smoothstep(0.5,0.0,d) * vGlow * 0.9;
+        vec3 col = mix(vec3(0.4,0.9,1.0), vec3(0.6,1.0,0.8), vGlow);
+        gl_FragColor = vec4(col, a);
+      }`
+  });
+  return new THREE.Points(geo, mat);
+}
+const plankton = makePlankton(1400);
+scene.add(plankton);
+
+/* -------------------- Procedural helpers -------------------- */
+function makeFishGeometry(){
+  // body
+  const body = new THREE.SphereGeometry(1, 12, 8);
+  body.scale(1.6, 0.9, 0.9);
+  const tail = new THREE.ConeGeometry(0.6, 1.4, 8);
+  tail.rotateZ(Math.PI/2); tail.translate(-1.8,0,0); tail.scale(0.7,0.9,0.15);
+  const dorsal = new THREE.ConeGeometry(0.4, 0.7, 6);
+  dorsal.translate(0, 0.95, 0); dorsal.scale(0.6,1,0.15);
+  const merged = new THREE.BufferGeometry();
+  // manual merge by appending matrices
+  const geoms = [body, tail, dorsal];
+  const positions = []; const normals = []; const indices = [];
+  let offset = 0;
+  geoms.forEach((g,i)=>{
+    const mat = new THREE.Matrix4();
+    if(i===1) mat.makeRotationY(0);
+    if(i===2) mat.makeTranslation(0,0,0);
+    const pos = g.attributes.position.array;
+    const nor = g.attributes.normal.array;
+    for(let j=0;j<pos.length;j++) positions.push(pos[j]);
+    for(let j=0;j<nor.length;j++) normals.push(nor[j]);
+    const idx = g.index ? g.index.array : null;
+    if(idx){ for(let j=0;j<idx.length;j++) indices.push(idx[j]+offset); }
+    offset += pos.length/3;
+  });
+  merged.setAttribute('position', new THREE.Float32BufferAttribute(positions,3));
+  merged.setAttribute('normal', new THREE.Float32BufferAttribute(normals,3));
+  merged.setIndex(indices);
+  merged.computeVertexNormals();
+  return merged;
+}
+function makeJellyGeometry(){
+  const g = new THREE.SphereGeometry(1, 16, 12, 0, Math.PI*2, 0, Math.PI/2);
+  // tentacles as thin lines (we'll add via separate mesh)
+  return g;
+}
+
+/* -------------------- Species registry -------------------- */
+const SPECIES = [
+  {id:'clownfish', name:'Clownfish', color:0xff8a3d, count:18, min:2, max:30,  size:0.5, school:true,  speed:1.2},
+  {id:'tuna',      name:'Yellowfin Tuna', color:0x4a8fcf, count:22, min:5, max:80,  size:1.0, school:true,  speed:2.4},
+  {id:'mackerel',  name:'Mackerel', color:0x88c4ff, count:30, min:10, max:120, size:0.6, school:true,  speed:1.8},
+  {id:'angelfish', name:'Angelfish', color:0xffe26b, count:12, min:20, max:180, size:0.55,school:false, speed:1.0},
+  {id:'parrotfish',name:'Parrotfish', color:0x33d1a3, count:14, min:5, max:60,  size:0.7, school:false, speed:1.1},
+  {id:'jelly',     name:'Moon Jellyfish', color:0xc8a8ff, count:22, min:10, max:200, size:1.2, school:false, speed:0.5, jelly:true},
+  {id:'manta',     name:'Manta Ray', color:0x223344, count:5,  min:40, max:600, size:3.5, school:false, speed:1.6},
+  {id:'shark',     name:'Reef Shark', color:0x6a7785, count:6,  min:30, max:600, size:3.0, school:false, speed:1.4},
+  {id:'whale',     name:'Sperm Whale', color:0x3a3f4a, count:3,  min:200,max:3500,size:14, school:false, speed:0.8},
+  {id:'dolphin',   name:'Bottlenose Dolphin', color:0x6a8aa8, count:8, min:5, max:300, size:2.0, school:false, speed:2.0},
+  {id:'angler',    name:'Anglerfish', color:0x6a3a2a, count:10, min:600,max:3500,size:1.4, school:false, speed:0.4, biolum:true},
+  {id:'gulper',    name:'Gulper Eel', color:0x4a2a55, count:8,  min:800,max:3500,size:2.5, school:false, speed:0.3, biolum:true},
+  {id:'vampire',   name:'Vampire Squid', color:0x803344, count:6, min:600,max:2500,size:1.6, school:false, speed:0.5, biolum:true},
+  {id:'dumbo',     name:'Dumbo Octopus', color:0xff8fa3, count:5, min:1000,max:3500,size:1.2, school:false, speed:0.3},
+  {id:'isopod',    name:'Giant Isopod', color:0xa8866a, count:12,min:200,max:2500,size:0.8, school:false, speed:0.2},
+  {id:'seahorse',  name:'Seahorse', color:0xffc14a, count:10, min:5, max:80,  size:0.5, school:false, speed:0.4},
+  {id:'turtle',    name:'Sea Turtle', color:0x4f7a4a, count:5,  min:5, max:200, size:2.5, school:false, speed:0.9},
+];
+
+const creatures = [];
+function buildCreature(sp){
+  const group = new THREE.Group();
+  let body, eyeMat;
+  if(sp.jelly){
+    body = makeJellyGeometry();
+    const mat = new THREE.MeshPhongMaterial({color:sp.color, transparent:true, opacity:0.55, shininess:120, emissive:sp.color, emissiveIntensity:0.15});
+    const mesh = new THREE.Mesh(body, mat);
+    mesh.position.y = 0.4;
+    group.add(mesh);
+    // tentacles
+    const tMat = new THREE.LineBasicMaterial({color:sp.color, transparent:true, opacity:0.6});
+    for(let i=0;i<8;i++){
+      const pts = [];
+      const a = (i/8)*Math.PI*2;
+      for(let j=0;j<14;j++){
+        const t = j/14;
+        pts.push(new THREE.Vector3(Math.cos(a)*0.9*(1-t*0.2), -t*2.4 + Math.sin(j*0.7)*0.1, Math.sin(a)*0.9*(1-t*0.2)));
+      }
+      const lg = new THREE.BufferGeometry().setFromPoints(pts);
+      group.add(new THREE.Line(lg, tMat));
+    }
+  } else if(sp.id==='whale'){
+    body = new THREE.SphereGeometry(1,16,12);
+    body.scale(2.2,1,1);
+    const mat = new THREE.MeshPhongMaterial({color:sp.color, shininess:30});
+    group.add(new THREE.Mesh(body, mat));
+    // tail
+    const tailG = new THREE.ConeGeometry(0.7,1.6,8);
+    tailG.rotateZ(Math.PI/2); tailG.translate(-2.2,0,0); tailG.scale(0.4,1,0.05);
+    group.add(new THREE.Mesh(tailG, mat));
+    // head blunt
+    const head = new THREE.SphereGeometry(0.9,16,12);
+    head.translate(1.7,0,0); head.scale(1,1,1);
+    group.add(new THREE.Mesh(head, mat));
+  } else if(sp.id==='shark' || sp.id==='dolphin' || sp.id==='manta'){
+    body = makeFishGeometry();
+    const mat = new THREE.MeshPhongMaterial({color:sp.color, shininess:60, flatShading: sp.id==='shark'});
+    const m = new THREE.Mesh(body, mat);
+    if(sp.id==='manta'){ m.scale.set(2,0.15,1.6); m.rotation.z = Math.PI/2; }
+    if(sp.id==='dolphin'){ m.scale.set(1.1,0.85,0.7); }
+    if(sp.id==='shark'){ m.scale.set(1.4,0.7,0.55); }
+    group.add(m);
+  } else if(sp.id==='angler' || sp.id==='gulper' || sp.id==='vampire' || sp.id==='dumbo' || sp.id==='isopod'){
+    const g = new THREE.IcosahedronGeometry(1, 0);
+    const mat = new THREE.MeshPhongMaterial({color:sp.color, shininess:10, emissive:sp.biolum?0x331a44:0x000000, emissiveIntensity:sp.biolum?0.4:0});
+    group.add(new THREE.Mesh(g, mat));
+    if(sp.id==='angler'){
+      // lure
+      const stalk = new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.03,1.2,6), new THREE.MeshBasicMaterial({color:0x222244}));
+      stalk.position.set(0.5,0.6,0); stalk.rotation.z = -0.8;
+      group.add(stalk);
+      const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.18,8,8), new THREE.MeshBasicMaterial({color:0x88ddff}));
+      bulb.position.set(0.95,1.15,0);
+      group.add(bulb);
+      bulb.userData.lure = true;
+    }
+    if(sp.id==='vampire' || sp.id==='dumbo'){
+      // 8 arms as small spheres around
+      for(let i=0;i<8;i++){
+        const arm = new THREE.Mesh(new THREE.SphereGeometry(0.18,6,6), mat);
+        const a = (i/8)*Math.PI*2;
+        arm.position.set(Math.cos(a)*0.7, -0.5, Math.sin(a)*0.7);
+        group.add(arm);
+      }
+    }
+  } else if(sp.id==='seahorse'){
+    const pts = [];
+    for(let i=0;i<30;i++){ const t=i/30; pts.push(new THREE.Vector3(0, t*1.4 - 0.7, Math.sin(t*8)*0.15)); }
+    const curve = new THREE.CatmullRomCurve3(pts);
+    const tube = new THREE.TubeGeometry(curve, 30, 0.18, 6, false);
+    const mat = new THREE.MeshPhongMaterial({color:sp.color, shininess:30});
+    group.add(new THREE.Mesh(tube, mat));
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.3,10,8), mat);
+    head.position.set(0,0.85,0);
+    group.add(head);
+  } else if(sp.id==='turtle'){
+    const shell = new THREE.Mesh(new THREE.SphereGeometry(1,16,12), new THREE.MeshPhongMaterial({color:0x3d5a36, shininess:20}));
+    shell.scale.set(1.2,0.5,1.4);
+    group.add(shell);
+    const skin = new THREE.MeshPhongMaterial({color:0x4f7a4a});
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.35,10,8), skin);
+    head.position.set(0,0.2,1.3);
+    group.add(head);
+    for(const z of [0.9,0.2,-0.5]){
+      const fl = new THREE.Mesh(new THREE.SphereGeometry(0.45,8,6), skin);
+      fl.scale.set(0.4,0.2,0.7);
+      fl.position.set(0,-0.4,z);
+      group.add(fl);
+    }
+  } else {
+    body = makeFishGeometry();
+    const mat = new THREE.MeshPhongMaterial({color:sp.color, shininess:80});
+    const m = new THREE.Mesh(body, mat);
+    m.scale.setScalar(sp.size);
+    group.add(m);
+  }
+  group.userData.sp = sp;
+  group.userData.scaleBase = sp.size || 1;
+  group.scale.setScalar(group.userData.scaleBase);
+  return group;
+}
+
+/* School controller */
+class School{
+  constructor(sp, group){
+    this.sp = sp;
+    this.group = group;            // THREE.Group of fish meshes
+    this.center = new THREE.Vector3(
+      (Math.random()-0.5)*800,
+      -sp.min - Math.random()*(sp.max-sp.min),
+      (Math.random()-0.5)*800
+    );
+    this.dir = new THREE.Vector3(Math.random()-0.5, 0, Math.random()-0.5).normalize();
+    this.radius = 8 + Math.random()*16;
+    this.speed = sp.speed * (0.8 + Math.random()*0.4);
+    this.t = Math.random()*10;
+    this.members = [];
+    this.divingTarget = null;
+  }
+  step(dt, cam){
+    this.t += dt;
+    // wandering center
+    this.center.x += this.dir.x * this.speed * 0.4 * dt;
+    this.center.z += this.dir.z * this.speed * 0.4 * dt;
+    this.center.y += Math.sin(this.t*0.3) * 0.1 * dt;
+    if(Math.random()<0.005){
+      this.dir.x += (Math.random()-0.5)*0.4;
+      this.dir.z += (Math.random()-0.5)*0.4;
+      this.dir.normalize();
+    }
+    // bounds — wrap around
+    const lim = 1500;
+    if(this.center.x>lim){this.center.x=-lim; this.dir.x*=-1;}
+    if(this.center.x<-lim){this.center.x=lim; this.dir.x*=-1;}
+    if(this.center.z>lim){this.center.z=-lim; this.dir.z*=-1;}
+    if(this.center.z<-lim){this.center.z=lim; this.dir.z*=-1;}
+    // depth bounds
+    if(this.center.y > -this.sp.min) this.center.y = -this.sp.min - 1;
+    if(this.center.y < -this.sp.max) this.center.y = -this.sp.max + 1;
+
+    // attraction / flee to camera
+    const toCam = new THREE.Vector3().subVectors(cam.position, this.center);
+    const dist = toCam.length();
+    if(dist < 50){
+      // flee
+      toCam.normalize();
+      this.center.addScaledVector(toCam, -this.speed * 1.5 * dt);
+    }
+    // arrange members around center
+    for(let i=0;i<this.members.length;i++){
+      const m = this.members[i];
+      const a = this.t + i*1.7;
+      const r = this.radius * (0.6 + 0.4*Math.sin(a*0.4));
+      const ox = Math.cos(a)*r;
+      const oz = Math.sin(a*0.9)*r*0.7;
+      const oy = Math.sin(a*1.3 + i)*1.5;
+      const tgt = new THREE.Vector3(this.center.x+ox, this.center.y+oy, this.center.z+oz);
+      m.position.lerp(tgt, Math.min(1, dt*3));
+      // facing direction (velocity approx)
+      const fwd = new THREE.Vector3().subVectors(tgt, m.position).normalize();
+      if(fwd.length()>0.01){
+        const q = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(1,0,0), fwd);
+        m.quaternion.slerp(q, Math.min(1, dt*3));
+      }
+      // gentle body wiggle via scale
+      const wig = 1 + 0.05*Math.sin(this.t*8 + i);
+      m.scale.set(this.sp.size, this.sp.size*wig, this.sp.size);
+    }
+  }
+}
+
+class SoloCreature{
+  constructor(mesh, sp){
+    this.mesh = mesh;
+    this.sp = sp;
+    this.target = new THREE.Vector3(
+      (Math.random()-0.5)*800,
+      -sp.min - Math.random()*(sp.max-sp.min),
+      (Math.random()-0.5)*800
+    );
+    this.heading = Math.random()*Math.PI*2;
+    this.speed = sp.speed * (0.7 + Math.random()*0.6);
+    this.t = Math.random()*10;
+    this.fleeFrom = null;
+  }
+  step(dt, cam){
+    this.t += dt;
+    const p = this.mesh.position;
+    const toTarget = new THREE.Vector3().subVectors(this.target, p);
+    if(toTarget.length() < 6){
+      this.target.set(
+        (Math.random()-0.5)*1200,
+        -this.sp.min - Math.random()*(this.sp.max-this.sp.min),
+        (Math.random()-0.5)*1200
+      );
+    }
+    toTarget.normalize();
+    // flee from cam if close (for non-deep)
+    const toCam = new THREE.Vector3().subVectors(cam.position, p);
+    const distC = toCam.length();
+    let speed = this.speed;
+    if(distC < 25 && !this.sp.biolum){
+      toCam.normalize();
+      toTarget.lerp(toCam.multiplyScalar(-1), 0.9);
+      speed *= 2.5;
+    }
+    p.addScaledVector(toTarget, speed * dt);
+    // depth bounds
+    if(p.y > -this.sp.min) p.y = -this.sp.min - 1;
+    if(p.y < -this.sp.max) p.y = -this.sp.max + 1;
+    // face
+    const yaw = Math.atan2(toTarget.z, toTarget.x);
+    this.mesh.rotation.y = -yaw + Math.PI/2;
+    // gentle pitch
+    this.mesh.rotation.z = Math.sin(this.t*0.5)*0.1;
+    // jelly bob
+    if(this.sp.jelly){
+      this.mesh.position.y += Math.sin(this.t*1.2)*0.02;
+      this.mesh.children.forEach((c,i)=>{ if(c.material && c.material.opacity){ c.material.opacity = 0.4 + 0.2*Math.sin(this.t*1.5+i); } });
+    }
+    // biolum pulse
+    if(this.sp.biolum){
+      const s = 0.85 + 0.15*Math.sin(this.t*2.5);
+      this.mesh.scale.setScalar(this.sp.size * s);
+    }
+  }
+}
+
+/* Spawn species */
+const schoolGroups = []; // list of School
+const solos = [];
+SPECIES.forEach(sp=>{
+  const template = buildCreature(sp);
+  if(sp.school){
+    // make one school with N members
+    const grp = new THREE.Group();
+    const members = [];
+    for(let i=0;i<sp.count;i++){
+      const m = template.clone(true);
+      grp.add(m);
+      members.push(m);
+    }
+    scene.add(grp);
+    const sch = new School(sp, grp);
+    sch.members = members;
+    schoolGroups.push(sch);
+    creatures.push({sp, ref:sch, type:'school'});
+  } else {
+    for(let i=0;i<sp.count;i++){
+      const m = template.clone(true);
+      scene.add(m);
+      const solo = new SoloCreature(m, sp);
+      m.position.set(
+        (Math.random()-0.5)*800,
+        -sp.min - Math.random()*(sp.max-sp.min),
+        (Math.random()-0.5)*800
+      );
+      solos.push(solo);
+      creatures.push({sp, ref:solo, type:'solo', mesh:m});
+    }
+  }
+});
+
+/* -------------------- Coral reef -------------------- */
+function makeCoralReef(){
+  const group = new THREE.Group();
+  const corals = [];
+  const palette = [0xff5577, 0xff8a3d, 0xffc14a, 0x74ffb1, 0x46e6ff, 0xa366ff, 0xff66c4];
+  for(let i=0;i<140;i++){
+    const c = palette[Math.floor(Math.random()*palette.length)];
+    const r = 60 + Math.random()*240;
+    const a = Math.random()*Math.PI*2;
+    const x = Math.cos(a)*r;
+    const z = Math.sin(a)*r;
+    const y = -10 - Math.random()*15;
+    const type = Math.floor(Math.random()*3);
+    let mesh;
+    if(type===0){
+      // brain coral
+      const g = new THREE.IcosahedronGeometry(1.5 + Math.random()*2, 1);
+      const m = new THREE.MeshPhongMaterial({color:c, shininess:10, flatShading:true});
+      mesh = new THREE.Mesh(g,m);
+    } else if(type===1){
+      // branching
+      const pts = [[0,0,0],[0,1.5,0],[0.6,2.4,0],[0,3.5,0.4],[-0.5,4.6,0]];
+      const curve = new THREE.CatmullRomCurve3(pts.map(p=>new THREE.Vector3(...p)));
+      const g = new THREE.TubeGeometry(curve, 12, 0.35, 6, false);
+      const m = new THREE.MeshPhongMaterial({color:c, shininess:40});
+      mesh = new THREE.Mesh(g,m);
+    } else {
+      // fan
+      const g = new THREE.CircleGeometry(2 + Math.random()*1.5, 16);
+      const m = new THREE.MeshPhongMaterial({color:c, shininess:60, side:THREE.DoubleSide});
+      mesh = new THREE.Mesh(g,m);
+      mesh.rotation.y = Math.random()*Math.PI;
+      mesh.rotation.x = -Math.PI/2 + (Math.random()-0.5)*0.6;
+    }
+    mesh.position.set(x,y,z);
+    mesh.scale.setScalar(0.8 + Math.random()*1.4);
+    group.add(mesh);
+    corals.push(mesh);
+  }
+  // seafloor rocks
+  for(let i=0;i<60;i++){
+    const r = 30 + Math.random()*280;
+    const a = Math.random()*Math.PI*2;
+    const x = Math.cos(a)*r;
+    const z = Math.sin(a)*r;
+    const g = new THREE.IcosahedronGeometry(0.8 + Math.random()*2.2, 0);
+    const m = new THREE.MeshPhongMaterial({color:0x555a55, flatShading:true});
+    const rock = new THREE.Mesh(g,m);
+    rock.position.set(x, -12 - Math.random()*8, z);
+    rock.scale.y = 0.5;
+    group.add(rock);
+  }
+  return group;
+}
+const reef = makeCoralReef();
+scene.add(reef);
+
+/* -------------------- Hydrothermal vents -------------------- */
+function makeVent(x,z){
+  const g = new THREE.Group();
+  const base = new THREE.Mesh(new THREE.CylinderGeometry(2,3,6,12), new THREE.MeshPhongMaterial({color:0x222, flatShading:true}));
+  base.position.y = -3200 + 3;
+  g.add(base);
+  const chimney = new THREE.Mesh(new THREE.CylinderGeometry(0.6,1.2,10,10), new THREE.MeshPhongMaterial({color:0x553311}));
+  chimney.position.y = -3200 + 11;
+  g.add(chimney);
+  // particle plume
+  const pc = 80;
+  const pgeo = new THREE.BufferGeometry();
+  const pos = new Float32Array(pc*3);
+  const phase = new Float32Array(pc);
+  for(let i=0;i<pc;i++){ pos[i*3]=(Math.random()-0.5)*1.5; pos[i*3+1] = -3190 + Math.random()*30; pos[i*3+2]=(Math.random()-0.5)*1.5; phase[i]=Math.random()*10; }
+  pgeo.setAttribute('position', new THREE.BufferAttribute(pos,3));
+  pgeo.setAttribute('aPhase', new THREE.BufferAttribute(phase,1));
+  const pmat = new THREE.ShaderMaterial({transparent:true, depthWrite:false, blending:THREE.AdditiveBlending,
+    uniforms:{uTime:{value:0}},
+    vertexShader:`attribute float aPhase; uniform float uTime; varying float vA;
+      void main(){
+        vec3 p = position;
+        p.y += mod(uTime*4.0 + aPhase*3.0, 30.0);
+        p.x += sin(uTime + aPhase)*0.4;
+        p.z += cos(uTime*0.7 + aPhase)*0.4;
+        vA = 1.0 - clamp(p.y/30.0, 0.0, 1.0);
+        vec4 mv = modelViewMatrix * vec4(p,1.0);
+        gl_Position = projectionMatrix * mv;
+        gl_PointSize = 30.0 / max(0.1, -mv.z);
+      }`,
+    fragmentShader:`varying float vA; void main(){ vec2 uv=gl_PointCoord-0.5; float d=length(uv); if(d>0.5)discard; float a=smoothstep(0.5,0.0,d)*vA*0.6; gl_FragColor = vec4(1.0,0.55,0.2, a); }`
+  });
+  const pts = new THREE.Points(pgeo, pmat);
+  g.add(pts);
+  g.position.set(x,0,z);
+  g.userData.mat = pmat;
+  return g;
+}
+const vents = [];
+for(let i=0;i<4;i++){
+  const a = (i/4)*Math.PI*2;
+  const r = 600 + Math.random()*200;
+  const v = makeVent(Math.cos(a)*r, Math.sin(a)*r);
+  scene.add(v); vents.push(v);
+}
+
+/* -------------------- Shipwreck -------------------- */
+function makeShipwreck(){
+  const g = new THREE.Group();
+  const hull = new THREE.Mesh(new THREE.BoxGeometry(14,4,5), new THREE.MeshPhongMaterial({color:0x4a3520, flatShading:true}));
+  hull.position.y = 1;
+  g.add(hull);
+  const deck = new THREE.Mesh(new THREE.BoxGeometry(13,0.4,4.6), new THREE.MeshPhongMaterial({color:0x6a4a30}));
+  deck.position.y = 3.1;
+  g.add(deck);
+  const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.15,0.15,10,8), new THREE.MeshPhongMaterial({color:0x3a2515}));
+  mast.position.set(-2,7,0);
+  g.add(mast);
+  // tilt
+  g.rotation.z = 0.18;
+  g.rotation.y = 0.5;
+  g.position.set(80,-45,40);
+  return g;
+}
+const wreck = makeShipwreck();
+scene.add(wreck);
+
+/* -------------------- Input -------------------- */
+const input = {keys:{}, mouseX:0, mouseY:0, dragging:false, lx:0, ly:0, yaw:0, pitch:-0.05, roll:0};
+canvas.addEventListener('mousedown', e=>{ input.dragging=true; input.lx=e.clientX; input.ly=e.clientY; canvas.classList.add('grabbing'); });
+window.addEventListener('mouseup', ()=>{ input.dragging=false; canvas.classList.remove('grabbing'); });
+window.addEventListener('mousemove', e=>{
+  if(input.dragging){
+    const dx = e.clientX - input.lx, dy = e.clientY - input.ly;
+    input.yaw -= dx * 0.0035;
+    input.pitch -= dy * 0.0035;
+    input.pitch = Math.max(-Math.PI/2+0.05, Math.min(Math.PI/2-0.05, input.pitch));
+    input.lx = e.clientX; input.ly = e.clientY;
+  }
+  input.mouseX = (e.clientX/window.innerWidth)*2-1;
+  input.mouseY = -(e.clientY/window.innerHeight)*2+1;
+});
+window.addEventListener('keydown', e=>{ input.keys[e.code]=true; if(e.code==='KeyR'){ camera.position.set(0,5,0); input.yaw=0; input.pitch=-0.05; }});
+window.addEventListener('keyup', e=>{ input.keys[e.code]=false; });
+window.addEventListener('wheel', e=>{
+  // wheel controls vertical speed of auto-dive
+  if(e.deltaY>0) camera.userData.targetSpeed = Math.min(40, (camera.userData.targetSpeed||8) + 2);
+  else camera.userData.targetSpeed = Math.max(1, (camera.userData.targetSpeed||8) - 2);
+}, {passive:true});
+
+/* Touch */
+let touchYaw=0, touchPitch=0, lastTouchDist=0, touchActive=false;
+canvas.addEventListener('touchstart', e=>{
+  if(e.touches.length===1){ touchActive=true; input.lx=e.touches[0].clientX; input.ly=e.touches[0].clientY; }
+  if(e.touches.length===2){ lastTouchDist = Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY); }
+}, {passive:true});
+canvas.addEventListener('touchmove', e=>{
+  if(e.touches.length===1 && touchActive){
+    const dx = e.touches[0].clientX - input.lx;
+    const dy = e.touches[0].clientY - input.ly;
+    input.yaw -= dx*0.005;
+    input.pitch -= dy*0.005;
+    input.pitch = Math.max(-1.4, Math.min(1.4, input.pitch));
+    input.lx = e.touches[0].clientX; input.ly = e.touches[0].clientY;
+  }
+  if(e.touches.length===2){
+    const d = Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);
+    const delta = d - lastTouchDist;
+    camera.userData.targetSpeed = Math.max(1, Math.min(40, (camera.userData.targetSpeed||8) + delta*0.05));
+    lastTouchDist = d;
+  }
+}, {passive:true});
+canvas.addEventListener('touchend', ()=>{ touchActive=false; });
+
+/* -------------------- HUD -------------------- */
+const elDepth = document.getElementById('depthVal');
+const elZone = document.getElementById('zone');
+const elDepthBar = document.getElementById('depthBar');
+const elOxy = document.getElementById('oxy');
+const elOxyBar = document.getElementById('oxyBar');
+const elPres = document.getElementById('pres');
+const elSpd = document.getElementById('spd');
+const elVis = document.getElementById('vis');
+const elSpecies = document.getElementById('speciesList');
+const elBio = document.getElementById('bioCount');
+const elLog = document.getElementById('logList');
+const elCompassStrip = document.getElementById('compassStrip');
+const elFlash = document.getElementById('flash');
+
+// compass strip
+(function buildCompass(){
+  const dirs = ['N','NE','E','SE','S','SW','W','NW'];
+  let html = '';
+  for(let i=0;i<32;i++){
+    const ang = i*(360/32);
+    const label = (ang%45===0) ? dirs[(ang/45)%8] : (ang%10===0 ? Math.round(ang/10)+'°' : '·');
+    html += `<span class="${label==='N'?'n':''}">${label}</span>`;
+  }
+  elCompassStrip.innerHTML = html + html; // doubled for wrap
+})();
+
+let prevZone = '';
+function depthZone(d){
+  if(d<40) return {name:'Sunlit Zone', color:'#46e6ff'};
+  if(d<200) return {name:'Twilight Zone', color:'#74b6ff'};
+  if(d<1000) return {name:'Midnight Zone', color:'#3a4d80'};
+  if(d<4000) return {name:'Abyssal Zone', color:'#1a2a4a'};
+  return {name:'Hadal Trench', color:'#0a1428'};
+}
+
+function addLog(msg){
+  const t = new Date();
+  const ts = `${String(t.getHours()).padStart(2,'0')}:${String(t.getMinutes()).padStart(2,'0')}:${String(t.getSeconds()).padStart(2,'0')}`;
+  const div = document.createElement('div');
+  div.innerHTML = `<span class="t">[${ts}]</span>${msg}`;
+  elLog.prepend(div);
+  while(elLog.children.length>8) elLog.removeChild(elLog.lastChild);
+}
+setTimeout(()=>addLog('Submersible systems online'), 1000);
+setTimeout(()=>addLog('Sonar calibrated · depth scan ready'), 2400);
+setTimeout(()=>addLog('Welcome to the Abyssal'), 3700);
+
+/* -------------------- Mode controls -------------------- */
+let mode = 'free'; // 'free' | 'sub'
+let autoDive = false;
+let oxygen = 100;
+let maxDepthReached = 0;
+const btnFree = document.getElementById('btnFree');
+const btnSub = document.getElementById('btnSub');
+const btnSound = document.getElementById('btnSound');
+const btnAuto = document.getElementById('btnAuto');
+btnFree.classList.add('active');
+btnFree.addEventListener('click', ()=>{ mode='free'; btnFree.classList.add('active'); btnSub.classList.remove('active'); });
+btnSub.addEventListener('click', ()=>{ mode='sub'; btnSub.classList.add('active'); btnFree.classList.remove('active'); });
+btnAuto.addEventListener('click', ()=>{
+  autoDive = !autoDive;
+  btnAuto.classList.toggle('active', autoDive);
+  addLog(autoDive?'Auto-dive engaged':'Auto-dive disengaged');
+});
+let audioCtx = null;
+btnSound.addEventListener('click', ()=>{
+  btnSound.classList.toggle('active');
+  if(btnSound.classList.contains('active')){
+    if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+    addLog('Ambient audio enabled');
+  } else {
+    addLog('Ambient audio muted');
+  }
+});
+
+/* -------------------- Resize -------------------- */
+function resize(){
+  const w = window.innerWidth, h = window.innerHeight;
+  renderer.setSize(w,h);
+  camera.aspect = w/h;
+  camera.updateProjectionMatrix();
+  bubbles.material.uniforms.uPx.value = h;
+  plankton.material.uniforms.uPx.value = h;
+  caustics.material.map.offset.x = (performance.now()*0.00002)%1;
+  caustics.material.map.offset.y = (performance.now()*0.000013)%1;
+}
+window.addEventListener('resize', resize);
+
+/* -------------------- Audio (simple) -------------------- */
+let noiseNode = null;
+function ensureAudio(){
+  if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+  if(noiseNode) return;
+  const buf = audioCtx.createBuffer(1, audioCtx.sampleRate*2, audioCtx.sampleRate);
+  const d = buf.getChannelData(0);
+  for(let i=0;i<d.length;i++) d[i] = (Math.random()*2-1) * 0.4;
+  const src = audioCtx.createBufferSource();
+  src.buffer = buf; src.loop = true;
+  const filt = audioCtx.createBiquadFilter(); filt.type = 'lowpass'; filt.frequency.value = 400;
+  const gain = audioCtx.createGain(); gain.gain.value = 0.04;
+  src.connect(filt).connect(gain).connect(audioCtx.destination);
+  src.start();
+  noiseNode = {src, gain, filt};
+}
+
+/* -------------------- Animation loop -------------------- */
+const clock = new THREE.Clock();
+let frame = 0;
+let splashTime = -10;
+
+function currentZoneY(){
+  const z = depthZone(Math.max(0,-camera.position.y));
+  return z;
+}
+
+function update(dt){
+  const t = clock.elapsedTime;
+  frame++;
+
+  // Input → camera velocity
+  const fwd = new THREE.Vector3(-Math.sin(input.yaw), 0, -Math.cos(input.yaw));
+  const right = new THREE.Vector3(Math.cos(input.yaw), 0, -Math.sin(input.yaw));
+  const up = new THREE.Vector3(0,1,0);
+  const move = new THREE.Vector3();
+
+  if(mode==='free'){
+    if(input.keys['KeyW']) move.add(fwd);
+    if(input.keys['KeyS']) move.sub(fwd);
+    if(input.keys['KeyA']) move.sub(right);
+    if(input.keys['KeyD']) move.add(right);
+    if(input.keys['Space']) move.add(up);
+    if(input.keys['ShiftLeft']||input.keys['ShiftRight']) move.sub(up);
+    if(input.keys['KeyQ']) input.roll = Math.min(0.7, input.roll + dt*1.5);
+    else if(input.keys['KeyE']) input.roll = Math.max(-0.7, input.roll - dt*1.5);
+    else input.roll *= (1 - dt*3);
+
+    let sp = (camera.userData.targetSpeed || 8);
+    if(autoDive){
+      camera.position.y -= sp * 0.5 * dt;
+      camera.position.x += Math.sin(t*0.1)*2*dt;
+    }
+    move.normalize().multiplyScalar(sp * dt);
+    camera.position.add(move);
+    // clamp Y
+    if(camera.position.y > 5) camera.position.y = 5;
+    if(camera.position.y < -MAX_DEPTH + 10) camera.position.y = -MAX_DEPTH + 10;
+    camera.rotation.set(input.pitch, input.yaw, input.roll, 'YXZ');
+  } else {
+    // submarine autopilot: descend slowly while moving forward
+    camera.position.x += Math.sin(t*0.05)*0.5*dt;
+    camera.position.z += Math.cos(t*0.04)*0.5*dt;
+    camera.position.y -= 1.5 * dt;
+    camera.rotation.set(Math.sin(t*0.1)*0.1 - 0.3, input.yaw, 0, 'YXZ');
+    input.yaw += dt*0.05;
+  }
+
+  // splash when crossing surface
+  const surfY = camera.position.y;
+  if(prevY > 0 && surfY <= 0 && Math.abs(prevY)<10){
+    splashTime = t;
+    elFlash.style.opacity = '0.45';
+    setTimeout(()=>{ elFlash.style.opacity='0'; }, 400);
+    addLog('Surface break — diving');
+  }
+  if(prevY <= 0 && surfY > 0){
+    splashTime = t;
+    elFlash.style.opacity = '0.55';
+    setTimeout(()=>{ elFlash.style.opacity='0'; }, 400);
+    addLog('Emerged into daylight');
+  }
+  prevY = surfY;
+
+  // oxygen & pressure
+  const depth = Math.max(0, -camera.position.y);
+  maxDepthReached = Math.max(maxDepthReached, depth);
+  if(depth>0){
+    oxygen -= 0.18 * dt * (0.4 + depth/2000);
+    if(oxygen<=0){
+      oxygen=0;
+      addLog('⚠ Life support critical — return to surface');
+    }
+  } else {
+    oxygen = Math.min(100, oxygen + 0.6*dt);
+  }
+  const pressure = 1 + depth/10;
+
+  // fog & visibility
+  scene.fog.color.setHSL(0.55 - depth*0.00008, 0.5, Math.max(0.02, 0.18 - depth*0.00004));
+  scene.fog.density = 0.012 + depth*0.00006;
+  // exposure dims with depth
+  renderer.toneMappingExposure = Math.max(0.4, 1.2 - depth*0.00018);
+
+  // water shader uniforms
+  waterMat.uniforms.uTime.value = t;
+  waterMat.uniforms.uCamY.value = camera.position.y;
+
+  // sky
+  skyMat.uniforms.uTime.value = t;
+  skyMat.uniforms.uCamY.value = camera.position.y;
+  sky.position.copy(camera.position);
+
+  // bubbles update
+  {
+    const pos = bubbles.geometry.attributes.position.array;
+    const vel = bubbles.userData.vel;
+    for(let i=0;i<pos.length/3;i++){
+      pos[i*3]   += vel[i*3] + Math.sin(t*1.5+i)*0.02;
+      pos[i*3+1] += vel[i*3+1];
+      pos[i*3+2] += vel[i*3+2] + Math.cos(t*1.3+i)*0.02;
+      if(pos[i*3+1] > -1){
+        pos[i*3]   = (Math.random()-0.5)*1200 + camera.position.x;
+        pos[i*3+1] = -MAX_DEPTH + Math.random()*50;
+        pos[i*3+2] = (Math.random()-0.5)*1200 + camera.position.z;
+      }
+    }
+    bubbles.geometry.attributes.position.needsUpdate = true;
+    bubbles.material.uniforms.uCamY.value = camera.position.y;
+  }
+
+  // plankton
+  plankton.material.uniforms.uTime.value = t;
+  plankton.material.uniforms.uCamY.value = camera.position.y;
+
+  // god rays
+  godRays.rays.forEach((r,i)=>{
+    r.material.uniforms.uTime.value = t + i;
+    r.position.y = -550 + Math.sin(t*0.2 + i)*30;
+    r.visible = depth < 250;
+    r.material.opacity = Math.max(0, 1 - depth/200);
+  });
+
+  // caustics fade with depth
+  caustics.material.opacity = Math.max(0, 0.45 - depth/120);
+  caustics.material.map.offset.x += dt*0.03;
+  caustics.material.map.offset.y += dt*0.018;
+  caustics.position.x = camera.position.x;
+  caustics.position.z = camera.position.z;
+  caustics.visible = depth < 100;
+
+  // creatures
+  schoolGroups.forEach(s=>s.step(dt, camera));
+  solos.forEach(s=>s.step(dt, camera));
+
+  // vents particles
+  vents.forEach(v=>{ v.userData.mat.uniforms.uTime.value = t; v.children[2].visible = depth > 600; });
+
+  // audio lowpass with depth
+  if(noiseNode){
+    noiseNode.filt.frequency.value = Math.max(80, 500 - depth*0.12);
+    noiseNode.gain.gain.value = btnSound.classList.contains('active') ? 0.04 : 0;
+  }
+
+  // HUD update
+  elDepth.textContent = depth.toFixed(1);
+  const zone = depthZone(depth);
+  elZone.textContent = `— ${zone.name} —`;
+  elZone.style.color = zone.color;
+  elDepthBar.style.width = Math.min(100, (depth/MAX_DEPTH)*100) + '%';
+  elDepthBar.style.background = `linear-gradient(90deg, ${zone.color}, #021626)`;
+  elOxy.textContent = Math.round(oxygen) + '%';
+  elOxyBar.style.width = oxygen + '%';
+  elOxyBar.style.background = oxygen>40 ? 'linear-gradient(90deg,#74ffb1,#46e6ff)' : oxygen>15 ? 'linear-gradient(90deg,#ffb74a,#ff8a3d)' : 'linear-gradient(90deg,#ff5b6a,#ff8a3d)';
+  elPres.textContent = pressure.toFixed(1) + ' atm';
+  const speed = mode==='sub' ? 1.5 : (camera.userData.targetSpeed||8);
+  elSpd.textContent = speed.toFixed(1) + ' m/s';
+  elVis.textContent = Math.max(0, Math.round(100 - depth*0.04)) + '%';
+
+  // species nearby
+  const visible = {};
+  let bioCount = 0;
+  creatures.forEach(c=>{
+    let pos;
+    if(c.type==='school'){ pos = c.ref.center; }
+    else { pos = c.ref.mesh.position; }
+    const d = pos.distanceTo(camera.position);
+    if(d < 60){
+      visible[c.sp.id] = (visible[c.sp.id]||0) + (c.type==='school'? c.ref.members.length : 1);
+      if(c.sp.biolum && depth>500) bioCount++;
+    }
+  });
+  let html = '';
+  Object.keys(visible).forEach(id=>{
+    const sp = SPECIES.find(s=>s.id===id);
+    html += `<div class="row2"><span>${sp.name}</span><span class="n">${visible[id]}</span></div>`;
+  });
+  if(!html) html = '<div style="opacity:.6;padding:6px 0">No creatures in sonar range.</div>';
+  elSpecies.innerHTML = html;
+  elBio.textContent = bioCount;
+
+  // compass
+  const headingDeg = ((input.yaw * 180/Math.PI) % 360 + 360) % 360;
+  const offset = -(headingDeg/360) * 40 * 32;
+  elCompassStrip.style.transform = `translateX(${offset}px)`;
+
+  // zone change log
+  if(zone.name !== prevZone){
+    addLog(`Entered ${zone.name} (${depth.toFixed(0)} m)`);
+    prevZone = zone.name;
+  }
+
+  // depth-record log
+  if(depth > 50 && (frame%180)===0){
+    if(depth > maxDepthReached - 5){
+      addLog(`New deepest: ${depth.toFixed(0)} m`);
+    }
+  }
+}
+
+let prevY = 0;
+function loop(){
+  requestAnimationFrame(loop);
+  const dt = Math.min(0.05, clock.getDelta());
+  update(dt);
+  renderer.render(scene, camera);
+}
+
+/* -------------------- Loading fade -------------------- */
+const loading = document.getElementById('loading');
+const loadP = document.getElementById('loadP');
+const messages = [
+  'Initialising sonar…',
+  'Calibrating pressure hull…',
+  'Loading bathymetric data…',
+  'Stocking reef with life…',
+  'Pressurising ballast tanks…',
+  'All systems nominal'
+];
+let mi = 0;
+const li = setInterval(()=>{
+  mi++;
+  if(messages[mi]) loadP.textContent = messages[mi];
+  if(mi >= messages.length-1){ clearInterval(li); }
+}, 380);
+
+setTimeout(()=>{
+  loading.classList.add('gone');
+  setTimeout(()=>{ loading.style.display='none'; }, 900);
+  addLog('Welcome aboard, Captain.');
+  addLog('Descend slowly to observe marine life.');
+  addLog('Use WASD + mouse to navigate.');
+}, 2600);
+
+/* -------------------- Start -------------------- */
+resize();
+camera.userData.targetSpeed = 8;
+loop();
+</script>
+</body>
+</html>

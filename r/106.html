@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Симулятор Бездны Океана</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #010206;
+            font-family: 'Courier New', Courier, monospace;
+            color: #00ffcc;
+            user-select: none;
+        }
+
+        #canvas-container {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        /* HUD Overlay */
+        .hud-panel {
+            position: absolute;
+            z-index: 10;
+            pointer-events: none;
+            background: rgba(1, 10, 25, 0.65);
+            border: 1px solid #00ffcc;
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.2);
+            padding: 15px;
+            border-radius: 4px;
+            backdrop-filter: blur(5px);
+        }
+
+        /* Left Panel - Telemetry */
+        #telemetry {
+            top: 20px;
+            left: 20px;
+            width: 260px;
+        }
+
+        .telemetry-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+            text-shadow: 0 0 5px rgba(0, 255, 204, 0.5);
+        }
+
+        .telemetry-value {
+            font-weight: bold;
+            color: #ffffff;
+        }
+
+        /* Right Panel - Controls & Depth Slider */
+        #controls-panel {
+            top: 20px;
+            right: 20px;
+            width: 220px;
+            pointer-events: auto;
+        }
+
+        .btn {
+            background: rgba(0, 255, 204, 0.1);
+            border: 1px solid #00ffcc;
+            color: #00ffcc;
+            padding: 8px 12px;
+            width: 100%;
+            margin-bottom: 10px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            box-shadow: inset 0 0 5px rgba(0, 255, 204, 0.2);
+        }
+
+        .btn:hover {
+            background: rgba(0, 255, 204, 0.3);
+            box-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
+            color: #fff;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .slider-container {
+            margin-top: 15px;
+        }
+
+        .slider-label {
+            font-size: 12px;
+            margin-bottom: 5px;
+            display: block;
+            text-align: center;
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: rgba(0, 255, 204, 0.2);
+            height: 6px;
+            border-radius: 3px;
+            outline: none;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #00ffcc;
+            cursor: pointer;
+            box-shadow: 0 0 8px #00ffcc;
+            transition: transform 0.1s;
+        }
+
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        /* Bottom Panel - Submarine Viewport / Compass */
+        #compass-panel {
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        /* Sonar Radar Screen */
+        #radar-container {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 1px solid #00ffcc;
+            background: radial-gradient(circle, rgba(0,30,20,0.6) 0%, rgba(1,10,25,0.8) 100%);
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0, 255, 204, 0.3);
+        }
+
+        #radar-sweep {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: conic-gradient(from 0deg, rgba(0, 255, 204, 0.4) 0deg, rgba(0, 255, 204, 0) 90deg);
+            border-radius: 50%;
+            transform-origin: center;
+            animation: sweep 4s linear infinite;
+        }
+
+        @keyframes sweep {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .radar-grid {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background-image: 
+                radial-gradient(circle, transparent 30%, rgba(0, 255, 204, 0.1) 31%, rgba(0, 255, 204, 0.1) 33%, transparent 34%),
+                radial-gradient(circle, transparent 60%, rgba(0, 255, 204, 0.1) 61%, rgba(0, 255, 204, 0.1) 63%, transparent 64%);
+        }
+
+        /* Interactive Intro Overlay */
+        #intro-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, #051329 0%, #01040a 100%);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            transition: opacity 1s ease;
+        }
+
+        #intro-overlay h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            letter-spacing: 5px;
+            text-shadow: 0 0 15px #00ffcc;
+            animation: pulse-glow 2s infinite alternate;
+        }
+
+        @keyframes pulse-glow {
+            from { text-shadow: 0 0 10px rgba(0, 255, 204, 0.5); }
+            to { text-shadow: 0 0 25px rgba(0, 255, 204, 0.9), 0 0 10px #00ffcc; }
+        }
+
+        #intro-overlay p {
+            font-size: 1.2rem;
+            max-width: 600px;
+            line-height: 1.6;
+            color: #8ab4f8;
+            margin-bottom: 30px;
+            padding: 0 20px;
+        }
+
+        #start-btn {
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            background: transparent;
+            border: 2px solid #00ffcc;
+            color: #00ffcc;
+            cursor: pointer;
+            font-weight: bold;
+            letter-spacing: 2px;
+            transition: all 0.3s;
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.2);
+        }
+
+        #start-btn:hover {
+            background: #00ffcc;
+            color: #01040a;
+            box-shadow: 0 0 25px #00ffcc;
+        }
+
+        /* Vignette effect for depth immersion */
+        #vignette {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            pointer-events: none;
+            box-shadow: inset 0 0 100px rgba(0,0,0,0.8);
+            transition: box-shadow 2s ease;
+        }
+
+        /* Instructions */
+        #instructions {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            font-size: 11px;
+            color: rgba(0, 255, 204, 0.6);
+            text-align: right;
+            line-height: 1.4;
+        }
+    </style>
+    <!-- Three.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+
+    <div id="intro-overlay">
+        <h1>БЕЗДНА</h1>
+        <p>Вы собираетесь совершить погружение в глубоководный желоб. Исследуйте слои океана от залитой солнцем поверхности до вечной тьмы абиссали, наполненной загадочной биолюминесцентной жизнью.</p>
+        <button id="start-btn" onclick="startSimulation()">НАЧАТЬ ПОГРУЖЕНИЕ</button>
+    </div>
+
+    <div id="canvas-container"></div>
+    <div id="vignette"></div>
+
+    <!-- HUD: Telemetry -->
+    <div class="hud-panel" id="telemetry">
+        <div class="telemetry-row">
+            <span>ЗОНА:</span>
+            <span class="telemetry-value" id="zone-name">Эпипелагиаль</span>
+        </div>
+        <div class="telemetry-row">
+            <span>ГЛУБИНА:</span>
+            <span class="telemetry-value" id="depth-val">0 м</span>
+        </div>
+        <div class="telemetry-row">
+            <span>ТЕМПЕРАТУРА:</span>
+            <span class="telemetry-value" id="temp-val">22.4 °C</span>
+        </div>
+        <div class="telemetry-row">
+            <span>ДАВЛЕНИЕ:</span>
+            <span class="telemetry-value" id="press-val">1.0 атм</span>
+        </div>
+        <div class="telemetry-row">
+            <span>ОСВЕЩЕНИЕ:</span>
+            <span class="telemetry-value" id="light-val">100%</span>
+        </div>
+    </div>
+
+    <!-- HUD: Controls -->
+    <div class="hud-panel" id="controls-panel">
+        <button class="btn" id="headlight-btn" onclick="toggleHeadlight()">ФАРЫ: ВЫКЛ</button>
+        <button class="btn" id="autopilot-btn" onclick="toggleAutopilot()">АВТОПИЛОТ: ВЫКЛ</button>
+        <button class="btn" id="audio-btn" onclick="toggleAudio()">ЗВУК: ВЫКЛ</button>
+        
+        <div class="slider-container">
+            <span class="slider-label">УПРАВЛЕНИЕ ГЛУБИНОЙ</span>
+            <input type="range" id="depth-slider" min="0" max="1000" value="0" step="1" oninput="onSliderChange(this.value)">
+        </div>
+    </div>
+
+    <!-- HUD: Radar -->
+    <div id="radar-container">
+        <div id="radar-sweep"></div>
+        <div class="radar-grid"></div>
+    </div>
+
+    <!-- HUD: Compass & Horizon -->
+    <div class="hud-panel" id="compass-panel">
+        <div style="font-size: 12px; letter-spacing: 2px;">КУРС: <span id="heading-val" style="color: #fff;">000°</span></div>
+    </div>
+
+    <div id="instructions">
+        Зажмите левую кнопку мыши и двигайте,<br>чтобы осматриваться.<br>Используйте колесико мыши для спуска/подъема.
+    </div>
+
+    <script>
+        // --- Глобальные переменные ---
+        let scene, camera, renderer;
+        let ambientLight, dirLight, headlight;
+        let particles, bubbleParticles;
+        let creatures = [];
+        let seabed;
+        let targetY = 0;
+        let currentY = 0;
+        let isAutopilot = false;
+        let isHeadlightOn = false;
+        let audioCtx, ambientHum, sonarNode;
+        let isAudioPlaying = false;
+        let clock = new THREE.Clock();
+        
+        // Настройки зон океана
+        const zones = [
+            { maxDepth: 150, name: "Эпипелагиаль (Солнечная)", tempStart: 25, tempEnd: 15, color: 0x0077be, fogDensity: 0.012 },
+            { maxDepth: 450, name: "Мезопелагиаль (Сумерки)", tempStart: 15, tempEnd: 5, color: 0x001d4a, fogDensity: 0.018 },
+            { maxDepth: 800, name: "Батипелагиаль (Полуночная)", tempStart: 5, tempEnd: 3, color: 0x000814, fogDensity: 0.025 },
+            { maxDepth: 1000, name: "Абиссопелагиаль (Бездна)", tempStart: 3, tempEnd: 1.2, color: 0x000105, fogDensity: 0.035 }
+        ];
+
+        // Инициализация симуляции при нажатии кнопки "Старт"
+        function startSimulation() {
+            document.getElementById('intro-overlay').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('intro-overlay').style.display = 'none';
+            }, 1000);
+
+            // Инициализация звука
+            initAudio();
+            // Запуск рендеринга и анимации
+            animate();
+        }
+
+        // --- Инициализация WebGL и сцены Three.js ---
+        function init() {
+            const container = document.getElementById('canvas-container');
+            
+            // Сцена
+            scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0x0077be, 0.012);
+
+            // Камера
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 0, 30);
+
+            // Рендерер
+            renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            container.appendChild(renderer.domElement);
+
+            // Освещение
+            ambientLight = new THREE.AmbientLight(0x0a355c, 1.5);
+            scene.add(ambientLight);
+
+            dirLight = new THREE.DirectionalLight(0xdff0ff, 2.0);
+            dirLight.position.set(5, 20, 10);
+            scene.add(dirLight);
+
+            // Фары подводного аппарата (SpotLight прикрепленный к камере)
+            headlight = new THREE.SpotLight(0xffffff, 0, 150, Math.PI / 5, 0.5, 1);
+            headlight.position.set(0, 0, 0);
+            camera.add(headlight);
+            headlight.target = new THREE.Object3D();
+            headlight.target.position.set(0, 0, -1);
+            camera.add(headlight.target);
+            scene.add(camera); // Добавляем камеру в сцену, чтобы работал прожектор
+
+            // Создание окружения
+            createWaterSurface();
+            createSeabed();
+            createParticles();
+            createMarineLife();
+
+            // Обработчики событий
+            window.addEventListener('resize', onWindowResize);
+            window.addEventListener('wheel', onWindowScroll, { passive: false });
+            
+            // Интерактивное вращение камеры мышью
+            let isDragging = false;
+            let previousMousePosition = { x: 0, y: 0 };
+            let lon = -90, lat = 0;
+
+            document.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                previousMousePosition = { x: e.clientX, y: e.clientY };
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                const deltaX = e.clientX - previousMousePosition.x;
+                const deltaY = e.clientY - previousMousePosition.y;
+
+                lon += deltaX * 0.15;
+                lat = Math.max(-85, Math.min(85, lat + deltaY * 0.15));
+
+                previousMousePosition = { x: e.clientX, y: e.clientY };
+
+                // Обновление направления камеры
+                updateCameraRotation(lon, lat);
+            });
+
+            document.addEventListener('mouseup', () => isDragging = false);
+
+            // Сенсорные события для мобильных
+            document.addEventListener('touchstart', (e) => {
+                isDragging = true;
+                previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            }, {passive: true});
+
+            document.addEventListener('touchmove', (e) => {
+                if (!isDragging) return;
+                const deltaX = e.touches[0].clientX - previousMousePosition.x;
+                const deltaY = e.touches[0].clientY - previousMousePosition.y;
+                lon += deltaX * 0.2;
+                lat = Math.max(-85, Math.min(85, lat + deltaY * 0.2));
+                previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+                updateCameraRotation(lon, lat);
+            }, {passive: true});
+
+            document.addEventListener('touchend', () => isDragging = false);
+
+            // Инициализация вращения камеры вперед
+            updateCameraRotation(lon, lat);
+        }
+
+        function updateCameraRotation(lon, lat) {
+            const phi = THREE.MathUtils.degToRad(90 - lat);
+            const theta = THREE.MathUtils.degToRad(lon);
+
+            const target = new THREE.Vector3();
+            target.x = Math.sin(phi) * Math.cos(theta);
+            target.y = Math.cos(phi);
+            target.z = Math.sin(phi) * Math.sin(theta);
+
+            camera.lookAt(camera.position.clone().add(target));
+
+            // Обновление компаса на HUD
+            let angle = Math.round(lon % 360);
+            if (angle < 0) angle += 360;
+            document.getElementById('heading-val').innerText = String(angle).padStart(3, '0') + '°';
+        }
+
+        // --- Создание объектов сцены ---
+
+        // Генерация текстуры свечения (процедурная)
+        function createGlowTexture(colorStr = 'rgba(0, 255, 204, 1)') {
+            const canvas = document.createElement('canvas');
+            canvas.width = 64;
+            canvas.height = 64;
+            const ctx = canvas.getContext('2d');
+            const grad = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+            grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
+            grad.addColorStop(0.2, colorStr);
+            grad.addColorStop(0.5, 'rgba(0, 50, 100, 0.3)');
+            grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, 64, 64);
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        // Поверхность воды
+        function createWaterSurface() {
+            const geom = new THREE.PlaneGeometry(1000, 1000, 64, 64);
+            const mat = new THREE.MeshStandardMaterial({
+                color: 0x00aaff,
+                roughness: 0.1,
+                metalness: 0.8,
+                transparent: true,
+                opacity: 0.6,
+                side: THREE.DoubleSide,
+                flatShading: true
+            });
+            const mesh = new THREE.Mesh(geom, mat);
+            mesh.rotation.x = -Math.PI / 2;
+            mesh.position.y = 15;
+            scene.add(mesh);
+        }
+
+        // Морское дно (на максимальной глубине)
+        function createSeabed() {
+            const geom = new THREE.PlaneGeometry(1200, 1200, 128, 128);
+            
+            // Процедурный рельеф дна
+            const pos = geom.attributes.position;
+            for (let i = 0; i < pos.count; i++) {
+                const x = pos.getX(i);
+                const y = pos.getY(i);
+                // Наложение синусоид разной частоты для создания холмов и впадин
+                let z = Math.sin(x * 0.01) * Math.cos(y * 0.01) * 45;
+                z += Math.sin(x * 0.03) * Math.sin(y * 0.03) * 15;
+                z += Math.cos(x * 0.08) * Math.sin(y * 0.08) * 4; // мелкие детали
+                pos.setZ(i, z);
+            }
+            geom.computeVertexNormals();
+
+            const mat = new THREE.MeshStandardMaterial({
+                color: 0x07131f,
+                roughness: 0.9,
+                metalness: 0.1,
+                flatShading: true
+            });
+
+            seabed = new THREE.Mesh(geom, mat);
+            seabed.rotation.x = -Math.PI / 2;
+            // Дно располагается на глубине -1050 единиц
+            seabed.position.y = -1050;
+            scene.add(seabed);
+
+            // Добавим глубоководные гидротермальные источники ("черные курильщики")
+            for (let i = 0; i < 8; i++) {
+                createHydrothermalVent(
+                    (Math.random() - 0.5) * 400,
+                    -1050,
+                    (Math.random() - 0.5) * 400
+                );
+            }
+        }
+
+        // Гидротермальный источник
+        function createHydrothermalVent(x, y, z) {
+            const ventGroup = new THREE.Group();
+            ventGroup.position.set(x, y, z);
+
+            const height = 20 + Math.random() * 30;
+            const geom = new THREE.CylinderGeometry(1, 6, height, 8);
+            const mat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 1.0 });
+            const pipe = new THREE.Mesh(geom, mat);
+            pipe.position.y = height / 2;
+            ventGroup.add(pipe);
+
+            // Оранжевое свечение у жерла
+            const glowGeo = new THREE.SphereGeometry(3, 8, 8);
+            const glowMat = new THREE.MeshBasicMaterial({
+                color: 0xff3300,
+                transparent: true,
+                opacity: 0.8
+            });
+            const glow = new THREE.Mesh(glowGeo, glowMat);
+            glow.position.y = height;
+            ventGroup.add(glow);
+
+            const light = new THREE.PointLight(0xff4400, 2, 40);
+            light.position.y = height + 2;
+            ventGroup.add(light);
+
+            scene.add(ventGroup);
+        }
+
+        // Частицы: Морской снег и Пузыри
+        function createParticles() {
+            // 1. Морской снег (взвесь, падающая вниз)
+            const snowGeom = new THREE.BufferGeometry();
+            const snowCount = 4000;
+            const snowPositions = new Float32Array(snowCount * 3);
+            const snowSpeeds = [];
+
+            for (let i = 0; i < snowCount * 3; i += 3) {
+                snowPositions[i] = (Math.random() - 0.5) * 600;     // X
+                snowPositions[i + 1] = -Math.random() * 1100 + 50; // Y (по всей глубине)
+                snowPositions[i + 2] = (Math.random() - 0.5) * 600; // Z
+                snowSpeeds.push({
+                    y: 0.1 + Math.random() * 0.2,
+                    x: (Math.random() - 0.5) * 0.05,
+                    z: (Math.random() - 0.5) * 0.05
+                });
+            }
+
+            snowGeom.setAttribute('position', new THREE.BufferAttribute(snowPositions, 3));
+            
+            const snowMat = new THREE.PointsMaterial({
+                size: 1.5,
+                map: createGlowTexture('rgba(255,255,255,0.7)'),
+                transparent: true,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false
+            });
+
+            particles = new THREE.Points(snowGeom, snowMat);
+            particles.userData = { speeds: snowSpeeds };
+            scene.add(particles);
+
+            // 2. Пузыри воздуха (поднимающиеся вверх)
+            const bubbleGeom = new THREE.BufferGeometry();
+            const bubbleCount = 600;
+            const bubblePositions = new Float32Array(bubbleCount * 3);
+            const bubbleSpeeds = [];
+
+            for (let i = 0; i < bubbleCount * 3; i += 3) {
+                bubblePositions[i] = (Math.random() - 0.5) * 300;
+                bubblePositions[i + 1] = -Math.random() * 1100 - 50;
+                bubblePositions[i + 2] = (Math.random() - 0.5) * 300;
+                bubbleSpeeds.push({
+                    y: 0.8 + Math.random() * 1.2,
+                    x: (Math.random() - 0.5) * 0.1
+                });
+            }
+
+            bubbleGeom.setAttribute('position', new THREE.BufferAttribute(bubblePositions, 3));
+            const bubbleMat = new THREE.PointsMaterial({
+                size: 2.5,
+                map: createGlowTexture('rgba(0, 255, 204, 0.8)'),
+                transparent: true,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false
+            });
+
+            bubbleParticles = new THREE.Points(bubbleGeom, bubbleMat);
+            bubbleParticles.userData = { speeds: bubbleSpeeds };
+            scene.add(bubbleParticles);
+        }
+
+        // --- Создание Морской Жизни (Процедурные Животные) ---
+        function createMarineLife() {
+            // Распределяем существ по глубинам
+
+            // 1. Косяки мелких рыб (Эпипелагиаль: 0 ... -150)
+            for (let f = 0; f < 60; f++) {
+                const fish = createProceduralFish(0xffaa00);
+                fish.position.set(
+                    (Math.random() - 0.5) * 200,
+                    -Math.random() * 120,
+                    (Math.random() - 0.5) * 200
+                );
+                fish.userData = {
+                    speed: 0.5 + Math.random() * 0.5,
+                    range: 50 + Math.random() * 50,
+                    angle: Math.random() * Math.PI * 2,
+                    type: 'fish',
+                    depthLimit: [0, -150]
+                };
+                scene.add(fish);
+                creatures.push(fish);
+            }
+
+            // 2. Медузы (Мезопелагиаль: -150 ... -450)
+            for (let j = 0; j < 25; j++) {
+                const jelly = createProceduralJellyfish();
+                jelly.position.set(
+                    (Math.random() - 0.5) * 150,
+                    -150 - Math.random() * 250,
+                    (Math.random() - 0.5) * 150
+                );
+                jelly.userData = {
+                    speed: 0.1 + Math.random() * 0.15,
+                    pulseSpeed: 1 + Math.random() * 2,
+                    type: 'jelly',
+                    depthLimit: [-150, -500]
+                };
+                scene.add(jelly);
+                creatures.push(jelly);
+            }
+
+            // 3. Светящиеся Удильщики (Абиссаль: -700 ... -1000)
+            for (let a = 0; a < 10; a++) {
+                const angler = createProceduralAnglerfish();
+                angler.position.set(
+                    (Math.random() - 0.5) * 100,
+                    -700 - Math.random() * 300,
+                    (Math.random() - 0.5) * 100
+                );
+                angler.userData = {
+                    speed: 0.2 + Math.random() * 0.2,
+                    angle: Math.random() * Math.PI * 2,
+                    type: 'angler',
+                    depthLimit: [-650, -1050]
+                };
+                scene.add(angler);
+                creatures.push(angler);
+            }
+        }
+
+        // Процедурная Рыба
+        function createProceduralFish(colorHex) {
+            const fishGroup = new THREE.Group();
+
+            // Тело
+            const bodyGeom = new THREE.ConeGeometry(1.5, 6, 5);
+            bodyGeom.rotateX(Math.PI / 2);
+            const bodyMat = new THREE.MeshStandardMaterial({
+                color: colorHex,
+                roughness: 0.3,
+                metalness: 0.8
+            });
+            const body = new THREE.Mesh(bodyGeom, bodyMat);
+            fishGroup.add(body);
+
+            // Хвост
+            const tailGeom = new THREE.PlaneGeometry(2, 2);
+            const tailMat = new THREE.MeshBasicMaterial({ color: colorHex, side: THREE.DoubleSide, transparent: true, opacity: 0.8 });
+            const tail = new THREE.Mesh(tailGeom, tailMat);
+            tail.position.z = 3.5;
+            fishGroup.add(tail);
+
+            fishGroup.scale.set(0.6, 0.6, 0.6);
+            return fishGroup;
+        }
+
+        // Процедурная Светящаяся Медуза
+        function createProceduralJellyfish() {
+            const jellyGroup = new THREE.Group();
+
+            // Шляпка (полусфера)
+            const capGeom = new THREE.SphereGeometry(4, 16, 16, 0, Math.PI * 2, 0, Math.PI / 2);
+            const capMat = new THREE.MeshStandardMaterial({
+                color: 0x00ffcc,
+                emissive: 0x005544,
+                transparent: true,
+                opacity: 0.65,
+                roughness: 0.1,
+                side: THREE.DoubleSide
+            });
+            const cap = new THREE.Mesh(capGeom, capMat);
+            cap.rotation.x = Math.PI; // Перевернуть куполом вверх
+            jellyGroup.add(cap);
+
+            // Щупальца (несколько линий свисающих вниз)
+            const tentaclesCount = 8;
+            const tentacles = [];
+            
+            for (let i = 0; i < tentaclesCount; i++) {
+                const points = [];
+                const length = 10 + Math.random() * 5;
+                for (let j = 0; j < 5; j++) {
+                    points.push(new THREE.Vector3(
+                        Math.sin((i / tentaclesCount) * Math.PI * 2) * 3,
+                        -j * (length / 5),
+                        Math.cos((i / tentaclesCount) * Math.PI * 2) * 3
+                    ));
+                }
+                const tentacleGeom = new THREE.BufferGeometry().setFromPoints(points);
+                const tentacleMat = new THREE.LineBasicMaterial({
+                    color: 0x00ffcc,
+                    transparent: true,
+                    opacity: 0.4
+                });
+                const line = new THREE.Line(tentacleGeom, tentacleMat);
+                jellyGroup.add(line);
+                tentacles.push(line);
+            }
+
+            // Локальный свет медузы
+            const light = new THREE.PointLight(0x00ffcc, 1.5, 30);
+            light.position.y = -2;
+            jellyGroup.add(light);
+
+            jellyGroup.userData = { tentacles: tentacles };
+            return jellyGroup;
+        }
+
+        // Процедурный Удильщик (Anglerfish)
+        function createProceduralAnglerfish() {
+            const anglerGroup = new THREE.Group();
+
+            // Устрашающее тело (сплюснутая сфера)
+            const bodyGeom = new THREE.SphereGeometry(5, 8, 8);
+            bodyGeom.scale(1, 0.8, 1.4);
+            const bodyMat = new THREE.MeshStandardMaterial({
+                color: 0x1a0f05,
+                roughness: 0.9,
+                metalness: 0.2
+            });
+            const body = new THREE.Mesh(bodyGeom, bodyMat);
+            anglerGroup.add(body);
+
+            // Огромная пасть (простая геометрия конуса)
+            const jawGeom = new THREE.ConeGeometry(3, 4, 4);
+            jawGeom.rotateX(-Math.PI / 3);
+            const jawMat = new THREE.MeshStandardMaterial({ color: 0x0a0502 });
+            const jaw = new THREE.Mesh(jawGeom, jawMat);
+            jaw.position.set(0, -2, -4);
+            anglerGroup.add(jaw);
+
+            // Светящаяся удочка (эска)
+            const rodGeom = new THREE.CylinderGeometry(0.1, 0.2, 8, 4);
+            rodGeom.rotateX(Math.PI / 4);
+            const rodMat = new THREE.MeshStandardMaterial({ color: 0x111111 });
+            const rod = new THREE.Mesh(rodGeom, rodMat);
+            rod.position.set(0, 4, -4);
+            anglerGroup.add(rod);
+
+            // Светящаяся приманка
+            const lureGeom = new THREE.SphereGeometry(0.8, 8, 8);
+            const lureMat = new THREE.MeshBasicMaterial({ color: 0x00ffaa });
+            const lure = new THREE.Mesh(lureGeom, lureMat);
+            lure.position.set(0, 7, -7);
+            anglerGroup.add(lure);
+
+            // Реальный точечный свет от приманки
+            const light = new THREE.PointLight(0x00ffaa, 3, 40);
+            light.position.set(0, 7, -7);
+            anglerGroup.add(light);
+
+            anglerGroup.scale.set(0.7, 0.7, 0.7);
+            return anglerGroup;
+        }
+
+
+        // --- Управление глубиной ---
+
+        // Скроллинг мыши
+        function onWindowScroll(event) {
+            event.preventDefault();
+            // Изменяем целевую глубину (Y координату)
+            targetY += event.deltaY * 0.15;
+            // Ограничение глубин: от поверхности (0) до дна (-1000)
+            targetY = Math.max(-1000, Math.min(0, targetY));
+            
+            // Синхронизация слайдера на HUD
+            document.getElementById('depth-slider').value = Math.abs(targetY);
+        }
+
+        // Ползунок на HUD
+        function onSliderChange(value) {
+            targetY = -parseFloat(value);
+        }
+
+        // Автопилот (плавное погружение и подъем)
+        let autopilotDirection = -1; // -1 вниз, 1 вверх
+        function toggleAutopilot() {
+            isAutopilot = !isAutopilot;
+            const btn = document.getElementById('autopilot-btn');
+            if (isAutopilot) {
+                btn.innerText = "АВТОПИЛОТ: ВКЛ";
+                btn.style.background = "rgba(0, 255, 204, 0.4)";
+            } else {
+                btn.innerText = "АВТОПИЛОТ: ВЫКЛ";
+                btn.style.background = "rgba(0, 255, 204, 0.1)";
+            }
+        }
+
+        // Включение фар
+        function toggleHeadlight() {
+            isHeadlightOn = !isHeadlightOn;
+            const btn = document.getElementById('headlight-btn');
+            if (isHeadlightOn) {
+                headlight.intensity = 5.0;
+                btn.innerText = "ФАРЫ: ВКЛ";
+                btn.style.background = "rgba(0, 255, 204, 0.4)";
+                playSonarPing();
+            } else {
+                headlight.intensity = 0;
+                btn.innerText = "ФАРЫ: ВЫКЛ";
+                btn.style.background = "rgba(0, 255, 204, 0.1)";
+            }
+        }
+
+        // --- Аудио Синтезатор (Web Audio API) ---
+        function initAudio() {
+            try {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // Создаем низкочастотный гул океана (двигатели батискафа + давление)
+                ambientHum = audioCtx.createOscillator();
+                const filter = audioCtx.createBiquadFilter();
+                const gainNode = audioCtx.createGain();
+
+                ambientHum.type = 'sine';
+                ambientHum.frequency.setValueAtTime(55, audioCtx.currentTime); // Очень низкий бас
+                
+                filter.type = 'lowpass';
+                filter.frequency.setValueAtTime(120, audioCtx.currentTime);
+
+                gainNode.gain.setValueAtTime(0.4, audioCtx.currentTime);
+
+                ambientHum.connect(filter);
+                filter.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                
+                ambientHum.start();
+                isAudioPlaying = true;
+                document.getElementById('audio-btn').innerText = "ЗВУК: ВКЛ";
+                document.getElementById('audio-btn').style.background = "rgba(0, 255, 204, 0.4)";
+            } catch (e) {
+                console.warn("Web Audio не поддерживается браузером", e);
+            }
+        }
+
+        function toggleAudio() {
+            if (!audioCtx) {
+                initAudio();
+                return;
+            }
+            if (isAudioPlaying) {
+                audioCtx.suspend();
+                isAudioPlaying = false;
+                document.getElementById('audio-btn').innerText = "ЗВУК: ВЫКЛ";
+                document.getElementById('audio-btn').style.background = "rgba(0, 255, 204, 0.1)";
+            } else {
+                audioCtx.resume();
+                isAudioPlaying = true;
+                document.getElementById('audio-btn').innerText = "ЗВУК: ВКЛ";
+                document.getElementById('audio-btn').style.background = "rgba(0, 255, 204, 0.4)";
+            }
+        }
+
+        // Звуковой импульс гидролокатора (Сонар)
+        function playSonarPing() {
+            if (!audioCtx || !isAudioPlaying) return;
+
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(800, audioCtx.currentTime); // Высокий чистый пинг
+            osc.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 1.5);
+
+            gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 2.0);
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            
+            osc.start();
+            osc.stop(audioCtx.currentTime + 2.0);
+        }
+
+        // Автоматический пинг радара каждые 5 секунд
+        setInterval(() => {
+            if (isAudioPlaying && Math.random() > 0.3) {
+                playSonarPing();
+            }
+        }, 5000);
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // --- Главный цикл анимации и физики ---
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const time = clock.getElapsedTime();
+            const delta = clock.getDelta();
+
+            // 1. Логика автопилота
+            if (isAutopilot) {
+                targetY += autopilotDirection * 1.5;
+                if (targetY <= -1000) {
+                    targetY = -1000;
+                    autopilotDirection = 1; // Поворачиваем вверх
+                } else if (targetY >= 0) {
+                    targetY = 0;
+                    autopilotDirection = -1; // Поворачиваем вниз
+                }
+                document.getElementById('depth-slider').value = Math.abs(targetY);
+            }
+
+            // Плавное следование камеры за целевой глубиной (интерполяция Lerp)
+            currentY += (targetY - currentY) * 0.05;
+            camera.position.y = currentY;
+
+            // Динамическое обновление параметров HUD на основе глубины
+            const absoluteDepth = Math.round(Math.abs(currentY));
+            
+            let currentZone = zones[0];
+            for (let i = 0; i < zones.length; i++) {
+                if (absoluteDepth <= zones[i].maxDepth) {
+                    currentZone = zones[i];
+                    break;
+                }
+            }
+            if (absoluteDepth > zones[zones.length - 1].maxDepth) {
+                currentZone = zones[zones.length - 1];
+            }
+
+            // Вычисление данных телеметрии
+            let zoneProgress = 0;
+            const prevMax = zones.indexOf(currentZone) === 0 ? 0 : zones[zones.indexOf(currentZone) - 1].maxDepth;
+            const zoneRange = currentZone.maxDepth - prevMax;
+            if (zoneRange > 0) {
+                zoneProgress = (absoluteDepth - prevMax) / zoneRange;
+            }
+            const temp = currentZone.tempStart - (currentZone.tempStart - currentZone.tempEnd) * zoneProgress;
+            const pressure = 1.0 + (absoluteDepth * 0.1);
+            const lightPercent = Math.max(0, Math.round(100 * Math.pow(1 - absoluteDepth / 600, 2)));
+
+            // Обновление UI
+            document.getElementById('depth-val').innerText = `${absoluteDepth} м`;
+            document.getElementById('zone-name').innerText = currentZone.name;
+            document.getElementById('temp-val').innerText = `${temp.toFixed(1)} °C`;
+            document.getElementById('press-val').innerText = `${pressure.toFixed(1)} атм`;
+            document.getElementById('light-val').innerText = `${lightPercent}%`;
+
+            // Обновление тумана и освещения в зависимости от глубины
+            const fogColor = new THREE.Color(currentZone.color);
+            scene.fog.color.lerp(fogColor, 0.05);
+            scene.fog.density = THREE.MathUtils.lerp(scene.fog.density, currentZone.fogDensity, 0.05);
+            renderer.setClearColor(scene.fog.color);
+
+            // Окружающий свет тускнеет с глубиной
+            const targetAmbientIntensity = THREE.MathUtils.lerp(1.5, 0.05, absoluteDepth / 800);
+            ambientLight.intensity = THREE.MathUtils.lerp(ambientLight.intensity, targetAmbientIntensity, 0.05);
+
+            // Направленный свет (солнце) исчезает к 400м
+            const targetDirIntensity = Math.max(0, 2.0 * (1 - absoluteDepth / 400));
+            dirLight.intensity = THREE.MathUtils.lerp(dirLight.intensity, targetDirIntensity, 0.05);
+
+            // Эффект виньетки усиливает чувство глубины
+            const vignetteShadow = Math.min(0.95, 0.4 + (absoluteDepth / 1000) * 0.55);
+            document.getElementById('vignette').style.boxShadow = `inset 0 0 100px rgba(0,0,0,${vignetteShadow})`;
+
+            // Анимация частиц морского снега
+            if (particles) {
+                const pos = particles.geometry.attributes.position;
+                const speeds = particles.userData.speeds;
+                for (let i = 0; i < pos.count; i++) {
+                    let y = pos.getY(i);
+                    let x = pos.getX(i);
+                    let z = pos.getZ(i);
+
+                    y -= speeds[i].y;
+                    x += speeds[i].x;
+                    z += speeds[i].z;
+
+                    if (y < -1100) y = 50;
+                    if (Math.abs(x) > 300) x = (Math.random() - 0.5) * 600;
+                    if (Math.abs(z) > 300) z = (Math.random() - 0.5) * 600;
+
+                    pos.setY(i, y);
+                    pos.setX(i, x);
+                    pos.setZ(i, z);
+                }
+                particles.geometry.attributes.position.needsUpdate = true;
+            }
+
+            // Анимация пузырей
+            if (bubbleParticles) {
+                const pos = bubbleParticles.geometry.attributes.position;
+                const speeds = bubbleParticles.userData.speeds;
+                for (let i = 0; i < pos.count; i++) {
+                    let y = pos.getY(i);
+                    let x = pos.getX(i);
+
+                    y += speeds[i].y;
+                    x += speeds[i].x;
+
+                    if (y > 50) y = -1100;
+                    if (Math.abs(x) > 150) x = (Math.random() - 0.5) * 300;
+
+                    pos.setY(i, y);
+                    pos.setX(i, x);
+                }
+                bubbleParticles.geometry.attributes.position.needsUpdate = true;
+            }
+
+            // Анимация морских существ
+            creatures.forEach(c => {
+                if (c.userData.type === 'fish') {
+                    c.userData.angle += 0.01 * c.userData.speed;
+                    c.position.x += Math.sin(c.userData.angle) * 0.1 * c.userData.speed;
+                    c.position.z += Math.cos(c.userData.angle) * 0.1 * c.userData.speed;
+                    c.rotation.y = c.userData.angle + Math.PI / 2;
+                    c.position.y += Math.sin(time + c.position.x) * 0.02;
+                } else if (c.userData.type === 'jelly') {
+                    const pulse = Math.sin(time * c.userData.pulseSpeed);
+                    c.position.y += (pulse + 1.2) * 0.05 * c.userData.speed;
+                    if (c.position.y > c.userData.depthLimit[0]) c.position.y = c.userData.depthLimit[1];
+                    
+                    if (c.userData.tentacles) {
+                        c.userData.tentacles.forEach((line, idx) => {
+                            const pos = line.geometry.attributes.position;
+                            for (let j = 1; j < pos.count; j++) {
+                                let tx = Math.sin(time * 2 + idx + j) * 0.1;
+                                pos.setX(j, pos.getX(j) + tx);
+                            }
+                            line.geometry.attributes.position.needsUpdate = true;
+                        });
+                    }
+                } else if (c.userData.type === 'angler') {
+                    c.userData.angle += 0.005;
+                    c.position.x += Math.sin(c.userData.angle) * 0.05;
+                    c.position.z += Math.cos(c.userData.angle) * 0.05;
+                    c.rotation.y = c.userData.angle;
+                    c.position.y += Math.sin(time * 0.5) * 0.01;
+                }
+            });
+
+            // Рендер сцены
+            renderer.render(scene, camera);
+        }
+
+        // Запуск инициализации при загрузке страницы
+        window.onload = () => {
+            init();
+        };
+    </script>
+</body>
+</html>

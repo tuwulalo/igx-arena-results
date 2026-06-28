@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="ru"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IGX Тест-Арена : результаты моделей</title>
+<meta name="description" content="Результаты финального теста IGX Тест-Арены: 109 генераций 10 моделей по 11 заданиям.">
+<style>
+  :root { --bg:#0a0a0b; --panel:#121214; --line:#222226; --line2:#2c2c31; --text:#ececef; --muted:#8a8a92; --faint:#5a5a61; --accent:#c9c9cf; }
+  * { box-sizing:border-box; }
+  html,body { margin:0; background:var(--bg); color:var(--text); font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+  a { color:inherit; }
+  .wrap { max-width:1400px; margin:0 auto; padding:28px 20px 80px; }
+  header.top { display:flex; align-items:flex-end; gap:18px; flex-wrap:wrap; border-bottom:1px solid var(--line); padding-bottom:18px; margin-bottom:8px; }
+  header.top h1 { font-size:22px; margin:0; letter-spacing:.5px; }
+  header.top h1 b { color:#fff; }
+  .sub { color:var(--muted); font:12px/1.4 ui-monospace,Menlo,Consolas,monospace; }
+  .stat { color:var(--faint); font:11px ui-monospace,monospace; text-transform:uppercase; letter-spacing:1px; margin-left:auto; text-align:right; }
+  .models { display:flex; gap:6px; flex-wrap:wrap; margin:14px 0 6px; }
+  .chip { display:inline-flex; align-items:center; gap:6px; font:11px ui-monospace,monospace; color:var(--muted); border:1px solid var(--line2); border-radius:999px; padding:3px 9px 3px 4px; }
+  .test { margin-top:38px; }
+  .thead { display:flex; align-items:baseline; gap:12px; }
+  .thead .tn { font:10px ui-monospace,monospace; color:var(--faint); text-transform:uppercase; letter-spacing:2px; }
+  .thead h2 { font-size:18px; margin:0; }
+  .thead .tcount { margin-left:auto; font:11px ui-monospace,monospace; color:var(--faint); }
+  .tdesc { color:var(--muted); font-size:12.5px; margin:6px 0 14px; max-width:900px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:16px; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:12px; overflow:hidden; cursor:pointer; transition:border-color .15s, transform .15s; }
+  .card:hover { border-color:var(--line2); transform:translateY(-2px); }
+  .card:focus-visible { outline:2px solid var(--accent); }
+  .frame { position:relative; width:100%; aspect-ratio:16/10; background:#08080a; overflow:hidden; border-bottom:1px solid var(--line); }
+  .frame.v { aspect-ratio:16/12; }
+  .frame iframe { position:absolute; top:0; left:0; border:0; transform-origin:top left; pointer-events:none; background:#fff; }
+  .frame .ph { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; color:var(--faint); }
+  .ph .phname { font:11px ui-monospace,monospace; color:var(--muted); }
+  .badge { width:34px; height:34px; border-radius:9px; display:inline-flex; align-items:center; justify-content:center; color:#fff; font:700 16px/1 ui-monospace,monospace; }
+  .badge.sm { width:20px; height:20px; border-radius:6px; font-size:11px; }
+  .meta { display:flex; align-items:center; gap:8px; padding:9px 11px; }
+  .meta .mname { font:600 12.5px sans-serif; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .meta .score { font:700 11px ui-monospace,monospace; color:#3ee89a; }
+  .meta .tps { font:11px ui-monospace,monospace; color:var(--faint); }
+  .meta .open { margin-left:auto; font:10px ui-monospace,monospace; color:var(--faint); text-transform:uppercase; letter-spacing:1px; }
+  .card:hover .open { color:var(--accent); }
+  .modal { position:fixed; inset:0; background:rgba(4,4,6,.92); display:none; z-index:50; flex-direction:column; }
+  .modal.on { display:flex; }
+  .mbar { display:flex; align-items:center; gap:12px; padding:10px 16px; border-bottom:1px solid var(--line); }
+  .mbar .mt { font:600 13px sans-serif; }
+  .mbar .ms { color:var(--muted); font:11px ui-monospace,monospace; }
+  .mbar .x { margin-left:auto; cursor:pointer; border:1px solid var(--line2); background:var(--panel); color:var(--text); border-radius:8px; padding:6px 12px; font:12px sans-serif; }
+  .mbar a.raw { color:var(--muted); font:11px ui-monospace,monospace; text-decoration:none; border:1px solid var(--line2); border-radius:8px; padding:6px 10px; }
+  .modal iframe { flex:1; width:100%; border:0; background:#fff; }
+  footer { margin-top:50px; color:var(--faint); font:11px ui-monospace,monospace; border-top:1px solid var(--line); padding-top:16px; }
+</style>
+</head><body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>IGX <b>Тест-Арена</b> &middot; результаты</h1>
+      <div class="sub">финальный тест: 109 генераций &middot; 10 моделей &middot; 11 заданий</div>
+    </div>
+    <div class="stat">снимок 29.06.2026<br>тащите вниз &middot; клик = открыть</div>
+  </header>
+  <div class="models"><span class="chip"><span class="badge sm" style="background:#d97757">C</span>Claude Opus 4.8</span><span class="chip"><span class="badge sm" style="background:#10a37f">O</span>GPT-5.5</span><span class="chip"><span class="badge sm" style="background:#7c5cff">K</span>Kimi K2.7</span><span class="chip"><span class="badge sm" style="background:#ff6900">M</span>MiMo V2.5 Pro</span><span class="chip"><span class="badge sm" style="background:#5b5b5b">x</span>Grok 4.3</span><span class="chip"><span class="badge sm" style="background:#1a73e8">G</span>Gemini 3.5 Flash</span><span class="chip"><span class="badge sm" style="background:#4d6bfe">D</span>DeepSeek: DeepSeek V4 Pro</span><span class="chip"><span class="badge sm" style="background:#615ced">Q</span>Qwen: Qwen3.7 Max</span><span class="chip"><span class="badge sm" style="background:#ff4d4f">M</span>MiniMax: MiniMax M3</span><span class="chip"><span class="badge sm" style="background:#3859ff">G</span>GLM-5.2</span></div>
+  <section class="test"><div class="thead"><span class="tn">тест 17</span><h2>Магазин</h2><span class="tcount">9 моделей</span></div>
+  <p class="tdesc">Создай многостраничный сайт для вымышленной сети магазина продуктов. Придумай логотип + фи</p>
+  <div class="grid"><div class="card" data-src="r/001.html" data-vw="1280" data-vh="800" data-model="Claude Opus 4.8" data-title="Магазин" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#d97757">C</span><span class="phname">Claude Opus 4.8</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#d97757">C</span><span class="mname">Claude Opus 4.8</span><span class="tps">84 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/002.html" data-vw="1280" data-vh="800" data-model="GPT-5.5" data-title="Магазин" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#10a37f">O</span><span class="phname">GPT-5.5</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#10a37f">O</span><span class="mname">GPT-5.5</span><span class="tps">29 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/003.html" data-vw="1280" data-vh="800" data-model="Kimi K2.7" data-title="Магазин" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#7c5cff">K</span><span class="phname">Kimi K2.7</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#7c5cff">K</span><span class="mname">Kimi K2.7</span><span class="tps">233 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/004.html" data-vw="1280" data-vh="800" data-model="MiMo V2.5 Pro" data-title="Магазин" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#ff6900">M</span><span class="phname">MiMo V2.5 Pro</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#ff6900">M</span><span class="mname">MiMo V2.5 Pro</span><span class="tps">82 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/005.html" data-vw="1280" data-vh="800" data-model="Grok 4.3" data-title="Магазин" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#5b5b5b">x</span><span class="phname">Grok 4.3</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#5b5b5b">x</span><span class="mname">Grok 4.3</span><span class="tps">86 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/006.html" data-vw="1280" data-vh="800" data-model="Gemini 3.5 Flash" data-title="Магазин" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#1a73e8">G</span><span class="phname">Gemini 3.5 Flash</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#1a73e8">G</span><span class="mname">Gemini 3.5 Flash</span><span class="tps">140 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/007.html" data-vw="1280" data-vh="800" data-model="DeepSeek: DeepSeek V4 Pro" data-title="Магазин" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#4d6bfe">D</span><span class="phname">DeepSeek: DeepSeek V4 Pro</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#4d6bfe">D</span><span class="mname">DeepSeek: DeepSeek V4 Pro</span><span class="tps">81 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/008.html" data-vw="1280" data-vh="800" data-model="Qwen: Qwen3.7 Max" data-title="Магазин" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#615ced">Q</span><span class="phname">Qwen: Qwen3.7 Max</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#615ced">Q</span><span class="mname">Qwen: Qwen3.7 Max</span><span class="tps">53 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/009.html" data-vw="1280" data-vh="800" data-model="MiniMax: MiniMax M3" data-title="Магазин" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#ff4d4f">M</span><span class="phname">MiniMax: MiniMax M3</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#ff4d4f">M</span><span class="mname">MiniMax: MiniMax M3</span><span class="tps">37 ток/с</span><span class="open">развернуть</span></div>
+  </div></div></section>
+<section class="test"><div class="thead"><span class="tn">тест 18</span><h2>CS</h2><span class="tcount">10 моделей</span></div>
+  <p class="tdesc">Создай 3д игру Counter Strike 1.6 карта de_dust 2 / Сохрани механики и звук + задеплой</p>
+  <div class="grid"><div class="card" data-src="r/010.html" data-vw="1280" data-vh="800" data-model="Claude Opus 4.8" data-title="CS" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#d97757">C</span><span class="phname">Claude Opus 4.8</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#d97757">C</span><span class="mname">Claude Opus 4.8</span><span class="tps">69 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/011.html" data-vw="1280" data-vh="800" data-model="GPT-5.5" data-title="CS" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#10a37f">O</span><span class="phname">GPT-5.5</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#10a37f">O</span><span class="mname">GPT-5.5</span><span class="tps">32 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/012.html" data-vw="1280" data-vh="800" data-model="GLM-5.2" data-title="CS" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#3859ff">G</span><span class="phname">GLM-5.2</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#3859ff">G</span><span class="mname">GLM-5.2</span><span class="tps">58 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/013.html" data-vw="1280" data-vh="800" data-model="Kimi K2.7" data-title="CS" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#7c5cff">K</span><span class="phname">Kimi K2.7</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#7c5cff">K</span><span class="mname">Kimi K2.7</span><span class="tps">45 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/014.html" data-vw="1280" data-vh="800" data-model="MiMo V2.5 Pro" data-title="CS" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#ff6900">M</span><span class="phname">MiMo V2.5 Pro</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#ff6900">M</span><span class="mname">MiMo V2.5 Pro</span><span class="tps">75 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/015.html" data-vw="1280" data-vh="800" data-model="Grok 4.3" data-title="CS" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#5b5b5b">x</span><span class="phname">Grok 4.3</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#5b5b5b">x</span><span class="mname">Grok 4.3</span><span class="tps">29 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/016.html" data-vw="1280" data-vh="800" data-model="Gemini 3.5 Flash" data-title="CS" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#1a73e8">G</span><span class="phname">Gemini 3.5 Flash</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#1a73e8">G</span><span class="mname">Gemini 3.5 Flash</span><span class="tps">130 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/017.html" data-vw="1280" data-vh="800" data-model="DeepSeek: DeepSeek V4 Pro" data-title="CS" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#4d6bfe">D</span><span class="phname">DeepSeek: DeepSeek V4 Pro</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#4d6bfe">D</span><span class="mname">DeepSeek: DeepSeek V4 Pro</span><span class="tps">39 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/018.html" data-vw="1280" data-vh="800" data-model="Qwen: Qwen3.7 Max" data-title="CS" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#615ced">Q</span><span class="phname">Qwen: Qwen3.7 Max</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#615ced">Q</span><span class="mname">Qwen: Qwen3.7 Max</span><span class="tps">44 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/019.html" data-vw="1280" data-vh="800" data-model="MiniMax: MiniMax M3" data-title="CS" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#ff4d4f">M</span><span class="phname">MiniMax: MiniMax M3</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#ff4d4f">M</span><span class="mname">MiniMax: MiniMax M3</span><span class="tps">58 ток/с</span><span class="open">развернуть</span></div>
+  </div></div></section>
+<section class="test"><div class="thead"><span class="tn">тест 19</span><h2>Барабаны</h2><span class="tcount">10 моделей</span></div>
+  <p class="tdesc">Создай 3д барабанные инструменты на студии что воспроизводят звуки. threejs &gt; Задеплой</p>
+  <div class="grid"><div class="card" data-src="r/020.html" data-vw="1280" data-vh="800" data-model="Claude Opus 4.8" data-title="Барабаны" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#d97757">C</span><span class="phname">Claude Opus 4.8</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#d97757">C</span><span class="mname">Claude Opus 4.8</span><span class="tps">92 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/021.html" data-vw="1280" data-vh="800" data-model="GPT-5.5" data-title="Барабаны" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#10a37f">O</span><span class="phname">GPT-5.5</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#10a37f">O</span><span class="mname">GPT-5.5</span><span class="tps">30 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/022.html" data-vw="1280" data-vh="800" data-model="GLM-5.2" data-title="Барабаны" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#3859ff">G</span><span class="phname">GLM-5.2</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#3859ff">G</span><span class="mname">GLM-5.2</span><span class="tps">66 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/023.html" data-vw="1280" data-vh="800" data-model="Kimi K2.7" data-title="Барабаны" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#7c5cff">K</span><span class="phname">Kimi K2.7</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#7c5cff">K</span><span class="mname">Kimi K2.7</span><span class="tps">235 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/024.html" data-vw="1280" data-vh="800" data-model="MiMo V2.5 Pro" data-title="Барабаны" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#ff6900">M</span><span class="phname">MiMo V2.5 Pro</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#ff6900">M</span><span class="mname">MiMo V2.5 Pro</span><span class="tps">81 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/025.html" data-vw="1280" data-vh="800" data-model="Grok 4.3" data-title="Барабаны" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#5b5b5b">x</span><span class="phname">Grok 4.3</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#5b5b5b">x</span><span class="mname">Grok 4.3</span><span class="tps">55 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/026.html" data-vw="1280" data-vh="800" data-model="Gemini 3.5 Flash" data-title="Барабаны" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#1a73e8">G</span><span class="phname">Gemini 3.5 Flash</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#1a73e8">G</span><span class="mname">Gemini 3.5 Flash</span><span class="tps">201 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/027.html" data-vw="1280" data-vh="800" data-model="DeepSeek: DeepSeek V4 Pro" data-title="Барабаны" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#4d6bfe">D</span><span class="phname">DeepSeek: DeepSeek V4 Pro</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#4d6bfe">D</span><span class="mname">DeepSeek: DeepSeek V4 Pro</span><span class="tps">67 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/028.html" data-vw="1280" data-vh="800" data-model="Qwen: Qwen3.7 Max" data-title="Барабаны" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#615ced">Q</span><span class="phname">Qwen: Qwen3.7 Max</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#615ced">Q</span><span class="mname">Qwen: Qwen3.7 Max</span><span class="tps">47 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/029.html" data-vw="1280" data-vh="800" data-model="MiniMax: MiniMax M3" data-title="Барабаны" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#ff4d4f">M</span><span class="phname">MiniMax: MiniMax M3</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#ff4d4f">M</span><span class="mname">MiniMax: MiniMax M3</span><span class="tps">20 ток/с</span><span class="open">развернуть</span></div>
+  </div></div></section>
+<section class="test"><div class="thead"><span class="tn">тест 20</span><h2>Flappy Bird</h2><span class="tcount">10 моделей</span></div>
+  <p class="tdesc">Создай 3д игру Flappy Bird и задеплой</p>
+  <div class="grid"><div class="card" data-src="r/030.html" data-vw="1280" data-vh="800" data-model="Claude Opus 4.8" data-title="Flappy Bird" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#d97757">C</span><span class="phname">Claude Opus 4.8</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#d97757">C</span><span class="mname">Claude Opus 4.8</span><span class="tps">83 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/031.html" data-vw="1280" data-vh="800" data-model="GPT-5.5" data-title="Flappy Bird" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#10a37f">O</span><span class="phname">GPT-5.5</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#10a37f">O</span><span class="mname">GPT-5.5</span><span class="tps">29 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/032.html" data-vw="1280" data-vh="800" data-model="GLM-5.2" data-title="Flappy Bird" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#3859ff">G</span><span class="phname">GLM-5.2</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#3859ff">G</span><span class="mname">GLM-5.2</span><span class="tps">57 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/033.html" data-vw="1280" data-vh="800" data-model="Kimi K2.7" data-title="Flappy Bird" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#7c5cff">K</span><span class="phname">Kimi K2.7</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#7c5cff">K</span><span class="mname">Kimi K2.7</span><span class="tps">208 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/034.html" data-vw="1280" data-vh="800" data-model="MiMo V2.5 Pro" data-title="Flappy Bird" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#ff6900">M</span><span class="phname">MiMo V2.5 Pro</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#ff6900">M</span><span class="mname">MiMo V2.5 Pro</span><span class="tps">75 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/035.html" data-vw="1280" data-vh="800" data-model="Grok 4.3" data-title="Flappy Bird" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#5b5b5b">x</span><span class="phname">Grok 4.3</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#5b5b5b">x</span><span class="mname">Grok 4.3</span><span class="tps">42 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/036.html" data-vw="1280" data-vh="800" data-model="Gemini 3.5 Flash" data-title="Flappy Bird" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#1a73e8">G</span><span class="phname">Gemini 3.5 Flash</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#1a73e8">G</span><span class="mname">Gemini 3.5 Flash</span><span class="tps">194 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/037.html" data-vw="1280" data-vh="800" data-model="DeepSeek: DeepSeek V4 Pro" data-title="Flappy Bird" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#4d6bfe">D</span><span class="phname">DeepSeek: DeepSeek V4 Pro</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#4d6bfe">D</span><span class="mname">DeepSeek: DeepSeek V4 Pro</span><span class="tps">47 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/038.html" data-vw="1280" data-vh="800" data-model="Qwen: Qwen3.7 Max" data-title="Flappy Bird" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#615ced">Q</span><span class="phname">Qwen: Qwen3.7 Max</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#615ced">Q</span><span class="mname">Qwen: Qwen3.7 Max</span><span class="tps">46 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/039.html" data-vw="1280" data-vh="800" data-model="MiniMax: MiniMax M3" data-title="Flappy Bird" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#ff4d4f">M</span><span class="phname">MiniMax: MiniMax M3</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#ff4d4f">M</span><span class="mname">MiniMax: MiniMax M3</span><span class="tps">74 ток/с</span><span class="open">развернуть</span></div>
+  </div></div></section>
+<section class="test"><div class="thead"><span class="tn">тест 21</span><h2>Приставка</h2><span class="tcount">10 моделей</span></div>
+  <p class="tdesc">Создай свой PlayStation с интерфейсом и базовым функционалом добавь туда игры рабочие в 3д</p>
+  <div class="grid"><div class="card" data-src="r/040.html" data-vw="1280" data-vh="800" data-model="Claude Opus 4.8" data-title="Приставка" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#d97757">C</span><span class="phname">Claude Opus 4.8</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#d97757">C</span><span class="mname">Claude Opus 4.8</span><span class="tps">83 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/041.html" data-vw="1280" data-vh="800" data-model="GPT-5.5" data-title="Приставка" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#10a37f">O</span><span class="phname">GPT-5.5</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#10a37f">O</span><span class="mname">GPT-5.5</span><span class="tps">18 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/042.html" data-vw="1280" data-vh="800" data-model="GLM-5.2" data-title="Приставка" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#3859ff">G</span><span class="phname">GLM-5.2</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#3859ff">G</span><span class="mname">GLM-5.2</span><span class="tps">86 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/043.html" data-vw="1280" data-vh="800" data-model="Kimi K2.7" data-title="Приставка" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#7c5cff">K</span><span class="phname">Kimi K2.7</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#7c5cff">K</span><span class="mname">Kimi K2.7</span><span class="tps">47 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/044.html" data-vw="1280" data-vh="800" data-model="MiMo V2.5 Pro" data-title="Приставка" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#ff6900">M</span><span class="phname">MiMo V2.5 Pro</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#ff6900">M</span><span class="mname">MiMo V2.5 Pro</span><span class="tps">65 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/045.html" data-vw="1280" data-vh="800" data-model="Grok 4.3" data-title="Приставка" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#5b5b5b">x</span><span class="phname">Grok 4.3</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#5b5b5b">x</span><span class="mname">Grok 4.3</span><span class="tps">54 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/046.html" data-vw="1280" data-vh="800" data-model="Gemini 3.5 Flash" data-title="Приставка" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#1a73e8">G</span><span class="phname">Gemini 3.5 Flash</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#1a73e8">G</span><span class="mname">Gemini 3.5 Flash</span><span class="tps">184 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/047.html" data-vw="1280" data-vh="800" data-model="DeepSeek: DeepSeek V4 Pro" data-title="Приставка" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#4d6bfe">D</span><span class="phname">DeepSeek: DeepSeek V4 Pro</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#4d6bfe">D</span><span class="mname">DeepSeek: DeepSeek V4 Pro</span><span class="tps">59 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/048.html" data-vw="1280" data-vh="800" data-model="Qwen: Qwen3.7 Max" data-title="Приставка" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#615ced">Q</span><span class="phname">Qwen: Qwen3.7 Max</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#615ced">Q</span><span class="mname">Qwen: Qwen3.7 Max</span><span class="tps">46 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/049.html" data-vw="1280" data-vh="800" data-model="MiniMax: MiniMax M3" data-title="Приставка" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#ff4d4f">M</span><span class="phname">MiniMax: MiniMax M3</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#ff4d4f">M</span><span class="mname">MiniMax: MiniMax M3</span><span class="tps">39 ток/с</span><span class="open">развернуть</span></div>
+  </div></div></section>
+<section class="test"><div class="thead"><span class="tn">тест 23</span><h2>Лендинг кофейни</h2><span class="tcount">10 моделей</span></div>
+  <p class="tdesc">Лендинг кофейни: hero с градиентом, меню из 6 позиций карточками, секция «о нас», галерея-</p>
+  <div class="grid"><div class="card" data-src="r/050.html" data-vw="1280" data-vh="800" data-model="Claude Opus 4.8" data-title="Лендинг кофейни" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#d97757">C</span><span class="phname">Claude Opus 4.8</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#d97757">C</span><span class="mname">Claude Opus 4.8</span><span class="tps">89 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/051.html" data-vw="1280" data-vh="800" data-model="GPT-5.5" data-title="Лендинг кофейни" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#10a37f">O</span><span class="phname">GPT-5.5</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#10a37f">O</span><span class="mname">GPT-5.5</span><span class="tps">35 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/052.html" data-vw="1280" data-vh="800" data-model="GLM-5.2" data-title="Лендинг кофейни" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#3859ff">G</span><span class="phname">GLM-5.2</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#3859ff">G</span><span class="mname">GLM-5.2</span><span class="tps">72 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/053.html" data-vw="1280" data-vh="800" data-model="Kimi K2.7" data-title="Лендинг кофейни" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#7c5cff">K</span><span class="phname">Kimi K2.7</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#7c5cff">K</span><span class="mname">Kimi K2.7</span><span class="tps">226 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/054.html" data-vw="1280" data-vh="800" data-model="MiMo V2.5 Pro" data-title="Лендинг кофейни" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#ff6900">M</span><span class="phname">MiMo V2.5 Pro</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#ff6900">M</span><span class="mname">MiMo V2.5 Pro</span><span class="tps">73 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/055.html" data-vw="1280" data-vh="800" data-model="Grok 4.3" data-title="Лендинг кофейни" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#5b5b5b">x</span><span class="phname">Grok 4.3</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#5b5b5b">x</span><span class="mname">Grok 4.3</span><span class="tps">50 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/056.html" data-vw="1280" data-vh="800" data-model="Gemini 3.5 Flash" data-title="Лендинг кофейни" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#1a73e8">G</span><span class="phname">Gemini 3.5 Flash</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#1a73e8">G</span><span class="mname">Gemini 3.5 Flash</span><span class="tps">131 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/057.html" data-vw="1280" data-vh="800" data-model="DeepSeek: DeepSeek V4 Pro" data-title="Лендинг кофейни" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#4d6bfe">D</span><span class="phname">DeepSeek: DeepSeek V4 Pro</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#4d6bfe">D</span><span class="mname">DeepSeek: DeepSeek V4 Pro</span><span class="tps">64 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/058.html" data-vw="1280" data-vh="800" data-model="Qwen: Qwen3.7 Max" data-title="Лендинг кофейни" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#615ced">Q</span><span class="phname">Qwen: Qwen3.7 Max</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#615ced">Q</span><span class="mname">Qwen: Qwen3.7 Max</span><span class="tps">50 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/059.html" data-vw="1280" data-vh="800" data-model="MiniMax: MiniMax M3" data-title="Лендинг кофейни" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#ff4d4f">M</span><span class="phname">MiniMax: MiniMax M3</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#ff4d4f">M</span><span class="mname">MiniMax: MiniMax M3</span><span class="tps">84 ток/с</span><span class="open">развернуть</span></div>
+  </div></div></section>
+<section class="test"><div class="thead"><span class="tn">тест 24</span><h2>Todo</h2><span class="tcount">10 моделей</span></div>
+  <p class="tdesc">To-do список: добавление/удаление/отметка, фильтры (все/активные/выполненные), сохранение </p>
+  <div class="grid"><div class="card" data-src="r/060.html" data-vw="1280" data-vh="800" data-model="Claude Opus 4.8" data-title="Todo" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#d97757">C</span><span class="phname">Claude Opus 4.8</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#d97757">C</span><span class="mname">Claude Opus 4.8</span><span class="tps">95 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/061.html" data-vw="1280" data-vh="800" data-model="GPT-5.5" data-title="Todo" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#10a37f">O</span><span class="phname">GPT-5.5</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#10a37f">O</span><span class="mname">GPT-5.5</span><span class="tps">35 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/062.html" data-vw="1280" data-vh="800" data-model="GLM-5.2" data-title="Todo" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#3859ff">G</span><span class="phname">GLM-5.2</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#3859ff">G</span><span class="mname">GLM-5.2</span><span class="tps">61 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/063.html" data-vw="1280" data-vh="800" data-model="Kimi K2.7" data-title="Todo" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#7c5cff">K</span><span class="phname">Kimi K2.7</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#7c5cff">K</span><span class="mname">Kimi K2.7</span><span class="tps">245 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/064.html" data-vw="1280" data-vh="800" data-model="MiMo V2.5 Pro" data-title="Todo" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#ff6900">M</span><span class="phname">MiMo V2.5 Pro</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#ff6900">M</span><span class="mname">MiMo V2.5 Pro</span><span class="tps">75 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/065.html" data-vw="1280" data-vh="800" data-model="Grok 4.3" data-title="Todo" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#5b5b5b">x</span><span class="phname">Grok 4.3</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#5b5b5b">x</span><span class="mname">Grok 4.3</span><span class="tps">72 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/066.html" data-vw="1280" data-vh="800" data-model="Gemini 3.5 Flash" data-title="Todo" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#1a73e8">G</span><span class="phname">Gemini 3.5 Flash</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#1a73e8">G</span><span class="mname">Gemini 3.5 Flash</span><span class="tps">167 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/067.html" data-vw="1280" data-vh="800" data-model="DeepSeek: DeepSeek V4 Pro" data-title="Todo" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#4d6bfe">D</span><span class="phname">DeepSeek: DeepSeek V4 Pro</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#4d6bfe">D</span><span class="mname">DeepSeek: DeepSeek V4 Pro</span><span class="tps">53 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/068.html" data-vw="1280" data-vh="800" data-model="Qwen: Qwen3.7 Max" data-title="Todo" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#615ced">Q</span><span class="phname">Qwen: Qwen3.7 Max</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#615ced">Q</span><span class="mname">Qwen: Qwen3.7 Max</span><span class="tps">43 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/069.html" data-vw="1280" data-vh="800" data-model="MiniMax: MiniMax M3" data-title="Todo" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#ff4d4f">M</span><span class="phname">MiniMax: MiniMax M3</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#ff4d4f">M</span><span class="mname">MiniMax: MiniMax M3</span><span class="tps">25 ток/с</span><span class="open">развернуть</span></div>
+  </div></div></section>
+<section class="test"><div class="thead"><span class="tn">тест 25</span><h2>2048</h2><span class="tcount">10 моделей</span></div>
+  <p class="tdesc">Игра 2048: сетка 4×4, управление стрелками, слияние плиток, счёт, проигрыш и победа</p>
+  <div class="grid"><div class="card" data-src="r/070.html" data-vw="1280" data-vh="800" data-model="Claude Opus 4.8" data-title="2048" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#d97757">C</span><span class="phname">Claude Opus 4.8</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#d97757">C</span><span class="mname">Claude Opus 4.8</span><span class="tps">94 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/071.html" data-vw="1280" data-vh="800" data-model="GPT-5.5" data-title="2048" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#10a37f">O</span><span class="phname">GPT-5.5</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#10a37f">O</span><span class="mname">GPT-5.5</span><span class="tps">36 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/072.html" data-vw="1280" data-vh="800" data-model="GLM-5.2" data-title="2048" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#3859ff">G</span><span class="phname">GLM-5.2</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#3859ff">G</span><span class="mname">GLM-5.2</span><span class="tps">64 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/073.html" data-vw="1280" data-vh="800" data-model="Kimi K2.7" data-title="2048" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#7c5cff">K</span><span class="phname">Kimi K2.7</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#7c5cff">K</span><span class="mname">Kimi K2.7</span><span class="tps">210 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/074.html" data-vw="1280" data-vh="800" data-model="MiMo V2.5 Pro" data-title="2048" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#ff6900">M</span><span class="phname">MiMo V2.5 Pro</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#ff6900">M</span><span class="mname">MiMo V2.5 Pro</span><span class="tps">77 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/075.html" data-vw="1280" data-vh="800" data-model="Grok 4.3" data-title="2048" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#5b5b5b">x</span><span class="phname">Grok 4.3</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#5b5b5b">x</span><span class="mname">Grok 4.3</span><span class="tps">58 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/076.html" data-vw="1280" data-vh="800" data-model="Gemini 3.5 Flash" data-title="2048" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#1a73e8">G</span><span class="phname">Gemini 3.5 Flash</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#1a73e8">G</span><span class="mname">Gemini 3.5 Flash</span><span class="tps">114 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/077.html" data-vw="1280" data-vh="800" data-model="DeepSeek: DeepSeek V4 Pro" data-title="2048" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#4d6bfe">D</span><span class="phname">DeepSeek: DeepSeek V4 Pro</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#4d6bfe">D</span><span class="mname">DeepSeek: DeepSeek V4 Pro</span><span class="tps">35 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/078.html" data-vw="1280" data-vh="800" data-model="Qwen: Qwen3.7 Max" data-title="2048" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#615ced">Q</span><span class="phname">Qwen: Qwen3.7 Max</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#615ced">Q</span><span class="mname">Qwen: Qwen3.7 Max</span><span class="tps">41 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/079.html" data-vw="1280" data-vh="800" data-model="MiniMax: MiniMax M3" data-title="2048" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#ff4d4f">M</span><span class="phname">MiniMax: MiniMax M3</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#ff4d4f">M</span><span class="mname">MiniMax: MiniMax M3</span><span class="tps">51 ток/с</span><span class="open">развернуть</span></div>
+  </div></div></section>
+<section class="test"><div class="thead"><span class="tn">тест 26</span><h2>Страница сравнения тарифов</h2><span class="tcount">10 моделей</span></div>
+  <p class="tdesc">Страница сравнения тарифов: таблица «фичи × 3 плана» с галочками, переключатель месяц/год,</p>
+  <div class="grid"><div class="card" data-src="r/080.html" data-vw="1280" data-vh="800" data-model="Claude Opus 4.8" data-title="Страница сравнения тарифов" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#d97757">C</span><span class="phname">Claude Opus 4.8</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#d97757">C</span><span class="mname">Claude Opus 4.8</span><span class="tps">94 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/081.html" data-vw="1280" data-vh="800" data-model="GPT-5.5" data-title="Страница сравнения тарифов" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#10a37f">O</span><span class="phname">GPT-5.5</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#10a37f">O</span><span class="mname">GPT-5.5</span><span class="tps">33 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/082.html" data-vw="1280" data-vh="800" data-model="GLM-5.2" data-title="Страница сравнения тарифов" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#3859ff">G</span><span class="phname">GLM-5.2</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#3859ff">G</span><span class="mname">GLM-5.2</span><span class="tps">75 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/083.html" data-vw="1280" data-vh="800" data-model="Kimi K2.7" data-title="Страница сравнения тарифов" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#7c5cff">K</span><span class="phname">Kimi K2.7</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#7c5cff">K</span><span class="mname">Kimi K2.7</span><span class="tps">234 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/084.html" data-vw="1280" data-vh="800" data-model="MiMo V2.5 Pro" data-title="Страница сравнения тарифов" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#ff6900">M</span><span class="phname">MiMo V2.5 Pro</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#ff6900">M</span><span class="mname">MiMo V2.5 Pro</span><span class="tps">70 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/085.html" data-vw="1280" data-vh="800" data-model="Grok 4.3" data-title="Страница сравнения тарифов" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#5b5b5b">x</span><span class="phname">Grok 4.3</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#5b5b5b">x</span><span class="mname">Grok 4.3</span><span class="tps">38 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/086.html" data-vw="1280" data-vh="800" data-model="Gemini 3.5 Flash" data-title="Страница сравнения тарифов" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#1a73e8">G</span><span class="phname">Gemini 3.5 Flash</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#1a73e8">G</span><span class="mname">Gemini 3.5 Flash</span><span class="tps">185 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/087.html" data-vw="1280" data-vh="800" data-model="DeepSeek: DeepSeek V4 Pro" data-title="Страница сравнения тарифов" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#4d6bfe">D</span><span class="phname">DeepSeek: DeepSeek V4 Pro</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#4d6bfe">D</span><span class="mname">DeepSeek: DeepSeek V4 Pro</span><span class="tps">42 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/088.html" data-vw="1280" data-vh="800" data-model="Qwen: Qwen3.7 Max" data-title="Страница сравнения тарифов" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#615ced">Q</span><span class="phname">Qwen: Qwen3.7 Max</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#615ced">Q</span><span class="mname">Qwen: Qwen3.7 Max</span><span class="tps">48 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/089.html" data-vw="1280" data-vh="800" data-model="MiniMax: MiniMax M3" data-title="Страница сравнения тарифов" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#ff4d4f">M</span><span class="phname">MiniMax: MiniMax M3</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#ff4d4f">M</span><span class="mname">MiniMax: MiniMax M3</span><span class="tps">101 ток/с</span><span class="open">развернуть</span></div>
+  </div></div></section>
+<section class="test"><div class="thead"><span class="tn">тест 27</span><h2>Планеты</h2><span class="tcount">10 моделей</span></div>
+  <p class="tdesc">Создай 3д проекцию солнечной системы на three js &gt; деплой</p>
+  <div class="grid"><div class="card" data-src="r/090.html" data-vw="1280" data-vh="800" data-model="Claude Opus 4.8" data-title="Планеты" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#d97757">C</span><span class="phname">Claude Opus 4.8</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#d97757">C</span><span class="mname">Claude Opus 4.8</span><span class="tps">87 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/091.html" data-vw="1280" data-vh="800" data-model="GPT-5.5" data-title="Планеты" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#10a37f">O</span><span class="phname">GPT-5.5</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#10a37f">O</span><span class="mname">GPT-5.5</span><span class="tps">9 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/092.html" data-vw="1280" data-vh="800" data-model="GLM-5.2" data-title="Планеты" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#3859ff">G</span><span class="phname">GLM-5.2</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#3859ff">G</span><span class="mname">GLM-5.2</span><span class="tps">70 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/093.html" data-vw="1280" data-vh="800" data-model="Kimi K2.7" data-title="Планеты" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#7c5cff">K</span><span class="phname">Kimi K2.7</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#7c5cff">K</span><span class="mname">Kimi K2.7</span><span class="tps">219 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/094.html" data-vw="1280" data-vh="800" data-model="MiMo V2.5 Pro" data-title="Планеты" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#ff6900">M</span><span class="phname">MiMo V2.5 Pro</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#ff6900">M</span><span class="mname">MiMo V2.5 Pro</span><span class="tps">69 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/095.html" data-vw="1280" data-vh="800" data-model="Grok 4.3" data-title="Планеты" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#5b5b5b">x</span><span class="phname">Grok 4.3</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#5b5b5b">x</span><span class="mname">Grok 4.3</span><span class="tps">49 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/096.html" data-vw="1280" data-vh="800" data-model="Gemini 3.5 Flash" data-title="Планеты" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#1a73e8">G</span><span class="phname">Gemini 3.5 Flash</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#1a73e8">G</span><span class="mname">Gemini 3.5 Flash</span><span class="tps">179 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/097.html" data-vw="1280" data-vh="800" data-model="DeepSeek: DeepSeek V4 Pro" data-title="Планеты" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#4d6bfe">D</span><span class="phname">DeepSeek: DeepSeek V4 Pro</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#4d6bfe">D</span><span class="mname">DeepSeek: DeepSeek V4 Pro</span><span class="tps">59 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/098.html" data-vw="1280" data-vh="800" data-model="Qwen: Qwen3.7 Max" data-title="Планеты" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#615ced">Q</span><span class="phname">Qwen: Qwen3.7 Max</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#615ced">Q</span><span class="mname">Qwen: Qwen3.7 Max</span><span class="tps">41 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/099.html" data-vw="1280" data-vh="800" data-model="MiniMax: MiniMax M3" data-title="Планеты" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#ff4d4f">M</span><span class="phname">MiniMax: MiniMax M3</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#ff4d4f">M</span><span class="mname">MiniMax: MiniMax M3</span><span class="tps">71 ток/с</span><span class="open">развернуть</span></div>
+  </div></div></section>
+<section class="test"><div class="thead"><span class="tn">тест 28</span><h2>Океан</h2><span class="tcount">10 моделей</span></div>
+  <p class="tdesc">Создай 3д эмуляцию океана, наполни его жизнью, дай возможность спустится на глубину three </p>
+  <div class="grid"><div class="card" data-src="r/100.html" data-vw="1280" data-vh="800" data-model="Claude Opus 4.8" data-title="Океан" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#d97757">C</span><span class="phname">Claude Opus 4.8</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#d97757">C</span><span class="mname">Claude Opus 4.8</span><span class="tps">82 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/101.html" data-vw="1280" data-vh="800" data-model="GPT-5.5" data-title="Океан" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#10a37f">O</span><span class="phname">GPT-5.5</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#10a37f">O</span><span class="mname">GPT-5.5</span><span class="tps">22 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/102.html" data-vw="1280" data-vh="800" data-model="GLM-5.2" data-title="Океан" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#3859ff">G</span><span class="phname">GLM-5.2</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#3859ff">G</span><span class="mname">GLM-5.2</span><span class="tps">78 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/103.html" data-vw="1280" data-vh="800" data-model="Kimi K2.7" data-title="Океан" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#7c5cff">K</span><span class="phname">Kimi K2.7</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#7c5cff">K</span><span class="mname">Kimi K2.7</span><span class="tps">48 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/104.html" data-vw="1280" data-vh="800" data-model="MiMo V2.5 Pro" data-title="Океан" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#ff6900">M</span><span class="phname">MiMo V2.5 Pro</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#ff6900">M</span><span class="mname">MiMo V2.5 Pro</span><span class="tps">76 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/105.html" data-vw="1280" data-vh="800" data-model="Grok 4.3" data-title="Океан" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#5b5b5b">x</span><span class="phname">Grok 4.3</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#5b5b5b">x</span><span class="mname">Grok 4.3</span><span class="tps">38 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/106.html" data-vw="1280" data-vh="800" data-model="Gemini 3.5 Flash" data-title="Океан" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#1a73e8">G</span><span class="phname">Gemini 3.5 Flash</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#1a73e8">G</span><span class="mname">Gemini 3.5 Flash</span><span class="tps">187 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/107.html" data-vw="1280" data-vh="800" data-model="DeepSeek: DeepSeek V4 Pro" data-title="Океан" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#4d6bfe">D</span><span class="phname">DeepSeek: DeepSeek V4 Pro</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#4d6bfe">D</span><span class="mname">DeepSeek: DeepSeek V4 Pro</span><span class="tps">53 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/108.html" data-vw="1280" data-vh="800" data-model="Qwen: Qwen3.7 Max" data-title="Океан" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#615ced">Q</span><span class="phname">Qwen: Qwen3.7 Max</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#615ced">Q</span><span class="mname">Qwen: Qwen3.7 Max</span><span class="tps">46 ток/с</span><span class="open">развернуть</span></div>
+  </div><div class="card" data-src="r/109.html" data-vw="1280" data-vh="800" data-model="MiniMax: MiniMax M3" data-title="Океан" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#ff4d4f">M</span><span class="phname">MiniMax: MiniMax M3</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#ff4d4f">M</span><span class="mname">MiniMax: MiniMax M3</span><span class="tps">93 ток/с</span><span class="open">развернуть</span></div>
+  </div></div></section>
+  <footer>Каждая карточка : самодостаточный HTML, сгенерированный моделью по заданию. Превью подгружаются лениво (видимые рендерятся, ушедшие из вида выгружаются). Клик открывает интерактивную версию.</footer>
+</div>
+
+<div class="modal" id="modal">
+  <div class="mbar"><span class="mt" id="mt"></span><span class="ms" id="ms"></span><a class="raw" id="mraw" target="_blank" rel="noopener">открыть в новой вкладке</a><button class="x" id="mx">закрыть</button></div>
+  <iframe id="mframe" title="result"></iframe>
+</div>
+
+<script>
+(function(){
+  function mount(card){
+    var frame = card.querySelector('.frame'); if(frame.dataset.loaded) return;
+    var vw = +card.dataset.vw, vh = +card.dataset.vh;
+    var ifr = document.createElement('iframe');
+    ifr.src = card.dataset.src; ifr.loading='lazy'; ifr.tabIndex=-1; ifr.setAttribute('scrolling','no'); ifr.setAttribute('sandbox','allow-scripts allow-same-origin');
+    function scale(){ var w = frame.clientWidth, h = frame.clientHeight; var s = Math.max(w/vw, h/vh); ifr.style.width=vw+'px'; ifr.style.height=vh+'px'; ifr.style.transform='scale('+s+')'; }
+    frame.appendChild(ifr); frame.dataset.loaded='1'; scale();
+    frame._scale = scale; window.addEventListener('resize', scale);
+  }
+  function unmount(card){ var frame=card.querySelector('.frame'); if(!frame.dataset.loaded) return; if(frame._scale) window.removeEventListener('resize', frame._scale); var f=frame.querySelector('iframe'); if(f) f.remove(); delete frame.dataset.loaded; }
+  var io = new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting) mount(e.target); else unmount(e.target); }); }, { rootMargin:'500px 0px' });
+  var cards = [].slice.call(document.querySelectorAll('.card'));
+  cards.forEach(function(c){ io.observe(c); });
+
+  var modal=document.getElementById('modal'), mframe=document.getElementById('mframe'), mt=document.getElementById('mt'), ms=document.getElementById('ms'), mraw=document.getElementById('mraw');
+  function open(card){ mframe.src = card.dataset.src; mt.textContent = card.dataset.model; ms.textContent = card.dataset.title; mraw.href = card.dataset.src; modal.classList.add('on'); document.body.style.overflow='hidden'; }
+  function close(){ modal.classList.remove('on'); mframe.src='about:blank'; document.body.style.overflow=''; }
+  cards.forEach(function(c){ c.addEventListener('click', function(){ open(c); }); c.addEventListener('keydown', function(e){ if(e.key==='Enter') open(c); }); });
+  document.getElementById('mx').addEventListener('click', close);
+  modal.addEventListener('click', function(e){ if(e.target===modal) close(); });
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape') close(); });
+})();
+</script>
+</body></html>

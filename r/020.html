@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Drum Studio 3D — Виртуальная барабанная установка</title>
+<style>
+  :root{
+    --bg:#0a0b12;
+    --panel:rgba(18,20,32,.82);
+    --stroke:rgba(255,255,255,.08);
+    --accent:#ff5a3c;
+    --accent2:#ffb347;
+    --txt:#e9ecf5;
+    --muted:#8b91a7;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;overflow:hidden}
+  body{
+    font-family:"Segoe UI",system-ui,-apple-system,sans-serif;
+    background:radial-gradient(circle at 50% 20%,#15182a,#06070d 70%);
+    color:var(--txt);
+    -webkit-font-smoothing:antialiased;
+  }
+  #app{position:fixed;inset:0}
+  canvas{display:block}
+
+  /* Top bar */
+  .topbar{
+    position:fixed;top:0;left:0;right:0;z-index:20;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:16px 22px;
+    background:linear-gradient(180deg,rgba(6,7,13,.85),rgba(6,7,13,0));
+    pointer-events:none;
+  }
+  .brand{display:flex;align-items:center;gap:13px;pointer-events:auto}
+  .logo{
+    width:42px;height:42px;border-radius:12px;
+    background:linear-gradient(145deg,var(--accent),var(--accent2));
+    display:grid;place-items:center;font-size:22px;
+    box-shadow:0 8px 24px rgba(255,90,60,.35);
+  }
+  .brand h1{font-size:19px;font-weight:700;letter-spacing:.3px}
+  .brand p{font-size:12px;color:var(--muted);margin-top:1px}
+  .badge{
+    pointer-events:auto;
+    font-size:11px;color:var(--accent2);
+    border:1px solid rgba(255,179,71,.3);
+    padding:5px 11px;border-radius:20px;
+    background:rgba(255,179,71,.08);
+    letter-spacing:.5px;text-transform:uppercase;font-weight:600;
+  }
+
+  /* Control panel */
+  .panel{
+    position:fixed;z-index:20;left:22px;bottom:22px;
+    width:280px;
+    background:var(--panel);
+    backdrop-filter:blur(14px);
+    border:1px solid var(--stroke);
+    border-radius:18px;
+    padding:18px 18px 16px;
+    box-shadow:0 20px 50px rgba(0,0,0,.5);
+  }
+  .panel h2{font-size:13px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:14px;font-weight:700}
+  .row{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:12px}
+  .row label{font-size:13px;color:var(--txt)}
+  .row .val{font-size:12px;color:var(--accent2);min-width:42px;text-align:right;font-variant-numeric:tabular-nums}
+  input[type=range]{
+    -webkit-appearance:none;appearance:none;height:5px;border-radius:5px;flex:1;
+    background:linear-gradient(90deg,var(--accent),var(--accent2));
+    cursor:pointer;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;width:16px;height:16px;border-radius:50%;
+    background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.5);cursor:pointer;
+  }
+  input[type=range]::-moz-range-thumb{width:16px;height:16px;border:none;border-radius:50%;background:#fff;cursor:pointer}
+  .btnrow{display:flex;gap:9px;margin-top:4px}
+  .btn{
+    flex:1;border:1px solid var(--stroke);background:rgba(255,255,255,.05);
+    color:var(--txt);font-size:13px;font-weight:600;
+    padding:10px;border-radius:11px;cursor:pointer;transition:.18s;
+    display:flex;align-items:center;justify-content:center;gap:7px;
+  }
+  .btn:hover{background:rgba(255,255,255,.11);transform:translateY(-1px)}
+  .btn.active{background:linear-gradient(145deg,var(--accent),var(--accent2));border-color:transparent;color:#1a1003}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+
+  /* Legend / keys */
+  .legend{
+    position:fixed;z-index:20;right:22px;bottom:22px;
+    width:230px;
+    background:var(--panel);
+    backdrop-filter:blur(14px);
+    border:1px solid var(--stroke);
+    border-radius:18px;padding:16px 18px;
+    box-shadow:0 20px 50px rgba(0,0,0,.5);
+  }
+  .legend h2{font-size:13px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:13px;font-weight:700}
+  .keys{display:flex;flex-direction:column;gap:8px}
+  .key{display:flex;align-items:center;justify-content:space-between;font-size:13px}
+  .key .name{color:var(--txt)}
+  .kbd{
+    font-family:ui-monospace,monospace;font-size:11px;font-weight:700;
+    background:rgba(255,255,255,.08);border:1px solid var(--stroke);
+    border-bottom-width:2px;padding:3px 9px;border-radius:7px;color:var(--accent2);
+    min-width:26px;text-align:center;
+  }
+  .hint{font-size:11px;color:var(--muted);margin-top:13px;line-height:1.5;border-top:1px solid var(--stroke);padding-top:11px}
+
+  /* Start overlay */
+  .overlay{
+    position:fixed;inset:0;z-index:50;display:grid;place-items:center;
+    background:radial-gradient(circle at 50% 40%,rgba(20,22,40,.85),rgba(4,5,10,.97));
+    backdrop-filter:blur(6px);transition:opacity .5s;
+  }
+  .overlay.hide{opacity:0;pointer-events:none}
+  .start-card{text-align:center;max-width:440px;padding:40px 30px}
+  .start-card .big{
+    width:88px;height:88px;margin:0 auto 22px;border-radius:24px;
+    background:linear-gradient(145deg,var(--accent),var(--accent2));
+    display:grid;place-items:center;font-size:46px;
+    box-shadow:0 16px 50px rgba(255,90,60,.45);
+    animation:float 3s ease-in-out infinite;
+  }
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+  .start-card h2{font-size:30px;margin-bottom:12px;font-weight:800;letter-spacing:.3px}
+  .start-card p{color:var(--muted);font-size:15px;line-height:1.6;margin-bottom:28px}
+  .start-btn{
+    border:none;background:linear-gradient(145deg,var(--accent),var(--accent2));
+    color:#1a1003;font-size:17px;font-weight:800;letter-spacing:.4px;
+    padding:15px 44px;border-radius:14px;cursor:pointer;transition:.2s;
+    box-shadow:0 12px 34px rgba(255,90,60,.4);
+  }
+  .start-btn:hover{transform:translatey(-2px) scale(1.02);box-shadow:0 18px 44px rgba(255,90,60,.55)}
+
+  /* beat indicator dot */
+  .beatdot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--muted);transition:.08s}
+  .beatdot.on{background:var(--accent);box-shadow:0 0 10px var(--accent)}
+
+  @media (max-width:760px){
+    .panel{width:calc(50% - 28px)}
+    .legend{display:none}
+    .brand p{display:none}
+  }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<div class="topbar">
+  <div class="brand">
+    <div class="logo">🥁</div>
+    <div>
+      <h1>Drum Studio 3D</h1>
+      <p>Интерактивная барабанная установка · Three.js + Web Audio</p>
+    </div>
+  </div>
+  <div class="badge">Live Studio</div>
+</div>
+
+<div class="panel">
+  <h2>Микшер</h2>
+  <div class="row">
+    <label>Громкость</label>
+    <input id="vol" type="range" min="0" max="100" value="80">
+    <span class="val" id="volVal">80%</span>
+  </div>
+  <div class="row">
+    <label>Реверб</label>
+    <input id="rev" type="range" min="0" max="100" value="28">
+    <span class="val" id="revVal">28%</span>
+  </div>
+  <div class="row">
+    <label>Темп</label>
+    <input id="bpm" type="range" min="60" max="180" value="100">
+    <span class="val" id="bpmVal">100</span>
+  </div>
+  <div class="btnrow">
+    <button class="btn" id="playBtn">▶ Бит</button>
+    <button class="btn" id="demoBtn">✨ Демо</button>
+  </div>
+  <div class="row" style="margin-top:14px;margin-bottom:0;justify-content:flex-start;gap:7px">
+    <span class="beatdot" data-b="0"></span>
+    <span class="beatdot" data-b="1"></span>
+    <span class="beatdot" data-b="2"></span>
+    <span class="beatdot" data-b="3"></span>
+    <span style="font-size:11px;color:var(--muted);margin-left:6px">4/4</span>
+  </div>
+</div>
+
+<div class="legend">
+  <h2>Клавиши</h2>
+  <div class="keys">
+    <div class="key"><span class="name">Бочка (Kick)</span><span class="kbd">Space</span></div>
+    <div class="key"><span class="name">Малый (Snare)</span><span class="kbd">F</span></div>
+    <div class="key"><span class="name">Хай-хэт</span><span class="kbd">J</span></div>
+    <div class="key"><span class="name">Том высокий</span><span class="kbd">D</span></div>
+    <div class="key"><span class="name">Том средний</span><span class="kbd">K</span></div>
+    <div class="key"><span class="name">Напольный том</span><span class="kbd">L</span></div>
+    <div class="key"><span class="name">Крэш</span><span class="kbd">A</span></div>
+    <div class="key"><span class="name">Райд</span><span class="kbd">;</span></div>
+  </div>
+  <div class="hint">🖱️ Кликай по барабанам мышью. Зажми и тяни — вращай камеру. Колесо — зум.</div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="start-card">
+    <div class="big">🥁</div>
+    <h2>Drum Studio 3D</h2>
+    <p>Полноценная 3D барабанная установка в виртуальной студии. Играй мышью или на клавиатуре, включай авто-бит, крути реверб и темп. Все звуки синтезируются в реальном времени.</p>
+    <button class="start-btn" id="startBtn">Войти в студию</button>
+  </div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+/* ============================================================
+   AUDIO ENGINE — synthesized drum sounds via Web Audio API
+   ============================================================ */
+let AC = null, master = null, convolver = null, dryGain = null, wetGain = null;
+
+function initAudio(){
+  AC = new (window.AudioContext || window.webkitAudioContext)();
+  master = AC.createGain();
+  master.gain.value = 0.8;
+
+  // reverb send
+  dryGain = AC.createGain();
+  wetGain = AC.createGain();
+  wetGain.gain.value = 0.28;
+  convolver = AC.createConvolver();
+  convolver.buffer = makeImpulse(2.4, 2.6);
+
+  dryGain.connect(master);
+  wetGain.connect(convolver);
+  convolver.connect(master);
+  master.connect(AC.destination);
+}
+
+function makeImpulse(dur, decay){
+  const rate = AC.sampleRate, len = rate*dur;
+  const buf = AC.createBuffer(2, len, rate);
+  for(let c=0;c<2;c++){
+    const d = buf.getChannelData(c);
+    for(let i=0;i<len;i++){
+      d[i] = (Math.random()*2-1) * Math.pow(1-i/len, decay);
+    }
+  }
+  return buf;
+}
+
+// route a node to both dry and wet (reverb) buses
+function route(node){ node.connect(dryGain); node.connect(wetGain); }
+
+function noiseBuffer(dur){
+  const len = AC.sampleRate*dur;
+  const buf = AC.createBuffer(1, len, AC.sampleRate);
+  const d = buf.getChannelData(0);
+  for(let i=0;i<len;i++) d[i] = Math.random()*2-1;
+  return buf;
+}
+
+const Sounds = {
+  kick(t=0){
+    const o = AC.createOscillator(), g = AC.createGain();
+    const now = AC.currentTime + t;
+    o.frequency.setValueAtTime(150, now);
+    o.frequency.exponentialRampToValueAtTime(48, now+0.12);
+    g.gain.setValueAtTime(1.0, now);
+    g.gain.exponentialRampToValueAtTime(0.001, now+0.42);
+    o.connect(g); route(g);
+    o.start(now); o.stop(now+0.45);
+    // click attack
+    const c = AC.createOscillator(), cg = AC.createGain();
+    c.frequency.setValueAtTime(900, now);
+    cg.gain.setValueAtTime(0.4, now);
+    cg.gain.exponentialRampToValueAtTime(0.001, now+0.03);
+    c.connect(cg); route(cg); c.start(now); c.stop(now+0.04);
+  },
+  snare(t=0){
+    const now = AC.currentTime + t;
+    // noise body
+    const n = AC.createBufferSource(); n.buffer = noiseBuffer(0.3);
+    const nf = AC.createBiquadFilter(); nf.type='highpass'; nf.frequency.value=1400;
+    const ng = AC.createGain();
+    ng.gain.setValueAtTime(0.85, now);
+    ng.gain.exponentialRampToValueAtTime(0.001, now+0.2);
+    n.connect(nf); nf.connect(ng); route(ng); n.start(now); n.stop(now+0.25);
+    // tonal
+    const o = AC.createOscillator(); o.type='triangle';
+    o.frequency.setValueAtTime(220, now);
+    o.frequency.exponentialRampToValueAtTime(170, now+0.1);
+    const og = AC.createGain();
+    og.gain.setValueAtTime(0.5, now);
+    og.gain.exponentialRampToValueAtTime(0.001, now+0.14);
+    o.connect(og); route(og); o.start(now); o.stop(now+0.15);
+  },
+  hihat(t=0, open=false){
+    const now = AC.currentTime + t;
+    const dur = open?0.4:0.06;
+    const n = AC.createBufferSource(); n.buffer = noiseBuffer(dur+0.05);
+    const f = AC.createBiquadFilter(); f.type='highpass'; f.frequency.value=8000;
+    const g = AC.createGain();
+    g.gain.setValueAtTime(0.5, now);
+    g.gain.exponentialRampToValueAtTime(0.001, now+dur);
+    n.connect(f); f.connect(g); route(g); n.start(now); n.stop(now+dur+0.05);
+  },
+  tom(freq){
+    return (t=0)=>{
+      const now = AC.currentTime + t;
+      const o = AC.createOscillator(); o.type='sine';
+      o.frequency.setValueAtTime(freq, now);
+      o.frequency.exponentialRampToValueAtTime(freq*0.5, now+0.3);
+      const g = AC.createGain();
+      g.gain.setValueAtTime(0.9, now);
+      g.gain.exponentialRampToValueAtTime(0.001, now+0.4);
+      o.connect(g); route(g); o.start(now); o.stop(now+0.42);
+    };
+  },
+  cymbal(freq, dur){
+    return (t=0)=>{
+      const now = AC.currentTime + t;
+      const g = AC.createGain();
+      g.gain.setValueAtTime(0.0, now);
+      g.gain.linearRampToValueAtTime(0.4, now+0.01);
+      g.gain.exponentialRampToValueAtTime(0.001, now+dur);
+      const bp = AC.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=freq; bp.Q.value=0.6;
+      const hp = AC.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=5000;
+      // metallic cluster of square oscillators
+      const ratios = [2, 3, 4.16, 5.43, 6.79, 8.21];
+      ratios.forEach(r=>{
+        const o = AC.createOscillator(); o.type='square';
+        o.frequency.value = freq*r/3;
+        o.connect(bp); o.start(now); o.stop(now+dur);
+      });
+      bp.connect(hp); hp.connect(g); route(g);
+    };
+  }
+};
+Sounds.tomHi = Sounds.tom(180);
+Sounds.tomMid = Sounds.tom(130);
+Sounds.tomFloor = Sounds.tom(90);
+Sounds.crash = Sounds.cymbal(380, 1.6);
+Sounds.ride = Sounds.cymbal(520, 1.1);
+
+/* ============================================================
+   3D SCENE
+   ============================================================ */
+const container = document.getElementById('app');
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x06070d);
+scene.fog = new THREE.Fog(0x06070d, 16, 38);
+
+const camera = new THREE.PerspectiveCamera(50, innerWidth/innerHeight, 0.1, 100);
+camera.position.set(0, 5.2, 11);
+
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.15;
+container.appendChild(renderer.domElement);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.07;
+controls.minDistance = 6;
+controls.maxDistance = 20;
+controls.maxPolarAngle = Math.PI*0.49;
+controls.target.set(0, 2.2, 0);
+controls.autoRotate = false;
+controls.autoRotateSpeed = 0.5;
+
+/* ---- Lighting (studio rig) ---- */
+scene.add(new THREE.AmbientLight(0x3a4060, 0.6));
+
+const key = new THREE.DirectionalLight(0xffffff, 2.2);
+key.position.set(6, 12, 8);
+key.castShadow = true;
+key.shadow.mapSize.set(2048,2048);
+key.shadow.camera.near=1; key.shadow.camera.far=40;
+key.shadow.camera.left=-14; key.shadow.camera.right=14;
+key.shadow.camera.top=14; key.shadow.camera.bottom=-14;
+key.shadow.bias = -0.0004;
+scene.add(key);
+
+const rim1 = new THREE.SpotLight(0xff5a3c, 120, 40, 0.6, 0.5, 1.2);
+rim1.position.set(-10, 9, -6); scene.add(rim1);
+const rim2 = new THREE.SpotLight(0x3c7bff, 100, 40, 0.6, 0.5, 1.2);
+rim2.position.set(10, 9, -6); scene.add(rim2);
+const fill = new THREE.PointLight(0xffb347, 30, 30);
+fill.position.set(0, 6, 9); scene.add(fill);
+
+/* ---- Studio room ---- */
+// floor
+const floorMat = new THREE.MeshStandardMaterial({color:0x14161f, roughness:0.55, metalness:0.2});
+const floor = new THREE.Mesh(new THREE.CircleGeometry(26, 64), floorMat);
+floor.rotation.x = -Math.PI/2; floor.receiveShadow = true;
+scene.add(floor);
+
+// reflective stage riser
+const riserMat = new THREE.MeshStandardMaterial({color:0x0d0e16, roughness:0.3, metalness:0.6});
+const riser = new THREE.Mesh(new THREE.CylinderGeometry(7.5, 8, 0.4, 64), riserMat);
+riser.position.y = 0.2; riser.receiveShadow = true; scene.add(riser);
+
+// grid accent
+const grid = new THREE.PolarGridHelper(24, 16, 8, 64, 0x2a2f45, 0x1a1d2c);
+grid.position.y = 0.01; scene.add(grid);
+
+// back wall panels
+const wallMat = new THREE.MeshStandardMaterial({color:0x0b0c14, roughness:0.9, metalness:0.1});
+for(let i=-2;i<=2;i++){
+  const panel = new THREE.Mesh(new THREE.BoxGeometry(4.4, 11, 0.4), wallMat);
+  panel.position.set(i*4.6, 5.5, -13);
+  panel.receiveShadow = true; scene.add(panel);
+  // glowing strip
+  const strip = new THREE.Mesh(new THREE.BoxGeometry(0.18, 9, 0.1),
+    new THREE.MeshStandardMaterial({color:0xff5a3c, emissive:0xff5a3c, emissiveIntensity:1.4}));
+  strip.position.set(i*4.6+2.3, 5.5, -12.78); scene.add(strip);
+}
+
+/* ============================================================
+   DRUM KIT BUILDER
+   ============================================================ */
+const drums = []; // {mesh, hitGroup, sound, baseY, vel, type}
+const chrome = new THREE.MeshStandardMaterial({color:0xdfe4ee, roughness:0.18, metalness:0.95});
+const blackHw = new THREE.MeshStandardMaterial({color:0x1a1c26, roughness:0.4, metalness:0.7});
+
+function shellMat(color){
+  return new THREE.MeshStandardMaterial({color, roughness:0.25, metalness:0.35,
+    emissive:new THREE.Color(color).multiplyScalar(0.04)});
+}
+function headMat(){
+  return new THREE.MeshStandardMaterial({color:0xf4f1e8, roughness:0.5, metalness:0.05});
+}
+
+// build a drum (cylinder shell + heads + lugs)
+function buildDrum({radius, height, color, x, y, z, tiltX=0, tiltZ=0, sound, type, label}){
+  const grp = new THREE.Group();
+  grp.position.set(x,y,z);
+  grp.rotation.x = tiltX; grp.rotation.z = tiltZ;
+
+  const shell = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, height, 48, 1, true), shellMat(color));
+  shell.castShadow = true; grp.add(shell);
+
+  // rims
+  const rimGeo = new THREE.TorusGeometry(radius+0.02, 0.05, 12, 48);
+  const topRim = new THREE.Mesh(rimGeo, chrome); topRim.rotation.x=Math.PI/2; topRim.position.y=height/2; topRim.castShadow=true;
+  const botRim = topRim.clone(); botRim.position.y=-height/2;
+  grp.add(topRim, botRim);
+
+  // heads
+  const topHead = new THREE.Mesh(new THREE.CircleGeometry(radius, 48), headMat());
+  topHead.rotation.x=-Math.PI/2; topHead.position.y=height/2+0.001; grp.add(topHead);
+  const botHead = new THREE.Mesh(new THREE.CircleGeometry(radius, 48), headMat());
+  botHead.rotation.x=Math.PI/2; botHead.position.y=-height/2-0.001; grp.add(botHead);
+
+  // lugs
+  const lugCount = Math.max(6, Math.round(radius*14));
+  for(let i=0;i<lugCount;i++){
+    const a = i/lugCount*Math.PI*2;
+    const lug = new THREE.Mesh(new THREE.BoxGeometry(0.07,height*0.55,0.07), chrome);
+    lug.position.set(Math.cos(a)*(radius+0.04), 0, Math.sin(a)*(radius+0.04));
+    grp.add(lug);
+  }
+
+  scene.add(grp);
+  drums.push({grp, hitTarget:topHead, sound, type, baseY:y, vel:0, label, kind:'drum'});
+  return grp;
+}
+
+// build a cymbal
+function buildCymbal({radius, x, y, z, color=0xc8a24a, sound, type, tilt=0.18, label}){
+  const grp = new THREE.Group();
+  grp.position.set(x,y,z);
+  // stand
+  const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.05,y,12), blackHw);
+  rod.position.y = -y/2; rod.castShadow=true; grp.add(rod);
+
+  const cymMat = new THREE.MeshStandardMaterial({color, roughness:0.22, metalness:1.0,
+    emissive:new THREE.Color(color).multiplyScalar(0.05)});
+  const cym = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, 0.04, 48), cymMat);
+  cym.castShadow = true;
+  // slight cone shape
+  const pos = cym.geometry.attributes.position;
+  for(let i=0;i<pos.count;i++){
+    const vy = pos.getY(i);
+    const vx = pos.getX(i), vz=pos.getZ(i);
+    const d = Math.sqrt(vx*vx+vz*vz);
+    pos.setY(i, vy + (radius-d)*0.06);
+  }
+  pos.needsUpdate = true; cym.geometry.computeVertexNormals();
+  // bell
+  const bell = new THREE.Mesh(new THREE.SphereGeometry(radius*0.22, 20, 12, 0, Math.PI*2, 0, Math.PI/2), cymMat);
+  bell.position.y=0.04; cym.add(bell);
+
+  const cymPivot = new THREE.Group();
+  cymPivot.rotation.z = tilt;
+  cymPivot.add(cym);
+  grp.add(cymPivot);
+
+  scene.add(grp);
+  drums.push({grp, hitTarget:cym, sound, type, baseRot:tilt, vel:0, cymPivot, label, kind:'cymbal'});
+  return grp;
+}
+
+/* ---- Layout the kit ---- */
+const Y = 0.4; // riser top
+// Kick (front center, lying down)
+const kick = buildDrum({radius:1.5, height:1.7, color:0xc0392b, x:0, y:Y+1.5, z:1.2, tiltX:Math.PI/2, sound:'kick', type:'kick', label:'Kick'});
+// pedal beater base for kick — small box
+const beater = new THREE.Mesh(new THREE.BoxGeometry(0.4,0.1,0.6), blackHw);
+beater.position.set(0, Y+0.05, 2.6); scene.add(beater);
+
+// Snare (front left-center)
+buildDrum({radius:0.85, height:0.6, color:0xecf0f1, x:-1.6, y:Y+2.0, z:1.0, sound:'snare', type:'snare', label:'Snare'});
+// snare stand legs
+addStand(-1.6, Y, 1.0, 2.0);
+
+// Toms on top of kick
+buildDrum({radius:0.7, height:0.7, color:0x2980b9, x:-0.95, y:Y+3.1, z:0.4, tiltX:0.35, sound:'tomHi', type:'tomHi', label:'Tom Hi'});
+buildDrum({radius:0.8, height:0.8, color:0x8e44ad, x:0.95, y:Y+3.0, z:0.4, tiltX:0.35, sound:'tomMid', type:'tomMid', label:'Tom Mid'});
+// Floor tom (right)
+buildDrum({radius:1.0, height:1.3, color:0x27ae60, x:2.7, y:Y+1.65, z:1.4, sound:'tomFloor', type:'tomFloor', label:'Floor Tom'});
+addStand(2.7, Y, 1.4, 0); // floor tom legs (short)
+
+// Hi-hat (left)
+buildCymbal({radius:0.85, x:-3.0, y:Y+2.6, z:1.2, color:0xd4af37, sound:'hihat', type:'hihat', tilt:0.05, label:'Hi-Hat'});
+// Crash (top left)
+buildCymbal({radius:1.15, x:-2.4, y:Y+4.4, z:-0.6, color:0xc8a24a, sound:'crash', type:'crash', tilt:0.22, label:'Crash'});
+// Ride (top right)
+buildCymbal({radius:1.3, x:2.6, y:Y+4.2, z:-0.4, color:0xb89030, sound:'ride', type:'ride', tilt:0.2, label:'Ride'});
+
+function addStand(x,baseY,z,top){
+  // simple tripod legs
+  for(let i=0;i<3;i++){
+    const a = i/3*Math.PI*2;
+    const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.04,0.04,1.6,8), blackHw);
+    leg.position.set(x+Math.cos(a)*0.4, baseY+0.8, z+Math.sin(a)*0.4);
+    leg.rotation.z = Math.cos(a)*0.18; leg.rotation.x = -Math.sin(a)*0.18;
+    leg.castShadow=true; scene.add(leg);
+  }
+}
+
+// drum throne (stool)
+const throne = new THREE.Group();
+const seat = new THREE.Mesh(new THREE.CylinderGeometry(0.6,0.6,0.2,24), new THREE.MeshStandardMaterial({color:0x111319,roughness:0.6}));
+seat.position.y = Y+1.8; seat.castShadow=true; throne.add(seat);
+const tpole = new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.06,1.8,10), blackHw);
+tpole.position.y = Y+0.9; throne.add(tpole);
+throne.position.set(0, 0, 5); scene.add(throne);
+
+/* ============================================================
+   HIT LOGIC + ANIMATION
+   ============================================================ */
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+const ripples = [];
+
+function findDrum(type){ return drums.find(d=>d.type===type); }
+
+function hitDrum(d, strength=1){
+  if(!d || !AC) return;
+  // sound
+  if(d.type==='hihat') Sounds.hihat(0, false);
+  else Sounds[d.sound](0);
+  // visual impulse
+  d.vel = -0.16*strength;
+  if(d.kind==='cymbal') d.cymVel = 0.5*strength;
+  spawnRipple(d);
+  flashLight();
+}
+
+function spawnRipple(d){
+  const p = new THREE.Vector3();
+  d.hitTarget.getWorldPosition(p);
+  const ring = new THREE.Mesh(
+    new THREE.RingGeometry(0.1, 0.18, 32),
+    new THREE.MeshBasicMaterial({color:0xffb347, transparent:true, opacity:0.9, side:THREE.DoubleSide})
+  );
+  ring.position.copy(p); ring.position.y += 0.05;
+  ring.rotation.x = -Math.PI/2;
+  scene.add(ring);
+  ripples.push({ring, life:0, max: d.kind==='cymbal'?0.6:0.45, base:d.kind==='cymbal'?1.4:0.9});
+}
+
+let flash = 0;
+function flashLight(){ flash = 1; }
+
+/* keyboard map */
+const KEYMAP = {
+  ' ':'kick', 'f':'snare', 'j':'hihat',
+  'd':'tomHi', 'k':'tomMid', 'l':'tomFloor',
+  'a':'crash', ';':'ride'
+};
+addEventListener('keydown', e=>{
+  if(e.repeat) return;
+  const k = e.key.toLowerCase();
+  if(k===' ') e.preventDefault();
+  const type = KEYMAP[k];
+  if(type){ hitDrum(findDrum(type)); }
+});
+
+/* mouse / touch hit */
+function pointerHit(clientX, clientY){
+  mouse.x = (clientX/innerWidth)*2-1;
+  mouse.y = -(clientY/innerHeight)*2+1;
+  raycaster.setFromCamera(mouse, camera);
+  const targets = drums.map(d=>d.hitTarget);
+  const hits = raycaster.intersectObjects(targets, false);
+  if(hits.length){
+    const d = drums.find(dr=>dr.hitTarget===hits[0].object);
+    hitDrum(d);
+    return true;
+  }
+  return false;
+}
+let downX=0, downY=0, moved=false;
+renderer.domElement.addEventListener('pointerdown', e=>{downX=e.clientX;downY=e.clientY;moved=false;});
+renderer.domElement.addEventListener('pointermove', e=>{
+  if(Math.abs(e.clientX-downX)>5||Math.abs(e.clientY-downY)>5) moved=true;
+});
+renderer.domElement.addEventListener('pointerup', e=>{
+  if(!moved) pointerHit(e.clientX, e.clientY);
+});
+
+/* ============================================================
+   SEQUENCER (auto beat) + DEMO
+   ============================================================ */
+let playing=false, demoOn=false, step=0, nextTime=0, bpm=100;
+const beatdots = [...document.querySelectorAll('.beatdot')];
+
+// basic rock pattern (16 steps)
+const PATTERN = {
+  kick:    [1,0,0,0, 0,0,1,0, 1,0,0,0, 0,0,0,0],
+  snare:   [0,0,0,0, 1,0,0,0, 0,0,0,0, 1,0,0,0],
+  hihat:   [1,0,1,0, 1,0,1,0, 1,0,1,0, 1,0,1,1],
+};
+const DEMO = {
+  kick:    [1,0,0,1, 0,0,1,0, 1,0,0,1, 0,1,0,0],
+  snare:   [0,0,0,0, 1,0,0,0, 0,0,1,0, 1,0,0,1],
+  hihat:   [1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1],
+  tomMid:  [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,1,0],
+  tomFloor:[0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,1],
+  crash:   [1,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+};
+
+function scheduler(){
+  if(!playing && !demoOn) return;
+  const pat = demoOn?DEMO:PATTERN;
+  while(nextTime < AC.currentTime + 0.1){
+    const s = step%16;
+    for(const type in pat){
+      if(pat[type][s]){
+        const d = findDrum(type);
+        if(d){
+          const when = nextTime - AC.currentTime;
+          if(type==='hihat') Sounds.hihat(Math.max(0,when), false);
+          else Sounds[d.sound](Math.max(0,when));
+          // schedule visual via timeout
+          setTimeout(()=>{ d.vel=-0.14; if(d.kind==='cymbal')d.cymVel=0.45; spawnRipple(d); }, Math.max(0,when*1000));
+        }
+      }
+    }
+    // beat indicator
+    if(s%4===0){
+      const b = s/4;
+      setTimeout(()=>{
+        beatdots.forEach((dot,i)=>dot.classList.toggle('on', i===b));
+        flashLight();
+      }, Math.max(0,(nextTime-AC.currentTime)*1000));
+    }
+    nextTime += (60/bpm)/4;
+    step++;
+  }
+}
+
+/* ============================================================
+   UI WIRING
+   ============================================================ */
+const $ = id=>document.getElementById(id);
+$('vol').addEventListener('input', e=>{
+  const v=e.target.value; $('volVal').textContent=v+'%';
+  if(master) master.gain.value = v/100;
+});
+$('rev').addEventListener('input', e=>{
+  const v=e.target.value; $('revVal').textContent=v+'%';
+  if(wetGain) wetGain.gain.value = v/100;
+});
+$('bpm').addEventListener('input', e=>{
+  bpm=+e.target.value; $('bpmVal').textContent=bpm;
+});
+$('playBtn').addEventListener('click', ()=>{
+  playing=!playing; demoOn=false;
+  $('playBtn').classList.toggle('active',playing);
+  $('demoBtn').classList.remove('active');
+  if(playing){ step=0; nextTime=AC.currentTime+0.05; }
+  else resetDots();
+});
+$('demoBtn').addEventListener('click', ()=>{
+  demoOn=!demoOn; playing=false;
+  $('demoBtn').classList.toggle('active',demoOn);
+  $('playBtn').classList.remove('active');
+  if(demoOn){ step=0; nextTime=AC.currentTime+0.05; controls.autoRotate=true; }
+  else { controls.autoRotate=false; resetDots(); }
+});
+function resetDots(){ beatdots.forEach(d=>d.classList.remove('on')); }
+
+/* start overlay */
+$('startBtn').addEventListener('click', ()=>{
+  initAudio();
+  if(AC.state==='suspended') AC.resume();
+  $('overlay').classList.add('hide');
+  // welcoming hit
+  setTimeout(()=>hitDrum(findDrum('crash')), 150);
+});
+
+/* ============================================================
+   RENDER LOOP
+   ============================================================ */
+const clock = new THREE.Clock();
+function animate(){
+  requestAnimationFrame(animate);
+  const dt = Math.min(clock.getDelta(), 0.05);
+
+  if(AC) scheduler();
+
+  // drum bounce physics
+  for(const d of drums){
+    if(d.kind==='drum'){
+      // spring back to base Y
+      const offset = d.grp.position.y - d.baseY;
+      d.vel += -offset*40*dt - d.vel*8*dt;
+      d.grp.position.y += d.vel;
+    } else {
+      // cymbal wobble (rotation)
+      if(d.cymVel===undefined) d.cymVel=0;
+      const off = d.cymPivot.rotation.z - d.baseRot;
+      d.cymVel += -off*60*dt - d.cymVel*4*dt;
+      d.cymPivot.rotation.z += d.cymVel*dt*3;
+    }
+  }
+
+  // ripples
+  for(let i=ripples.length-1;i>=0;i--){
+    const r=ripples[i]; r.life+=dt;
+    const t=r.life/r.max;
+    const s=1+t*r.base*5;
+    r.ring.scale.set(s,s,s);
+    r.ring.material.opacity = Math.max(0,0.9*(1-t));
+    if(t>=1){ scene.remove(r.ring); r.ring.geometry.dispose(); r.ring.material.dispose(); ripples.splice(i,1); }
+  }
+
+  // light flash decay
+  if(flash>0){ flash=Math.max(0,flash-dt*4); }
+  fill.intensity = 30 + flash*60;
+  rim1.intensity = 120 + flash*80;
+  rim2.intensity = 100 + flash*60;
+
+  controls.update();
+  renderer.render(scene, camera);
+}
+animate();
+
+addEventListener('resize', ()=>{
+  camera.aspect = innerWidth/innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+</script>
+</body>
+</html>

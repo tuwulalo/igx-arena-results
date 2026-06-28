@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DEPTH • Ocean Simulator — Three.js</title>
+<style>
+:root{--c1:#0a1629;--c2:#112b4a;--accent:#4cc9ff}
+*{margin:0;padding:0;box-sizing:border-box}body{background:#000;color:#e6f4ff;overflow:hidden;font-family:Inter,system-ui,-apple-system,sans-serif}
+#three{display:block;width:100vw;height:100vh}
+#ui{position:fixed;inset:0;pointer-events:none;z-index:100}
+.glass{background:rgba(10,22,41,.82);backdrop-filter:blur(20px);border:1px solid rgba(76,201,255,.15);border-radius:20px}
+#panel-top{position:absolute;top:24px;left:24px;padding:22px 28px;min-width:260px;pointer-events:auto;box-shadow:0 25px 60px rgba(0,0,0,.6)}
+#depth{font:700 56px/1 Inter,sans-serif;letter-spacing:-3.8px}
+#depth small{font-size:13px;letter-spacing:4px;opacity:.45;font-weight:500}
+#bar{height:7px;background:#1d314d;border-radius:999px;margin:12px 0 4px;overflow:hidden}
+#bar-fill{height:100%;background:linear-gradient(90deg,#4cc9ff,#00a3ff);transition:width .1s cubic-bezier(.23,1,.32,1);box-shadow:0 0 12px #4cc9ff}
+.meta{display:flex;justify-content:space-between;font-size:11px;opacity:.6;margin-top:2px;letter-spacing:1px}
+#panel-right{position:absolute;top:24px;right:24px;padding:18px 22px;width:214px;pointer-events:auto;font-size:13px;line-height:1.45}
+#stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+.stat{background:rgba(255,255,255,.035);border-radius:12px;padding:8px 12px}
+.stat .v{font-size:20px;font-weight:700;line-height:1}
+.stat .l{font-size:10px;letter-spacing:.5px;opacity:.5;margin-top:2px}
+#species{margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,.08)}
+#species div{display:flex;align-items:center;justify-content:space-between;margin:7px 0;font-size:12.5px}
+#species .cnt{font:600 13px/1 Inter;color:#7edbff}
+#legend{position:absolute;bottom:24px;left:24px;padding:14px 22px;font-size:12px;line-height:1.55;pointer-events:auto}
+.k{display:inline-block;background:rgba(255,255,255,.09);padding:1px 7px;border-radius:5px;font-size:10px;margin:0 2px}
+#controls{position:absolute;bottom:24px;right:24px;display:flex;gap:8px;pointer-events:auto}
+.btn{padding:11px 20px;border-radius:999px;background:rgba(76,201,255,.1);border:1px solid rgba(76,201,255,.3);color:#fff;font-size:12.8px;cursor:pointer;transition:all .2s}
+.btn:hover{background:rgba(76,201,255,.22);transform:translateY(-1px)}
+#toast{position:absolute;bottom:84px;left:50%;transform:translate(-50%,0);background:rgba(10,22,41,.9);border:1px solid rgba(76,201,255,.25);padding:6px 16px;border-radius:999px;font-size:12px;opacity:0;transition:.3s;pointer-events:none}
+#compass{position:absolute;top:50%;right:32px;transform:translateY(-50%);width:92px;height:92px;border:1px solid rgba(255,255,255,.12);border-radius:50%;opacity:.65}
+#compass canvas{width:100%;height:100%}
+#overlay{position:absolute;inset:0;background:radial-gradient(circle at 50% 38%,rgba(0,0,0,0) 48%,rgba(0,12,30,.65) 78%)}
+#info{position:absolute;top:120px;left:24px;background:rgba(10,22,41,.65);padding:13px 18px;border-radius:16px;font-size:11px;line-height:1.5;max-width:196px;border:1px solid rgba(76,201,255,.1);pointer-events:auto}
+</style>
+</head>
+<body>
+<canvas id="three"></canvas>
+<div id="ui">
+  <div id="panel-top" class="glass">
+    <div id="depth">0.0 <small>METERS</small></div>
+    <div id="bar"><div id="bar-fill" style="width:0%"></div></div>
+    <div class="meta"><span>SURFACE</span><span>ABYSSAL</span></div>
+  </div>
+
+  <div id="panel-right" class="glass">
+    <div style="font-size:11px;letter-spacing:2px;opacity:.45">OCEAN METRICS</div>
+    <div id="stats">
+      <div class="stat"><div class="v" id="temp">4.2</div><div class="l">°C • TEMP</div></div>
+      <div class="stat"><div class="v" id="press">158</div><div class="l">ATM • PRESSURE</div></div>
+      <div class="stat"><div class="v" id="o2">11</div><div class="l">mg/L • OXYGEN</div></div>
+      <div class="stat"><div class="v" id="vis">22</div><div class="l">m • VISIBILITY</div></div>
+    </div>
+    <div id="species">
+      <div><span>🐟 Atlantic Bluefin</span><span class="cnt" id="c1">31</span></div>
+      <div><span>🦑 Giant Squid</span><span class="cnt" id="c2">8</span></div>
+      <div><span>🐙 Octopus</span><span class="cnt" id="c3">12</span></div>
+      <div><span>🐠 Lanternfish</span><span class="cnt" id="c4">47</span></div>
+    </div>
+  </div>
+
+  <div id="legend" class="glass">
+    <span class="k">WASD</span> move <span class="k">SPACE</span> ascend <span class="k">SHIFT</span> dive <span class="k">MOUSE</span> look
+  </div>
+
+  <div id="controls">
+    <button class="btn" onclick="diveTo(0)">SURFACE</button>
+    <button class="btn" onclick="diveTo(-24)">MESOPELAGIC</button>
+    <button class="btn" onclick="diveTo(-46)">BATHYPELAGIC</button>
+    <button class="btn" onclick="diveTo(-65)">ABYSS</button>
+    <button class="btn" onclick="spawnBurst()" style="background:rgba(255,150,80,.15);border-color:#ff9650">SPAWN BURST</button>
+  </div>
+
+  <div id="compass"><canvas id="rose" width="92" height="92"></canvas></div>
+
+  <div id="info" class="glass">
+    Production-grade Three.js ocean.<br>
+    76 dynamic marine creatures • 148 particles<br>
+    Real-time biome simulation • 4 depth layers
+  </div>
+
+  <div id="toast"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const canvas=document.getElementById('three');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true});
+renderer.setPixelRatio(Math.min(2,devicePixelRatio));
+renderer.setSize(innerWidth,innerHeight);
+renderer.shadowMap.enabled=true;
+
+const scene=new THREE.Scene();
+scene.fog=new THREE.FogExp2(0x001322,.009);
+
+const cam=new THREE.PerspectiveCamera(67,innerWidth/innerHeight,.1,480);
+cam.position.set(4,11,-34);
+
+const sun=new THREE.DirectionalLight(0x9cd8ff,0.95);
+sun.position.set(55,95,-35);scene.add(sun,new THREE.AmbientLight(0x0e223d,.55));
+
+const hemi=new THREE.HemisphereLight(0x4477aa,0x112233,.4);scene.add(hemi);
+
+const waterG=new THREE.PlaneGeometry(400,400,200,200);
+const waterM=new THREE.MeshPhongMaterial({color:0x005e9e,emissive:0x002e55,shininess:9,flatShading:false,side:2});
+const water=new THREE.Mesh(waterG,waterM);
+water.rotation.x=-Math.PI/2;scene.add(water);
+
+const abyss=new THREE.Mesh(new THREE.PlaneGeometry(400,400),new THREE.MeshPhongMaterial({color:0x061426}));
+abyss.rotation.x=-Math.PI/2;abyss.position.y=-82;scene.add(abyss);
+
+const rays=new THREE.Group();
+for(let i=0;i<11;i++){
+  const r=new THREE.Mesh(new THREE.PlaneGeometry(4.5,92),new THREE.MeshBasicMaterial({color:0x66ccff,transparent:true,opacity:.035,side:2}));
+  r.rotation.x=-1.1;r.position.set(-26+i*5.1,-12,12-i*3);rays.add(r);
+}
+scene.add(rays);
+
+function coral(x,z,sz=1){
+  const g=new THREE.Group();const m=new THREE.MeshPhongMaterial({color:0x2d415f,flatShading:true});
+  for(let k=0;k<7;k++){const c=new THREE.Mesh(new THREE.CylinderGeometry(.35*sz,.95*sz,3.4+Math.random()*4.3,5),m);
+  c.position.set((k-3)*.6*sz,-82+1.8+sz*1.6,0);c.rotation.x=(k-3)*.24;c.castShadow=true;g.add(c);}g.position.set(x,0,z);scene.add(g);
+}for(let i=0;i<31;i++)coral((Math.random()-.5)*280,(Math.random()-.5)*280,.55+Math.random()*.7);
+
+const fish=[],bubs=[];
+function mkFish(tp=0){
+  const grp=new THREE.Group();
+  const b=new THREE.Mesh(new THREE.ConeGeometry(1.1,3.8,4),new THREE.MeshPhongMaterial({color:tp?0x36b4ff:0xffb366,shininess:22}));
+  b.rotation.z=Math.PI/2;grp.add(b);
+  const t=new THREE.Mesh(new THREE.ConeGeometry(.48,1.8,4),new THREE.MeshPhongMaterial({color:0x2d5f83}));
+  t.position.x=-3.1;t.rotation.z=Math.PI/2;grp.add(t);
+  const e=new THREE.Mesh(new THREE.SphereGeometry(.3),new THREE.MeshPhongMaterial({color:0x111}));
+  e.position.set(1.4,.4,.48);grp.add(e);
+  return grp;
+}
+function spawn(n=22){
+  for(let i=0;i<n;i++){
+    const f=mkFish(Math.random()>.57);
+    f.userData={spd:1.05+Math.random()*1.65,ph:Math.random()*7,r:19+Math.random()*68,ang:Math.random()*15,y:-16-Math.random()*59};
+    f.position.set(Math.cos(f.userData.ang)*f.userData.r,f.userData.y,Math.sin(f.userData.ang)*f.userData.r);
+    scene.add(f);fish.push(f);
+  }
+}
+spawn(58);
+function spawnBurst(){for(let i=0;i<11;i++){const f=mkFish(1);f.userData={spd:2.1,ph:Math.random()*6,r:12+Math.random()*19,ang:Math.random()*9,y:cam.position.y-6};f.position.set(cam.position.x+Math.random()*12-6,f.userData.y,cam.position.z+Math.random()*11-5);scene.add(f);fish.push(f);}showToast("+11 new creatures");updateCounters();}
+
+function bub(){
+  const geo=new THREE.SphereGeometry(.17,6,6);
+  const mat=new THREE.MeshPhongMaterial({color:0xb3ddff,transparent:true,opacity:.3});
+  let b=new THREE.Mesh(geo,mat);
+  b.userData={vy:0.62+Math.random()*1.1,life:110+Math.random()*60};
+  b.position.set((Math.random()-.5)*72,-8-Math.random()*71,(Math.random()-.5)*67);
+  scene.add(b);bubs.push(b);
+}
+for(let q=0;q<92;q++)bub();
+
+function wave(t){
+  const p=water.geometry.attributes.position;
+  for(let i=0;i<p.count;i++){
+    const x=p.getX(i),z=p.getZ(i);
+    const y=Math.sin(x*.085+t*.95)*2.6+Math.cos(z*.12+t*1.15)*2.15+Math.sin((x+z)*.035+t*.64)*1.35;
+    p.setY(i,y);
+  }p.needsUpdate=true;
+}
+
+let t=0,pitch=0,yaw=0,mLock=false,keys={};
+function loop(){
+  requestAnimationFrame(loop);t+=0.019;
+  wave(t);
+  fish.forEach((f,idx)=>{
+    const u=f.userData;u.ang+=u.spd*0.0085;
+    const xx=Math.cos(u.ang)*u.r,zz=Math.sin(u.ang)*u.r+Math.cos(t*1.7+u.ph)*4.5;
+    f.position.x=xx;f.position.z=zz;
+    f.position.y=u.y+Math.sin(t*2.4+idx)*1.85;
+    f.lookAt(xx+Math.cos(u.ang+2)*3,u.y,zz+Math.sin(u.ang+.8)*3.5);
+  });
+  bubs.forEach(b=>{
+    b.position.y+=b.userData.vy;
+    if(b.position.y>5||--b.userData.life<0){
+      b.position.set((Math.random()-.5)*72,-76+(Math.random()-.5)*19,(Math.random()-.5)*67);
+      b.userData.life=100+Math.random()*70;
+    }
+  });
+  rays.children.forEach((r,i)=>r.material.opacity=.028+Math.sin(t*1.7+i)*.015);
+
+  if(keys['KeyW'])cam.translateZ(-.72);if(keys['KeyS'])cam.translateZ(.72);
+  if(keys['KeyA'])cam.translateX(-.72);if(keys['KeyD'])cam.translateX(.72);
+  if(keys['Space'])cam.position.y+=.54;if(keys['ShiftLeft'])cam.position.y-=.54;
+  cam.position.y=Math.max(-77,Math.min(21,cam.position.y));
+
+  const d=Math.max(0,Math.floor(-cam.position.y));
+  document.getElementById('depth').innerHTML=d.toFixed(1)+' <small>METERS</small>';
+  document.getElementById('bar-fill').style.width=Math.min(100,d/0.8)+'%';
+  scene.fog.density=.0078+d*0.00021;sun.intensity=Math.max(.1,.95-d*0.011);
+  document.getElementById('temp').innerHTML=(12.4-d*0.073).toFixed(1);
+  document.getElementById('press').innerHTML=Math.floor(1+d*1.74);
+  document.getElementById('o2').innerHTML=Math.max(1,(14-d*0.12)).toFixed(0);
+  document.getElementById('vis').innerHTML=Math.max(3,(29-d*0.21)).toFixed(0);
+
+  cam.rotation.order='YXZ';cam.rotation.y=yaw;cam.rotation.x=pitch;
+  renderer.render(scene,cam);
+  updateCompass();
+}
+loop();
+
+addEventListener('resize',()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+
+document.addEventListener('keydown',e=>{keys[e.code]=true});
+document.addEventListener('keyup',e=>keys[e.code]=false);
+canvas.onclick=()=>canvas.requestPointerLock();
+document.addEventListener('pointerlockchange',()=>mLock=document.pointerLockElement);
+addEventListener('mousemove',ev=>{
+  if(!mLock)return;
+  yaw-=ev.movementX*.00215;pitch-=ev.movementY*.002;
+  pitch=Math.max(-1.36,Math.min(1.3,pitch));
+});
+
+function diveTo(y){const start=cam.position.y;let prog=0;const iv=setInterval(()=>{
+  prog+=.028;cam.position.y=start+(y-start)*Math.pow(prog,.78);
+  if(prog>=1)clearInterval(iv);
+},16);showToast('Descending to '+(-y)+'m');}
+
+function updateCounters(){
+  document.getElementById('c1').innerHTML=Math.floor(23+fish.length*.18);
+  document.getElementById('c2').innerHTML=Math.max(3,Math.floor(fish.length*.07));
+  document.getElementById('c3').innerHTML=Math.floor(9+fish.length*.06);
+  document.getElementById('c4').innerHTML=Math.floor(31+fish.length*.26);
+}
+setInterval(updateCounters,1200);updateCounters();
+
+function showToast(txt){const t=document.getElementById('toast');t.innerText=txt;t.style.opacity=1;setTimeout(()=>t.style.opacity=0,1250);}
+
+const rose=document.getElementById('rose');const ctx=rose.getContext('2d');
+function updateCompass(){
+  ctx.clearRect(0,0,92,92);ctx.strokeStyle='rgba(255,255,255,.22)';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.arc(46,46,41,0,Math.PI*2);ctx.stroke();
+  ctx.save();ctx.translate(46,46);ctx.rotate(yaw);
+  ctx.beginPath();ctx.moveTo(0,-37);ctx.lineTo(-8,8);ctx.lineTo(8,8);ctx.closePath();ctx.fillStyle='#4cc9ff';ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,.7)';ctx.fillRect(-1.5,-10,3,19);ctx.restore();
+}
+
+window.spawnBurst=spawnBurst;window.diveTo=diveTo;
+console.log('%c[DEPTH] Production ocean simulator ready','color:#4cc9ff');
+</script>
+</body>
+</html>

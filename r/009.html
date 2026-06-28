@@ -1,0 +1,2611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="description" content="MARKETA — The future of fresh. Premium groceries, locally sourced, delivered fast. 87 stores across the US." />
+<meta name="theme-color" content="#0A6E3D" />
+<title>MARKETA — The future of fresh</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' x2='1' y1='0' y2='1'%3E%3Cstop offset='0' stop-color='%2300C853'/%3E%3Cstop offset='1' stop-color='%23064A28'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='%230F1A14'/%3E%3Cpath d='M8 23V10h2.4l5.6 7.5L21.6 10H24v13h-2.5v-8.6L17 21h-2l-4.5-6.6V23z' fill='url(%23g)'/%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['Inter', 'system-ui', 'sans-serif'],
+          mono: ['JetBrains Mono', 'monospace'],
+        },
+        colors: {
+          ink: '#0F0F0F',
+          forest: { 50:'#EDF7F1',100:'#D1EBDC',200:'#A4D6BA',300:'#6FBA8F',400:'#3D9C66',500:'#1E8048',600:'#0A6E3D',700:'#085730',800:'#064A28',900:'#042E1A' },
+          lime: { DEFAULT:'#C7F26B', dark:'#A8D946' },
+          cream: '#FAFAF7',
+          bone: '#F2F0E9',
+          clay: '#E8E3D6',
+          graphite: '#1C1C1C',
+        },
+        letterSpacing: { tightest: '-0.05em', crunch: '-0.03em' },
+        animation: {
+          'marquee': 'marquee 40s linear infinite',
+          'fade-up': 'fadeUp 0.6s ease-out forwards',
+          'spin-slow': 'spin 20s linear infinite',
+          'pulse-soft': 'pulseSoft 3s ease-in-out infinite',
+        },
+        keyframes: {
+          marquee: { '0%': { transform: 'translateX(0)' }, '100%': { transform: 'translateX(-50%)' } },
+          fadeUp: { '0%': { opacity: '0', transform: 'translateY(20px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+          pulseSoft: { '0%,100%': { opacity: '0.6' }, '50%': { opacity: '1' } },
+        },
+      }
+    }
+  }
+</script>
+<style>
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  .display { font-family: 'Inter', sans-serif; font-weight: 800; letter-spacing: -0.04em; line-height: 0.95; }
+  .display-xl { font-size: clamp(3rem, 9vw, 9rem); }
+  .display-lg { font-size: clamp(2.5rem, 6vw, 5.5rem); line-height: 0.95; letter-spacing: -0.04em; }
+  .display-md { font-size: clamp(2rem, 4.5vw, 3.75rem); line-height: 1.02; letter-spacing: -0.035em; }
+  .eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase; }
+  .pill { border-radius: 9999px; }
+  .grid-noise {
+    background-image: linear-gradient(rgba(0,0,0,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+  .grain::before {
+    content: ''; position: absolute; inset: 0; pointer-events: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.4 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.5'/></svg>");
+    opacity: 0.18; mix-blend-mode: overlay;
+  }
+  .card-hover { transition: transform 0.4s cubic-bezier(0.2,0.8,0.2,1), box-shadow 0.4s ease; }
+  .card-hover:hover { transform: translateY(-4px); }
+  .btn-primary { background:#0A6E3D; color:#fff; transition: all .25s ease; }
+  .btn-primary:hover { background:#064A28; transform: translateY(-1px); box-shadow: 0 12px 24px -10px rgba(10,110,61,.5); }
+  .btn-ghost { background: transparent; color: #0F0F0F; border: 1px solid #0F0F0F; transition: all .25s ease; }
+  .btn-ghost:hover { background:#0F0F0F; color:#fff; }
+  .underline-grow { position: relative; }
+  .underline-grow::after { content:''; position:absolute; left:0; bottom:-2px; width:100%; height:1px; background: currentColor; transform: scaleX(0); transform-origin: right; transition: transform .35s cubic-bezier(.7,0,.3,1); }
+  .underline-grow:hover::after { transform: scaleX(1); transform-origin: left; }
+  .page-enter { animation: fadeUp 0.5s ease-out forwards; }
+  .marquee-track { display: flex; width: max-content; }
+  .skew-card { transform: rotate(-1.5deg); }
+  .skew-card.rev { transform: rotate(1.5deg); }
+  .blob {
+    border-radius: 60% 40% 30% 70%/60% 30% 70% 40%;
+    animation: morph 8s ease-in-out infinite;
+  }
+  @keyframes morph {
+    0%,100% { border-radius: 60% 40% 30% 70%/60% 30% 70% 40%; }
+    50% { border-radius: 30% 60% 70% 40%/50% 60% 30% 60%; }
+  }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  .ring-pulse::before {
+    content: ''; position: absolute; inset: -4px; border-radius: inherit;
+    border: 2px solid #C7F26B; opacity: 0; animation: ringPulse 2.4s ease-out infinite;
+  }
+  @keyframes ringPulse { 0% { transform: scale(0.95); opacity:.8; } 100% { transform: scale(1.4); opacity:0; } }
+  .reveal { opacity: 0; transform: translateY(28px); transition: opacity .8s ease, transform .8s cubic-bezier(.2,.8,.2,1); }
+  .reveal.in { opacity: 1; transform: translateY(0); }
+  details > summary { list-style: none; cursor: pointer; }
+  details > summary::-webkit-details-marker { display: none; }
+  .scroll-x { overflow-x: auto; scroll-snap-type: x mandatory; }
+  .scroll-x > * { scroll-snap-align: start; }
+  ::selection { background: #C7F26B; color: #0F0F0F; }
+  .nav-link { position: relative; padding: 0.5rem 0; }
+  .nav-link.active::after { content:''; position:absolute; left:0; right:0; bottom:-4px; height:2px; background:#0A6E3D; border-radius: 2px; }
+  .stripe-band { background: repeating-linear-gradient(45deg, #0A6E3D 0 20px, #085730 20px 40px); }
+</style>
+</head>
+<body class="bg-cream text-ink antialiased">
+
+<!-- ANNOUNCEMENT BAR -->
+<div class="bg-ink text-cream text-xs sm:text-sm py-2 overflow-hidden">
+  <div class="marquee-track animate-marquee">
+    <div class="flex items-center gap-8 px-4 whitespace-nowrap">
+      <span class="font-mono">★ FREE DELIVERY on orders over $35</span>
+      <span>·</span>
+      <span>SAME-DAY PICKUP in 87 stores</span>
+      <span>·</span>
+      <span class="font-mono">NEW: AI Meal Planner →</span>
+      <span>·</span>
+      <span>Locally grown, fairly priced</span>
+      <span>·</span>
+      <span>Member prices up to 30% off</span>
+      <span>·</span>
+      <span>Carbon-neutral delivery fleet</span>
+      <span>·</span>
+    </div>
+    <div class="flex items-center gap-8 px-4 whitespace-nowrap" aria-hidden="true">
+      <span class="font-mono">★ FREE DELIVERY on orders over $35</span>
+      <span>·</span>
+      <span>SAME-DAY PICKUP in 87 stores</span>
+      <span>·</span>
+      <span class="font-mono">NEW: AI Meal Planner →</span>
+      <span>·</span>
+      <span>Locally grown, fairly priced</span>
+      <span>·</span>
+      <span>Member prices up to 30% off</span>
+      <span>·</span>
+      <span>Carbon-neutral delivery fleet</span>
+      <span>·</span>
+    </div>
+  </div>
+</div>
+
+<!-- NAVIGATION -->
+<header id="nav" class="sticky top-0 z-40 bg-cream/85 backdrop-blur-xl border-b border-ink/10">
+  <nav class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 h-16 flex items-center justify-between gap-6">
+    <a href="#/" class="flex items-center gap-2.5 group">
+      <span class="relative inline-flex items-center justify-center w-9 h-9 rounded-xl bg-graphite overflow-hidden">
+        <svg viewBox="0 0 32 32" class="w-7 h-7">
+          <defs>
+            <linearGradient id="lgmark" x1="0" x2="1" y1="0" y2="1">
+              <stop offset="0" stop-color="#C7F26B"/>
+              <stop offset="1" stop-color="#0A6E3D"/>
+            </linearGradient>
+          </defs>
+          <path d="M7 24V8h3.2l5.8 7.8L21.8 8H25v16h-3v-9.5L17 21h-2l-5-6.5V24z" fill="url(#lgmark)"/>
+        </svg>
+      </span>
+      <span class="font-black tracking-tight text-xl">MARKETA</span>
+      <span class="hidden md:inline-flex items-center gap-1 ml-1 text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full bg-lime/30 text-forest-800">v3.4</span>
+    </a>
+
+    <div class="hidden lg:flex items-center gap-8 text-sm font-medium">
+      <a href="#/" class="nav-link" data-nav>Shop</a>
+      <a href="#/products" class="nav-link" data-nav>Products</a>
+      <a href="#/stores" class="nav-link" data-nav>Stores</a>
+      <a href="#/recipes" class="nav-link" data-nav>Recipes</a>
+      <a href="#/sustainability" class="nav-link" data-nav>Sustainability</a>
+      <a href="#/about" class="nav-link" data-nav>Company</a>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <button id="btn-search" class="hidden md:flex items-center gap-2 h-10 px-3 rounded-full bg-bone hover:bg-clay transition text-sm text-ink/70">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <span>Search produce, recipes…</span>
+        <kbd class="hidden xl:inline-block ml-2 font-mono text-[10px] px-1.5 py-0.5 rounded border border-ink/15 bg-cream">⌘K</kbd>
+      </button>
+      <button id="btn-search-mobile" class="md:hidden w-10 h-10 rounded-full hover:bg-bone flex items-center justify-center" aria-label="Search">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      </button>
+      <a href="#/careers" class="hidden md:inline-flex h-10 items-center px-4 rounded-full hover:bg-bone text-sm font-medium">Careers</a>
+      <button id="btn-account" class="hidden sm:inline-flex w-10 h-10 rounded-full hover:bg-bone items-center justify-center" aria-label="Account">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+      </button>
+      <button id="btn-cart" class="relative inline-flex items-center gap-2 h-10 px-3 sm:px-4 rounded-full bg-ink text-cream hover:bg-forest-700 transition text-sm font-medium">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-2 11H8L6 6z"/><circle cx="9" cy="21" r="1.5"/><circle cx="18" cy="21" r="1.5"/><path d="M6 6 4 2H1"/></svg>
+        <span class="hidden sm:inline">Cart</span>
+        <span id="cart-count" class="absolute -top-1 -right-1 min-w-[20px] h-5 px-1 rounded-full bg-lime text-ink text-[11px] font-bold flex items-center justify-center">0</span>
+      </button>
+      <button id="btn-menu" class="lg:hidden w-10 h-10 rounded-full hover:bg-bone flex items-center justify-center" aria-label="Menu">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+    </div>
+  </nav>
+</header>
+
+<!-- MOBILE MENU -->
+<div id="mobile-menu" class="fixed inset-0 z-50 hidden">
+  <div class="absolute inset-0 bg-ink/60 backdrop-blur-sm" data-close-menu></div>
+  <div class="absolute right-0 top-0 bottom-0 w-[88%] max-w-md bg-cream p-6 overflow-y-auto">
+    <div class="flex items-center justify-between mb-8">
+      <span class="font-black text-xl">MARKETA</span>
+      <button data-close-menu class="w-10 h-10 rounded-full bg-bone flex items-center justify-center" aria-label="Close">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+    <ul class="space-y-1 text-2xl font-semibold tracking-tight">
+      <li><a href="#/" data-close-menu class="block py-3 border-b border-ink/10">Shop</a></li>
+      <li><a href="#/products" data-close-menu class="block py-3 border-b border-ink/10">Products</a></li>
+      <li><a href="#/stores" data-close-menu class="block py-3 border-b border-ink/10">Stores</a></li>
+      <li><a href="#/recipes" data-close-menu class="block py-3 border-b border-ink/10">Recipes</a></li>
+      <li><a href="#/sustainability" data-close-menu class="block py-3 border-b border-ink/10">Sustainability</a></li>
+      <li><a href="#/about" data-close-menu class="block py-3 border-b border-ink/10">Company</a></li>
+      <li><a href="#/careers" data-close-menu class="block py-3 border-b border-ink/10">Careers</a></li>
+      <li><a href="#/contact" data-close-menu class="block py-3 border-b border-ink/10">Contact</a></li>
+    </ul>
+    <div class="mt-10 p-5 rounded-2xl bg-forest-700 text-cream">
+      <div class="eyebrow text-lime mb-2">Marketa+ Member</div>
+      <div class="font-bold text-lg leading-tight">Get free delivery on every order over $35.</div>
+      <button class="mt-4 inline-flex items-center gap-2 bg-lime text-ink font-semibold rounded-full px-4 py-2 text-sm">Start 30-day trial →</button>
+    </div>
+  </div>
+</div>
+
+<!-- CART DRAWER -->
+<div id="cart-drawer" class="fixed inset-0 z-50 hidden">
+  <div class="absolute inset-0 bg-ink/50 backdrop-blur-sm" data-close-cart></div>
+  <aside class="absolute right-0 top-0 bottom-0 w-full sm:w-[440px] bg-cream flex flex-col">
+    <div class="flex items-center justify-between p-5 border-b border-ink/10">
+      <div>
+        <div class="font-bold text-lg">Your cart</div>
+        <div id="cart-sub" class="text-xs text-ink/60 font-mono">0 items · $0.00</div>
+      </div>
+      <button data-close-cart class="w-10 h-10 rounded-full bg-bone flex items-center justify-center" aria-label="Close">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+    <div id="cart-items" class="flex-1 overflow-y-auto p-5 space-y-3"></div>
+    <div class="border-t border-ink/10 p-5 bg-bone">
+      <div class="flex justify-between text-sm mb-2"><span class="text-ink/60">Subtotal</span><span id="cart-total" class="font-mono">$0.00</span></div>
+      <div class="flex justify-between text-sm mb-3"><span class="text-ink/60">Delivery</span><span class="font-mono text-forest-700 font-semibold">FREE over $35</span></div>
+      <button class="w-full btn-primary rounded-full py-3 font-semibold">Checkout →</button>
+      <div class="mt-3 text-center text-[11px] font-mono text-ink/50 uppercase tracking-wider">Secure checkout · 256-bit SSL</div>
+    </div>
+  </aside>
+</div>
+
+<!-- SEARCH MODAL -->
+<div id="search-modal" class="fixed inset-0 z-50 hidden">
+  <div class="absolute inset-0 bg-ink/70 backdrop-blur-md" data-close-search></div>
+  <div class="relative max-w-2xl mx-auto mt-24 bg-cream rounded-2xl shadow-2xl overflow-hidden">
+    <div class="flex items-center gap-3 p-5 border-b border-ink/10">
+      <svg class="w-5 h-5 text-ink/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="search-input" type="text" placeholder="Search 12,400+ products, recipes, stores…" class="flex-1 bg-transparent outline-none text-lg" />
+      <kbd class="font-mono text-[10px] px-1.5 py-0.5 rounded border border-ink/15">ESC</kbd>
+    </div>
+    <div class="p-5">
+      <div class="eyebrow text-ink/50 mb-3">Trending searches</div>
+      <div class="flex flex-wrap gap-2">
+        <button class="px-3 py-1.5 rounded-full bg-bone hover:bg-clay text-sm">🥑 Avocado</button>
+        <button class="px-3 py-1.5 rounded-full bg-bone hover:bg-clay text-sm">🍓 Strawberries</button>
+        <button class="px-3 py-1.5 rounded-full bg-bone hover:bg-clay text-sm">🥩 Grass-fed beef</button>
+        <button class="px-3 py-1.5 rounded-full bg-bone hover:bg-clay text-sm">🌾 Sourdough</button>
+        <button class="px-3 py-1.5 rounded-full bg-bone hover:bg-clay text-sm">🥗 Caesar salad kit</button>
+        <button class="px-3 py-1.5 rounded-full bg-bone hover:bg-clay text-sm">🧀 Aged cheddar</button>
+      </div>
+      <div class="mt-6 eyebrow text-ink/50 mb-3">Quick links</div>
+      <div class="grid sm:grid-cols-2 gap-2 text-sm">
+        <a href="#/products" class="flex items-center justify-between p-3 rounded-xl hover:bg-bone"><span>Weekly deals</span><span class="text-ink/40">→</span></a>
+        <a href="#/stores" class="flex items-center justify-between p-3 rounded-xl hover:bg-bone"><span>Find a store</span><span class="text-ink/40">→</span></a>
+        <a href="#/recipes" class="flex items-center justify-between p-3 rounded-xl hover:bg-bone"><span>Recipe of the day</span><span class="text-ink/40">→</span></a>
+        <a href="#/sustainability" class="flex items-center justify-between p-3 rounded-xl hover:bg-bone"><span>Local sourcing map</span><span class="text-ink/40">→</span></a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- APP ROOT -->
+<main id="app" class="min-h-[60vh]"></main>
+
+<!-- FOOTER -->
+<footer class="bg-graphite text-cream mt-24 relative overflow-hidden">
+  <div class="absolute inset-0 grid-noise opacity-40 pointer-events-none"></div>
+  <div class="relative max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 pt-20 pb-10">
+    <div class="grid lg:grid-cols-12 gap-10 pb-16 border-b border-cream/10">
+      <div class="lg:col-span-4">
+        <div class="flex items-center gap-2.5 mb-5">
+          <span class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-cream/10">
+            <svg viewBox="0 0 32 32" class="w-7 h-7">
+              <path d="M7 24V8h3.2l5.8 7.8L21.8 8H25v16h-3v-9.5L17 21h-2l-5-6.5V24z" fill="#C7F26B"/>
+            </svg>
+          </span>
+          <span class="font-black text-2xl tracking-tight">MARKETA</span>
+        </div>
+        <p class="text-cream/70 max-w-sm leading-relaxed">The future of fresh. 87 stores, 4,200 local farmers, one mission: make the food system work for everyone.</p>
+        <div class="mt-6 flex gap-2">
+          <a class="w-9 h-9 rounded-full bg-cream/10 hover:bg-lime hover:text-ink flex items-center justify-center transition" aria-label="Instagram"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg></a>
+          <a class="w-9 h-9 rounded-full bg-cream/10 hover:bg-lime hover:text-ink flex items-center justify-center transition" aria-label="TikTok"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 4v9a4 4 0 1 1-4-4"/><path d="M15 4c0 3 2 5 5 5"/></svg></a>
+          <a class="w-9 h-9 rounded-full bg-cream/10 hover:bg-lime hover:text-ink flex items-center justify-center transition" aria-label="YouTube"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="3"/><path d="m10 9 5 3-5 3z" fill="currentColor"/></svg></a>
+          <a class="w-9 h-9 rounded-full bg-cream/10 hover:bg-lime hover:text-ink flex items-center justify-center transition" aria-label="LinkedIn"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M7 10v7M7 7v.01M11 17v-4a2 2 0 0 1 4 0v4M11 10v7"/></svg></a>
+        </div>
+      </div>
+      <div class="lg:col-span-8 grid grid-cols-2 md:grid-cols-4 gap-6 text-sm">
+        <div>
+          <div class="eyebrow text-lime mb-4">Shop</div>
+          <ul class="space-y-2 text-cream/70">
+            <li><a href="#/products" class="hover:text-lime">Produce</a></li>
+            <li><a href="#/products" class="hover:text-lime">Meat & Seafood</a></li>
+            <li><a href="#/products" class="hover:text-lime">Dairy & Eggs</a></li>
+            <li><a href="#/products" class="hover:text-lime">Bakery</a></li>
+            <li><a href="#/products" class="hover:text-lime">Pantry</a></li>
+            <li><a href="#/products" class="hover:text-lime">Frozen</a></li>
+          </ul>
+        </div>
+        <div>
+          <div class="eyebrow text-lime mb-4">Company</div>
+          <ul class="space-y-2 text-cream/70">
+            <li><a href="#/about" class="hover:text-lime">About</a></li>
+            <li><a href="#/careers" class="hover:text-lime">Careers <span class="ml-1 text-[10px] px-1.5 py-0.5 rounded bg-lime text-ink">42 open</span></a></li>
+            <li><a href="#/stores" class="hover:text-lime">Find a store</a></li>
+            <li><a href="#/sustainability" class="hover:text-lime">Impact report</a></li>
+            <li><a href="#/contact" class="hover:text-lime">Press kit</a></li>
+          </ul>
+        </div>
+        <div>
+          <div class="eyebrow text-lime mb-4">Help</div>
+          <ul class="space-y-2 text-cream/70">
+            <li><a href="#/contact" class="hover:text-lime">Customer support</a></li>
+            <li><a href="#/contact" class="hover:text-lime">Delivery & pickup</a></li>
+            <li><a href="#/contact" class="hover:text-lime">Returns</a></li>
+            <li><a href="#/contact" class="hover:text-lime">FAQ</a></li>
+            <li><a href="#/contact" class="hover:text-lime">Accessibility</a></li>
+          </ul>
+        </div>
+        <div>
+          <div class="eyebrow text-lime mb-4">For business</div>
+          <ul class="space-y-2 text-cream/70">
+            <li><a href="#/contact" class="hover:text-lime">Marketa for Teams</a></li>
+            <li><a href="#/contact" class="hover:text-lime">Wholesale</a></li>
+            <li><a href="#/contact" class="hover:text-lime">Catering</a></li>
+            <li><a href="#/contact" class="hover:text-lime">Gift cards</a></li>
+            <li><a href="#/contact" class="hover:text-lime">Investors</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="py-10 grid lg:grid-cols-2 gap-8 items-center">
+      <div>
+        <div class="eyebrow text-lime mb-3">Get the app</div>
+        <h3 class="display-md mb-4">Fresh in your pocket.</h3>
+        <div class="flex flex-wrap gap-3">
+          <a href="#/" class="flex items-center gap-3 px-4 py-3 rounded-2xl bg-cream text-ink hover:bg-lime transition">
+            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 12.5c0-2.4 2-3.5 2.1-3.6-1.2-1.7-3-1.9-3.6-2-1.5-.2-3 .9-3.7.9s-2-.9-3.3-.9c-1.7 0-3.3 1-4.2 2.5-1.8 3.1-.5 7.7 1.3 10.3.9 1.2 1.9 2.6 3.3 2.6 1.3-.1 1.8-.9 3.4-.9s2 .9 3.4.9c1.4 0 2.3-1.3 3.2-2.5 1-1.4 1.4-2.8 1.4-2.9-.1 0-2.7-1-2.7-4z M14 4.5c.7-.9 1.2-2.1 1.1-3.4-1.1.1-2.4.7-3.1 1.6-.7.8-1.3 2.1-1.1 3.3 1.2.1 2.4-.6 3.1-1.5z"/></svg>
+            <div class="text-left"><div class="text-[10px] uppercase tracking-wider opacity-60">Download on</div><div class="font-bold leading-tight">App Store</div></div>
+          </a>
+          <a href="#/" class="flex items-center gap-3 px-4 py-3 rounded-2xl bg-cream text-ink hover:bg-lime transition">
+            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M3 3.5v17c0 .6.3 1.1.8 1.3l9.6-9.8L3.8 2.2c-.5.2-.8.7-.8 1.3zM14.6 12.7l2.6 2.7-11.5 6.6c-.3.1-.6.1-.9 0l9.8-9.3zM18 11.2l3 1.7c.7.4.7 1.4 0 1.8l-3 1.7-2.8-2.6 2.8-2.6zM5.7 1.7l11.5 6.6-2.6 2.7L5.7 1.7z"/></svg>
+            <div class="text-left"><div class="text-[10px] uppercase tracking-wider opacity-60">Get it on</div><div class="font-bold leading-tight">Google Play</div></div>
+          </a>
+        </div>
+      </div>
+      <div>
+        <div class="eyebrow text-lime mb-3">Newsletter</div>
+        <h3 class="display-md mb-4">Eat better. Get $10 off.</h3>
+        <form class="flex gap-2 max-w-md" onsubmit="event.preventDefault(); this.querySelector('button').textContent='Subscribed ✓'; this.querySelector('button').classList.add('bg-lime');">
+          <input type="email" placeholder="you@email.com" class="flex-1 bg-cream/10 border border-cream/20 rounded-full px-5 py-3 text-cream placeholder-cream/50 focus:outline-none focus:border-lime" required />
+          <button class="bg-cream text-ink font-semibold rounded-full px-5 py-3 hover:bg-lime transition">Join</button>
+        </form>
+        <div class="mt-3 text-xs text-cream/50">We email once a week. Unsubscribe anytime. No spam, just recipes.</div>
+      </div>
+    </div>
+
+    <div class="pt-8 border-t border-cream/10 flex flex-wrap gap-x-6 gap-y-2 justify-between items-center text-xs text-cream/50">
+      <div class="font-mono">© 2026 MARKETA Inc. · Delivered with care from 87 stores.</div>
+      <div class="flex gap-5">
+        <a href="#" class="hover:text-cream">Privacy</a>
+        <a href="#" class="hover:text-cream">Terms</a>
+        <a href="#" class="hover:text-cream">Cookie settings</a>
+        <a href="#" class="hover:text-cream">Do not sell my info</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- COOKIE TOAST -->
+<div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 hidden">
+  <div class="bg-ink text-cream rounded-full px-5 py-3 shadow-2xl flex items-center gap-3 text-sm">
+    <span id="toast-text">Added to cart</span>
+    <button onclick="document.getElementById('toast').classList.add('hidden')" class="text-lime hover:underline">Dismiss</button>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   MARKETA — Single-file SPA
+   ========================================================= */
+
+/* ---------- DATA ---------- */
+const PRODUCTS = [
+  { id:'p1', name:'Hass Avocados', cat:'Produce', price:1.25, unit:'each', img:'https://images.unsplash.com/photo-1601039641847-7857b994d704?w=600&q=70', tag:'Local', tagColor:'bg-forest-700' },
+  { id:'p2', name:'Wild Arugula', cat:'Produce', price:3.99, unit:'5oz clamshell', img:'https://images.unsplash.com/photo-1576045057995-568f588f82fb?w=600&q=70', tag:'Organic', tagColor:'bg-lime text-ink' },
+  { id:'p3', name:'Heirloom Tomatoes', cat:'Produce', price:5.49, unit:'lb', img:'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=600&q=70' },
+  { id:'p4', name:'Grass-fed Ribeye', cat:'Meat', price:24.00, unit:'lb', img:'https://images.unsplash.com/photo-1603048297172-c92544798d2e?w=600&q=70', tag:'Premium', tagColor:'bg-ink' },
+  { id:'p5', name:'Wild Sockeye Salmon', cat:'Seafood', price:18.99, unit:'lb', img:'https://images.unsplash.com/photo-1574781330855-d0db8cc6a79c?w=600&q=70', tag:'Sustainable', tagColor:'bg-forest-700' },
+  { id:'p6', name:'Sourdough Boule', cat:'Bakery', price:6.50, unit:'each', img:'https://images.unsplash.com/photo-1585478259715-876acc5be8eb?w=600&q=70', tag:'Baked today', tagColor:'bg-lime text-ink' },
+  { id:'p7', name:'Pasture-raised Eggs', cat:'Dairy', price:7.99, unit:'dozen', img:'https://images.unsplash.com/photo-1569288063643-5d29ad6ad6d6?w=600&q=70' },
+  { id:'p8', name:'Aged Cheddar', cat:'Dairy', price:11.00, unit:'8oz block', img:'https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=600&q=70' },
+  { id:'p9', name:'Strawberries', cat:'Produce', price:4.99, unit:'1lb', img:'https://images.unsplash.com/photo-1543528176-61b239494933?w=600&q=70', tag:'Local', tagColor:'bg-forest-700' },
+  { id:'p10', name:'Free-range Chicken', cat:'Meat', price:9.99, unit:'lb', img:'https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=600&q=70' },
+  { id:'p11', name:'Cold-pressed Olive Oil', cat:'Pantry', price:22.00, unit:'500ml', img:'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=600&q=70' },
+  { id:'p12', name:'Stone-ground Oats', cat:'Pantry', price:5.49, unit:'2lb bag', img:'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=600&q=70', tag:'Organic', tagColor:'bg-lime text-ink' },
+];
+
+const CATEGORIES = [
+  { name:'Produce', icon:'🥬', count:'420+ items', img:'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&q=70' },
+  { name:'Meat & Seafood', icon:'🥩', count:'180+ items', img:'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=800&q=70' },
+  { name:'Dairy & Eggs', icon:'🥚', count:'240+ items', img:'https://images.unsplash.com/photo-1628088062854-d4fcf4d3082d?w=800&q=70' },
+  { name:'Bakery', icon:'🥖', count:'90+ items', img:'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=800&q=70' },
+  { name:'Pantry', icon:'🫙', count:'610+ items', img:'https://images.unsplash.com/photo-1590779033100-9f60a05a013d?w=800&q=70' },
+  { name:'Frozen', icon:'🧊', count:'320+ items', img:'https://images.unsplash.com/photo-1610629000027-a0bb05d8ad48?w=800&q=70' },
+  { name:'Beverages', icon:'🥤', count:'210+ items', img:'https://images.unsplash.com/photo-1546171753-97d7676e4602?w=800&q=70' },
+  { name:'Floral', icon:'🌸', count:'60+ items', img:'https://images.unsplash.com/photo-1487530811176-3780de880c2d?w=800&q=70' },
+];
+
+const RECIPES = [
+  { title:'One-pan lemon garlic salmon', time:'25 min', difficulty:'Easy', kcal:'420 kcal', img:'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=800&q=70', desc:'Bright, herby, and ready in 25 minutes. Wild sockeye with blistered cherry tomatoes.' },
+  { title:'Mushroom risotto, slow & silky', time:'45 min', difficulty:'Medium', kcal:'560 kcal', img:'https://images.unsplash.com/photo-1633964913849-96bb09cbb1ee?w=800&q=70', desc:'Carnaroli rice, wild mushrooms, finished with aged parm and brown butter.' },
+  { title:'Crispy smashed potatoes', time:'40 min', difficulty:'Easy', kcal:'310 kcal', img:'https://images.unsplash.com/photo-1518779578993-ec3579fee39f?w=800&q=70', desc:'Boiled, smashed, roasted hot. The crunch comes from a second blast in the oven.' },
+  { title:'Heirloom tomato & burrata', time:'10 min', difficulty:'Easy', kcal:'280 kcal', img:'https://images.unsplash.com/photo-1601314002592-b8734bca6604?w=800&q=70', desc:'The summer plate. Good olive oil, flaky salt, basil torn at the last second.' },
+  { title:'Sunday sourdough cinnamon rolls', time:'3 hr', difficulty:'Hard', kcal:'620 kcal', img:'https://images.unsplash.com/photo-1583527976767-cbb88e0fcd2b?w=800&q=70', desc:'A project, but worth it. Brown butter glaze, no fondant sugar.' },
+  { title:'Thai basil chicken stir-fry', time:'18 min', difficulty:'Easy', kcal:'430 kcal', img:'https://images.unsplash.com/photo-1455619452474-d2be8b1e70cd?w=800&q=70', desc:'Holy basil, bird chilis, jasmine rice. Faster than delivery.' },
+];
+
+const STORES = [
+  { city:'Brooklyn — Williamsburg', addr:'124 N 6th St', hours:'7am – 11pm', phone:'+1 (718) 555-0119', manager:'Yara Okafor', opened:'2019', featured:true, badge:'Flagship' },
+  { city:'Manhattan — SoHo', addr:'88 Spring St', hours:'6am – 12am', phone:'+1 (212) 555-0142', manager:'Theo Marchetti', opened:'2020' },
+  { city:'Queens — Long Island City', addr:'47-01 Vernon Blvd', hours:'7am – 11pm', phone:'+1 (718) 555-0177', manager:'Priya Raman', opened:'2021' },
+  { city:'Boston — Seaport', addr:'210 Northern Ave', hours:'7am – 10pm', phone:'+1 (617) 555-0188', manager:'Daniel Cho', opened:'2022', badge:'New' },
+  { city:'Brooklyn — Park Slope', addr:'275 5th Ave', hours:'7am – 11pm', phone:'+1 (718) 555-0134', manager:'Mira Halevi', opened:'2018' },
+  { city:'Jersey City — Newport', addr:'525 Washington Blvd', hours:'7am – 11pm', phone:'+1 (201) 555-0102', manager:'Andre Foster', opened:'2021' },
+  { city:'Philadelphia — Fishtown', addr:'1234 E Columbia Ave', hours:'7am – 10pm', phone:'+1 (215) 555-0166', manager:'Cassidy Lin', opened:'2023', badge:'New' },
+  { city:'Washington DC — Union Market', addr:'1309 5th St NE', hours:'7am – 10pm', phone:'+1 (202) 555-0149', manager:'Owen Park', opened:'2022' },
+];
+
+const ROLES = [
+  { team:'Engineering', title:'Senior Full-stack Engineer, Logistics', loc:'Brooklyn, NY · Hybrid', type:'Full-time' },
+  { team:'Engineering', title:'Staff Engineer, Pricing Platform', loc:'Remote (US)', type:'Full-time' },
+  { team:'Design', title:'Principal Product Designer, Store Experience', loc:'Brooklyn, NY · Hybrid', type:'Full-time' },
+  { team:'Operations', title:'Regional Operations Lead, Northeast', loc:'New York, NY', type:'Full-time' },
+  { team:'Data', title:'Senior Data Scientist, Demand Forecasting', loc:'Remote (US)', type:'Full-time' },
+  { team:'Marketing', title:'Brand Marketing Manager', loc:'Brooklyn, NY', type:'Full-time' },
+  { team:'Sustainability', title:'Sourcing Program Manager', loc:'Brooklyn, NY · Hybrid', type:'Full-time' },
+  { team:'Customer', title:'Customer Care Specialist (Bilingual ES/EN)', loc:'Remote (US)', type:'Full-time' },
+];
+
+/* ---------- CART ---------- */
+let cart = JSON.parse(localStorage.getItem('marketa-cart') || '[]');
+function saveCart(){ localStorage.setItem('marketa-cart', JSON.stringify(cart)); updateCartUI(); }
+function addToCart(id){
+  const p = PRODUCTS.find(x=>x.id===id); if(!p) return;
+  const ex = cart.find(x=>x.id===id);
+  if(ex) ex.qty++; else cart.push({...p, qty:1});
+  saveCart(); openCart(); showToast(`${p.name} added to cart`);
+}
+function removeFromCart(id){ cart = cart.filter(x=>x.id!==id); saveCart(); renderCartItems(); }
+function changeQty(id, d){
+  const it = cart.find(x=>x.id===id); if(!it) return;
+  it.qty += d; if(it.qty<=0) return removeFromCart(id);
+  saveCart(); renderCartItems();
+}
+function updateCartUI(){
+  const c = cart.reduce((a,b)=>a+b.qty,0);
+  const t = cart.reduce((a,b)=>a+b.qty*b.price,0);
+  document.getElementById('cart-count').textContent = c;
+  document.getElementById('cart-sub').textContent = `${c} item${c===1?'':'s'} · $${t.toFixed(2)}`;
+  document.getElementById('cart-total').textContent = `$${t.toFixed(2)}`;
+}
+function renderCartItems(){
+  const el = document.getElementById('cart-items');
+  if(cart.length===0){
+    el.innerHTML = `<div class="text-center py-12 text-ink/50">
+      <div class="text-5xl mb-3">🛒</div>
+      <div class="font-semibold text-ink mb-1">Your cart is empty</div>
+      <div class="text-sm">Start adding some fresh goodness.</div>
+      <a href="#/products" data-close-cart class="inline-block mt-4 px-4 py-2 rounded-full bg-forest-700 text-cream text-sm font-semibold">Browse products</a>
+    </div>`; return;
+  }
+  el.innerHTML = cart.map(it=>`
+    <div class="flex gap-3 p-3 rounded-2xl bg-bone">
+      <img src="${it.img}" class="w-16 h-16 object-cover rounded-xl" alt="" loading="lazy" />
+      <div class="flex-1 min-w-0">
+        <div class="font-semibold text-sm truncate">${it.name}</div>
+        <div class="text-xs text-ink/60">${it.unit} · $${it.price.toFixed(2)}</div>
+        <div class="mt-1 flex items-center gap-2">
+          <button onclick="changeQty('${it.id}',-1)" class="w-7 h-7 rounded-full bg-cream hover:bg-clay">−</button>
+          <span class="font-mono text-sm w-6 text-center">${it.qty}</span>
+          <button onclick="changeQty('${it.id}',1)" class="w-7 h-7 rounded-full bg-cream hover:bg-clay">+</button>
+          <button onclick="removeFromCart('${it.id}')" class="ml-auto text-xs text-ink/50 hover:text-red-600">Remove</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+function openCart(){ document.getElementById('cart-drawer').classList.remove('hidden'); renderCartItems(); }
+function closeCart(){ document.getElementById('cart-drawer').classList.add('hidden'); }
+
+/* ---------- TOAST ---------- */
+function showToast(text){
+  const t = document.getElementById('toast');
+  document.getElementById('toast-text').textContent = text;
+  t.classList.remove('hidden');
+  clearTimeout(window._toastT);
+  window._toastT = setTimeout(()=>t.classList.add('hidden'), 2200);
+}
+
+/* ---------- ROUTER ---------- */
+const routes = {
+  '': renderHome,
+  '/': renderHome,
+  '/products': renderProducts,
+  '/stores': renderStores,
+  '/recipes': renderRecipes,
+  '/about': renderAbout,
+  '/sustainability': renderSustainability,
+  '/careers': renderCareers,
+  '/contact': renderContact,
+};
+function navigate(){
+  const hash = location.hash.slice(1) || '/';
+  const path = hash.split('?')[0];
+  const fn = routes[path] || renderNotFound;
+  const app = document.getElementById('app');
+  app.classList.remove('page-enter'); void app.offsetWidth; app.classList.add('page-enter');
+  app.innerHTML = fn();
+  window.scrollTo({top:0, behavior:'instant'});
+  setActiveNav(path);
+  setTimeout(observeReveals, 50);
+}
+function setActiveNav(path){
+  document.querySelectorAll('[data-nav]').forEach(a=>{
+    const href = a.getAttribute('href').replace('#','');
+    a.classList.toggle('active', href === path || (path==='/' && href==='/'));
+  });
+}
+window.addEventListener('hashchange', navigate);
+
+/* ---------- UI HELPERS ---------- */
+function productCard(p){
+  return `
+  <article class="card-hover bg-white rounded-2xl overflow-hidden border border-ink/5 group">
+    <div class="relative aspect-square overflow-hidden bg-bone">
+      <img src="${p.img}" alt="${p.name}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+      ${p.tag?`<span class="absolute top-3 left-3 ${p.tagColor} text-cream text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full">${p.tag}</span>`:''}
+      <button onclick="addToCart('${p.id}')" class="absolute bottom-3 right-3 w-10 h-10 rounded-full bg-ink text-cream hover:bg-forest-700 flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition" aria-label="Add to cart">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
+    </div>
+    <div class="p-4">
+      <div class="eyebrow text-ink/50">${p.cat}</div>
+      <h3 class="font-semibold mt-1 leading-tight">${p.name}</h3>
+      <div class="flex items-end justify-between mt-2">
+        <div class="text-xs text-ink/60">${p.unit}</div>
+        <div class="font-mono font-bold text-lg">$${p.price.toFixed(2)}</div>
+      </div>
+    </div>
+  </article>`;
+}
+
+/* ---------- PAGES ---------- */
+
+function renderHome(){
+  return `
+  <!-- HERO -->
+  <section class="relative overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-br from-forest-50 via-cream to-lime/10"></div>
+    <div class="absolute inset-0 grid-noise opacity-50"></div>
+    <div class="relative max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 pt-16 pb-24 grid lg:grid-cols-12 gap-10 items-center">
+      <div class="lg:col-span-7">
+        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-ink/10 text-xs font-mono">
+          <span class="w-2 h-2 rounded-full bg-forest-700 animate-pulse-soft"></span>
+          <span>87 stores · 4,200 farmers · 1 mission</span>
+        </div>
+        <h1 class="display display-xl mt-6">
+          The future<br/>
+          of <span class="relative inline-block">
+            <span class="relative z-10">fresh</span>
+            <svg class="absolute -bottom-3 left-0 w-full" viewBox="0 0 300 18" preserveAspectRatio="none"><path d="M2 14 Q 80 2, 150 10 T 298 6" stroke="#C7F26B" stroke-width="6" fill="none" stroke-linecap="round"/></svg>
+          </span><br/>
+          is here.
+        </h1>
+        <p class="mt-8 text-lg sm:text-xl text-ink/70 max-w-xl leading-relaxed">
+          MARKETA partners directly with the people who grow your food. No middlemen. No surprises. Just produce picked yesterday, on your table tonight.
+        </p>
+        <div class="mt-8 flex flex-wrap gap-3">
+          <a href="#/products" class="btn-primary inline-flex items-center gap-2 rounded-full px-6 py-3.5 font-semibold">
+            Start shopping
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+          </a>
+          <a href="#/stores" class="btn-ghost inline-flex items-center gap-2 rounded-full px-6 py-3.5 font-semibold">
+            Find a store
+          </a>
+        </div>
+        <div class="mt-10 grid grid-cols-3 gap-6 max-w-md">
+          <div>
+            <div class="display-md font-black">12k+</div>
+            <div class="eyebrow text-ink/60 mt-1">Products</div>
+          </div>
+          <div>
+            <div class="display-md font-black">87</div>
+            <div class="eyebrow text-ink/60 mt-1">Stores</div>
+          </div>
+          <div>
+            <div class="display-md font-black">4.9<span class="text-forest-700">★</span></div>
+            <div class="eyebrow text-ink/60 mt-1">App rating</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="lg:col-span-5 relative">
+        <div class="relative aspect-[4/5] blob overflow-hidden bg-forest-700">
+          <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?w=900&q=80" alt="Fresh produce" class="w-full h-full object-cover" />
+          <div class="absolute inset-0 bg-gradient-to-t from-forest-900/40 to-transparent"></div>
+        </div>
+        <div class="absolute -bottom-6 -left-6 bg-white rounded-2xl shadow-2xl p-4 flex items-center gap-3 max-w-xs">
+          <div class="w-12 h-12 rounded-full bg-forest-700 text-cream flex items-center justify-center text-2xl">🥬</div>
+          <div>
+            <div class="text-xs text-ink/60 font-mono">Picked 6 hours ago</div>
+            <div class="font-bold">Arugula · Hudson Valley, NY</div>
+          </div>
+        </div>
+        <div class="absolute -top-4 -right-4 bg-lime rounded-2xl shadow-2xl p-4">
+          <div class="eyebrow text-ink/70">Today's deal</div>
+          <div class="font-black text-2xl">-30%</div>
+          <div class="text-xs font-mono">Wild salmon</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- trust strip -->
+    <div class="relative border-y border-ink/10 bg-white">
+      <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 py-6 flex flex-wrap items-center justify-center gap-x-12 gap-y-3 text-sm">
+        <span class="eyebrow text-ink/50">As featured in</span>
+        <span class="font-bold tracking-tight text-ink/70">THE NEW YORK TIMES</span>
+        <span class="font-serif italic text-ink/70 text-lg">Eater</span>
+        <span class="font-bold tracking-tight text-ink/70">BON APPÉTIT</span>
+        <span class="font-black tracking-widest text-ink/70 text-sm">WIRED</span>
+        <span class="font-bold text-ink/70">TechCrunch</span>
+        <span class="font-mono text-ink/70">The Verge</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- CATEGORIES -->
+  <section class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 py-24">
+    <div class="flex items-end justify-between mb-12 reveal">
+      <div>
+        <div class="eyebrow text-forest-700">Shop by aisle</div>
+        <h2 class="display-md mt-2">Everything you need.<br/>Nothing you don't.</h2>
+      </div>
+      <a href="#/products" class="hidden sm:inline-flex items-center gap-1 underline-grow font-medium">All departments →</a>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+      ${CATEGORIES.map((c,i)=>`
+        <a href="#/products" class="reveal card-hover group relative aspect-[4/5] rounded-2xl overflow-hidden bg-bone" style="transition-delay:${i*40}ms">
+          <img src="${c.img}" alt="${c.name}" loading="lazy" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-700" />
+          <div class="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/20 to-transparent"></div>
+          <div class="absolute inset-x-0 bottom-0 p-5 text-cream">
+            <div class="text-2xl mb-1">${c.icon}</div>
+            <div class="font-bold text-lg">${c.name}</div>
+            <div class="text-xs font-mono text-cream/70">${c.count}</div>
+          </div>
+        </a>
+      `).join('')}
+    </div>
+  </section>
+
+  <!-- FEATURED PRODUCTS -->
+  <section class="bg-white py-24 border-y border-ink/10">
+    <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10">
+      <div class="flex items-end justify-between mb-12 reveal">
+        <div>
+          <div class="eyebrow text-forest-700">Picked this week</div>
+          <h2 class="display-md mt-2">What we're loving.</h2>
+        </div>
+        <div class="hidden md:flex gap-2">
+          <button onclick="document.getElementById('prod-scroll').scrollBy({left:-300,behavior:'smooth'})" class="w-10 h-10 rounded-full border border-ink/20 hover:bg-bone flex items-center justify-center">←</button>
+          <button onclick="document.getElementById('prod-scroll').scrollBy({left:300,behavior:'smooth'})" class="w-10 h-10 rounded-full border border-ink/20 hover:bg-bone flex items-center justify-center">→</button>
+        </div>
+      </div>
+      <div id="prod-scroll" class="scroll-x no-scrollbar flex gap-5 pb-4">
+        ${PRODUCTS.slice(0,8).map(p=>`<div class="w-[260px] flex-shrink-0">${productCard(p)}</div>`).join('')}
+      </div>
+    </div>
+  </section>
+
+  <!-- WHY MARKETA -->
+  <section class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 py-24">
+    <div class="reveal mb-16 max-w-3xl">
+      <div class="eyebrow text-forest-700">Why MARKETA</div>
+      <h2 class="display-md mt-3">We're rebuilding the grocery stack — from the soil up.</h2>
+      <p class="mt-4 text-lg text-ink/70 max-w-2xl">Every MARKETA store is built on the same principle: shorter supply chains, fairer prices for farmers, and zero compromise on freshness. Here's how it works in practice.</p>
+    </div>
+    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
+      ${[
+        {n:'01', t:'Direct sourcing', d:'We work with 4,200+ farms within a 250-mile radius. No distributors, no warehouses full of plastic-wrapped pallets.'},
+        {n:'02', t:'24-hour shelf', d:'Most produce hits our shelves within 24 hours of harvest. We don\'t sell anything past its prime. Ever.'},
+        {n:'03', t:'Fair pricing', d:'Farmers set their prices. We add a flat margin so they earn a living wage, and you pay what the food is actually worth.'},
+        {n:'04', t:'Zero waste', d:'93% of our produce is sold before its best-by date. The rest? Donated to local food banks within hours.'},
+      ].map((b,i)=>`
+        <div class="reveal card-hover p-7 rounded-2xl bg-cream border border-ink/5" style="transition-delay:${i*60}ms">
+          <div class="font-mono text-xs text-forest-700">${b.n}</div>
+          <div class="display text-2xl mt-3 leading-tight">${b.t}</div>
+          <p class="text-ink/70 mt-3 text-sm leading-relaxed">${b.d}</p>
+        </div>
+      `).join('')}
+    </div>
+  </section>
+
+  <!-- BIG STAT BAND -->
+  <section class="stripe-band text-cream py-20 relative overflow-hidden">
+    <div class="relative max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 grid grid-cols-2 lg:grid-cols-4 gap-8">
+      ${[
+        {n:'1.2M+', l:'households served'},
+        {n:'87', l:'stores, 12 states'},
+        {n:'$48M', l:'paid to farmers in 2025'},
+        {n:'0', l:'plastic bags since 2022'},
+      ].map(s=>`
+        <div class="reveal">
+          <div class="display display-lg">${s.n}</div>
+          <div class="font-mono uppercase tracking-wider text-sm text-cream/80 mt-2">${s.l}</div>
+        </div>
+      `).join('')}
+    </div>
+  </section>
+
+  <!-- LOCAL FARMER STORY -->
+  <section class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 py-24 grid lg:grid-cols-2 gap-12 items-center">
+    <div class="reveal">
+      <div class="eyebrow text-forest-700">From the field</div>
+      <h2 class="display-md mt-3">Meet Mei.<br/>She grows your greens.</h2>
+      <p class="mt-5 text-lg text-ink/70 leading-relaxed">
+        Mei Tanaka runs a 12-acre farm in the Hudson Valley. Three years ago, she was selling to wholesalers at $0.80/lb. Today, she sells direct to MARKETA at $2.40/lb — and customers still pay less than the supermarket down the street.
+      </p>
+      <p class="mt-4 text-lg text-ink/70 leading-relaxed">
+        That's what "fair pricing" actually looks like.
+      </p>
+      <a href="#/sustainability" class="mt-8 inline-flex items-center gap-2 underline-grow font-semibold">Read her full story →</a>
+    </div>
+    <div class="reveal relative">
+      <div class="aspect-[4/5] rounded-3xl overflow-hidden bg-bone">
+        <img src="https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=900&q=80" alt="Farmer Mei in her field" class="w-full h-full object-cover" />
+      </div>
+      <div class="absolute -bottom-6 right-6 bg-white rounded-2xl shadow-2xl p-5 max-w-xs">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-full bg-forest-700 text-cream flex items-center justify-center font-bold text-lg">MT</div>
+          <div>
+            <div class="font-bold">Mei Tanaka</div>
+            <div class="text-xs text-ink/60">Tanaka Family Farm, NY</div>
+          </div>
+        </div>
+        <div class="mt-3 text-sm text-ink/70">"MARKETA is the first partner that ever asked what we needed to make the farm work."</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RECIPES -->
+  <section class="bg-forest-700 text-cream py-24 relative overflow-hidden">
+    <div class="absolute inset-0 grid-noise opacity-20"></div>
+    <div class="relative max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10">
+      <div class="flex items-end justify-between mb-12 reveal">
+        <div>
+          <div class="eyebrow text-lime">Cook with MARKETA</div>
+          <h2 class="display-md mt-2">Tonight's dinner, planned in 5 minutes.</h2>
+        </div>
+        <a href="#/recipes" class="hidden sm:inline-flex items-center gap-1 underline-grow font-medium">All recipes →</a>
+      </div>
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        ${RECIPES.slice(0,3).map(r=>`
+          <a href="#/recipes" class="reveal card-hover group block bg-cream text-ink rounded-2xl overflow-hidden">
+            <div class="aspect-[4/3] overflow-hidden">
+              <img src="${r.img}" alt="${r.title}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+            </div>
+            <div class="p-6">
+              <div class="flex gap-2 eyebrow text-ink/50 mb-2">
+                <span>${r.time}</span><span>·</span><span>${r.difficulty}</span><span>·</span><span>${r.kcal}</span>
+              </div>
+              <h3 class="font-bold text-xl leading-tight">${r.title}</h3>
+              <p class="mt-2 text-ink/70 text-sm">${r.desc}</p>
+            </div>
+          </a>
+        `).join('')}
+      </div>
+    </div>
+  </section>
+
+  <!-- APP DOWNLOAD BANNER -->
+  <section class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 py-24">
+    <div class="reveal relative rounded-3xl bg-ink text-cream overflow-hidden grain">
+      <div class="relative grid lg:grid-cols-2 gap-10 p-10 sm:p-16 items-center">
+        <div>
+          <div class="eyebrow text-lime">Marketa App · 4.9★ · 142k reviews</div>
+          <h2 class="display-md mt-3">Fresh, faster.<br/>On every device.</h2>
+          <p class="mt-5 text-cream/70 text-lg max-w-md">Order in 30 seconds with smart reorder. Track delivery in real time. Save your staples. Discover what's in season near you.</p>
+          <div class="mt-7 flex flex-wrap gap-3">
+            <a href="#" class="flex items-center gap-3 px-5 py-3 rounded-2xl bg-cream text-ink hover:bg-lime transition">
+              <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 12.5c0-2.4 2-3.5 2.1-3.6-1.2-1.7-3-1.9-3.6-2-1.5-.2-3 .9-3.7.9s-2-.9-3.3-.9c-1.7 0-3.3 1-4.2 2.5-1.8 3.1-.5 7.7 1.3 10.3.9 1.2 1.9 2.6 3.3 2.6 1.3-.1 1.8-.9 3.4-.9s2 .9 3.4.9c1.4 0 2.3-1.3 3.2-2.5 1-1.4 1.4-2.8 1.4-2.9-.1 0-2.7-1-2.7-4z"/></svg>
+              <div><div class="text-[10px] uppercase tracking-wider opacity-60">Download</div><div class="font-bold">App Store</div></div>
+            </a>
+            <a href="#" class="flex items-center gap-3 px-5 py-3 rounded-2xl bg-cream text-ink hover:bg-lime transition">
+              <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M3 3.5v17c0 .6.3 1.1.8 1.3l9.6-9.8L3.8 2.2c-.5.2-.8.7-.8 1.3z"/></svg>
+              <div><div class="text-[10px] uppercase tracking-wider opacity-60">Get it on</div><div class="font-bold">Google Play</div></div>
+            </a>
+          </div>
+        </div>
+        <div class="relative hidden lg:flex justify-center">
+          <div class="relative w-72 h-[560px] bg-graphite rounded-[3rem] border-8 border-graphite shadow-2xl overflow-hidden">
+            <div class="absolute top-3 left-1/2 -translate-x-1/2 w-24 h-6 bg-ink rounded-full z-10"></div>
+            <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&q=70" class="w-full h-full object-cover" alt="App preview" />
+            <div class="absolute top-16 left-4 right-4 bg-cream rounded-2xl p-3 flex items-center gap-2">
+              <div class="w-10 h-10 rounded-full bg-forest-700 text-cream flex items-center justify-center">🥑</div>
+              <div class="flex-1"><div class="text-xs font-bold">Hass Avocados</div><div class="text-[10px] text-ink/60">Reorder in 30 sec</div></div>
+              <div class="font-mono text-xs font-bold">$1.25</div>
+            </div>
+            <div class="absolute top-32 left-4 right-4 bg-lime rounded-2xl p-3 flex items-center justify-between">
+              <div class="font-bold text-sm">Order in 4 min →</div>
+              <div class="w-8 h-8 rounded-full bg-ink text-cream flex items-center justify-center">→</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRESS QUOTES -->
+  <section class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 py-24">
+    <div class="grid md:grid-cols-3 gap-8">
+      ${[
+        {q:'"The most ambitious grocery store in America right now."', s:'— Bon Appétit, 2026'},
+        {q:'"Whole Foods should be worried."', s:'— The Verge, Sept 2025'},
+        {q:'"MARKETA figured out the fresh supply chain before anyone else did."', s:'— TechCrunch, 2026'},
+      ].map(p=>`
+        <blockquote class="reveal p-8 rounded-2xl bg-bone">
+          <div class="display text-2xl leading-snug">${p.q}</div>
+          <div class="mt-6 font-mono text-xs uppercase tracking-wider text-ink/50">${p.s}</div>
+        </blockquote>
+      `).join('')}
+    </div>
+  </section>
+  `;
+}
+
+function renderProducts(){
+  return `
+  <section class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 pt-12 pb-6">
+    <div class="flex flex-wrap items-end justify-between gap-6">
+      <div>
+        <div class="eyebrow text-forest-700">Catalog · 12,400 items</div>
+        <h1 class="display-md mt-2">Shop the store.</h1>
+        <p class="mt-3 text-ink/70 max-w-xl">From pasture-raised eggs to wild-foraged mushrooms. Filter by diet, sourcing, and price.</p>
+      </div>
+      <div class="flex gap-2 items-center">
+        <select class="rounded-full border border-ink/15 px-4 py-2 text-sm bg-white">
+          <option>All categories</option>
+          ${CATEGORIES.map(c=>`<option>${c.name}</option>`).join('')}
+        </select>
+        <select class="rounded-full border border-ink/15 px-4 py-2 text-sm bg-white">
+          <option>Sort: Featured</option>
+          <option>Price: low to high</option>
+          <option>Price: high to low</option>
+          <option>Local first</option>
+          <option>Organic first</option>
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <section class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 pb-20 grid lg:grid-cols-[260px_1fr] gap-10">
+    <aside class="hidden lg:block">
+      <div class="sticky top-24 space-y-6">
+        <div>
+          <div class="eyebrow text-ink/50 mb-3">Dietary</div>
+          <div class="space-y-2 text-sm">
+            ${['Organic','Local (250mi)','Gluten-free','Vegan','Keto','Fair-trade','Grass-fed','Wild-caught'].map(d=>`
+              <label class="flex items-center gap-3 p-2 rounded-lg hover:bg-bone cursor-pointer">
+                <input type="checkbox" class="accent-forest-700" />
+                <span>${d}</span>
+              </label>
+            `).join('')}
+          </div>
+        </div>
+        <div>
+          <div class="eyebrow text-ink/50 mb-3">Price</div>
+          <input type="range" class="w-full accent-forest-700" />
+          <div class="flex justify-between text-xs font-mono mt-2"><span>$0</span><span>$50+</span></div>
+        </div>
+        <div class="p-5 rounded-2xl bg-forest-700 text-cream">
+          <div class="font-bold mb-1">Member deal</div>
+          <div class="text-sm text-cream/80">Get 20% off your first 3 orders with Marketa+.</div>
+          <button class="mt-3 bg-lime text-ink text-xs font-bold px-3 py-1.5 rounded-full">Try free →</button>
+        </div>
+      </div>
+    </aside>
+    <div>
+      <div class="flex items-center justify-between mb-5">
+        <div class="text-sm text-ink/60 font-mono">Showing ${PRODUCTS.length} of 12,400</div>
+        <div class="flex gap-2">
+          <button class="px-3 py-1.5 rounded-full bg-ink text-cream text-xs font-semibold">Grid</button>
+          <button class="px-3 py-1.5 rounded-full bg-bone text-ink/60 text-xs font-semibold">List</button>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
+        ${[...PRODUCTS, ...PRODUCTS].map(p=>productCard(p)).join('')}
+      </div>
+      <div class="mt-12 flex justify-center">
+        <button class="px-6 py-3 rounded-full border border-ink/20 hover:bg-bone font-semibold">Load 24 more →</button>
+      </div>
+    </div>
+  </section>
+  `;
+}
+
+function renderStores(){
+  return `
+  <section class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 pt-12 pb-6">
+    <div class="eyebrow text-forest-700">Find a store</div>
+    <h1 class="display-md mt-2">87 stores. Probably one near you.</h1>
+    <p class="mt-3 text-ink/70 max-w-xl">Open your closest MARKETA and grab groceries in under 30 minutes, or have them delivered same-day.</p>
+
+    <div class="mt-8 flex flex-wrap gap-3 items-center">
+      <div class="flex items-center gap-2 px-4 py-3 rounded-full bg-white border border-ink/10 flex-1 max-w-md">
+        <svg class="w-4 h-4 text-ink/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-7 8-13a8 8 0 1 0-16 0c0 6 8 13 8 13z"/><circle cx="12" cy="9" r="3"/></svg>
+        <input placeholder="ZIP, city, or address" class="flex-1 bg-transparent outline-none text-sm" />
+      </div>
+      <select class="px-4 py-3 rounded-full bg-white border border-ink/10 text-sm">
+        <option>Within 5 miles</option>
+        <option>Within 10 miles</option>
+        <option>Within 25 miles</option>
+      </select>
+      <select class="px-4 py-3 rounded-full bg-white border border-ink/10 text-sm">
+        <option>All services</option>
+        <option>Pickup</option>
+        <option>Delivery</option>
+        <option>In-store dining</option>
+      </select>
+    </div>
+  </section>
+
+  <!-- MAP MOCK + FEATURED -->
+  <section class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 pb-12 grid lg:grid-cols-[1.4fr_1fr] gap-8">
+    <div class="reveal rounded-3xl overflow-hidden border border-ink/10 bg-forest-700 text-cream relative aspect-[4/3] lg:aspect-auto">
+      <svg viewBox="0 0 800 600" class="absolute inset-0 w-full h-full">
+        <defs>
+          <pattern id="dots" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" fill="rgba(255,255,255,0.15)"/></pattern>
+        </defs>
+        <rect width="800" height="600" fill="#0A6E3D"/>
+        <rect width="800" height="600" fill="url(#dots)"/>
+        <!-- abstract map shapes -->
+        <path d="M 100 400 Q 200 300 350 350 T 600 380 T 750 320" stroke="rgba(255,255,255,0.4)" stroke-width="3" fill="none"/>
+        <path d="M 50 200 Q 200 180 350 220 T 700 200" stroke="rgba(255,255,255,0.3)" stroke-width="2" fill="none"/>
+        <path d="M 150 100 L 600 130 L 700 500 L 100 480 Z" stroke="rgba(255,255,255,0.2)" stroke-width="2" stroke-dasharray="6 6" fill="none"/>
+        <!-- store pins -->
+        ${[
+          {x:220,y:280,r:14,big:1},
+          {x:340,y:340,r:10},
+          {x:480,y:300,r:12},
+          {x:540,y:380,r:9},
+          {x:380,y:240,r:9},
+          {x:260,y:200,r:8},
+          {x:600,y:340,r:9},
+          {x:680,y:280,r:8},
+        ].map(p=>`
+          <g transform="translate(${p.x} ${p.y})">
+            ${p.big?`<circle r="${p.r+8}" fill="#C7F26B" opacity="0.3"><animate attributeName="r" from="${p.r+6}" to="${p.r+16}" dur="2s" repeatCount="indefinite"/><animate attributeName="opacity" from="0.4" to="0" dur="2s" repeatCount="indefinite"/></circle>`:''}
+            <circle r="${p.r}" fill="${p.big?'#C7F26B':'#FAFAF7'}" stroke="#0A6E3D" stroke-width="2"/>
+            ${p.big?`<text y="4" text-anchor="middle" font-family="Inter" font-weight="700" font-size="11" fill="#0A6E3D">★</text>`:''}
+          </g>
+        `).join('')}
+      </svg>
+      <div class="absolute bottom-4 left-4 bg-cream text-ink rounded-2xl p-4 shadow-2xl max-w-xs">
+        <div class="font-bold">Williamsburg, Brooklyn</div>
+        <div class="text-xs text-ink/60 mt-1">8 stores nearby · Open until 11pm</div>
+        <div class="text-xs font-mono mt-2 text-forest-700">★ Flagship · opened 2019</div>
+      </div>
+      <div class="absolute top-4 right-4 bg-ink/80 backdrop-blur px-3 py-2 rounded-full text-xs font-mono">LIVE · 87 active stores</div>
+    </div>
+
+    <div class="reveal bg-lime rounded-3xl p-8 lg:p-10 flex flex-col justify-between">
+      <div>
+        <div class="eyebrow text-ink/70">This week's flagship</div>
+        <h2 class="display-md mt-3">Williamsburg<br/>flagship.</h2>
+        <p class="mt-4 text-ink/80 leading-relaxed">Our original store. 14,000 sq ft of fresh produce, an in-house bakery, a 30-seat café, and the only MARKETA with a rooftop herb garden.</p>
+        <ul class="mt-6 space-y-2 text-sm">
+          <li class="flex items-start gap-2"><span>✓</span> Pickup in 30 min</li>
+          <li class="flex items-start gap-2"><span>✓</span> Same-day delivery to 12 zips</li>
+          <li class="flex items-start gap-2"><span>✓</span> In-store café open until 10pm</li>
+          <li class="flex items-start gap-2"><span>✓</span> Rooftop tour every Saturday 11am</li>
+        </ul>
+      </div>
+      <button class="mt-8 btn-primary rounded-full py-3.5 font-semibold">Get directions →</button>
+    </div>
+  </section>
+
+  <!-- STORE LIST -->
+  <section class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 py-12">
+    <div class="flex items-end justify-between mb-8">
+      <h2 class="display-md">All locations.</h2>
+      <div class="text-sm text-ink/60 font-mono">Showing 8 of 87</div>
+    </div>
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+      ${STORES.map(s=>`
+        <article class="reveal card-hover bg-white rounded-2xl p-6 border border-ink/5">
+          <div class="flex items-start justify-between mb-3">
+            <div>
+              ${s.badge?`<span class="eyebrow inline-block px-2 py-1 rounded-full ${s.badge==='Flagship'?'bg-lime text-ink':'bg-forest-700 text-cream'}">${s.badge}</span>`:'<span class="eyebrow text-ink/40">Store</span>'}
+              <h3 class="font-bold text-lg mt-2">${s.city}</h3>
+            </div>
+          </div>
+          <div class="text-sm text-ink/70 space-y-1.5">
+            <div class="flex items-center gap-2"><svg class="w-4 h-4 text-ink/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-7 8-13a8 8 0 1 0-16 0c0 6 8 13 8 13z"/></svg>${s.addr}</div>
+            <div class="flex items-center gap-2"><svg class="w-4 h-4 text-ink/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>${s.hours}</div>
+            <div class="flex items-center gap-2"><svg class="w-4 h-4 text-ink/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.6A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 3a2 2 0 0 1-.5 2L8 9.6a16 16 0 0 0 6 6l.9-1.3a2 2 0 0 1 2-.5c1 .3 2 .5 3 .7A2 2 0 0 1 22 16.9z"/></svg>${s.phone}</div>
+          </div>
+          <div class="mt-5 pt-5 border-t border-ink/10 flex items-center justify-between">
+            <div>
+              <div class="text-xs text-ink/50 font-mono">Store manager</div>
+              <div class="text-sm font-semibold">${s.manager}</div>
+            </div>
+            <div class="text-xs text-ink/50 font-mono">Since ${s.opened}</div>
+          </div>
+        </article>
+      `).join('')}
+    </div>
+    <div class="mt-10 text-center">
+      <button class="px-6 py-3 rounded-full border border-ink/20 hover:bg-bone font-semibold">Load 79 more stores →</button>
+    </div>
+  </section>
+  `;
+}
+
+function renderRecipes(){
+  return `
+  <section class="bg-forest-700 text-cream py-20 relative overflow-hidden">
+    <div class="absolute inset-0 grid-noise opacity-20"></div>
+    <div class="relative max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 grid lg:grid-cols-2 gap-12 items-center">
+      <div>
+        <div class="eyebrow text-li<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="description" content="MARKETA — The future of fresh. Premium groceries, locally sourced, delivered fast. 87 stores across the US." />
+<meta name="theme-color" content="#0A6E3D" />
+<title>MARKETA — The future of fresh</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' x2='1' y1='0' y2='1'%3E%3Cstop offset='0' stop-color='%2300C853'/%3E%3Cstop offset='1' stop-color='%23064A28'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='%230F1A14'/%3E%3Cpath d='M8 23V10h2.4l5.6 7.5L21.6 10H24v13h-2.5v-8.6L17 21h-2l-4.5-6.6V23z' fill='url(%23g)'/%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['Inter', 'system-ui', 'sans-serif'],
+          mono: ['JetBrains Mono', 'monospace'],
+        },
+        colors: {
+          ink: '#0F0F0F',
+          forest: { 50:'#EDF7F1',100:'#D1EBDC',200:'#A4D6BA',300:'#6FBA8F',400:'#3D9C66',500:'#1E8048',600:'#0A6E3D',700:'#085730',800:'#064A28',900:'#042E1A' },
+          lime: { DEFAULT:'#C7F26B', dark:'#A8D946' },
+          cream: '#FAFAF7',
+          bone: '#F2F0E9',
+          clay: '#E8E3D6',
+          graphite: '#1C1C1C',
+        },
+        letterSpacing: { tightest: '-0.05em', crunch: '-0.03em' },
+        animation: {
+          'marquee': 'marquee 40s linear infinite',
+          'fade-up': 'fadeUp 0.6s ease-out forwards',
+          'spin-slow': 'spin 20s linear infinite',
+          'pulse-soft': 'pulseSoft 3s ease-in-out infinite',
+        },
+        keyframes: {
+          marquee: { '0%': { transform: 'translateX(0)' }, '100%': { transform: 'translateX(-50%)' } },
+          fadeUp: { '0%': { opacity: '0', transform: 'translateY(20px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+          pulseSoft: { '0%,100%': { opacity: '0.6' }, '50%': { opacity: '1' } },
+        },
+      }
+    }
+  }
+</script>
+<style>
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  .display { font-family: 'Inter', sans-serif; font-weight: 800; letter-spacing: -0.04em; line-height: 0.95; }
+  .display-xl { font-size: clamp(3rem, 9vw, 9rem); }
+  .display-lg { font-size: clamp(2.5rem, 6vw, 5.5rem); line-height: 0.95; letter-spacing: -0.04em; }
+  .display-md { font-size: clamp(2rem, 4.5vw, 3.75rem); line-height: 1.02; letter-spacing: -0.035em; }
+  .eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase; }
+  .pill { border-radius: 9999px; }
+  .grid-noise {
+    background-image: linear-gradient(rgba(0,0,0,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+  .grain::before {
+    content: ''; position: absolute; inset: 0; pointer-events: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.4 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.5'/></svg>");
+    opacity: 0.18; mix-blend-mode: overlay;
+  }
+  .card-hover { transition: transform 0.4s cubic-bezier(0.2,0.8,0.2,1), box-shadow 0.4s ease; }
+  .card-hover:hover { transform: translateY(-4px); }
+  .btn-primary { background:#0A6E3D; color:#fff; transition: all .25s ease; }
+  .btn-primary:hover { background:#064A28; transform: translateY(-1px); box-shadow: 0 12px 24px -10px rgba(10,110,61,.5); }
+  .btn-ghost { background: transparent; color: #0F0F0F; border: 1px solid #0F0F0F; transition: all .25s ease; }
+  .btn-ghost:hover { background:#0F0F0F; color:#fff; }
+  .underline-grow { position: relative; }
+  .underline-grow::after { content:''; position:absolute; left:0; bottom:-2px; width:100%; height:1px; background: currentColor; transform: scaleX(0); transform-origin: right; transition: transform .35s cubic-bezier(.7,0,.3,1); }
+  .underline-grow:hover::after { transform: scaleX(1); transform-origin: left; }
+  .page-enter { animation: fadeUp 0.5s ease-out forwards; }
+  .marquee-track { display: flex; width: max-content; }
+  .skew-card { transform: rotate(-1.5deg); }
+  .skew-card.rev { transform: rotate(1.5deg); }
+  .blob {
+    border-radius: 60% 40% 30% 70%/60% 30% 70% 40%;
+    animation: morph 8s ease-in-out infinite;
+  }
+  @keyframes morph {
+    0%,100% { border-radius: 60% 40% 30% 70%/60% 30% 70% 40%; }
+    50% { border-radius: 30% 60% 70% 40%/50% 60% 30% 60%; }
+  }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  .ring-pulse::before {
+    content: ''; position: absolute; inset: -4px; border-radius: inherit;
+    border: 2px solid #C7F26B; opacity: 0; animation: ringPulse 2.4s ease-out infinite;
+  }
+  @keyframes ringPulse { 0% { transform: scale(0.95); opacity:.8; } 100% { transform: scale(1.4); opacity:0; } }
+  .reveal { opacity: 0; transform: translateY(28px); transition: opacity .8s ease, transform .8s cubic-bezier(.2,.8,.2,1); }
+  .reveal.in { opacity: 1; transform: translateY(0); }
+  details > summary { list-style: none; cursor: pointer; }
+  details > summary::-webkit-details-marker { display: none; }
+  .scroll-x { overflow-x: auto; scroll-snap-type: x mandatory; }
+  .scroll-x > * { scroll-snap-align: start; }
+  ::selection { background: #C7F26B; color: #0F0F0F; }
+  .nav-link { position: relative; padding: 0.5rem 0; }
+  .nav-link.active::after { content:''; position:absolute; left:0; right:0; bottom:-4px; height:2px; background:#0A6E3D; border-radius: 2px; }
+  .stripe-band { background: repeating-linear-gradient(45deg, #0A6E3D 0 20px, #085730 20px 40px); }
+</style>
+</head>
+<body class="bg-cream text-ink antialiased">
+
+<!-- ANNOUNCEMENT BAR -->
+<div class="bg-ink text-cream text-xs sm:text-sm py-2 overflow-hidden">
+  <div class="marquee-track animate-marquee">
+    <div class="flex items-center gap-8 px-4 whitespace-nowrap">
+      <span class="font-mono">★ FREE DELIVERY on orders over $35</span>
+      <span>·</span>
+      <span>SAME-DAY PICKUP in 87 stores</span>
+      <span>·</span>
+      <span class="font-mono">NEW: AI Meal Planner →</span>
+      <span>·</span>
+      <span>Locally grown, fairly priced</span>
+      <span>·</span>
+      <span>Member prices up to 30% off</span>
+      <span>·</span>
+      <span>Carbon-neutral delivery fleet</span>
+      <span>·</span>
+    </div>
+    <div class="flex items-center gap-8 px-4 whitespace-nowrap" aria-hidden="true">
+      <span class="font-mono">★ FREE DELIVERY on orders over $35</span>
+      <span>·</span>
+      <span>SAME-DAY PICKUP in 87 stores</span>
+      <span>·</span>
+      <span class="font-mono">NEW: AI Meal Planner →</span>
+      <span>·</span>
+      <span>Locally grown, fairly priced</span>
+      <span>·</span>
+      <span>Member prices up to 30% off</span>
+      <span>·</span>
+      <span>Carbon-neutral delivery fleet</span>
+      <span>·</span>
+    </div>
+  </div>
+</div>
+
+<!-- NAVIGATION -->
+<header id="nav" class="sticky top-0 z-40 bg-cream/85 backdrop-blur-xl border-b border-ink/10">
+  <nav class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 h-16 flex items-center justify-between gap-6">
+    <a href="#/" class="flex items-center gap-2.5 group">
+      <span class="relative inline-flex items-center justify-center w-9 h-9 rounded-xl bg-graphite overflow-hidden">
+        <svg viewBox="0 0 32 32" class="w-7 h-7">
+          <defs>
+            <linearGradient id="lgmark" x1="0" x2="1" y1="0" y2="1">
+              <stop offset="0" stop-color="#C7F26B"/>
+              <stop offset="1" stop-color="#0A6E3D"/>
+            </linearGradient>
+          </defs>
+          <path d="M7 24V8h3.2l5.8 7.8L21.8 8H25v16h-3v-9.5L17 21h-2l-5-6.5V24z" fill="url(#lgmark)"/>
+        </svg>
+      </span>
+      <span class="font-black tracking-tight text-xl">MARKETA</span>
+      <span class="hidden md:inline-flex items-center gap-1 ml-1 text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full bg-lime/30 text-forest-800">v3.4</span>
+    </a>
+
+    <div class="hidden lg:flex items-center gap-8 text-sm font-medium">
+      <a href="#/" class="nav-link" data-nav>Shop</a>
+      <a href="#/products" class="nav-link" data-nav>Products</a>
+      <a href="#/stores" class="nav-link" data-nav>Stores</a>
+      <a href="#/recipes" class="nav-link" data-nav>Recipes</a>
+      <a href="#/sustainability" class="nav-link" data-nav>Sustainability</a>
+      <a href="#/about" class="nav-link" data-nav>Company</a>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <button id="btn-search" class="hidden md:flex items-center gap-2 h-10 px-3 rounded-full bg-bone hover:bg-clay transition text-sm text-ink/70">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <span>Search produce, recipes…</span>
+        <kbd class="hidden xl:inline-block ml-2 font-mono text-[10px] px-1.5 py-0.5 rounded border border-ink/15 bg-cream">⌘K</kbd>
+      </button>
+      <button id="btn-search-mobile" class="md:hidden w-10 h-10 rounded-full hover:bg-bone flex items-center justify-center" aria-label="Search">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      </button>
+      <a href="#/careers" class="hidden md:inline-flex h-10 items-center px-4 rounded-full hover:bg-bone text-sm font-medium">Careers</a>
+      <button id="btn-account" class="hidden sm:inline-flex w-10 h-10 rounded-full hover:bg-bone items-center justify-center" aria-label="Account">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+      </button>
+      <button id="btn-cart" class="relative inline-flex items-center gap-2 h-10 px-3 sm:px-4 rounded-full bg-ink text-cream hover:bg-forest-700 transition text-sm font-medium">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-2 11H8L6 6z"/><circle cx="9" cy="21" r="1.5"/><circle cx="18" cy="21" r="1.5"/><path d="M6 6 4 2H1"/></svg>
+        <span class="hidden sm:inline">Cart</span>
+        <span id="cart-count" class="absolute -top-1 -right-1 min-w-[20px] h-5 px-1 rounded-full bg-lime text-ink text-[11px] font-bold flex items-center justify-center">0</span>
+      </button>
+      <button id="btn-menu" class="lg:hidden w-10 h-10 rounded-full hover:bg-bone flex items-center justify-center" aria-label="Menu">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+    </div>
+  </nav>
+</header>
+
+<!-- MOBILE MENU -->
+<div id="mobile-menu" class="fixed inset-0 z-50 hidden">
+  <div class="absolute inset-0 bg-ink/60 backdrop-blur-sm" data-close-menu></div>
+  <div class="absolute right-0 top-0 bottom-0 w-[88%] max-w-md bg-cream p-6 overflow-y-auto">
+    <div class="flex items-center justify-between mb-8">
+      <span class="font-black text-xl">MARKETA</span>
+      <button data-close-menu class="w-10 h-10 rounded-full bg-bone flex items-center justify-center" aria-label="Close">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+    <ul class="space-y-1 text-2xl font-semibold tracking-tight">
+      <li><a href="#/" data-close-menu class="block py-3 border-b border-ink/10">Shop</a></li>
+      <li><a href="#/products" data-close-menu class="block py-3 border-b border-ink/10">Products</a></li>
+      <li><a href="#/stores" data-close-menu class="block py-3 border-b border-ink/10">Stores</a></li>
+      <li><a href="#/recipes" data-close-menu class="block py-3 border-b border-ink/10">Recipes</a></li>
+      <li><a href="#/sustainability" data-close-menu class="block py-3 border-b border-ink/10">Sustainability</a></li>
+      <li><a href="#/about" data-close-menu class="block py-3 border-b border-ink/10">Company</a></li>
+      <li><a href="#/careers" data-close-menu class="block py-3 border-b border-ink/10">Careers</a></li>
+      <li><a href="#/contact" data-close-menu class="block py-3 border-b border-ink/10">Contact</a></li>
+    </ul>
+    <div class="mt-10 p-5 rounded-2xl bg-forest-700 text-cream">
+      <div class="eyebrow text-lime mb-2">Marketa+ Member</div>
+      <div class="font-bold text-lg leading-tight">Get free delivery on every order over $35.</div>
+      <button class="mt-4 inline-flex items-center gap-2 bg-lime text-ink font-semibold rounded-full px-4 py-2 text-sm">Start 30-day trial →</button>
+    </div>
+  </div>
+</div>
+
+<!-- CART DRAWER -->
+<div id="cart-drawer" class="fixed inset-0 z-50 hidden">
+  <div class="absolute inset-0 bg-ink/50 backdrop-blur-sm" data-close-cart></div>
+  <aside class="absolute right-0 top-0 bottom-0 w-full sm:w-[440px] bg-cream flex flex-col">
+    <div class="flex items-center justify-between p-5 border-b border-ink/10">
+      <div>
+        <div class="font-bold text-lg">Your cart</div>
+        <div id="cart-sub" class="text-xs text-ink/60 font-mono">0 items · $0.00</div>
+      </div>
+      <button data-close-cart class="w-10 h-10 rounded-full bg-bone flex items-center justify-center" aria-label="Close">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+    <div id="cart-items" class="flex-1 overflow-y-auto p-5 space-y-3"></div>
+    <div class="border-t border-ink/10 p-5 bg-bone">
+      <div class="flex justify-between text-sm mb-2"><span class="text-ink/60">Subtotal</span><span id="cart-total" class="font-mono">$0.00</span></div>
+      <div class="flex justify-between text-sm mb-3"><span class="text-ink/60">Delivery</span><span class="font-mono text-forest-700 font-semibold">FREE over $35</span></div>
+      <button class="w-full btn-primary rounded-full py-3 font-semibold">Checkout →</button>
+      <div class="mt-3 text-center text-[11px] font-mono text-ink/50 uppercase tracking-wider">Secure checkout · 256-bit SSL</div>
+    </div>
+  </aside>
+</div>
+
+<!-- SEARCH MODAL -->
+<div id="search-modal" class="fixed inset-0 z-50 hidden">
+  <div class="absolute inset-0 bg-ink/70 backdrop-blur-md" data-close-search></div>
+  <div class="relative max-w-2xl mx-auto mt-24 bg-cream rounded-2xl shadow-2xl overflow-hidden">
+    <div class="flex items-center gap-3 p-5 border-b border-ink/10">
+      <svg class="w-5 h-5 text-ink/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="search-input" type="text" placeholder="Search 12,400+ products, recipes, stores…" class="flex-1 bg-transparent outline-none text-lg" />
+      <kbd class="font-mono text-[10px] px-1.5 py-0.5 rounded border border-ink/15">ESC</kbd>
+    </div>
+    <div class="p-5">
+      <div class="eyebrow text-ink/50 mb-3">Trending searches</div>
+      <div class="flex flex-wrap gap-2">
+        <button class="px-3 py-1.5 rounded-full bg-bone hover:bg-clay text-sm">🥑 Avocado</button>
+        <button class="px-3 py-1.5 rounded-full bg-bone hover:bg-clay text-sm">🍓 Strawberries</button>
+        <button class="px-3 py-1.5 rounded-full bg-bone hover:bg-clay text-sm">🥩 Grass-fed beef</button>
+        <button class="px-3 py-1.5 rounded-full bg-bone hover:bg-clay text-sm">🌾 Sourdough</button>
+        <button class="px-3 py-1.5 rounded-full bg-bone hover:bg-clay text-sm">🥗 Caesar salad kit</button>
+        <button class="px-3 py-1.5 rounded-full bg-bone hover:bg-clay text-sm">🧀 Aged cheddar</button>
+      </div>
+      <div class="mt-6 eyebrow text-ink/50 mb-3">Quick links</div>
+      <div class="grid sm:grid-cols-2 gap-2 text-sm">
+        <a href="#/products" class="flex items-center justify-between p-3 rounded-xl hover:bg-bone"><span>Weekly deals</span><span class="text-ink/40">→</span></a>
+        <a href="#/stores" class="flex items-center justify-between p-3 rounded-xl hover:bg-bone"><span>Find a store</span><span class="text-ink/40">→</span></a>
+        <a href="#/recipes" class="flex items-center justify-between p-3 rounded-xl hover:bg-bone"><span>Recipe of the day</span><span class="text-ink/40">→</span></a>
+        <a href="#/sustainability" class="flex items-center justify-between p-3 rounded-xl hover:bg-bone"><span>Local sourcing map</span><span class="text-ink/40">→</span></a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- APP ROOT -->
+<main id="app" class="min-h-[60vh]"></main>
+
+<!-- FOOTER -->
+<footer class="bg-graphite text-cream mt-24 relative overflow-hidden">
+  <div class="absolute inset-0 grid-noise opacity-40 pointer-events-none"></div>
+  <div class="relative max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 pt-20 pb-10">
+    <div class="grid lg:grid-cols-12 gap-10 pb-16 border-b border-cream/10">
+      <div class="lg:col-span-4">
+        <div class="flex items-center gap-2.5 mb-5">
+          <span class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-cream/10">
+            <svg viewBox="0 0 32 32" class="w-7 h-7">
+              <path d="M7 24V8h3.2l5.8 7.8L21.8 8H25v16h-3v-9.5L17 21h-2l-5-6.5V24z" fill="#C7F26B"/>
+            </svg>
+          </span>
+          <span class="font-black text-2xl tracking-tight">MARKETA</span>
+        </div>
+        <p class="text-cream/70 max-w-sm leading-relaxed">The future of fresh. 87 stores, 4,200 local farmers, one mission: make the food system work for everyone.</p>
+        <div class="mt-6 flex gap-2">
+          <a class="w-9 h-9 rounded-full bg-cream/10 hover:bg-lime hover:text-ink flex items-center justify-center transition" aria-label="Instagram"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg></a>
+          <a class="w-9 h-9 rounded-full bg-cream/10 hover:bg-lime hover:text-ink flex items-center justify-center transition" aria-label="TikTok"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 4v9a4 4 0 1 1-4-4"/><path d="M15 4c0 3 2 5 5 5"/></svg></a>
+          <a class="w-9 h-9 rounded-full bg-cream/10 hover:bg-lime hover:text-ink flex items-center justify-center transition" aria-label="YouTube"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="3"/><path d="m10 9 5 3-5 3z" fill="currentColor"/></svg></a>
+          <a class="w-9 h-9 rounded-full bg-cream/10 hover:bg-lime hover:text-ink flex items-center justify-center transition" aria-label="LinkedIn"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M7 10v7M7 7v.01M11 17v-4a2 2 0 0 1 4 0v4M11 10v7"/></svg></a>
+        </div>
+      </div>
+      <div class="lg:col-span-8 grid grid-cols-2 md:grid-cols-4 gap-6 text-sm">
+        <div>
+          <div class="eyebrow text-lime mb-4">Shop</div>
+          <ul class="space-y-2 text-cream/70">
+            <li><a href="#/products" class="hover:text-lime">Produce</a></li>
+            <li><a href="#/products" class="hover:text-lime">Meat & Seafood</a></li>
+            <li><a href="#/products" class="hover:text-lime">Dairy & Eggs</a></li>
+            <li><a href="#/products" class="hover:text-lime">Bakery</a></li>
+            <li><a href="#/products" class="hover:text-lime">Pantry</a></li>
+            <li><a href="#/products" class="hover:text-lime">Frozen</a></li>
+          </ul>
+        </div>
+        <div>
+          <div class="eyebrow text-lime mb-4">Company</div>
+          <ul class="space-y-2 text-cream/70">
+            <li><a href="#/about" class="hover:text-lime">About</a></li>
+            <li><a href="#/careers" class="hover:text-lime">Careers <span class="ml-1 text-[10px] px-1.5 py-0.5 rounded bg-lime text-ink">42 open</span></a></li>
+            <li><a href="#/stores" class="hover:text-lime">Find a store</a></li>
+            <li><a href="#/sustainability" class="hover:text-lime">Impact report</a></li>
+            <li><a href="#/contact" class="hover:text-lime">Press kit</a></li>
+          </ul>
+        </div>
+        <div>
+          <div class="eyebrow text-lime mb-4">Help</div>
+          <ul class="space-y-2 text-cream/70">
+            <li><a href="#/contact" class="hover:text-lime">Customer support</a></li>
+            <li><a href="#/contact" class="hover:text-lime">Delivery & pickup</a></li>
+            <li><a href="#/contact" class="hover:text-lime">Returns</a></li>
+            <li><a href="#/contact" class="hover:text-lime">FAQ</a></li>
+            <li><a href="#/contact" class="hover:text-lime">Accessibility</a></li>
+          </ul>
+        </div>
+        <div>
+          <div class="eyebrow text-lime mb-4">For business</div>
+          <ul class="space-y-2 text-cream/70">
+            <li><a href="#/contact" class="hover:text-lime">Marketa for Teams</a></li>
+            <li><a href="#/contact" class="hover:text-lime">Wholesale</a></li>
+            <li><a href="#/contact" class="hover:text-lime">Catering</a></li>
+            <li><a href="#/contact" class="hover:text-lime">Gift cards</a></li>
+            <li><a href="#/contact" class="hover:text-lime">Investors</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="py-10 grid lg:grid-cols-2 gap-8 items-center">
+      <div>
+        <div class="eyebrow text-lime mb-3">Get the app</div>
+        <h3 class="display-md mb-4">Fresh in your pocket.</h3>
+        <div class="flex flex-wrap gap-3">
+          <a href="#/" class="flex items-center gap-3 px-4 py-3 rounded-2xl bg-cream text-ink hover:bg-lime transition">
+            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 12.5c0-2.4 2-3.5 2.1-3.6-1.2-1.7-3-1.9-3.6-2-1.5-.2-3 .9-3.7.9s-2-.9-3.3-.9c-1.7 0-3.3 1-4.2 2.5-1.8 3.1-.5 7.7 1.3 10.3.9 1.2 1.9 2.6 3.3 2.6 1.3-.1 1.8-.9 3.4-.9s2 .9 3.4.9c1.4 0 2.3-1.3 3.2-2.5 1-1.4 1.4-2.8 1.4-2.9-.1 0-2.7-1-2.7-4z M14 4.5c.7-.9 1.2-2.1 1.1-3.4-1.1.1-2.4.7-3.1 1.6-.7.8-1.3 2.1-1.1 3.3 1.2.1 2.4-.6 3.1-1.5z"/></svg>
+            <div class="text-left"><div class="text-[10px] uppercase tracking-wider opacity-60">Download on</div><div class="font-bold leading-tight">App Store</div></div>
+          </a>
+          <a href="#/" class="flex items-center gap-3 px-4 py-3 rounded-2xl bg-cream text-ink hover:bg-lime transition">
+            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M3 3.5v17c0 .6.3 1.1.8 1.3l9.6-9.8L3.8 2.2c-.5.2-.8.7-.8 1.3zM14.6 12.7l2.6 2.7-11.5 6.6c-.3.1-.6.1-.9 0l9.8-9.3zM18 11.2l3 1.7c.7.4.7 1.4 0 1.8l-3 1.7-2.8-2.6 2.8-2.6zM5.7 1.7l11.5 6.6-2.6 2.7L5.7 1.7z"/></svg>
+            <div class="text-left"><div class="text-[10px] uppercase tracking-wider opacity-60">Get it on</div><div class="font-bold leading-tight">Google Play</div></div>
+          </a>
+        </div>
+      </div>
+      <div>
+        <div class="eyebrow text-lime mb-3">Newsletter</div>
+        <h3 class="display-md mb-4">Eat better. Get $10 off.</h3>
+        <form class="flex gap-2 max-w-md" onsubmit="event.preventDefault(); this.querySelector('button').textContent='Subscribed ✓'; this.querySelector('button').classList.add('bg-lime');">
+          <input type="email" placeholder="you@email.com" class="flex-1 bg-cream/10 border border-cream/20 rounded-full px-5 py-3 text-cream placeholder-cream/50 focus:outline-none focus:border-lime" required />
+          <button class="bg-cream text-ink font-semibold rounded-full px-5 py-3 hover:bg-lime transition">Join</button>
+        </form>
+        <div class="mt-3 text-xs text-cream/50">We email once a week. Unsubscribe anytime. No spam, just recipes.</div>
+      </div>
+    </div>
+
+    <div class="pt-8 border-t border-cream/10 flex flex-wrap gap-x-6 gap-y-2 justify-between items-center text-xs text-cream/50">
+      <div class="font-mono">© 2026 MARKETA Inc. · Delivered with care from 87 stores.</div>
+      <div class="flex gap-5">
+        <a href="#" class="hover:text-cream">Privacy</a>
+        <a href="#" class="hover:text-cream">Terms</a>
+        <a href="#" class="hover:text-cream">Cookie settings</a>
+        <a href="#" class="hover:text-cream">Do not sell my info</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- COOKIE TOAST -->
+<div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 hidden">
+  <div class="bg-ink text-cream rounded-full px-5 py-3 shadow-2xl flex items-center gap-3 text-sm">
+    <span id="toast-text">Added to cart</span>
+    <button onclick="document.getElementById('toast').classList.add('hidden')" class="text-lime hover:underline">Dismiss</button>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   MARKETA — Single-file SPA
+   ========================================================= */
+
+/* ---------- DATA ---------- */
+const PRODUCTS = [
+  { id:'p1', name:'Hass Avocados', cat:'Produce', price:1.25, unit:'each', img:'https://images.unsplash.com/photo-1601039641847-7857b994d704?w=600&q=70', tag:'Local', tagColor:'bg-forest-700' },
+  { id:'p2', name:'Wild Arugula', cat:'Produce', price:3.99, unit:'5oz clamshell', img:'https://images.unsplash.com/photo-1576045057995-568f588f82fb?w=600&q=70', tag:'Organic', tagColor:'bg-lime text-ink' },
+  { id:'p3', name:'Heirloom Tomatoes', cat:'Produce', price:5.49, unit:'lb', img:'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=600&q=70' },
+  { id:'p4', name:'Grass-fed Ribeye', cat:'Meat', price:24.00, unit:'lb', img:'https://images.unsplash.com/photo-1603048297172-c92544798d2e?w=600&q=70', tag:'Premium', tagColor:'bg-ink' },
+  { id:'p5', name:'Wild Sockeye Salmon', cat:'Seafood', price:18.99, unit:'lb', img:'https://images.unsplash.com/photo-1574781330855-d0db8cc6a79c?w=600&q=70', tag:'Sustainable', tagColor:'bg-forest-700' },
+  { id:'p6', name:'Sourdough Boule', cat:'Bakery', price:6.50, unit:'each', img:'https://images.unsplash.com/photo-1585478259715-876acc5be8eb?w=600&q=70', tag:'Baked today', tagColor:'bg-lime text-ink' },
+  { id:'p7', name:'Pasture-raised Eggs', cat:'Dairy', price:7.99, unit:'dozen', img:'https://images.unsplash.com/photo-1569288063643-5d29ad6ad6d6?w=600&q=70' },
+  { id:'p8', name:'Aged Cheddar', cat:'Dairy', price:11.00, unit:'8oz block', img:'https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=600&q=70' },
+  { id:'p9', name:'Strawberries', cat:'Produce', price:4.99, unit:'1lb', img:'https://images.unsplash.com/photo-1543528176-61b239494933?w=600&q=70', tag:'Local', tagColor:'bg-forest-700' },
+  { id:'p10', name:'Free-range Chicken', cat:'Meat', price:9.99, unit:'lb', img:'https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=600&q=70' },
+  { id:'p11', name:'Cold-pressed Olive Oil', cat:'Pantry', price:22.00, unit:'500ml', img:'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=600&q=70' },
+  { id:'p12', name:'Stone-ground Oats', cat:'Pantry', price:5.49, unit:'2lb bag', img:'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=600&q=70', tag:'Organic', tagColor:'bg-lime text-ink' },
+];
+
+const CATEGORIES = [
+  { name:'Produce', icon:'🥬', count:'420+ items', img:'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&q=70' },
+  { name:'Meat & Seafood', icon:'🥩', count:'180+ items', img:'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=800&q=70' },
+  { name:'Dairy & Eggs', icon:'🥚', count:'240+ items', img:'https://images.unsplash.com/photo-1628088062854-d4fcf4d3082d?w=800&q=70' },
+  { name:'Bakery', icon:'🥖', count:'90+ items', img:'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=800&q=70' },
+  { name:'Pantry', icon:'🫙', count:'610+ items', img:'https://images.unsplash.com/photo-1590779033100-9f60a05a013d?w=800&q=70' },
+  { name:'Frozen', icon:'🧊', count:'320+ items', img:'https://images.unsplash.com/photo-1610629000027-a0bb05d8ad48?w=800&q=70' },
+  { name:'Beverages', icon:'🥤', count:'210+ items', img:'https://images.unsplash.com/photo-1546171753-97d7676e4602?w=800&q=70' },
+  { name:'Floral', icon:'🌸', count:'60+ items', img:'https://images.unsplash.com/photo-1487530811176-3780de880c2d?w=800&q=70' },
+];
+
+const RECIPES = [
+  { title:'One-pan lemon garlic salmon', time:'25 min', difficulty:'Easy', kcal:'420 kcal', img:'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=800&q=70', desc:'Bright, herby, and ready in 25 minutes. Wild sockeye with blistered cherry tomatoes.' },
+  { title:'Mushroom risotto, slow & silky', time:'45 min', difficulty:'Medium', kcal:'560 kcal', img:'https://images.unsplash.com/photo-1633964913849-96bb09cbb1ee?w=800&q=70', desc:'Carnaroli rice, wild mushrooms, finished with aged parm and brown butter.' },
+  { title:'Crispy smashed potatoes', time:'40 min', difficulty:'Easy', kcal:'310 kcal', img:'https://images.unsplash.com/photo-1518779578993-ec3579fee39f?w=800&q=70', desc:'Boiled, smashed, roasted hot. The crunch comes from a second blast in the oven.' },
+  { title:'Heirloom tomato & burrata', time:'10 min', difficulty:'Easy', kcal:'280 kcal', img:'https://images.unsplash.com/photo-1601314002592-b8734bca6604?w=800&q=70', desc:'The summer plate. Good olive oil, flaky salt, basil torn at the last second.' },
+  { title:'Sunday sourdough cinnamon rolls', time:'3 hr', difficulty:'Hard', kcal:'620 kcal', img:'https://images.unsplash.com/photo-1583527976767-cbb88e0fcd2b?w=800&q=70', desc:'A project, but worth it. Brown butter glaze, no fondant sugar.' },
+  { title:'Thai basil chicken stir-fry', time:'18 min', difficulty:'Easy', kcal:'430 kcal', img:'https://images.unsplash.com/photo-1455619452474-d2be8b1e70cd?w=800&q=70', desc:'Holy basil, bird chilis, jasmine rice. Faster than delivery.' },
+];
+
+const STORES = [
+  { city:'Brooklyn — Williamsburg', addr:'124 N 6th St', hours:'7am – 11pm', phone:'+1 (718) 555-0119', manager:'Yara Okafor', opened:'2019', featured:true, badge:'Flagship' },
+  { city:'Manhattan — SoHo', addr:'88 Spring St', hours:'6am – 12am', phone:'+1 (212) 555-0142', manager:'Theo Marchetti', opened:'2020' },
+  { city:'Queens — Long Island City', addr:'47-01 Vernon Blvd', hours:'7am – 11pm', phone:'+1 (718) 555-0177', manager:'Priya Raman', opened:'2021' },
+  { city:'Boston — Seaport', addr:'210 Northern Ave', hours:'7am – 10pm', phone:'+1 (617) 555-0188', manager:'Daniel Cho', opened:'2022', badge:'New' },
+  { city:'Brooklyn — Park Slope', addr:'275 5th Ave', hours:'7am – 11pm', phone:'+1 (718) 555-0134', manager:'Mira Halevi', opened:'2018' },
+  { city:'Jersey City — Newport', addr:'525 Washington Blvd', hours:'7am – 11pm', phone:'+1 (201) 555-0102', manager:'Andre Foster', opened:'2021' },
+  { city:'Philadelphia — Fishtown', addr:'1234 E Columbia Ave', hours:'7am – 10pm', phone:'+1 (215) 555-0166', manager:'Cassidy Lin', opened:'2023', badge:'New' },
+  { city:'Washington DC — Union Market', addr:'1309 5th St NE', hours:'7am – 10pm', phone:'+1 (202) 555-0149', manager:'Owen Park', opened:'2022' },
+];
+
+const ROLES = [
+  { team:'Engineering', title:'Senior Full-stack Engineer, Logistics', loc:'Brooklyn, NY · Hybrid', type:'Full-time' },
+  { team:'Engineering', title:'Staff Engineer, Pricing Platform', loc:'Remote (US)', type:'Full-time' },
+  { team:'Design', title:'Principal Product Designer, Store Experience', loc:'Brooklyn, NY · Hybrid', type:'Full-time' },
+  { team:'Operations', title:'Regional Operations Lead, Northeast', loc:'New York, NY', type:'Full-time' },
+  { team:'Data', title:'Senior Data Scientist, Demand Forecasting', loc:'Remote (US)', type:'Full-time' },
+  { team:'Marketing', title:'Brand Marketing Manager', loc:'Brooklyn, NY', type:'Full-time' },
+  { team:'Sustainability', title:'Sourcing Program Manager', loc:'Brooklyn, NY · Hybrid', type:'Full-time' },
+  { team:'Customer', title:'Customer Care Specialist (Bilingual ES/EN)', loc:'Remote (US)', type:'Full-time' },
+];
+
+/* ---------- CART ---------- */
+let cart = JSON.parse(localStorage.getItem('marketa-cart') || '[]');
+function saveCart(){ localStorage.setItem('marketa-cart', JSON.stringify(cart)); updateCartUI(); }
+function addToCart(id){
+  const p = PRODUCTS.find(x=>x.id===id); if(!p) return;
+  const ex = cart.find(x=>x.id===id);
+  if(ex) ex.qty++; else cart.push({...p, qty:1});
+  saveCart(); openCart(); showToast(`${p.name} added to cart`);
+}
+function removeFromCart(id){ cart = cart.filter(x=>x.id!==id); saveCart(); renderCartItems(); }
+function changeQty(id, d){
+  const it = cart.find(x=>x.id===id); if(!it) return;
+  it.qty += d; if(it.qty<=0) return removeFromCart(id);
+  saveCart(); renderCartItems();
+}
+function updateCartUI(){
+  const c = cart.reduce((a,b)=>a+b.qty,0);
+  const t = cart.reduce((a,b)=>a+b.qty*b.price,0);
+  document.getElementById('cart-count').textContent = c;
+  document.getElementById('cart-sub').textContent = `${c} item${c===1?'':'s'} · $${t.toFixed(2)}`;
+  document.getElementById('cart-total').textContent = `$${t.toFixed(2)}`;
+}
+function renderCartItems(){
+  const el = document.getElementById('cart-items');
+  if(cart.length===0){
+    el.innerHTML = `<div class="text-center py-12 text-ink/50">
+      <div class="text-5xl mb-3">🛒</div>
+      <div class="font-semibold text-ink mb-1">Your cart is empty</div>
+      <div class="text-sm">Start adding some fresh goodness.</div>
+      <a href="#/products" data-close-cart class="inline-block mt-4 px-4 py-2 rounded-full bg-forest-700 text-cream text-sm font-semibold">Browse products</a>
+    </div>`; return;
+  }
+  el.innerHTML = cart.map(it=>`
+    <div class="flex gap-3 p-3 rounded-2xl bg-bone">
+      <img src="${it.img}" class="w-16 h-16 object-cover rounded-xl" alt="" loading="lazy" />
+      <div class="flex-1 min-w-0">
+        <div class="font-semibold text-sm truncate">${it.name}</div>
+        <div class="text-xs text-ink/60">${it.unit} · $${it.price.toFixed(2)}</div>
+        <div class="mt-1 flex items-center gap-2">
+          <button onclick="changeQty('${it.id}',-1)" class="w-7 h-7 rounded-full bg-cream hover:bg-clay">−</button>
+          <span class="font-mono text-sm w-6 text-center">${it.qty}</span>
+          <button onclick="changeQty('${it.id}',1)" class="w-7 h-7 rounded-full bg-cream hover:bg-clay">+</button>
+          <button onclick="removeFromCart('${it.id}')" class="ml-auto text-xs text-ink/50 hover:text-red-600">Remove</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+function openCart(){ document.getElementById('cart-drawer').classList.remove('hidden'); renderCartItems(); }
+function closeCart(){ document.getElementById('cart-drawer').classList.add('hidden'); }
+
+/* ---------- TOAST ---------- */
+function showToast(text){
+  const t = document.getElementById('toast');
+  document.getElementById('toast-text').textContent = text;
+  t.classList.remove('hidden');
+  clearTimeout(window._toastT);
+  window._toastT = setTimeout(()=>t.classList.add('hidden'), 2200);
+}
+
+/* ---------- ROUTER ---------- */
+const routes = {
+  '': renderHome,
+  '/': renderHome,
+  '/products': renderProducts,
+  '/stores': renderStores,
+  '/recipes': renderRecipes,
+  '/about': renderAbout,
+  '/sustainability': renderSustainability,
+  '/careers': renderCareers,
+  '/contact': renderContact,
+};
+function navigate(){
+  const hash = location.hash.slice(1) || '/';
+  const path = hash.split('?')[0];
+  const fn = routes[path] || renderNotFound;
+  const app = document.getElementById('app');
+  app.classList.remove('page-enter'); void app.offsetWidth; app.classList.add('page-enter');
+  app.innerHTML = fn();
+  window.scrollTo({top:0, behavior:'instant'});
+  setActiveNav(path);
+  setTimeout(observeReveals, 50);
+}
+function setActiveNav(path){
+  document.querySelectorAll('[data-nav]').forEach(a=>{
+    const href = a.getAttribute('href').replace('#','');
+    a.classList.toggle('active', href === path || (path==='/' && href==='/'));
+  });
+}
+window.addEventListener('hashchange', navigate);
+
+/* ---------- UI HELPERS ---------- */
+function productCard(p){
+  return `
+  <article class="card-hover bg-white rounded-2xl overflow-hidden border border-ink/5 group">
+    <div class="relative aspect-square overflow-hidden bg-bone">
+      <img src="${p.img}" alt="${p.name}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+      ${p.tag?`<span class="absolute top-3 left-3 ${p.tagColor} text-cream text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full">${p.tag}</span>`:''}
+      <button onclick="addToCart('${p.id}')" class="absolute bottom-3 right-3 w-10 h-10 rounded-full bg-ink text-cream hover:bg-forest-700 flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition" aria-label="Add to cart">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
+    </div>
+    <div class="p-4">
+      <div class="eyebrow text-ink/50">${p.cat}</div>
+      <h3 class="font-semibold mt-1 leading-tight">${p.name}</h3>
+      <div class="flex items-end justify-between mt-2">
+        <div class="text-xs text-ink/60">${p.unit}</div>
+        <div class="font-mono font-bold text-lg">$${p.price.toFixed(2)}</div>
+      </div>
+    </div>
+  </article>`;
+}
+
+/* ---------- PAGES ---------- */
+
+function renderHome(){
+  return `
+  <!-- HERO -->
+  <section class="relative overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-br from-forest-50 via-cream to-lime/10"></div>
+    <div class="absolute inset-0 grid-noise opacity-50"></div>
+    <div class="relative max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 pt-16 pb-24 grid lg:grid-cols-12 gap-10 items-center">
+      <div class="lg:col-span-7">
+        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-ink/10 text-xs font-mono">
+          <span class="w-2 h-2 rounded-full bg-forest-700 animate-pulse-soft"></span>
+          <span>87 stores · 4,200 farmers · 1 mission</span>
+        </div>
+        <h1 class="display display-xl mt-6">
+          The future<br/>
+          of <span class="relative inline-block">
+            <span class="relative z-10">fresh</span>
+            <svg class="absolute -bottom-3 left-0 w-full" viewBox="0 0 300 18" preserveAspectRatio="none"><path d="M2 14 Q 80 2, 150 10 T 298 6" stroke="#C7F26B" stroke-width="6" fill="none" stroke-linecap="round"/></svg>
+          </span><br/>
+          is here.
+        </h1>
+        <p class="mt-8 text-lg sm:text-xl text-ink/70 max-w-xl leading-relaxed">
+          MARKETA partners directly with the people who grow your food. No middlemen. No surprises. Just produce picked yesterday, on your table tonight.
+        </p>
+        <div class="mt-8 flex flex-wrap gap-3">
+          <a href="#/products" class="btn-primary inline-flex items-center gap-2 rounded-full px-6 py-3.5 font-semibold">
+            Start shopping
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+          </a>
+          <a href="#/stores" class="btn-ghost inline-flex items-center gap-2 rounded-full px-6 py-3.5 font-semibold">
+            Find a store
+          </a>
+        </div>
+        <div class="mt-10 grid grid-cols-3 gap-6 max-w-md">
+          <div>
+            <div class="display-md font-black">12k+</div>
+            <div class="eyebrow text-ink/60 mt-1">Products</div>
+          </div>
+          <div>
+            <div class="display-md font-black">87</div>
+            <div class="eyebrow text-ink/60 mt-1">Stores</div>
+          </div>
+          <div>
+            <div class="display-md font-black">4.9<span class="text-forest-700">★</span></div>
+            <div class="eyebrow text-ink/60 mt-1">App rating</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="lg:col-span-5 relative">
+        <div class="relative aspect-[4/5] blob overflow-hidden bg-forest-700">
+          <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?w=900&q=80" alt="Fresh produce" class="w-full h-full object-cover" />
+          <div class="absolute inset-0 bg-gradient-to-t from-forest-900/40 to-transparent"></div>
+        </div>
+        <div class="absolute -bottom-6 -left-6 bg-white rounded-2xl shadow-2xl p-4 flex items-center gap-3 max-w-xs">
+          <div class="w-12 h-12 rounded-full bg-forest-700 text-cream flex items-center justify-center text-2xl">🥬</div>
+          <div>
+            <div class="text-xs text-ink/60 font-mono">Picked 6 hours ago</div>
+            <div class="font-bold">Arugula · Hudson Valley, NY</div>
+          </div>
+        </div>
+        <div class="absolute -top-4 -right-4 bg-lime rounded-2xl shadow-2xl p-4">
+          <div class="eyebrow text-ink/70">Today's deal</div>
+          <div class="font-black text-2xl">-30%</div>
+          <div class="text-xs font-mono">Wild salmon</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- trust strip -->
+    <div class="relative border-y border-ink/10 bg-white">
+      <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 py-6 flex flex-wrap items-center justify-center gap-x-12 gap-y-3 text-sm">
+        <span class="eyebrow text-ink/50">As featured in</span>
+        <span class="font-bold tracking-tight text-ink/70">THE NEW YORK TIMES</span>
+        <span class="font-serif italic text-ink/70 text-lg">Eater</span>
+        <span class="font-bold tracking-tight text-ink/70">BON APPÉTIT</span>
+        <span class="font-black tracking-widest text-ink/70 text-sm">WIRED</span>
+        <span class="font-bold text-ink/70">TechCrunch</span>
+        <span class="font-mono text-ink/70">The Verge</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- CATEGORIES -->
+  <section class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 py-24">
+    <div class="flex items-end justify-between mb-12 reveal">
+      <div>
+        <div class="eyebrow text-forest-700">Shop by aisle</div>
+        <h2 class="display-md mt-2">Everything you need.<br/>Nothing you don't.</h2>
+      </div>
+      <a href="#/products" class="hidden sm:inline-flex items-center gap-1 underline-grow font-medium">All departments →</a>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+      ${CATEGORIES.map((c,i)=>`
+        <a href="#/products" class="reveal card-hover group relative aspect-[4/5] rounded-2xl overflow-hidden bg-bone" style="transition-delay:${i*40}ms">
+          <img src="${c.img}" alt="${c.name}" loading="lazy" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-700" />
+          <div class="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/20 to-transparent"></div>
+          <div class="absolute inset-x-0 bottom-0 p-5 text-cream">
+            <div class="text-2xl mb-1">${c.icon}</div>
+            <div class="font-bold text-lg">${c.name}</div>
+            <div class="text-xs font-mono text-cream/70">${c.count}</div>
+          </div>
+        </a>
+      `).join('')}
+    </div>
+  </section>
+
+  <!-- FEATURED PRODUCTS -->
+  <section class="bg-white py-24 border-y border-ink/10">
+    <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10">
+      <div class="flex items-end justify-between mb-12 reveal">
+        <div>
+          <div class="eyebrow text-forest-700">Picked this week</div>
+          <h2 class="display-md mt-2">What we're loving.</h2>
+        </div>
+        <div class="hidden md:flex gap-2">
+          <button onclick="document.getElementById('prod-scroll').scrollBy({left:-300,behavior:'smooth'})" class="w-10 h-10 rounded-full border border-ink/20 hover:bg-bone flex items-center justify-center">←</button>
+          <button onclick="document.getElementById('prod-scroll').scrollBy({left:300,behavior:'smooth'})" class="w-10 h-10 rounded-full border border-ink/20 hover:bg-bone flex items-center justify-center">→</button>
+        </div>
+      </div>
+      <div id="prod-scroll" class="scroll-x no-scrollbar flex gap-5 pb-4">
+        ${PRODUCTS.slice(0,8).map(p=>`<div class="w-[260px] flex-shrink-0">${productCard(p)}</div>`).join('')}
+      </div>
+    </div>
+  </section>
+
+  <!-- WHY MARKETA -->
+  <section class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 py-24">
+    <div class="reveal mb-16 max-w-3xl">
+      <div class="eyebrow text-forest-700">Why MARKETA</div>
+      <h2 class="display-md mt-3">We're rebuilding the grocery stack — from the soil up.</h2>
+      <p class="mt-4 text-lg text-ink/70 max-w-2xl">Every MARKETA store is built on the same principle: shorter supply chains, fairer prices for farmers, and zero compromise on freshness. Here's how it works in practice.</p>
+    </div>
+    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
+      ${[
+        {n:'01', t:'Direct sourcing', d:'We work with 4,200+ farms within a 250-mile radius. No distributors, no warehouses full of plastic-wrapped pallets.'},
+        {n:'02', t:'24-hour shelf', d:'Most produce hits our shelves within 24 hours of harvest. We don\'t sell anything past its prime. Ever.'},
+        {n:'03', t:'Fair pricing', d:'Farmers set their prices. We add a flat margin so they earn a living wage, and you pay what the food is actually worth.'},
+        {n:'04', t:'Zero waste', d:'93% of our produce is sold before its best-by date. The rest? Donated to local food banks within hours.'},
+      ].map((b,i)=>`
+        <div class="reveal card-hover p-7 rounded-2xl bg-cream border border-ink/5" style="transition-delay:${i*60}ms">
+          <div class="font-mono text-xs text-forest-700">${b.n}</div>
+          <div class="display text-2xl mt-3 leading-tight">${b.t}</div>
+          <p class="text-ink/70 mt-3 text-sm leading-relaxed">${b.d}</p>
+        </div>
+      `).join('')}
+    </div>
+  </section>
+
+  <!-- BIG STAT BAND -->
+  <section class="stripe-band text-cream py-20 relative overflow-hidden">
+    <div class="relative max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 grid grid-cols-2 lg:grid-cols-4 gap-8">
+      ${[
+        {n:'1.2M+', l:'households served'},
+        {n:'87', l:'stores, 12 states'},
+        {n:'$48M', l:'paid to farmers in 2025'},
+        {n:'0', l:'plastic bags since 2022'},
+      ].map(s=>`
+        <div class="reveal">
+          <div class="display display-lg">${s.n}</div>
+          <div class="font-mono uppercase tracking-wider text-sm text-cream/80 mt-2">${s.l}</div>
+        </div>
+      `).join('')}
+    </div>
+  </section>
+
+  <!-- LOCAL FARMER STORY -->
+  <section class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 py-24 grid lg:grid-cols-2 gap-12 items-center">
+    <div class="reveal">
+      <div class="eyebrow text-forest-700">From the field</div>
+      <h2 class="display-md mt-3">Meet Mei.<br/>She grows your greens.</h2>
+      <p class="mt-5 text-lg text-ink/70 leading-relaxed">
+        Mei Tanaka runs a 12-acre farm in the Hudson Valley. Three years ago, she was selling to wholesalers at $0.80/lb. Today, she sells direct to MARKETA at $2.40/lb — and customers still pay less than the supermarket down the street.
+      </p>
+      <p class="mt-4 text-lg text-ink/70 leading-relaxed">
+        That's what "fair pricing" actually looks like.
+      </p>
+      <a href="#/sustainability" class="mt-8 inline-flex items-center gap-2 underline-grow font-semibold">Read her full story →</a>
+    </div>
+    <div class="reveal relative">
+      <div class="aspect-[4/5] rounded-3xl overflow-hidden bg-bone">
+        <img src="https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=900&q=80" alt="Farmer Mei in her field" class="w-full h-full object-cover" />
+      </div>
+      <div class="absolute -bottom-6 right-6 bg-white rounded-2xl shadow-2xl p-5 max-w-xs">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-full bg-forest-700 text-cream flex items-center justify-center font-bold text-lg">MT</div>
+          <div>
+            <div class="font-bold">Mei Tanaka</div>
+            <div class="text-xs text-ink/60">Tanaka Family Farm, NY</div>
+          </div>
+        </div>
+        <div class="mt-3 text-sm text-ink/70">"MARKETA is the first partner that ever asked what we needed to make the farm work."</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RECIPES -->
+  <section class="bg-forest-700 text-cream py-24 relative overflow-hidden">
+    <div class="absolute inset-0 grid-noise opacity-20"></div>
+    <div class="relative max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10">
+      <div class="flex items-end justify-between mb-12 reveal">
+        <div>
+          <div class="eyebrow text-lime">Cook with MARKETA</div>
+          <h2 class="display-md mt-2">Tonight's dinner, planned in 5 minutes.</h2>
+        </div>
+        <a href="#/recipes" class="hidden sm:inline-flex items-center gap-1 underline-grow font-medium">All recipes →</a>
+      </div>
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        ${RECIPES.slice(0,3).map(r=>`
+          <a href="#/recipes" class="reveal card-hover group block bg-cream text-ink rounded-2xl overflow-hidden">
+            <div class="aspect-[4/3] overflow-hidden">
+              <img src="${r.img}" alt="${r.title}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+            </div>
+            <div class="p-6">
+              <div class="flex gap-2 eyebrow text-ink/50 mb-2">
+                <span>${r.time}</span><span>·</span><span>${r.difficulty}</span><span>·</span><span>${r.kcal}</span>
+              </div>
+              <h3 class="font-bold text-xl leading-tight">${r.title}</h3>
+              <p class="mt-2 text-ink/70 text-sm">${r.desc}</p>
+            </div>
+          </a>
+        `).join('')}
+      </div>
+    </div>
+  </section>
+
+  <!-- APP DOWNLOAD BANNER -->
+  <section class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 py-24">
+    <div class="reveal relative rounded-3xl bg-ink text-cream overflow-hidden grain">
+      <div class="relative grid lg:grid-cols-2 gap-10 p-10 sm:p-16 items-center">
+        <div>
+          <div class="eyebrow text-lime">Marketa App · 4.9★ · 142k reviews</div>
+          <h2 class="display-md mt-3">Fresh, faster.<br/>On every device.</h2>
+          <p class="mt-5 text-cream/70 text-lg max-w-md">Order in 30 seconds with smart reorder. Track delivery in real time. Save your staples. Discover what's in season near you.</p>
+          <div class="mt-7 flex flex-wrap gap-3">
+            <a href="#" class="flex items-center gap-3 px-5 py-3 rounded-2xl bg-cream text-ink hover:bg-lime transition">
+              <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 12.5c0-2.4 2-3.5 2.1-3.6-1.2-1.7-3-1.9-3.6-2-1.5-.2-3 .9-3.7.9s-2-.9-3.3-.9c-1.7 0-3.3 1-4.2 2.5-1.8 3.1-.5 7.7 1.3 10.3.9 1.2 1.9 2.6 3.3 2.6 1.3-.1 1.8-.9 3.4-.9s2 .9 3.4.9c1.4 0 2.3-1.3 3.2-2.5 1-1.4 1.4-2.8 1.4-2.9-.1 0-2.7-1-2.7-4z"/></svg>
+              <div><div class="text-[10px] uppercase tracking-wider opacity-60">Download</div><div class="font-bold">App Store</div></div>
+            </a>
+            <a href="#" class="flex items-center gap-3 px-5 py-3 rounded-2xl bg-cream text-ink hover:bg-lime transition">
+              <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M3 3.5v17c0 .6.3 1.1.8 1.3l9.6-9.8L3.8 2.2c-.5.2-.8.7-.8 1.3z"/></svg>
+              <div><div class="text-[10px] uppercase tracking-wider opacity-60">Get it on</div><div class="font-bold">Google Play</div></div>
+            </a>
+          </div>
+        </div>
+        <div class="relative hidden lg:flex justify-center">
+          <div class="relative w-72 h-[560px] bg-graphite rounded-[3rem] border-8 border-graphite shadow-2xl overflow-hidden">
+            <div class="absolute top-3 left-1/2 -translate-x-1/2 w-24 h-6 bg-ink rounded-full z-10"></div>
+            <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&q=70" class="w-full h-full object-cover" alt="App preview" />
+            <div class="absolute top-16 left-4 right-4 bg-cream rounded-2xl p-3 flex items-center gap-2">
+              <div class="w-10 h-10 rounded-full bg-forest-700 text-cream flex items-center justify-center">🥑</div>
+              <div class="flex-1"><div class="text-xs font-bold">Hass Avocados</div><div class="text-[10px] text-ink/60">Reorder in 30 sec</div></div>
+              <div class="font-mono text-xs font-bold">$1.25</div>
+            </div>
+            <div class="absolute top-32 left-4 right-4 bg-lime rounded-2xl p-3 flex items-center justify-between">
+              <div class="font-bold text-sm">Order in 4 min →</div>
+              <div class="w-8 h-8 rounded-full bg-ink text-cream flex items-center justify-center">→</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRESS QUOTES -->
+  <section class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 py-24">
+    <div class="grid md:grid-cols-3 gap-8">
+      ${[
+        {q:'"The most ambitious grocery store in America right now."', s:'— Bon Appétit, 2026'},
+        {q:'"Whole Foods should be worried."', s:'— The Verge, Sept 2025'},
+        {q:'"MARKETA figured out the fresh supply chain before anyone else did."', s:'— TechCrunch, 2026'},
+      ].map(p=>`
+        <blockquote class="reveal p-8 rounded-2xl bg-bone">
+          <div class="display text-2xl leading-snug">${p.q}</div>
+          <div class="mt-6 font-mono text-xs uppercase tracking-wider text-ink/50">${p.s}</div>
+        </blockquote>
+      `).join('')}
+    </div>
+  </section>
+  `;
+}
+
+function renderProducts(){
+  return `
+  <section class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 pt-12 pb-6">
+    <div class="flex flex-wrap items-end justify-between gap-6">
+      <div>
+        <div class="eyebrow text-forest-700">Catalog · 12,400 items</div>
+        <h1 class="display-md mt-2">Shop the store.</h1>
+        <p class="mt-3 text-ink/70 max-w-xl">From pasture-raised eggs to wild-foraged mushrooms. Filter by diet, sourcing, and price.</p>
+      </div>
+      <div class="flex gap-2 items-center">
+        <select class="rounded-full border border-ink/15 px-4 py-2 text-sm bg-white">
+          <option>All categories</option>
+          ${CATEGORIES.map(c=>`<option>${c.name}</option>`).join('')}
+        </select>
+        <select class="rounded-full border border-ink/15 px-4 py-2 text-sm bg-white">
+          <option>Sort: Featured</option>
+          <option>Price: low to high</option>
+          <option>Price: high to low</option>
+          <option>Local first</option>
+          <option>Organic first</option>
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <section class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 pb-20 grid lg:grid-cols-[260px_1fr] gap-10">
+    <aside class="hidden lg:block">
+      <div class="sticky top-24 space-y-6">
+        <div>
+          <div class="eyebrow text-ink/50 mb-3">Dietary</div>
+          <div class="space-y-2 text-sm">
+            ${['Organic','Local (250mi)','Gluten-free','Vegan','Keto','Fair-trade','Grass-fed','Wild-caught'].map(d=>`
+              <label class="flex items-center gap-3 p-2 rounded-lg hover:bg-bone cursor-pointer">
+                <input type="checkbox" class="accent-forest-700" />
+                <span>${d}</span>
+              </label>
+            `).join('')}
+          </div>
+        </div>
+        <div>
+          <div class="eyebrow text-ink/50 mb-3">Price</div>
+          <input type="range" class="w-full accent-forest-700" />
+          <div class="flex justify-between text-xs font-mono mt-2"><span>$0</span><span>$50+</span></div>
+        </div>
+        <div class="p-5 rounded-2xl bg-forest-700 text-cream">
+          <div class="font-bold mb-1">Member deal</div>
+          <div class="text-sm text-cream/80">Get 20% off your first 3 orders with Marketa+.</div>
+          <button class="mt-3 bg-lime text-ink text-xs font-bold px-3 py-1.5 rounded-full">Try free →</button>
+        </div>
+      </div>
+    </aside>
+    <div>
+      <div class="flex items-center justify-between mb-5">
+        <div class="text-sm text-ink/60 font-mono">Showing ${PRODUCTS.length} of 12,400</div>
+        <div class="flex gap-2">
+          <button class="px-3 py-1.5 rounded-full bg-ink text-cream text-xs font-semibold">Grid</button>
+          <button class="px-3 py-1.5 rounded-full bg-bone text-ink/60 text-xs font-semibold">List</button>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
+        ${[...PRODUCTS, ...PRODUCTS].map(p=>productCard(p)).join('')}
+      </div>
+      <div class="mt-12 flex justify-center">
+        <button class="px-6 py-3 rounded-full border border-ink/20 hover:bg-bone font-semibold">Load 24 more →</button>
+      </div>
+    </div>
+  </section>
+  `;
+}
+
+function renderStores(){
+  return `
+  <section class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 pt-12 pb-6">
+    <div class="eyebrow text-forest-700">Find a store</div>
+    <h1 class="display-md mt-2">87 stores. Probably one near you.</h1>
+    <p class="mt-3 text-ink/70 max-w-xl">Open your closest MARKETA and grab groceries in under 30 minutes, or have them delivered same-day.</p>
+
+    <div class="mt-8 flex flex-wrap gap-3 items-center">
+      <div class="flex items-center gap-2 px-4 py-3 rounded-full bg-white border border-ink/10 flex-1 max-w-md">
+        <svg class="w-4 h-4 text-ink/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-7 8-13a8 8 0 1 0-16 0c0 6 8 13 8 13z"/><circle cx="12" cy="9" r="3"/></svg>
+        <input placeholder="ZIP, city, or address" class="flex-1 bg-transparent outline-none text-sm" />
+      </div>
+      <select class="px-4 py-3 rounded-full bg-white border border-ink/10 text-sm">
+        <option>Within 5 miles</option>
+        <option>Within 10 miles</option>
+        <option>Within 25 miles</option>
+      </select>
+      <select class="px-4 py-3 rounded-full bg-white border border-ink/10 text-sm">
+        <option>All services</option>
+        <option>Pickup</option>
+        <option>Delivery</option>
+        <option>In-store dining</option>
+      </select>
+    </div>
+  </section>
+
+  <!-- MAP MOCK + FEATURED -->
+  <section class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 pb-12 grid lg:grid-cols-[1.4fr_1fr] gap-8">
+    <div class="reveal rounded-3xl overflow-hidden border border-ink/10 bg-forest-700 text-cream relative aspect-[4/3] lg:aspect-auto">
+      <svg viewBox="0 0 800 600" class="absolute inset-0 w-full h-full">
+        <defs>
+          <pattern id="dots" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" fill="rgba(255,255,255,0.15)"/></pattern>
+        </defs>
+        <rect width="800" height="600" fill="#0A6E3D"/>
+        <rect width="800" height="600" fill="url(#dots)"/>
+        <!-- abstract map shapes -->
+        <path d="M 100 400 Q 200 300 350 350 T 600 380 T 750 320" stroke="rgba(255,255,255,0.4)" stroke-width="3" fill="none"/>
+        <path d="M 50 200 Q 200 180 350 220 T 700 200" stroke="rgba(255,255,255,0.3)" stroke-width="2" fill="none"/>
+        <path d="M 150 100 L 600 130 L 700 500 L 100 480 Z" stroke="rgba(255,255,255,0.2)" stroke-width="2" stroke-dasharray="6 6" fill="none"/>
+        <!-- store pins -->
+        ${[
+          {x:220,y:280,r:14,big:1},
+          {x:340,y:340,r:10},
+          {x:480,y:300,r:12},
+          {x:540,y:380,r:9},
+          {x:380,y:240,r:9},
+          {x:260,y:200,r:8},
+          {x:600,y:340,r:9},
+          {x:680,y:280,r:8},
+        ].map(p=>`
+          <g transform="translate(${p.x} ${p.y})">
+            ${p.big?`<circle r="${p.r+8}" fill="#C7F26B" opacity="0.3"><animate attributeName="r" from="${p.r+6}" to="${p.r+16}" dur="2s" repeatCount="indefinite"/><animate attributeName="opacity" from="0.4" to="0" dur="2s" repeatCount="indefinite"/></circle>`:''}
+            <circle r="${p.r}" fill="${p.big?'#C7F26B':'#FAFAF7'}" stroke="#0A6E3D" stroke-width="2"/>
+            ${p.big?`<text y="4" text-anchor="middle" font-family="Inter" font-weight="700" font-size="11" fill="#0A6E3D">★</text>`:''}
+          </g>
+        `).join('')}
+      </svg>
+      <div class="absolute bottom-4 left-4 bg-cream text-ink rounded-2xl p-4 shadow-2xl max-w-xs">
+        <div class="font-bold">Williamsburg, Brooklyn</div>
+        <div class="text-xs text-ink/60 mt-1">8 stores nearby · Open until 11pm</div>
+        <div class="text-xs font-mono mt-2 text-forest-700">★ Flagship · opened 2019</div>
+      </div>
+      <div class="absolute top-4 right-4 bg-ink/80 backdrop-blur px-3 py-2 rounded-full text-xs font-mono">LIVE · 87 active stores</div>
+    </div>
+
+    <div class="reveal bg-lime rounded-3xl p-8 lg:p-10 flex flex-col justify-between">
+      <div>
+        <div class="eyebrow text-ink/70">This week's flagship</div>
+        <h2 class="display-md mt-3">Williamsburg<br/>flagship.</h2>
+        <p class="mt-4 text-ink/80 leading-relaxed">Our original store. 14,000 sq ft of fresh produce, an in-house bakery, a 30-seat café, and the only MARKETA with a rooftop herb garden.</p>
+        <ul class="mt-6 space-y-2 text-sm">
+          <li class="flex items-start gap-2"><span>✓</span> Pickup in 30 min</li>
+          <li class="flex items-start gap-2"><span>✓</span> Same-day delivery to 12 zips</li>
+          <li class="flex items-start gap-2"><span>✓</span> In-store café open until 10pm</li>
+          <li class="flex items-start gap-2"><span>✓</span> Rooftop tour every Saturday 11am</li>
+        </ul>
+      </div>
+      <button class="mt-8 btn-primary rounded-full py-3.5 font-semibold">Get directions →</button>
+    </div>
+  </section>
+
+  <!-- STORE LIST -->
+  <section class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 py-12">
+    <div class="flex items-end justify-between mb-8">
+      <h2 class="display-md">All locations.</h2>
+      <div class="text-sm text-ink/60 font-mono">Showing 8 of 87</div>
+    </div>
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+      ${STORES.map(s=>`
+        <article class="reveal card-hover bg-white rounded-2xl p-6 border border-ink/5">
+          <div class="flex items-start justify-between mb-3">
+            <div>
+              ${s.badge?`<span class="eyebrow inline-block px-2 py-1 rounded-full ${s.badge==='Flagship'?'bg-lime text-ink':'bg-forest-700 text-cream'}">${s.badge}</span>`:'<span class="eyebrow text-ink/40">Store</span>'}
+              <h3 class="font-bold text-lg mt-2">${s.city}</h3>
+            </div>
+          </div>
+          <div class="text-sm text-ink/70 space-y-1.5">
+            <div class="flex items-center gap-2"><svg class="w-4 h-4 text-ink/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-7 8-13a8 8 0 1 0-16 0c0 6 8 13 8 13z"/></svg>${s.addr}</div>
+            <div class="flex items-center gap-2"><svg class="w-4 h-4 text-ink/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>${s.hours}</div>
+            <div class="flex items-center gap-2"><svg class="w-4 h-4 text-ink/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.6A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 3a2 2 0 0 1-.5 2L8 9.6a16 16 0 0 0 6 6l.9-1.3a2 2 0 0 1 2-.5c1 .3 2 .5 3 .7A2 2 0 0 1 22 16.9z"/></svg>${s.phone}</div>
+          </div>
+          <div class="mt-5 pt-5 border-t border-ink/10 flex items-center justify-between">
+            <div>
+              <div class="text-xs text-ink/50 font-mono">Store manager</div>
+              <div class="text-sm font-semibold">${s.manager}</div>
+            </div>
+            <div class="text-xs text-ink/50 font-mono">Since ${s.opened}</div>
+          </div>
+        </article>
+      `).join('')}
+    </div>
+    <div class="mt-10 text-center">
+      <button class="px-6 py-3 rounded-full border border-ink/20 hover:bg-bone font-semibold">Load 79 more stores →</button>
+    </div>
+  </section>
+  `;
+}
+
+function renderRecipes(){
+  return `
+  <section class="bg-forest-700 text-cream py-20 relative overflow-hidden">
+    <div class="absolute inset-0 grid-noise opacity-20"></div>
+    <div class="relative max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 grid lg:grid-cols-2 gap-12 items-center">
+      <div>
+        <div class="eyebrow text-lime">Recipe of the week</div>
+        <h1 class="display-md mt-3">One-pan lemon<br/>garlic salmon.</h1>
+        <p class="mt-5 text-cream/80 text-lg">Wild sockeye, blistered cherry tomatoes, charred lemon. Ready in 25 minutes with a single sheet pan and a handful of herbs from your windowsill.</p>
+        <div class="mt-6 flex gap-4 eyebrow text-cream/70">
+          <span>⏱ 25 min</span><span>·</span><span>Easy</span><span>·</span><span>420 kcal</span><span>·</span><span>4 servings</span>
+        </div>
+        <div class="mt-8 flex flex-wrap gap-3">
+          <button class="bg-lime text-ink font-semibold rounded-full px-6 py-3">Get the recipe →</button>
+          <button class="border border-cream/30 hover:bg-cream/10 rounded-full px-6 py-3 font-semibold">Add ingredients to cart</button>
+        </div>
+      </div>
+      <div class="relative aspect-[4/3] rounded-3xl overflow-hidden">
+        <img src="https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=900&q=80" alt="Lemon garlic salmon" class="w-full h-full object-cover" />
+        <div class="absolute bottom-4 left-4 bg-cream text-ink rounded-2xl p-4 flex items-center gap-3">
+          <div class="text-3xl">🐟</div>
+          <div>
+            <div class="text-xs text-ink/60 font-mono">Pairs with</div>
+            <div class="font-bold">Sauvignon Blanc + crusty bread</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 py-16">
+    <div class="flex flex-wrap items-end justify-between gap-4 mb-10">
+      <div>
+        <h2 class="display-md">Browse recipes.</h2>
+        <p class="mt-2 text-ink/60">Every recipe links to the exact ingredients in our store.</p>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        ${['All','Under 30 min','Vegetarian','One-pan','Sheet-pan','Comfort food','Date night'].map((c,i)=>`<button class="px-4 py-2 rounded-full text-sm font-medium ${i===0?'bg-ink text-cream':'bg-bone hover:bg-clay'}">${c}</button>`).join('')}
+      </div>
+    </div>
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      ${RECIPES.map(r=>`
+        <article class="reveal card-hover group bg-white rounded-2xl overflow-hidden border border-ink/5">
+          <div class="aspect-[4/3] overflow-hidden">
+            <img src="${r.img}" alt="${r.title}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+          </div>
+          <div class="p-6">
+            <div class="flex gap-2 eyebrow text-ink/50 mb-2">
+              <span>${r.time}</span><span>·</span><span>${r.difficulty}</span><span>·</span><span>${r.kcal}</span>
+            </div>
+            <h3 class="font-bold text-xl leading-tight">${r.title}</h3>
+            <p class="mt-2 text-ink/70 text-sm leading-relaxed">${r.desc}</p>
+            <div class="mt-4 flex gap-2">
+              <button class="text-xs px-3 py-1.5 rounded-full bg-forest-700 text-cream font-semibold">Get recipe</button>
+              <button class="text-xs px-3 py-1.5 rounded-full bg-bone hover:bg-clay font-semibold">+ Ingredients</button>
+            </div>
+          </div>
+        </article>
+      `).join('')}
+    </div>
+  </section>
+
+  <section class="bg-bone py-20">
+    <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 grid lg:grid-cols-2 gap-12 items-center">
+      <div>
+        <div class="eyebrow text-forest-700">AI Meal Planner · Beta</div>
+        <h2 class="display-md mt-3">Tell us what you like.<br/>We'll plan the week.</h2>
+        <p class="mt-5 text-ink/70 text-lg">Marketa's planner builds a 5-day meal plan from your dietary preferences, allergies, and what's in season. Add every ingredient to your cart in one tap.</p>
+        <ul class="mt-6 space-y-3">
+          ${['Picky-eater mode (no repeats)','Budget cap per meal','Leftover-aware shopping lists','Family of 1–8 servings'].map(f=>`<li class="flex gap-3"><span class="text-forest-700 font-bold">✓</span>${f}</li>`).join('')}
+        </ul>
+        <button class="mt-8 btn-primary rounded-full px-6 py-3.5 font-semibold">Try the planner →</button>
+      </div>
+      <div class="relative">
+        <div class="rounded-3xl bg-white shadow-2xl p-6 border border-ink/10">
+          <div class="flex items-center justify-between mb-4">
+            <div class="font-bold">Your week</div>
+            <div class="text-xs font-mono text-ink/50">5 days · 14 meals</div>
+          </div>
+          ${['Mon — Sheet-pan salmon','Tue — Mushroom risotto','Wed — Thai basil chicken','Thu — Heirloom tomato pasta','Fri — Roasted veggie bowl'].map((d,i)=>`
+            <div class="flex items-center gap-3 p-3 rounded-xl ${i===0?'bg-forest-50 border border-forest-100':'hover:bg-bone'}">
+              <div class="w-10 h-10 rounded-full bg-forest-700 text-cream flex items-center justify-center font-bold">${i+1}</div>
+              <div class="flex-1"><div class="font-semibold text-sm">${d}</div><div class="text-xs text-ink/60">${['25 min','45 min','18 min','30 min','40 min'][i]} · ${[420,560,430,520,380][i]} kcal</div></div>
+              <button class="text-forest-700 font-mono text-xs">+ cart</button>
+            </div>
+          `).join('')}
+          <div class="mt-4 pt-4 border-t border-ink/10 flex justify-between items-center">
+            <div class="text-sm text-ink/60">Total ingredients: <span class="font-bold text-ink">37</span></div>
+            <div class="font-mono font-bold text-lg">$94.20</div>
+          </div>
+          <button class="mt-4 w-full btn-primary rounded-full py-3 font-semibold">Add all to cart →</button>
+        </div>
+      </div>
+    </div>
+  </section>
+  `;
+}
+
+function renderAbout(){
+  return `
+  <section class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 pt-20 pb-24">
+    <div class="grid lg:grid-cols-12 gap-10 items-end">
+      <div class="lg:col-span-8">
+        <div class="eyebrow text-forest-700">About MARKETA</div>
+        <h1 class="display display-lg mt-4">We started MARKETA<br/>because the<br/>supermarket was broken.</h1>
+      </div>
+      <div class="lg:col-span-4 text-ink/70 text-lg leading-relaxed">
+        In 2018, our founders spent six months driving across America talking to 200+ farmers. They heard the same story everywhere: distributors took 40-60% margins, shelf life dictated everything, and small farms were getting squeezed out. So they built MARKETA from scratch.
+      </div>
+    </div>
+  </section>
+
+  <section class="relative h-[60vh] overflow-hidden">
+    <img src="https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=1600&q=80" alt="MARKETA store" class="w-full h-full object-cover" />
+    <div class="absolute inset-0 bg-gradient-to-t from-ink/60 to-transparent"></div>
+    <div class="absolute bottom-10 left-1/2 -translate-x-1/2 text-cream text-center">
+      <div class="font-mono text-xs uppercase tracking-widest">Williamsburg Flagship · 2019</div>
+    </div>
+  </section>
+
+  <!-- TIMELINE -->
+  <section class="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-10 py-24">
+    <div class="text-center mb-16">
+      <div class="eyebrow text-forest-700">Our story</div>
+      <h2 class="display-md mt-3">From a garage in Brooklyn<br/>to 87 stores.</h2>
+    </div>
+    <div class="space-y-12">
+      ${[
+        {y:'2018', t:'The spark', d:'Co-founders Maya Lin and Devon Park leave their jobs in food logistics. Six-month road trip, 200+ farm visits, 14 states.'},
+        {y:'2019', t:'Store #1', d:'Williamsburg flagship opens with 80 SKUs from 12 local farms. Lines down the block. Sold out by 6pm.'},
+        {y:'2020', t:'Pandemic pivot', d:'Built delivery in 14 days. Grew to 6 stores. Donated $4M in produce to NYC food banks.'},
+        {y:'2022', t:'Series B, $80M', d:'Expanded to Boston, Philadelphia, DC. Launched Marketa+ membership. First carbon-neutral delivery fleet.'},
+        {y:'2024', t:'National rollout', d:'87 stores in 12 states. 1.2M+ households. First major grocery chain to hit 100% fair-trade certified.'},
+        {y:'2026', t:'Today', d:'4,200 partner farms, 12,400 SKUs, and a system that actually works for everyone. The hard part is just starting.'},
+      ].map((s,i)=>`
+        <div class="reveal grid md:grid-cols-[120px_1fr] gap-6 md:gap-10 pb-12 border-b border-ink/10 last:border-0">
+          <div class="font-mono text-3xl font-black text-forest-700">${s.y}</div>
+          <div>
+            <div class="display text-2xl">${s.t}</div>
+            <p class="mt-2 text-ink/70 leading-relaxed">${s.d}</p>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  </section>
+
+  <!-- VALUES -->
+  <section class="bg-ink text-cream py-24 relative grain">
+    <div class="relative max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10">
+      <div class="grid lg:grid-cols-2 gap-12 mb-16 items-end">
+        <h2 class="display display-lg">Four principles.<br/>No compromises.</h2>
+        <p class="text-cream/70 text-lg max-w-md">These aren't aspirational slides. They're written into every contract, every store layout, every hiring decision.</p>
+      </div>
+      <div class="grid md:grid-cols-2 gap-px bg-cream/10">
+        ${[
+          {n:'01', t:'Farmers set the price', d:'No auctions, no haggling. If a farm grows it well, they name their price. We take a flat 18% margin.'},
+          {n:'02', t:'24 hours, max', d:'Produce on our shelves was in the field yesterday. Anything older goes to compost or donation.'},
+          {n:'03', t:'Zero hidden labor', d:'Every worker in our supply chain earns a verified living wage. We publish the audit annually.'},
+          {n:'04', t:'No plastic, period', d:'Since 2022, we\'ve shipped zero single-use plastic. Reusable containers, paper, compostable wrap. That\'s it.'},
+        ].map(v=>`
+          <div class="bg-ink p-10">
+            <div class="font-mono text-lime">${v.n}</div>
+            <div class="display text-2xl mt-3">${v.t}</div>
+            <p class="mt-3 text-cream/70 leading-relaxed">${v.d}</p>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  </section>
+
+  <!-- TEAM -->
+  <section class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 py-24">
+    <div class="mb-12">
+      <div class="eyebrow text-forest-700">Leadership</div>
+      <h2 class="display-md mt-3">The people behind MARKETA.</h2>
+    </div>
+    <div class="grid sm:grid-cols-2 md:grid-cols-4 gap-6">
+      ${[
+        {n:'Maya Lin', r:'Co-founder, CEO', bg:'#C7F26B'},
+        {n:'Devon Park', r:'Co-founder, COO', bg:'#A4D6BA'},
+        {n:'Ana Restrepo', r:'Chief Merchandising Officer', bg:'#E8C3A4'},
+        {n:'Jordan Vance', r:'CTO', bg:'#9DB7D6'},
+        {n:'Saskia Berg', r:'VP of Sourcing', bg:'#D4A5D6'},
+        {n:'Tomás Rivera', r:'VP of Operations', bg:'#F0D78C'},
+        {n:'Hana Olu', r:'Head of Sustainability', bg:'#A8D946'},
+        {n:'Felix Aoki', r:'Head of Design', bg:'#FFB59E'},
+      ].map(p=>`
+        <div class="reveal text-center">
+          <div class="aspect-square rounded-2xl mb-3 flex items-center justify-center display text-4xl" style="background:${p.bg}">${p.n.split(' ').map(x=>x[0]).join('')}</div>
+          <div class="font-bold">${p.n}</div>
+          <div class="text-xs text-ink/60 font-mono">${p.r}</div>
+        </div>
+      `).join('')}
+    </div>
+  </section>
+  `;
+}
+
+function renderSustainability(){
+  return `
+  <section class="bg-forest-700 text-cream py-24 relative overflow-hidden">
+    <div class="absolute inset-0 grid-noise opacity-20"></div>
+    <div class="relative max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10">
+      <div class="eyebrow text-lime">Impact Report · 2025</div>
+      <h1 class="display display-lg mt-4 max-w-4xl">The food system<br/>is the climate system.</h1>
+      <p class="mt-6 text-cream/80 text-lg max-w-2xl">Food production accounts for 26% of global emissions. We can't fix climate without fixing how we grow, ship, and sell food. Here's what we've done — and what's next.</p>
+    </div>
+  </section>
+
+  <!-- BENTO STATS -->
+  <section class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 py-16 -mt-10 relative">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      ${[
+        {n:'-42%', l:'CO₂ per delivery vs. industry', bg:'bg-lime text-ink'},
+        {n:'4,200', l:'Local farms in network', bg:'bg-ink text-cream'},
+        {n:'93%', l:'Produce sold before best-by', bg:'bg-cream border border-ink/10'},
+        {n:'0', l:'Plastic bags since 2022', bg:'bg-forest-700 text-cream'},
+        {n:'$48M', l:'Paid to farmers above market', bg:'bg-cream border border-ink/10'},
+        {n:'100%', l:'Living wage across supply', bg:'bg-ink text-cream'},
+        {n:'1.4M', l:'Meals donated to food banks', bg:'bg-cream border border-ink/10'},
+        {n:'82%', l:'Stores powered by solar', bg:'bg-lime text-ink'},
+      ].map(s=>`
+        <div class="${s.bg} rounded-2xl p-6 reveal">
+          <div class="display display-lg">${s.n}</div>
+          <div class="font-mono uppercase tracking-wider text-xs mt-3 opacity-80">${s.l}</div>
+        </div>
+      `).join('')}
+    </div>
+  </section>
+
+  <!-- PILLARS -->
+  <section class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 py-20">
+    <div class="max-w-3xl mb-16">
+      <div class="eyebrow text-forest-700">Our pillars</div>
+      <h2 class="display-md mt-3">Four commitments.<br/>Public, measurable, audited.</h2>
+    </div>
+    <div class="space-y-px bg-ink/10">
+      ${[
+        {n:'01', t:'Local-first sourcing', d:'Every store sources 75% of produce from farms within a 250-mile radius. We publish the map publicly — your store, your farms, your food miles.', metric:'Avg food miles: 178 mi'},
+        {n:'02', t:'Carbon-neutral delivery', d:'Our last-mile delivery fleet is 100% electric, powered by our own solar canopies. Standard shipping is now carbon-negative, not just neutral.', metric:'-1.2kg CO₂ per order'},
+        {n:'03', t:'Zero waste, real zero', d:'No plastic packaging in any store since 2022. Produce that doesn\'t sell in 48 hours goes to one of 67 partner food banks — within hours, not days.', metric:'93% sold, 7% donated'},
+        {n:'04', t:'Fair labor, audited', d:'Every farm and warehouse in our network is audited annually. We publish the full list and wage data — not because it\'s flattering, but because transparency is the only way to be sure.', metric:'100% living wage'},
+      ].map(p=>`
+        <div class="reveal bg-cream grid md:grid-cols-[100px_1fr_220px] gap-8 p-8 md:p-10 items-center">
+          <div class="font-mono text-3xl font-black text-forest-700">${p.n}</div>
+          <div>
+            <div class="display text-2xl">${p.t}</div>
+            <p class="mt-3 text-ink/70 leading-relaxed">${p.d}</p>
+          </div>
+          <div class="bg-bone rounded-2xl p-5 text-center">
+            <div class="eyebrow text-ink/50">Verified</div>
+            <div class="font-bold mt-2">${p.metric}</div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  </section>
+
+  <!-- ROADMAP -->
+  <section class="bg-ink text-cream py-24">
+    <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10">
+      <div class="grid lg:grid-cols-2 gap-12 items-end mb-16">
+        <h2 class="display display-lg">Where we're going.</h2>
+        <p class="text-cream/70 text-lg">A public roadmap for what we'll ship by 2030. If we miss a target, you'll know first.</p>
+      </div>
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        ${[
+          {y:'2026', t:'Soil-carbon verified sourcing', d:'Every farm in our network will publish soil-carbon data. We\'ll pay a premium for carbon-sequestering practices.'},
+          {y:'2027', t:'Net-positive packaging', d:'All packaging made from agricultural waste from our own supply chain. Closed loop, no exceptions.'},
+          {y:'2028', t:'1,000 partner farms', d:'Tripling our farmer network. Adding 600 small and mid-sized operations across the Midwest and South.'},
+          {y:'2029', t:'Vertical farms in 12 cities', d:'Indoor growing for produce that doesn\'t survive long-distance shipping. Year-round local.'},
+          {y:'2030', t:'Carbon-negative grocery chain', d:'Net negative across operations, supply chain, and delivery. Audited annually.'},
+          {y:'Always', t:'Public reporting', d:'Full impact report every January. Real numbers. Verified by third parties.'},
+        ].map(r=>`
+          <div class="reveal p-6 rounded-2xl border border-cream/15">
+            <div class="font-mono text-lime text-sm">${r.y}</div>
+            <div class="font-bold text-xl mt-2">${r.t}</div>
+            <p class="mt-2 text-cream/70 text-sm leading-relaxed">${r.d}</p>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  </section>
+  `;
+}
+
+function renderCareers(){
+  return `
+  <section class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 pt-20 pb-12">
+    <div class="grid lg:grid-cols-12 gap-10 items-end">
+      <div class="lg:col-span-8">
+        <div class="eyebrow text-forest-700">Careers at MARKETA</div>
+        <h1 class="display display-lg mt-4">Build the grocery<br/>store of the future.</h1>
+      </div>
+      <div class="lg:col-span-4 text-ink/70 text-lg leading-relaxed">
+        We're 2,400 people across 12 states — engineers, designers, farmers, bakers, drivers. If you care about food systems, you belong here.
+      </div>
+    </div>
+  </section>
+
+  <!-- CULTURE BENTO -->
+  <section class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 py-12">
+    <div class="grid md:grid-cols-3 gap-4">
+      <div class="md:col-span-2 rounded-3xl bg-lime p-10 relative overflow-hidden">
+        <div class="eyebrow text-ink/70">Compensation</div>
+        <h2 class="display text-3xl mt-3">Salary bands, public.<br/>Top of market, always.</h2>
+        <p class="mt-4 text-ink/80 max-w-md">Every role at MARKETA has a published salary band — entry, mid, senior. No negotiation. No mystery. We pay top-quartile for every position, in every city.</p>
+        <div class="mt-6 flex gap-3 text-sm font-mono">
+          <div class="px-3 py-2 bg-cream rounded-lg">Engineer II: $165k – $215k</div>
+          <div class="px-3 py-2 bg-cream rounded-lg">Store Lead: $72k – $95k</div>
+        </div>
+      </div>
+      <div class="rounded-3xl bg-ink text-cream p-10">
+        <div class="eyebrow text-lime">Benefits</div>
+        <h2 class="display text-3xl mt-3">Health, equity,<br/>and time off.</h2>
+        <ul class="mt-4 space-y-2 text-sm text-cream/80">
+          <li>· 100% premium health/dental/vision</li>
+          <li>· 20 days PTO from day one</li>
+          <li>· 16-week parental leave, all caregivers</li>
+          <li>· $2,400/yr learning budget</li>
+          <li>· Equity for every employee</li>
+        </ul>
+      </div>
+      <div class="rounded-3xl bg-forest-700 text-cream p-10">
+        <div class="eyebrow text-lime">Remote-first</div>
+        <h2 class="display text-3xl mt-3">Work where<br/>you do best.</h2>
+        <p class="mt-4 text-cream/80 text-sm">Most teams are remote. We have hubs in NYC, Boston, and Oakland. Quarterly offsites. Annual all-company gathering.</p>
+      </div>
+      <div class="md:col-span-2 rounded-3xl bg-cream border border-ink/10 p-10 relative overflow-hidden">
+        <div class="eyebrow text-forest-700">Growth</div>
+        <h2 class="display text-3xl mt-3">A career, not a job.</h2>
+        <p class="mt-4 text-ink/70 max-w-xl">Internal mobility is our default. 47% of our senior leaders started as store associates or junior engineers. We invest in coaching, mentorship, and clear ladders for every role.</p>
+        <div class="mt-6 grid grid-cols-3 gap-4 max-w-md">
+          <div><div class="display text-3xl">47%</div><div class="text-xs font-mono text-ink/60 mt-1">Leaders from within</div></div>
+          <div><div class="display text-3xl">$2.4k</div><div class="text-xs font-mono text-ink/60 mt-1">Learning budget/yr</div></div>
+          <div><div class="display text-3xl">92%</div><div class="text-xs font-mono text-ink/60 mt-1">Retention rate</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- OPEN ROLES -->
+  <section class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 py-16">
+    <div class="flex items-end justify-between mb-8">
+      <div>
+        <h2 class="display-md">Open roles · ${ROLES.length}+</h2>
+        <p class="mt-2 text-ink/60">Don't see your fit? Email <a href="#" class="underline">talent@marketa.com</a></p>
+      </div>
+      <select class="px-4 py-2 rounded-full bg-white border border-ink/10 text-sm">
+        <option>All teams</option>
+        <option>Engineering</option>
+        <option>Design</option>
+        <option>Operations</option>
+      </select>
+    </div>
+    <div class="bg-white rounded-2xl border border-ink/10 divide-y divide-ink/10">
+      ${ROLES.map((r,i)=>`
+        <a href="#/contact" class="reveal grid md:grid-cols-[80px_1fr_180px_120px_60px] gap-4 items-center p-5 hover:bg-bone transition">
+          <div class="font-mono text-xs text-forest-700">${String(i+1).padStart(2,'0')}</div>
+          <div>
+            <div class="font-bold text-lg">${r.title}</div>
+            <div class="text-xs text-ink/60 font-mono mt-1">${r.team}</div>
+          </div>
+          <div class="text-sm text-ink/70">${r.loc}</div>
+          <div class="text-sm"><span class="px-2 py-1 rounded-full bg-bone">${r.type}</span></div>
+          <div class="text-right text-2xl text-ink/30 group-hover:text-forest-700">→</div>
+        </a>
+      `).join('')}
+    </div>
+  </section>
+  `;
+}
+
+function renderContact(){
+  return `
+  <section class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 pt-20 pb-12 grid lg:grid-cols-12 gap-10">
+    <div class="lg:col-span-5">
+      <div class="eyebrow text-forest-700">Get in touch</div>
+      <h1 class="display display-lg mt-4">Talk to us.<br/>We read everything.</h1>
+      <p class="mt-6 text-ink/70 text-lg leading-relaxed">Questions about a recent order? Want to partner your farm with us? Press inquiry? Pick a channel and a real person will respond within 24 hours.</p>
+
+      <div class="mt-10 space-y-5">
+        <div class="flex items-start gap-4 p-5 rounded-2xl bg-white border border-ink/10">
+          <div class="w-10 h-10 rounded-full bg-forest-700 text-cream flex items-center justify-center">📞</div>
+          <div>
+            <div class="font-bold">Customer support</div>
+            <div class="text-sm text-ink/70 mt-0.5">+1 (888) 555-MARKETA</div>
+            <div class="text-xs text-ink/50 font-mono">Daily 6am – 12am ET</div>
+          </div>
+        </div>
+        <div class="flex items-start gap-4 p-5 rounded-2xl bg-white border border-ink/10">
+          <div class="w-10 h-10 rounded-full bg-forest-700 text-cream flex items-center justify-center">📧</div>
+          <div>
+            <div class="font-bold">Press & partnerships</div>
+            <div class="text-sm text-ink/70 mt-0.5">press@marketa.com</div>
+          </div>
+        </div>
+        <div class="flex items-start gap-4 p-5 rounded-2xl bg-white border border-ink/10">
+          <div class="w-10 h-10 rounded-full bg-forest-700 text-cream flex items-center justify-center">🌾</div>
+          <div>
+            <div class="font-bold">Farm applications</div>
+            <div class="text-sm text-ink/70 mt-0.5">growers@marketa.com</div>
+            <div class="text-xs text-ink/50 font-mono">Currently accepting — 6 week onboarding</div>
+          </div>
+        </div>
+        <div class="flex items-start gap-4 p-5 rounded-2xl bg-white border border-ink/10">
+          <div class="w-10 h-10 rounded-full bg-forest-700 text-cream flex items-center justify-center">🏢</div>
+          <div>
+            <div class="font-bold">Headquarters</div>
+            <div class="text-sm text-ink/70 mt-0.5">141 N 6th Street, Brooklyn NY 11249</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="lg:col-span-7">
+      <form class="bg-white rounded-3xl border border-ink/10 p-8 lg:p-10 space-y-5" onsubmit="event.preventDefault(); this.querySelector('button[type=submit]').textContent='✓ Message sent — we\\'ll be in touch'; this.querySelector('button[type=submit]').classList.add('bg-forest-700','text-cream');">
+        <div>
+          <div class="eyebrow text-ink/50 mb-2">What is this about?</div>
+          <div class="flex flex-wrap gap-2">
+            ${['Order support','Press inquiry','Partnership','Wholesale','Something else'].map((c,i)=>`<label class="px-4 py-2 rounded-full border border-ink/15 cursor-pointer hover:border-forest-700 has-[:checked]:bg-forest-700 has-[:checked]:text-cream has-[:checked]:border-forest-700 text-sm"><input type="radio" name="topic" class="hidden" ${i===0?'checked':''}/>${c}</label>`).join('')}
+          </div>
+        </div>
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div>
+            <label class="eyebrow text-ink/50 block mb-2">Your name</label>
+            <input type="text" required class="w-full px-4 py-3 rounded-xl bg-bone border border-ink/10 focus:border-forest-700 outline-none" />
+          </div>
+          <div>
+            <label class="eyebrow text-ink/50 block mb-2">Email</label>
+            <input type="email" required class="w-full px-4 py-3 rounded-xl bg-bone border border-ink/10 focus:border-forest-700 outline-none" />
+          </div>
+        </div>
+        <div>
+          <label class="eyebrow text-ink/50 block mb-2">Order number (optional)</label>
+          <input type="text" placeholder="MKT-..." class="w-full px-4 py-3 rounded-xl bg-bone border border-ink/10 focus:border-forest-700 outline-none font-mono" />
+        </div>
+        <div>
+          <label class="eyebrow text-ink/50 block mb-2">Your message</label>
+          <textarea rows="5" required class="w-full px-4 py-3 rounded-xl bg-bone border border-ink/10 focus:border-forest-700 outline-none resize-none"></textarea>
+        </div>
+        <div class="flex items-center justify-between">
+          <div class="text-xs text-ink/50">We respond within 24 hours, usually much faster.</div>
+          <button type="submit" class="btn-primary rounded-full px-6 py-3 font-semibold">Send message →</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="bg-bone py-20">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-10">
+      <div class="text-center mb-12">
+        <div class="eyebrow text-forest-700">FAQ</div>
+        <h2 class="display-md mt-3">Quick answers.</h2>
+      </div>
+      <div class="space-y-3">
+        ${[
+          {q:'How fast is delivery?', a:'Same-day delivery for orders placed before 2pm, in our service areas. Otherwise, next-day delivery with a 1-hour delivery window.'},
+          {q:'What if I don\'t like something?', a:'Tell us within 7 days. We refund or replace, no questions. We use the feedback to improve supplier scorecards.'},
+          {q:'Can I return the containers?', a:'Yes. Every MARKETA delivery comes with reusable insulated totes. Leave them on your doorstep next delivery — we pick them up and reuse.'},
+          {q:'Do you price-match?', a:'Yes. If you find the same item cheaper at Whole Foods, Wegmans, or Trader Joe\'s within 24 hours, we refund the difference.'},
+          {q:'How do I become a Marketa+ member?', a:'$99/year. Free delivery on orders over $35, member-only pricing (up to 30% off), early access to seasonal items, and one free monthly produce box.'},
+          {q:'Do you ship outside your store regions?', a:'Not yet. We deliver in the 12 states we operate in. We\'re opening 14 new stores in 2026 — check the store locator for updates.'},
+        ].map(f=>`
+          <details class="reveal bg-white rounded-2xl border border-ink/10 p-5 group">
+            <summary class="flex items-center justify-between font-semibold">
+              <span>${f.q}</span>
+              <span class="text-2xl text-ink/40 group-open:rotate-45 transition">+</span>
+            </summary>
+            <p class="mt-3 text-ink/70 leading-relaxed">${f.a}</p>
+          </details>
+        `).join('')}
+      </div>
+    </div>
+  </section>
+  `;
+}
+
+function renderNotFound(){
+  return `
+  <section class="max-w-3xl mx-auto px-6 py-32 text-center">
+    <div class="font-mono text-forest-700 text-9xl font-black">404</div>
+    <h1 class="display display-md mt-4">This aisle doesn't exist.</h1>
+    <p class="mt-4 text-ink/70">But here's the front door.</p>
+    <a href="#/" class="mt-8 inline-flex btn-primary rounded-full px-6 py-3 font-semibold">Take me home →</a>
+  </section>`;
+}
+
+/* ---------- INTERACTIVITY ---------- */
+document.addEventListener('click', e=>{
+  if(e.target.matches('[data-close-menu]')) document.getElementById('mobile-menu').classList.add('hidden');
+  if(e.target.matches('[data-close-cart]')) closeCart();
+  if(e.target.matches('[data-close-search]')) document.getElementById('search-modal').classList.add('hidden');
+});
+document.getElementById('btn-menu').addEventListener('click', ()=>document.getElementById('mobile-menu').classList.remove('hidden'));
+document.getElementById('btn-cart').addEventListener('click', openCart);
+document.getElementById('btn-account').addEventListener('click', ()=>{ location.hash = '#/contact'; });
+const openSearch = ()=>{ const m = document.getElementById('search-modal'); m.classList.remove('hidden'); setTimeout(()=>document.getElementById('search-input').focus(), 50); };
+document.getElementById('btn-search').addEventListener('click', openSearch);
+document.getElementById('btn-search-mobile').addEventListener('click', openSearch);
+document.addEventListener('keydown', e=>{
+  if((e.metaKey||e.ctrlKey) && e.key.toLowerCase()==='k'){ e.preventDefault(); openSearch(); }
+  if(e.key==='Escape'){ closeCart(); document.getElementById('mobile-menu').classList.add('hidden'); document.getElementById('search-modal').classList.add('hidden'); }
+});
+
+/* ---------- SCROLL REVEAL ---------- */
+function observeReveals(){
+  const obs = new IntersectionObserver(entries=>{
+    entries.forEach(en=>{ if(en.isIntersecting){ en.target.classList.add('in'); obs.unobserve(en.target); }});
+  }, {threshold:.12});
+  document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+}
+
+/* ---------- NAV SCROLL EFFECT ---------- */
+let lastY = 0;
+window.addEventListener('scroll', ()=>{
+  const y = window.scrollY;
+  const nav = document.getElementById('nav');
+  if(y > 8) nav.classList.add('shadow-sm'); else nav.classList.remove('shadow-sm');
+  lastY = y;
+}, {passive:true});
+
+/* ---------- INIT ---------- */
+updateCartUI();
+navigate();
+observeReveals();
+</script>
+
+</body>
+</html>

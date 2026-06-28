@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Сравнение тарифов — Выберите свой план</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --c-bg:#0b0f1a;
+  --c-surface:#131827;
+  --c-surface2:#1a2035;
+  --c-border:#252d44;
+  --c-text:#e2e8f0;
+  --c-text2:#94a3b8;
+  --c-accent:#6366f1;
+  --c-accent2:#818cf8;
+  --c-accent-glow:rgba(99,102,241,.25);
+  --c-popular:#f59e0b;
+  --c-popular-glow:rgba(245,158,11,.2);
+  --c-green:#22c55e;
+  --c-red:#ef4444;
+  --radius:16px;
+  --shadow:0 4px 32px rgba(0,0,0,.4);
+}
+html{font-size:16px;scroll-behavior:smooth}
+body{
+  font-family:'Inter',system-ui,-apple-system,sans-serif;
+  background:var(--c-bg);
+  color:var(--c-text);
+  line-height:1.6;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+body::before{
+  content:'';position:fixed;inset:0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% -10%,rgba(99,102,241,.12),transparent 70%),
+    radial-gradient(ellipse 50% 40% at 80% 100%,rgba(245,158,11,.06),transparent 60%);
+  pointer-events:none;z-index:0;
+}
+
+/* ── Header ── */
+.hero{
+  text-align:center;
+  padding:4rem 1.5rem 2rem;
+  position:relative;z-index:1;
+}
+.hero h1{
+  font-size:clamp(2rem,5vw,3.2rem);
+  font-weight:800;
+  letter-spacing:-.03em;
+  background:linear-gradient(135deg,#e2e8f0 30%,var(--c-accent2) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+  margin-bottom:.75rem;
+}
+.hero p{
+  font-size:1.15rem;
+  color:var(--c-text2);
+  max-width:560px;
+  margin:0 auto;
+}
+
+/* ── Toggle ── */
+.toggle-wrap{
+  display:flex;align-items:center;justify-content:center;
+  gap:1rem;margin:2.5rem auto 3rem;
+  position:relative;z-index:1;
+}
+.toggle-label{
+  font-size:.95rem;font-weight:600;
+  color:var(--c-text2);
+  transition:color .3s;
+  cursor:pointer;
+  user-select:none;
+}
+.toggle-label.active{color:var(--c-text)}
+.toggle-track{
+  position:relative;width:56px;height:30px;
+  background:var(--c-surface2);
+  border:2px solid var(--c-border);
+  border-radius:999px;
+  cursor:pointer;
+  transition:background .3s,border-color .3s;
+}
+.toggle-track:hover{border-color:var(--c-accent)}
+.toggle-thumb{
+  position:absolute;top:3px;left:3px;
+  width:20px;height:20px;
+  background:var(--c-accent);
+  border-radius:50%;
+  transition:transform .35s cubic-bezier(.4,0,.2,1);
+  box-shadow:0 0 8px var(--c-accent-glow);
+}
+.toggle-track.yearly .toggle-thumb{transform:translateX(26px)}
+.save-badge{
+  background:linear-gradient(135deg,var(--c-green),#16a34a);
+  color:#fff;font-size:.72rem;font-weight:700;
+  padding:.2rem .55rem;border-radius:999px;
+  letter-spacing:.02em;
+  animation:pulse 2s infinite;
+}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.7}}
+
+/* ── Cards Row ── */
+.plans{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:1.5rem;
+  max-width:1100px;
+  margin:0 auto 3rem;
+  padding:0 1.5rem;
+  position:relative;z-index:1;
+}
+.plan-card{
+  background:var(--c-surface);
+  border:1px solid var(--c-border);
+  border-radius:var(--radius);
+  padding:2rem 1.75rem 2.25rem;
+  display:flex;flex-direction:column;
+  position:relative;
+  transition:transform .3s,box-shadow .3s,border-color .3s;
+}
+.plan-card:hover{
+  transform:translateY(-4px);
+  box-shadow:0 12px 40px rgba(0,0,0,.35);
+}
+.plan-card.popular{
+  border-color:var(--c-popular);
+  box-shadow:0 0 0 1px var(--c-popular),0 8px 40px var(--c-popular-glow);
+  transform:scale(1.04);
+  z-index:2;
+}
+.plan-card.popular:hover{transform:scale(1.04) translateY(-4px)}
+.popular-badge{
+  position:absolute;top:-13px;left:50%;
+  transform:translateX(-50%);
+  background:linear-gradient(135deg,var(--c-popular),#d97706);
+  color:#fff;font-size:.72rem;font-weight:700;
+  padding:.3rem 1rem;border-radius:999px;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+  box-shadow:0 4px 16px var(--c-popular-glow);
+}
+.plan-icon{
+  width:48px;height:48px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.5rem;margin-bottom:1rem;
+}
+.plan-card:nth-child(1) .plan-icon{background:rgba(99,102,241,.15);color:var(--c-accent2)}
+.plan-card:nth-child(2) .plan-icon{background:rgba(245,158,11,.15);color:var(--c-popular)}
+.plan-card:nth-child(3) .plan-icon{background:rgba(34,197,94,.15);color:var(--c-green)}
+.plan-name{font-size:1.25rem;font-weight:700;margin-bottom:.35rem}
+.plan-desc{font-size:.88rem;color:var(--c-text2);margin-bottom:1.25rem;min-height:2.7em}
+.price-row{display:flex;align-items:baseline;gap:.35rem;margin-bottom:.25rem}
+.price{
+  font-size:2.4rem;font-weight:800;
+  letter-spacing:-.03em;
+  transition:opacity .25s;
+}
+.price.fade{opacity:0}
+.currency{font-size:1rem;font-weight:600;color:var(--c-text2)}
+.period{font-size:.85rem;color:var(--c-text2)}
+.price-note{font-size:.78rem;color:var(--c-text2);margin-bottom:1.5rem;min-height:1.2em}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:100%;padding:.75rem 1.5rem;
+  border:none;border-radius:10px;
+  font-size:.92rem;font-weight:600;
+  cursor:pointer;
+  transition:all .25s;
+  margin-top:auto;
+}
+.btn-outline{
+  background:transparent;
+  border:1.5px solid var(--c-border);
+  color:var(--c-text);
+}
+.btn-outline:hover{border-color:var(--c-accent);color:var(--c-accent2);background:rgba(99,102,241,.06)}
+.btn-primary{
+  background:linear-gradient(135deg,var(--c-accent),#4f46e5);
+  color:#fff;
+  box-shadow:0 4px 20px var(--c-accent-glow);
+}
+.btn-primary:hover{
+  box-shadow:0 6px 28px rgba(99,102,241,.4);
+  transform:translateY(-1px);
+}
+
+/* ── Comparison Table ── */
+.table-section{
+  max-width:1100px;margin:0 auto 4rem;
+  padding:0 1.5rem;
+  position:relative;z-index:1;
+}
+.table-section h2{
+  text-align:center;
+  font-size:1.8rem;font-weight:700;
+  margin-bottom:.5rem;
+}
+.table-section>p{
+  text-align:center;
+  color:var(--c-text2);
+  font-size:.95rem;
+  margin-bottom:2rem;
+}
+.table-wrap{
+  background:var(--c-surface);
+  border:1px solid var(--c-border);
+  border-radius:var(--radius);
+  overflow:hidden;
+  box-shadow:var(--shadow);
+}
+table{width:100%;border-collapse:collapse}
+thead th{
+  padding:1.25rem 1rem;
+  font-size:.82rem;font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  color:var(--c-text2);
+  border-bottom:1px solid var(--c-border);
+  text-align:center;
+  position:relative;
+}
+thead th:first-child{text-align:left;padding-left:1.5rem}
+thead th.popular-col{
+  color:var(--c-popular);
+  background:rgba(245,158,11,.04);
+}
+tbody tr{transition:background .2s}
+tbody tr:hover{background:rgba(99,102,241,.03)}
+tbody td{
+  padding:.95rem 1rem;
+  font-size:.9rem;
+  text-align:center;
+  border-bottom:1px solid rgba(37,45,68,.5);
+  vertical-align:middle;
+}
+tbody td:first-child{
+  text-align:left;
+  padding-left:1.5rem;
+  font-weight:500;
+  color:var(--c-text);
+}
+tbody td.popular-col{background:rgba(245,158,11,.03)}
+tbody tr:last-child td{border-bottom:none}
+.cat-row td{
+  padding:.7rem 1rem .7rem 1.5rem !important;
+  font-size:.75rem !important;
+  font-weight:700 !important;
+  text-transform:uppercase;
+  letter-spacing:.07em;
+  color:var(--c-accent2) !important;
+  background:rgba(99,102,241,.04) !important;
+  border-bottom:1px solid var(--c-border) !important;
+}
+.check{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:24px;height:24px;border-radius:6px;
+  font-size:.8rem;
+}
+.check.yes{background:rgba(34,197,94,.12);color:var(--c-green)}
+.check.no{background:rgba(239,68,68,.1);color:rgba(239,68,68,.5)}
+.check.limit{font-size:.78rem;font-weight:600;color:var(--c-popular);background:rgba(245,158,11,.1);padding:0 .35rem;border-radius:6px}
+.feature-name-wrap{display:flex;align-items:center;gap:.5rem}
+.feature-name-wrap .feat-icon{
+  font-size:.85rem;
+  opacity:.5;
+  flex-shrink:0;
+}
+
+/* ── CTA ── */
+.cta{
+  text-align:center;
+  padding:3rem 1.5rem 5rem;
+  position:relative;z-index:1;
+}
+.cta h2{font-size:1.6rem;font-weight:700;margin-bottom:.5rem}
+.cta p{color:var(--c-text2);margin-bottom:1.5rem;font-size:.95rem}
+.cta .btn{width:auto;display:inline-flex;padding:.85rem 2.5rem;font-size:1rem;border-radius:12px}
+
+/* ── Responsive ── */
+@media(max-width:860px){
+  .plans{grid-template-columns:1fr;max-width:420px}
+  .plan-card.popular{transform:none}
+  .plan-card.popular:hover{transform:translateY(-4px)}
+  table{font-size:.85rem}
+  thead th,tbody td{padding:.75rem .5rem}
+  tbody td:first-child{padding-left:1rem}
+  thead th:first-child{padding-left:1rem}
+}
+@media(max-width:600px){
+  .hero{padding:2.5rem 1rem 1.5rem}
+  .table-wrap{overflow-x:auto}
+  table{min-width:580px}
+}
+</style>
+</head>
+<body>
+
+<section class="hero">
+  <h1>Прозрачные тарифы для&nbsp;каждого</h1>
+  <p>Выберите план, который подходит именно вам. Отмена в&nbsp;любое время, без&nbsp;скрытых платежей.</p>
+</section>
+
+<div class="toggle-wrap">
+  <span class="toggle-label active" data-period="monthly">Месяц</span>
+  <div class="toggle-track" id="toggleTrack" role="switch" aria-checked="false" tabindex="0">
+    <div class="toggle-thumb"></div>
+  </div>
+  <span class="toggle-label" data-period="yearly">Год</span>
+  <span class="save-badge">−20%</span>
+</div>
+
+<!-- ── Plan Cards ── -->
+<section class="plans" id="plansRow">
+  <article class="plan-card">
+    <div class="plan-icon">🚀</div>
+    <div class="plan-name">Стартовый</div>
+    <div class="plan-desc">Для фрилансеров и&nbsp;небольших проектов на&nbsp;старте</div>
+    <div class="price-row">
+      <span class="currency">₽</span>
+      <span class="price" data-monthly="490" data-yearly="392">490</span>
+      <span class="period">/ мес</span>
+    </div>
+    <div class="price-note">&nbsp;</div>
+    <button class="btn btn-outline">Начать бесплатно</button>
+  </article>
+  <article class="plan-card popular">
+    <div class="popular-badge">Популярный</div>
+    <div class="plan-icon">⚡</div>
+    <div class="plan-name">Профессиональный</div>
+    <div class="plan-desc">Для растущих команд и&nbsp;бизнеса среднего масштаба</div>
+    <div class="price-row">
+      <span class="currency">₽</span>
+      <span class="price" data-monthly="1 490" data-yearly="1 192">1 490</span>
+      <span class="period">/ мес</span>
+    </div>
+    <div class="price-note yearly-note" style="visibility:hidden">₽ 14 304 / год — экономия ₽ 3 576</div>
+    <button class="btn btn-primary">Выбрать план</button>
+  </article>
+  <article class="plan-card">
+    <div class="plan-icon">🏢</div>
+    <div class="plan-name">Корпоративный</div>
+    <div class="plan-desc">Безлимитные возможности для&nbsp;крупных компаний</div>
+    <div class="price-row">
+      <span class="currency">₽</span>
+      <span class="price" data-monthly="4 990" data-yearly="3 992">4 990</span>
+      <span class="period">/ мес</span>
+    </div>
+    <div class="price-note yearly-note" style="visibility:hidden">₽ 47 904 / год — экономия ₽ 11 976</div>
+    <button class="btn btn-outline">Связаться с нами</button>
+  </article>
+</section>
+
+<!-- ── Comparison Table ── -->
+<section class="table-section">
+  <h2>Детальное сравнение</h2>
+  <p>Все возможности каждого плана в&nbsp;одной таблице</p>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:40%">Возможность</th>
+          <th>Стартовый</th>
+          <th class="popular-col">Профессиональный</th>
+          <th>Корпоративный</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+</section>
+
+<section class="cta">
+  <h2>Не&nbsp;уверены, какой план выбрать?</h2>
+  <p>Попробуйте бесплатный 14-дневный период любого плана без&nbsp;привязки карты</p>
+  <button class="btn btn-primary">Попробовать бесплатно →</button>
+</section>
+
+<script>
+/* ── Data ── */
+const features = [
+  { cat:'Основное' },
+  { name:'Проекты',                       icon:'📁', start:'5',        pro:'50',       corp:'∞' },
+  { name:'Хранилище',                     icon:'💾', start:'10 ГБ',   pro:'500 ГБ',   corp:'5 ТБ' },
+  { name:'Пользователи',                  icon:'👥', start:'1',       pro:'15',       corp:'∞' },
+  { name:'Кастомный домен',               icon:'🌐', check:[false,true,true] },
+  { cat:'Инструменты' },
+  { name:'Аналитика в реальном времени',  icon:'📊', check:[false,true,true] },
+  { name:'API-доступ',                    icon:'🔌', check:[false,true,true] },
+  { name:'Автоматические бэкапы',         icon:'🔄', check:[false,true,true] },
+  { name:'CI/CD интеграция',             icon:'⚙️', check:[false,true,true] },
+  { name:'AI-ассистент',                 icon:'🤖', check:[false,true,true] },
+  { cat:'Поддержка' },
+  { name:'Email-поддержка',               icon:'📧', check:[true,true,true] },
+  { name:'Чат-поддержка 24/7',            icon:'💬', check:[false,true,true] },
+  { name:'Выделенный менеджер',            icon:'🧑‍💼', check:[false,false,true] },
+  { name:'SLA 99.9%',                     icon:'🛡️', check:[false,false,true] },
+  { cat:'Безопасность' },
+  { name:'SSL-сертификат',                icon:'🔒', check:[true,true,true] },
+  { name:'Двухфакторная аутентификация',  icon:'🔑', check:[true,true,true] },
+  { name:'SSO / SAML',                    icon:'🏛️', check:[false,false,true] },
+  { name:'Аудит-лог',                     icon:'📋', check:[false,true,true] },
+  { name:'Резервное шифрование',          icon:'🔐', check:[false,false,true] },
+];
+
+/* ── Render table ── */
+const tbody = document.getElementById('tableBody');
+features.forEach(f => {
+  const tr = document.createElement('tr');
+  if (f.cat) {
+    tr.className = 'cat-row';
+    tr.innerHTML = `<td colspan="4">${f.cat}</td>`;
+    tbody.appendChild(tr);
+    return;
+  }
+  const iconHtml = `<span class="feat-icon">${f.icon||''}</span>`;
+  let cells = `<td><div class="feature-name-wrap">${iconHtml}<span>${f.name}</span></div></td>`;
+  for (let i = 0; i < 3; i++) {
+    const cls = i === 1 ? ' class="popular-col"' : '';
+    if (f.check) {
+      const v = f.check[i];
+      cells += `<td${cls}><span class="check ${v?'yes':'no'}">${v?'✓':'—'}</span></td>`;
+    } else {
+      const val = [f.start, f.pro, f.corp][i];
+      cells += `<td${cls}><span class="check limit">${val}</span></td>`;
+    }
+  }
+  tr.innerHTML = cells;
+  tbody.appendChild(tr);
+});
+
+/* ── Toggle ── */
+const track = document.getElementById('toggleTrack');
+const labels = document.querySelectorAll('.toggle-label');
+const prices = document.querySelectorAll('.price');
+const notes = document.querySelectorAll('.yearly-note');
+let yearly = false;
+
+function updatePrices() {
+  const key = yearly ? 'yearly' : 'monthly';
+  prices.forEach(el => {
+    el.classList.add('fade');
+    setTimeout(() => {
+      el.textContent = el.dataset[key];
+      el.classList.remove('fade');
+    }, 180);
+  });
+  labels.forEach(l => l.classList.toggle('active', l.dataset.period === (yearly ? 'yearly' : 'monthly')));
+  track.classList.toggle('yearly', yearly);
+  notes.forEach(n => n.style.visibility = yearly ? 'visible' : 'hidden');
+}
+
+function toggle() {
+  yearly = !yearly;
+  track.setAttribute('aria-checked', yearly);
+  updatePrices();
+}
+
+track.addEventListener('click', toggle);
+labels.forEach(l => l.addEventListener('click', () => { if ((l.dataset.period === 'yearly') !== yearly) toggle(); }));
+track.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } });
+</script>
+</body>
+</html>

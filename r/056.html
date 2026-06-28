@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Кофейня «Гармония» | Аромат уюта в каждой чашке</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+
+  <style>
+    /* CSS Variables & Reset */
+    :root {
+      --primary: #2C1A11;
+      --primary-light: #4A3121;
+      --secondary: #865D36;
+      --accent: #C17A47;
+      --accent-hover: #A05F30;
+      --gold: #E0A96D;
+      --bg-light: #FDFBF7;
+      --bg-cream: #F5EBE6;
+      --text-main: #2D2421;
+      --text-muted: #6E5D55;
+      --white: #FFFFFF;
+      --error: #D32F2F;
+      --success: #388E3C;
+      --font-title: 'Playfair Display', Georgia, serif;
+      --font-body: 'Montserrat', sans-serif;
+      --shadow: 0 10px 30px rgba(44, 26, 17, 0.08);
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background-color: var(--bg-light);
+      color: var(--text-main);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 10px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg-cream);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--secondary);
+      border-radius: 5px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--primary);
+    }
+
+    /* Utility Classes */
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .section {
+      padding: 100px 0;
+    }
+
+    .section-title {
+      font-family: var(--font-title);
+      font-size: 2.5rem;
+      color: var(--primary);
+      text-align: center;
+      margin-bottom: 15px;
+      position: relative;
+    }
+
+    .section-title::after {
+      content: '';
+      display: block;
+      width: 60px;
+      height: 3px;
+      background-color: var(--gold);
+      margin: 15px auto 0;
+    }
+
+    .section-subtitle {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      max-width: 600px;
+      margin: 0 auto 50px;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 14px 32px;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      text-decoration: none;
+      transition: var(--transition);
+      cursor: pointer;
+      border: none;
+      text-align: center;
+    }
+
+    .btn-primary {
+      background-color: var(--accent);
+      color: var(--white);
+    }
+
+    .btn-primary:hover {
+      background-color: var(--accent-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(193, 122, 71, 0.4);
+    }
+
+    .btn-outline {
+      background-color: transparent;
+      color: var(--white);
+      border: 2px solid var(--white);
+    }
+
+    .btn-outline:hover {
+      background-color: var(--white);
+      color: var(--primary);
+      transform: translateY(-2px);
+    }
+
+    /* Header & Navigation */
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 1000;
+      transition: var(--transition);
+      padding: 20px 0;
+    }
+
+    header.scrolled {
+      background-color: rgba(44, 26, 17, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 12px 0;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+    }
+
+    .nav-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-family: var(--font-title);
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--white);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo span {
+      color: var(--gold);
+    }
+
+    .nav-menu {
+      display: flex;
+      gap: 30px;
+      align-items: center;
+      list-style: none;
+    }
+
+    .nav-link {
+      color: rgba(255, 255, 255, 0.85);
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: var(--transition);
+      position: relative;
+    }
+
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background-color: var(--gold);
+      transition: var(--transition);
+    }
+
+    .nav-link:hover {
+      color: var(--white);
+    }
+
+    .nav-link:hover::after {
+      width: 100%;
+    }
+
+    .nav-btn {
+      padding: 10px 20px;
+      font-size: 0.85rem;
+    }
+
+    .menu-toggle {
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+      cursor: pointer;
+      background: none;
+      border: none;
+    }
+
+    .menu-toggle span {
+      display: block;
+      width: 28px;
+      height: 3px;
+      background-color: var(--white);
+      border-radius: 2px;
+      transition: var(--transition);
+    }
+
+    /* Hero Section */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      background: linear-gradient(135deg, rgba(44, 26, 17, 0.92) 0%, rgba(92, 61, 46, 0.85) 100%), 
+                  url('https://images.unsplash.com/photo-1498804103079-a6351b050096?auto=format&fit=crop&w=1920&q=80') no-repeat center center/cover;
+      color: var(--white);
+      padding-top: 100px;
+    }
+
+    .hero-content {
+      max-width: 650px;
+      animation: fadeInUp 1s ease;
+    }
+
+    .hero-tagline {
+      font-size: 1.1rem;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      color: var(--gold);
+      margin-bottom: 20px;
+      font-weight: 600;
+      display: block;
+    }
+
+    .hero-title {
+      font-family: var(--font-title);
+      font-size: 4rem;
+      line-height: 1.15;
+      margin-bottom: 25px;
+    }
+
+    .hero-desc {
+      font-size: 1.15rem;
+      color: rgba(255, 255, 255, 0.8);
+      margin-bottom: 40px;
+      font-weight: 300;
+    }
+
+    .hero-btns {
+      display: flex;
+      gap: 20px;
+    }
+
+    /* Menu Section */
+    .menu {
+      background-color: var(--bg-cream);
+    }
+
+    .menu-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 30px;
+    }
+
+    .menu-card {
+      background-color: var(--white);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .menu-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 15px 35px rgba(44, 26, 17, 0.15);
+    }
+
+    .menu-img-wrapper {
+      position: relative;
+      height: 240px;
+      overflow: hidden;
+    }
+
+    .menu-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: var(--transition);
+    }
+
+    .menu-card:hover .menu-img {
+      transform: scale(1.08);
+    }
+
+    .menu-badge {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background-color: var(--accent);
+      color: var(--white);
+      padding: 6px 14px;
+      border-radius: 50px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .menu-info {
+      padding: 25px;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+    }
+
+    .menu-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 12px;
+    }
+
+    .menu-item-title {
+      font-family: var(--font-title);
+      font-size: 1.4rem;
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    .menu-price {
+      font-size: 1.3rem;
+      color: var(--accent);
+      font-weight: 700;
+      font-family: var(--font-title);
+    }
+
+    .menu-desc {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 20px;
+      flex-grow: 1;
+    }
+
+    .menu-order-btn {
+      background-color: transparent;
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      padding: 10px 20px;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: var(--transition);
+      width: 100%;
+      text-align: center;
+    }
+
+    .menu-order-btn:hover {
+      background-color: var(--accent);
+      color: var(--white);
+    }
+
+    /* About Us Section */
+    .about-wrapper {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+    }
+
+    .about-img-box {
+      position: relative;
+    }
+
+    .about-img-main {
+      width: 100%;
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      z-index: 2;
+      position: relative;
+    }
+
+    .about-img-sub {
+      position: absolute;
+      bottom: -30px;
+      right: -30px;
+      width: 60%;
+      border-radius: 20px;
+      border: 8px solid var(--white);
+      box-shadow: var(--shadow);
+      z-index: 3;
+    }
+
+    .about-experience {
+      position: absolute;
+      top: -20px;
+      left: -20px;
+      background-color: var(--gold);
+      color: var(--primary);
+      padding: 20px;
+      border-radius: 15px;
+      z-index: 4;
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+
+    .about-experience .num {
+      font-family: var(--font-title);
+      font-size: 2.5rem;
+      font-weight: 700;
+      display: block;
+      line-height: 1;
+    }
+
+    .about-experience .text {
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .about-content h3 {
+      font-family: var(--font-title);
+      font-size: 2rem;
+      color: var(--primary);
+      margin-bottom: 20px;
+    }
+
+    .about-text {
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+
+    .about-features {
+      margin-top: 35px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .feature-icon {
+      width: 40px;
+      height: 40px;
+      background-color: var(--bg-cream);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .feature-text {
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--primary);
+    }
+
+    /* Gallery Section */
+    .gallery {
+      background-color: var(--bg-cream);
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-auto-rows: 240px;
+      gap: 20px;
+    }
+
+    .gallery-item {
+      position: relative;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .gallery-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: var(--transition);
+    }
+
+    .gallery-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(44, 26, 17, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: var(--transition);
+    }
+
+    .gallery-overlay-icon {
+      color: var(--gold);
+      font-size: 2rem;
+      transform: translateY(20px);
+      transition: var(--transition);
+    }
+
+    .gallery-item:hover img {
+      transform: scale(1.1);
+    }
+
+    .gallery-item:hover .gallery-overlay {
+      opacity: 1;
+    }
+
+    .gallery-item:hover .gallery-overlay-icon {
+      transform: translateY(0);
+    }
+
+    /* Grid Layout variations */
+    .gallery-item.wide {
+      grid-column: span 2;
+    }
+
+    .gallery-item.tall {
+      grid-row: span 2;
+    }
+
+    /* Booking Section */
+    .booking {
+      position: relative;
+      background: linear-gradient(135deg, rgba(44, 26, 17, 0.95) 0%, rgba(92, 61, 46, 0.95) 100%), 
+                  url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1920&q=80') no-repeat center center/cover;
+      color: var(--white);
+    }
+
+    .booking .section-title {
+      color: var(--white);
+    }
+
+    .booking .section-subtitle {
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .booking-wrapper {
+      max-width: 800px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      padding: 50px;
+      border-radius: 30px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+    }
+
+    .booking-form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .form-group.full-width {
+      grid-column: span 2;
+    }
+
+    .form-label {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--gold);
+    }
+
+    .form-control {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 14px 20px;
+      border-radius: 10px;
+      color: var(--white);
+      font-family: var(--font-body);
+      font-size: 1rem;
+      transition: var(--transition);
+    }
+
+    .form-control::placeholder {
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--gold);
+      background: rgba(255, 255, 255, 0.15);
+      box-shadow: 0 0 10px rgba(224, 169, 109, 0.2);
+    }
+
+    select.form-control option {
+      background-color: var(--primary);
+      color: var(--white);
+    }
+
+    .error-msg {
+      color: #FF8A80;
+      font-size: 0.8rem;
+      margin-top: 4px;
+      display: none;
+    }
+
+    .booking-btn-box {
+      grid-column: span 2;
+      text-align: center;
+      margin-top: 15px;
+    }
+
+    .booking-btn {
+      width: 100%;
+      max-width: 300px;
+    }
+
+    /* Footer */
+    footer {
+      background-color: var(--primary);
+      color: rgba(255, 255, 255, 0.7);
+      padding: 80px 0 30px;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1.5fr;
+      gap: 40px;
+      margin-bottom: 60px;
+    }
+
+    .footer-col h4 {
+      color: var(--white);
+      font-family: var(--font-title);
+      font-size: 1.4rem;
+      margin-bottom: 25px;
+    }
+
+    .footer-about p {
+      margin-bottom: 25px;
+      line-height: 1.7;
+    }
+
+    .social-links {
+      display: flex;
+      gap: 15px;
+    }
+
+    .social-link {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: rgba(255,255,255,0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--white);
+      text-decoration: none;
+      transition: var(--transition);
+    }
+
+    .social-link:hover {
+      background-color: var(--accent);
+      color: var(--white);
+      transform: translateY(-3px);
+    }
+
+    .footer-links {
+      list-style: none;
+    }
+
+    .footer-links li {
+      margin-bottom: 12px;
+    }
+
+    .footer-links a {
+      color: rgba(255, 255, 255, 0.7);
+      text-decoration: none;
+      transition: var(--transition);
+    }
+
+    .footer-links a:hover {
+      color: var(--gold);
+      padding-left: 5px;
+    }
+
+    .footer-contact li {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 15px;
+    }
+
+    .footer-contact svg {
+      color: var(--gold);
+      flex-shrink: 0;
+    }
+
+    .footer-bottom {
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding-top: 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.9rem;
+    }
+
+    /* Modal Success Window */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(5px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      opacity: 0;
+      pointer-events: none;
+      transition: var(--transition);
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-content {
+      background-color: var(--bg-light);
+      padding: 50px;
+      border-radius: 25px;
+      max-width: 500px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+      transform: scale(0.8);
+      transition: var(--transition);
+    }
+
+    .modal-overlay.active .modal-content {
+      transform: scale(1);
+    }
+
+    .modal-icon {
+      width: 80px;
+      height: 80px;
+      background-color: rgba(56, 142, 60, 0.1);
+      color: var(--success);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 25px;
+    }
+
+    .modal-title {
+      font-family: var(--font-title);
+      font-size: 2rem;
+      color: var(--primary);
+      margin-bottom: 15px;
+    }
+
+    .modal-text {
+      color: var(--text-muted);
+      margin-bottom: 30px;
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Responsive Styles */
+    @media (max-width: 1024px) {
+      .gallery-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+      .footer-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .section {
+        padding: 70px 0;
+      }
+
+      .hero-title {
+        font-size: 2.8rem;
+      }
+
+      .about-wrapper {
+        grid-template-columns: 1fr;
+        gap: 50px;
+      }
+
+      .about-img-box {
+        max-width: 500px;
+        margin: 0 auto;
+      }
+
+      .gallery-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .booking-form {
+        grid-template-columns: 1fr;
+      }
+
+      .form-group.full-width, .booking-btn-box {
+        grid-column: span 1;
+      }
+
+      .menu-toggle {
+        display: flex;
+      }
+
+      .nav-menu {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 80%;
+        max-width: 350px;
+        height: 100vh;
+        background-color: var(--primary);
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 35px;
+        transition: var(--transition);
+        box-shadow: -10px 0 30px rgba(0,0,0,0.2);
+      }
+
+      .nav-menu.active {
+        right: 0;
+      }
+
+      .menu-toggle.active span:nth-child(1) {
+        transform: rotate(45deg) translate(6px, 6px);
+      }
+
+      .menu-toggle.active span:nth-child(2) {
+        opacity: 0;
+      }
+
+      .menu-toggle.active span:nth-child(3) {
+        transform: rotate(-45deg) translate(6px, -6px);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .hero-title {
+        font-size: 2.2rem;
+      }
+
+      .hero-btns {
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .gallery-grid {
+        grid-template-columns: 1fr;
+        grid-auto-rows: 200px;
+      }
+
+      .gallery-item.wide {
+        grid-column: span 1;
+      }
+
+      .gallery-item.tall {
+        grid-row: span 1;
+      }
+
+      .footer-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .footer-bottom {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+      }
+
+      .booking-wrapper {
+        padding: 30px 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header id="header">
+    <div class="container nav-container">
+      <a href="#" class="logo">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--gold)"><path d="M18 8h1a4 4 0 0 1 0 8h-1"></path><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path><line x1="6" y1="1" x2="6" y2="4"></line><line x1="10" y1="1" x2="10" y2="4"></line><line x1="14" y1="1" x2="14" y2="4"></line></svg>
+        Гармония<span>.</span>
+      </a>
+      
+      <ul class="nav-menu" id="nav-menu">
+        <li><a href="#" class="nav-link">Главная</a></li>
+        <li><a href="#menu" class="nav-link">Меню</a></li>
+        <li><a href="#about" class="nav-link">О нас</a></li>
+        <li><a href="#gallery" class="nav-link">Галерея</a></li>
+        <li><a href="#booking" class="btn btn-primary nav-btn">Забронировать</a></li>
+      </ul>
+
+      <button class="menu-toggle" id="menu-toggle" aria-label="Открыть меню">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero" id="home">
+    <div class="container">
+      <div class="hero-content">
+        <span class="hero-tagline">Добро пожаловать в Гармонию</span>
+        <h1 class="hero-title">Аромат уюта в каждой чашке</h1>
+        <p class="hero-desc">Погрузитесь в атмосферу свежеобжаренного кофе, изысканных десертов и тёплых встреч в самом сердце города. Мы создаем моменты счастья каждый день.</p>
+        <div class="hero-btns">
+          <a href="#menu" class="btn btn-primary">Посмотреть меню</a>
+          <a href="#booking" class="btn btn-outline">Заказать столик</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Menu Section -->
+  <section class="section menu" id="menu">
+    <div class="container">
+      <h2 class="section-title">Наше Меню</h2>
+      <p class="section-subtitle">От классического эспрессо до авторских шедевров нашей кондитерской. Каждое блюдо приготовлено с любовью.</p>
+      
+      <div class="menu-grid">
+        <!-- Item 1 -->
+        <div class="menu-card">
+          <div class="menu-img-wrapper">
+            <img class="menu-img" src="https://images.unsplash.com/photo-151097252790b-af4f902673a1?auto=format&fit=crop&w=500&q=80" alt="Эспрессо">
+            <span class="menu-badge">Классика</span>
+          </div>
+          <div class="menu-info">
+            <div class="menu-meta">
+              <h3 class="menu-item-title">Эспрессо</h3>
+              <span class="menu-price">150 ₽</span>
+            </div>
+            <p class="menu-desc">Бодрящий классический напиток с плотной золотистой пенкой крема, приготовленный из отборной арабики.</p>
+            <button class="menu-order-btn" onclick="scrollToBooking()">Заказать к столу</button>
+          </div>
+        </div>
+
+        <!-- Item 2 -->
+        <div class="menu-card">
+          <div class="menu-img-wrapper">
+            <img class="menu-img" src="https://images.unsplash.com/photo-1534778101976-62847782c213?auto=format&fit=crop&w=500&q=80" alt="Капучино">
+            <span class="menu-badge">Популярное</span>
+          </div>
+          <div class="menu-info">
+            <div class="menu-meta">
+              <h3 class="menu-item-title">Капучино</h3>
+              <span class="menu-price">220 ₽</span>
+            </div>
+            <p class="menu-desc">Идеальный баланс крепкого эспрессо, подогретого молока и нежной бархатистой молочной пенки.</p>
+            <button class="menu-order-btn" onclick="scrollToBooking()">Заказать к столу</button>
+          </div>
+        </div>
+
+        <!-- Item 3 -->
+        <div class="menu-card">
+          <div class="menu-img-wrapper">
+            <img class="menu-img" src="https://images.unsplash.com/photo-1570968915860-54d5c301fc9f?auto=format&fit=crop&w=500&q=80" alt="Латте Макиато">
+          </div>
+          <div class="menu-info">
+            <div class="menu-meta">
+              <h3 class="menu-item-title">Латте Макиато</h3>
+              <span class="menu-price">250 ₽</span>
+            </div>
+            <p class="menu-desc">Трехслойный кофейный напиток с нежным молочным вкусом, дополненный натуральным сиропом на ваш выбор.</p>
+            <button class="menu-order-btn" onclick="scrollToBooking()">Заказать к столу</button>
+          </div>
+        </div>
+
+        <!-- Item 4 -->
+        <div class="menu-card">
+          <div class="menu-img-wrapper">
+            <img class="menu-img" src="https://images.unsplash.com/photo-1577968897966-3d4325b36b61?auto=format&fit=crop&w=500&q=80" alt="Флэт Уайт">
+          </div>
+          <div class="menu-info">
+            <div class="menu-meta">
+              <h3 class="menu-item-title">Флэт Уайт</h3>
+              <span class="menu-price">240 ₽</span>
+            </div>
+            <p class="menu-desc">Насыщенный двойной эспрессо с добавлением деликатно взбитого молока с минимальным количеством пены.</p>
+            <button class="menu-order-btn" onclick="scrollToBooking()">Заказать к столу</button>
+          </div>
+        </div>
+
+        <!-- Item 5 -->
+        <div class="menu-card">
+          <div class="menu-img-wrapper">
+            <img class="menu-img" src="https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=500&q=80" alt="Круассан с миндалем">
+            <span class="menu-badge">Свежая выпечка</span>
+          </div>
+          <div class="menu-info">
+            <div class="menu-meta">
+              <h3 class="menu-item-title">Миндальный круассан</h3>
+              <span class="menu-price">180 ₽</span>
+            </div>
+            <p class="menu-desc">Теплый хрустящий круассан из слоеного теста с начинкой из нежного миндального крема, посыпанный лепестками миндаля.</p>
+            <button class="menu-order-btn" onclick="scrollToBooking()">Заказать к столу</button>
+          </div>
+        </div>
+
+        <!-- Item 6 -->
+        <div class="menu-card">
+          <div class="menu-img-wrapper">
+            <img class="menu-img" src="https://images.unsplash.com/photo-1541532713592-79a0317b6b77?auto=format&fit=crop&w=500&q=80" alt="Авокадо Тост">
+            <span class="menu-badge">Завтрак</span>
+          </div>
+          <div class="menu-info">
+            <div class="menu-meta">
+              <h3 class="menu-item-title">Авокадо-тост</h3>
+              <span class="menu-price">320 ₽</span>
+            </div>
+            <p class="menu-desc">Хрустящий ремесленный хлеб с пюре из спелого авокадо, яйцом пашот, семенами тыквы и микрозеленью.</p>
+            <button class="menu-order-btn" onclick="scrollToBooking()">Заказать к столу</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- About Us Section -->
+  <section class="section about" id="about">
+    <div class="container">
+      <div class="about-wrapper">
+        <div class="about-img-box">
+          <div class="about-experience">
+            <span class="num">7</span>
+            <span class="text">лет опыта</span>
+          </div>
+          <img class="about-img-main" src="https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=600&q=80" alt="Интерьер кофейни">
+          <img class="about-img-sub" src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=400&q=80" alt="Процесс варки кофе">
+        </div>
+        
+        <div class="about-content">
+          <h2 class="section-title" style="text-align: left; margin-bottom: 30px; margin-left: 0;">Наша История</h2>
+          <h3>Где страсть встречается с качеством</h3>
+          <p class="about-text">Кофейня «Гармония» — это больше, чем просто место, где варят кофе. Это пространство, созданное для вдохновения, теплых разговоров и неспешного наслаждения моментом.</p>
+          <p class="about-text">Мы тщательно выбираем зерна класса Specialty с лучших плантаций мира, обжариваем их локально и контролируем каждый этап заваривания. Наши кондитеры каждое утро вручную создают десерты, чтобы вы получали только самое свежее.</p>
+          
+          <div class="about-features">
+            <div class="feature-item">
+              <div class="feature-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+              </div>
+              <span class="feature-text">100% Спешелти Арабика</span>
+            </div>
+            <div class="feature-item">
+              <div class="feature-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              </div>
+              <span class="feature-text">Экологичные фермы</span>
+            </div>
+            <div class="feature-item">
+              <div class="feature-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              </div>
+              <span class="feature-text">Всегда свежая выпечка</span>
+            </div>
+            <div class="feature-item">
+              <div class="feature-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              </div>
+              <span class="feature-text">Уютная атмосфера</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Gallery Section -->
+  <section class="section gallery" id="gallery">
+    <div class="container">
+      <h2 class="section-title">Атмосфера Гармонии</h2>
+      <p class="section-subtitle">Взгляните на кусочек нашей кофейной жизни, запечатленный на фотографиях.</p>
+      
+      <div class="gallery-grid">
+        <div class="gallery-item wide">
+          <img src="https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=800&q=80" alt="Наш зал">
+          <div class="gallery-overlay">
+            <span class="gallery-overlay-icon">✦</span>
+          </div>
+        </div>
+        <div class="gallery-item">
+          <img src="https://images.unsplash.com/photo-1447933601403-0c6688de566e?auto=format&fit=crop&w=600&q=80" alt="Кофейные зерна">
+          <div class="gallery-overlay">
+            <span class="gallery-overlay-icon">✦</span>
+          </div>
+        </div>
+        <div class="gallery-item tall">
+          <img src="https://images.unsplash.com/photo-1521017432531-fbd92d768814?auto=format&fit=crop&w=600&q=80" alt="Кофейный уголок">
+          <div class="gallery-overlay">
+            <span class="gallery-overlay-icon">✦</span>
+          </div>
+        </div>
+        <div class="gallery-item">
+          <img src="https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=600&q=80" alt="Процесс фильтрации">
+          <div class="gallery-overlay">
+            <span class="gallery-overlay-icon">✦</span>
+          </div>
+        </div>
+        <div class="gallery-item wide">
+          <img src="https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=800&q=80" alt="Десерты">
+          <div class="gallery-overlay">
+            <span class="gallery-overlay-icon">✦</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Booking Section -->
+  <section class="section booking" id="booking">
+    <div class="container">
+      <h2 class="section-title">Забронировать Столик</h2>
+      <p class="section-subtitle">Оставьте ваши данные, и мы подготовим для вас лучший столик. Бронирование абсолютно бесплатное.</p>
+      
+      <div class="booking-wrapper">
+        <form class="booking-form" id="bookingForm" novalidate>
+          <div class="form-group">
+            <label class="form-label" for="name">Ваше имя *</label>
+            <input type="text" id="name" class="form-control" placeholder="Иван Иванов" required minlength="2">
+            <span class="error-msg" id="name-error">Пожалуйста, введите имя (не менее 2-х символов)</span>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label" for="phone">Номер телефона *</label>
+            <input type="tel" id="phone" class="form-control" placeholder="+7 (999) 999-99-99" required>
+            <span class="error-msg" id="phone-error">Введите корректный номер телефона</span>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label" for="date">Дата визита *</label>
+            <input type="date" id="date" class="form-control" required>
+            <span class="error-msg" id="date-error">Выберите дату в будущем</span>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label" for="time">Время *</label>
+            <select id="time" class="form-control" required>
+              <option value="" disabled selected>Выберите время</option>
+              <option value="09:00">09:00</option>
+              <option value="11:00">11:00</option>
+              <option value="13:00">13:00</option>
+              <option value="15:00">15:00</option>
+              <option value="17:00">17:00</option>
+              <option value="19:00">19:00</option>
+              <option value="21:00">21:00</option>
+            </select>
+            <span class="error-msg" id="time-error">Пожалуйста, выберите время визита</span>
+          </div>
+          
+          <div class="form-group full-width">
+            <label class="form-label" for="guests">Количество гостей *</label>
+            <select id="guests" class="form-control" required>
+              <option value="" disabled selected>Выберите число гостей</option>
+              <option value="1">1 человек</option>
+              <option value="2">2 человека</option>
+              <option value="3">3 человека</option>
+              <option value="4">4 человека</option>
+              <option value="5">5+ человек</option>
+            </select>
+            <span class="error-msg" id="guests-error">Пожалуйста, укажите количество гостей</span>
+          </div>
+          
+          <div class="booking-btn-box">
+            <button type="submit" class="btn btn-primary booking-btn">Подтвердить бронь</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-col footer-about">
+          <h4>Гармония.</h4>
+          <p>Мы создаем уникальный кофейный опыт, сочетая традиции обжарки с современным искусством бариста. Ждем вас в гости за вдохновением!</p>
+          <div class="social-links">
+            <a href="#" class="social-link" aria-label="VK">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+            </a>
+            <a href="#" class="social-link" aria-label="Instagram">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+            </a>
+            <a href="#" class="social-link" aria-label="Telegram">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </a>
+          </div>
+        </div>
+        
+        <div class="footer-col">
+          <h4>Разделы</h4>
+          <ul class="footer-links">
+            <li><a href="#">Главная</a></li>
+            <li><a href="#menu">Наше Меню</a></li>
+            <li><a href="#about">О нас</a></li>
+            <li><a href="#gallery">Галерея</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Полезное</h4>
+          <ul class="footer-links">
+            <li><a href="#booking">Бронь столика</a></li>
+            <li><a href="#">Франшиза</a></li>
+            <li><a href="#">Вакансии</a></li>
+            <li><a href="#">Контакты</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Контакты</h4>
+          <ul class="footer-contact" style="list-style: none;">
+            <li>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              <span>ул. Кофейная, д. 12, Москва</span>
+            </li>
+            <li>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              <span>+7 (495) 123-45-67</span>
+            </li>
+            <li>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              <span>Ежедневно: 08:00 - 22:00</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="footer-bottom">
+        <p>&copy; 2024 Кофейня «Гармония». Все права защищены.</p>
+        <p>Сделано с любовью к хорошему кофе</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Success Modal Window -->
+  <div class="modal-overlay" id="successModal">
+    <div class="modal-content">
+      <div class="modal-icon">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+      </div>
+      <h3 class="modal-title">

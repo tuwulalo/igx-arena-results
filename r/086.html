@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тарифные планы и сравнение функций</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --primary-light: #f5f3ff;
+            --popular: #f59e0b;
+            --popular-hover: #d97706;
+            --popular-light: #fef3c7;
+            --dark: #0f172a;
+            --gray-light: #f8fafc;
+            --gray-border: #e2e8f0;
+            --text-main: #334155;
+            --text-muted: #64748b;
+            --white: #ffffff;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #fafafa;
+            color: var(--text-main);
+            line-height: 1.5;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Hero Header Section */
+        .hero {
+            text-align: center;
+            padding: 80px 0 40px;
+            background: radial-gradient(100% 100% at 50% 0%, rgba(79, 70, 229, 0.07) 0%, rgba(255, 255, 255, 0) 100%);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 16px;
+            background-color: var(--primary-light);
+            color: var(--primary);
+            border-radius: 9999px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            font-weight: 800;
+            color: var(--dark);
+            letter-spacing: -0.03em;
+            margin-bottom: 16px;
+        }
+
+        .hero p {
+            font-size: 18px;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto 40px;
+        }
+
+        /* Toggle Switch */
+        .toggle-container {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--white);
+            padding: 6px;
+            border-radius: 9999px;
+            border: 1px solid var(--gray-border);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 40px;
+        }
+
+        .toggle-btn {
+            background: none;
+            border: none;
+            padding: 10px 24px;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-radius: 9999px;
+            transition: var(--transition);
+        }
+
+        .toggle-btn.active {
+            background-color: var(--dark);
+            color: var(--white);
+        }
+
+        .discount-badge {
+            margin-left: 8px;
+            background-color: #10b981;
+            color: var(--white);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 9999px;
+            text-transform: uppercase;
+        }
+
+        /* Pricing Cards Grid */
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 32px;
+            margin-bottom: 80px;
+            align-items: stretch;
+        }
+
+        .pricing-card {
+            background-color: var(--white);
+            border-radius: 24px;
+            border: 1px solid var(--gray-border);
+            padding: 40px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        /* Popular Plan Highlight */
+        .pricing-card.popular {
+            border: 2px solid var(--primary);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .pricing-card.popular:hover {
+            box-shadow: var(--shadow-xl);
+        }
+
+        .popular-tag {
+            position: absolute;
+            top: -16px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, var(--primary), #6366f1);
+            color: var(--white);
+            padding: 6px 20px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
+
+        .plan-name {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 8px;
+        }
+
+        .plan-description {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+            min-height: 42px;
+        }
+
+        .plan-price-container {
+            display: flex;
+            align-items: baseline;
+            margin-bottom: 24px;
+        }
+
+        .price-currency {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--dark);
+            align-self: flex-start;
+            margin-top: 4px;
+        }
+
+        .plan-price {
+            font-size: 56px;
+            font-weight: 800;
+            color: var(--dark);
+            line-height: 1;
+            letter-spacing: -0.02em;
+            transition: var(--transition);
+        }
+
+        .price-period {
+            font-size: 15px;
+            color: var(--text-muted);
+            margin-left: 6px;
+        }
+
+        .price-annual-note {
+            font-size: 12px;
+            color: #10b981;
+            font-weight: 600;
+            margin-top: -16px;
+            margin-bottom: 24px;
+            min-height: 18px;
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .price-annual-note.visible {
+            opacity: 1;
+        }
+
+        .plan-btn {
+            display: block;
+            width: 100%;
+            padding: 14px 24px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            text-align: center;
+            border: 1px solid var(--gray-border);
+            background-color: var(--white);
+            color: var(--dark);
+            cursor: pointer;
+            transition: var(--transition);
+            margin-bottom: 32px;
+            text-decoration: none;
+        }
+
+        .plan-btn:hover {
+            background-color: var(--gray-light);
+            border-color: #cbd5e1;
+        }
+
+        .popular .plan-btn {
+            background: var(--primary);
+            color: var(--white);
+            border: none;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+        }
+
+        .popular .plan-btn:hover {
+            background: var(--primary-hover);
+            box-shadow: 0 6px 16px rgba(79, 70, 229, 0.3);
+        }
+
+        .plan-features-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--dark);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 16px;
+        }
+
+        .plan-features-list {
+            list-style: none;
+            margin-bottom: 0;
+        }
+
+        .plan-features-list li {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            color: var(--text-main);
+            margin-bottom: 12px;
+        }
+
+        .plan-features-list li svg {
+            width: 18px;
+            height: 18px;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+
+        .plan-features-list li.included svg {
+            color: #10b981;
+        }
+
+        .plan-features-list li.excluded {
+            color: var(--text-muted);
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+
+        .plan-features-list li.excluded svg {
+            color: var(--text-muted);
+        }
+
+        /* Comparison Table Section */
+        .comparison-section {
+            padding: 80px 0;
+            background-color: var(--white);
+            border-top: 1px solid var(--gray-border);
+        }
+
+        .comparison-title {
+            text-align: center;
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--dark);
+            margin-bottom: 48px;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 16px;
+            border: 1px solid var(--gray-border);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            background-color: var(--white);
+            min-width: 800px;
+        }
+
+        .comparison-table th, .comparison-table td {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--gray-border);
+        }
+
+        /* Table Header sticky positioning */
+        .comparison-table thead th {
+            background-color: var(--gray-light);
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--dark);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .comparison-table thead th:first-child {
+            width: 35%;
+        }
+
+        .comparison-table thead th:not(:first-child) {
+            width: 21.66%;
+            text-align: center;
+        }
+
+        .comparison-table tbody tr:hover {
+            background-color: rgba(248, 250, 252, 0.8);
+        }
+
+        /* Column Highlighting in Table */
+        .col-highlight {
+            background-color: rgba(79, 70, 229, 0.02);
+        }
+
+        tr:hover .col-highlight {
+            background-color: rgba(79, 70, 229, 0.04) !important;
+        }
+
+        .comparison-table td:first-child {
+            font-weight: 500;
+            color: var(--dark);
+            font-size: 15px;
+        }
+
+        .comparison-table td:not(:first-child) {
+            text-align: center;
+            font-size: 14px;
+            color: var(--text-main);
+        }
+
+        /* Categories in Table */
+        .table-category {
+            background-color: #f1f5f9;
+            font-weight: 700 !important;
+            font-size: 13px !important;
+            color: var(--text-muted) !important;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 12px 24px !important;
+        }
+
+        /* Table Icons */
+        .icon-check {
+            color: #10b981;
+            width: 20px;
+            height: 20px;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .icon-cross {
+            color: var(--text-muted);
+            opacity: 0.4;
+            width: 18px;
+            height: 18px;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .table-text-val {
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        /* FAQ Section */
+        .faq-section {
+            padding: 80px 0;
+            background-color: var(--gray-light);
+            border-top: 1px solid var(--gray-border);
+        }
+
+        .faq-title {
+            text-align: center;
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--dark);
+            margin-bottom: 48px;
+        }
+
+        .faq-grid {
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .faq-item {
+            background-color: var(--white);
+            border: 1px solid var(--gray-border);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .faq-trigger {
+            width: 100%;
+            padding: 20px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: none;
+            border: none;
+            text-align: left;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--dark);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .faq-trigger:hover {
+            color: var(--primary);
+        }
+
+        .faq-icon {
+            width: 20px;
+            height: 20px;
+            transition: transform 0.3s ease;
+            color: var(--text-muted);
+        }
+
+        .faq-item.active .faq-icon {
+            transform: rotate(180deg);
+            color: var(--primary);
+        }
+
+        .faq-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, padding 0.3s ease-out;
+            padding: 0 24px;
+            color: var(--text-muted);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .faq-item.active .faq-content {
+            padding: 0 24px 20px;
+            max-height: 200px; /* Adjust based on content */
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--dark);
+            color: var(--text-muted);
+            padding: 40px 0;
+            text-align: center;
+            font-size: 14px;
+            border-top: 1px solid #1e293b;
+        }
+
+        footer p {
+            margin-bottom: 8px;
+        }
+
+        /* Modal styling for CTA buttons */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal {
+            background-color: var(--white);
+            border-radius: 24px;
+            max-width: 480px;
+            width: 90%;
+            padding: 40px;
+            box-shadow: var(--shadow-xl);
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+            position: relative;
+        }
+
+        .modal-overlay.active .modal {
+            transform: scale(1);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: var(--transition);
+        }
+
+        .modal-close:hover {
+            color: var(--dark);
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--dark);
+            margin-bottom: 12px;
+        }
+
+        .modal-desc {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--gray-border);
+            font-family: inherit;
+            font-size: 14px;
+            transition: var(--transition);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--primary);
+            color: var(--white);
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-submit:hover {
+            background-color: var(--primary-hover);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .pricing-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 24px;
+            }
+            .pricing-card.popular {
+                grid-column: span 2;
+                order: -1; /* Keep popular on top/first for tablet */
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 36px;
+            }
+            .pricing-grid {
+                grid-template-columns: 1fr;
+            }
+            .pricing-card.popular {
+                grid-column: span 1;
+            }
+            .comparison-section {
+                padding: 40px 0;
+            }
+            .table-wrapper {
+                border-radius: 0;
+                border-left: none;
+                border-right: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Hero Header -->
+    <header class="hero">
+        <div class="container">
+            <span class="badge">Тарифные планы</span>
+            <h1>Гибкие тарифы под любые задачи</h1>
+            <p>Выберите подходящий тарифный план. Переключайтесь между месячной и годовой оплатой, чтобы получить дополнительную скидку.</p>
+            
+            <!-- Billing Toggle Switch -->
+            <div class="toggle-container">
+                <button class="toggle-btn active" id="btn-monthly" onclick="setBilling('monthly')">Ежемесячно</button>
+                <button class="toggle-btn" id="btn-yearly" onclick="setBilling('yearly')">
+                    Ежегодно <span class="discount-badge">-20%</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Pricing Cards Grid -->
+    <main class="container">
+        <section class="pricing-grid">
+            
+            <!-- Plan: Basic -->
+            <div class="pricing-card" id="card-basic">
+                <h3 class="plan-name">Стартовый</h3>
+                <p class="plan-description">Идеально для индивидуальных разработчиков, фрилансеров и небольших хобби-проектов.</p>
+                
+                <div class="plan-price-container">
+                    <span class="price-currency">₽</span>
+                    <span class="plan-price" id="price-basic" data-monthly="990" data-yearly="790">990</span>
+                    <span class="price-period" id="period-basic">/ мес</span>
+                </div>
+                <div class="price-annual-note" id="note-basic">при оплате за год</div>
+
+                <button class="plan-btn" onclick="openModal('Стартовый')">Начать бесплатно</button>
+
+                <div class="plan-features-title">Что входит:</div>
+                <ul class="plan-features-list">
+                    <li class="included">
+                        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                        До 3 активных проектов
+                    </li>
+                    <li class="included">
+                        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                        5 ГБ облачного хранилища
+                    </li>
+                    <li class="included">
+                        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                        Базовая аналитика
+                    </li>
+                    <li class="excluded">
+                        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                        Командная работа
+                    </li>
+                    <li class="excluded">
+                        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                        Индивидуальный домен
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Plan: Pro (Popular Highlighted) -->
+            <div class="pricing-card popular" id="card-pro">
+                <div class="popular-tag">Популярный выбор</div>
+                <h3 class="plan-name">Профессиональный</h3>
+                <p class="plan-description">Оптимальный набор инструментов для растущих команд и профессионалов.</p>
+                
+                <div class="plan-price-container">
+                    <span class="price-currency">₽</span>
+                    <span class="plan-price" id="price-pro" data-monthly="2490" data-yearly="1990">2 490</span>
+                    <span class="price-period" id="period-pro">/ мес</span>
+                </div>
+                <div class="price-annual-note" id="note-pro">при оплате за год</div>
+
+                <button class="plan-btn" onclick="openModal('Профессиональный')">Попробовать бесплатно</button>
+
+                <div class="plan-features-title">Что входит:</div>
+                <ul class="plan-features-list">
+                    <li class="included">
+                        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                        <strong>Безлимитные</strong> проекты
+                    </li>
+                    <li class="included">
+                        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                        100 ГБ облачного хранилища
+                    </li>
+                    <li class="included">
+                        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                        Продвинутая аналитика
+                    </li>
+                    <li class="included">
+                        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                        Команда до 10 человек
+                    </li>
+                    <li class="included">
+                        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                        Собственный домен
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Plan: Enterprise -->
+            <div class="pricing-card" id="card-enterprise">
+                <h3 class="plan-name">Корпоративный</h3>
+                <p class="plan-description">Для крупных компаний, которым требуются повышенная безопасность, SLA и гибкие настройки.</p>
+                
+                <div class="plan-price-container">
+                    <span class="price-currency">₽</span>
+                    <span class="plan-price" id="price-enterprise" data-monthly="9990" data-yearly="7990">9 990</span>
+                    <span class="price-period" id="period-enterprise">/ мес</span>
+                </div>
+                <div class="price-annual-note" id="note-enterprise">при оплате за год</div>
+
+                <button class="plan-btn" onclick="openModal('Корпоративный')">Связаться с нами</button>
+
+                <div class="plan-features-title">Что входит:</div>
+                <ul class="plan-features-list">
+                    <li class="included">
+                        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                        <strong>Безлимитные</strong> проекты
+                    </li>
+                    <li class="included">
+                        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                        1 ТБ облачного хранилища
+                    </li>
+                    <li class="included">
+                        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                        Кастомная реалтайм аналитика
+                    </li>
+                    <li class="included">
+                        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                        Безлимитное число участников
+                    </li>
+                    <li class="included">
+                        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                        Выделенный менеджер и SLA
+                    </li>
+                </ul>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- Comparison Table Section -->
+    <section class="comparison-section">
+        <div class="container">
+            <h2 class="comparison-title">Детальное сравнение функций</h2>
+            
+            <div class="table-wrapper">
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Функции и возможности</th>
+                            <th>Стартовый</th>
+                            <th class="col-highlight">Профессиональный</th>
+                            <th>Корпоративный</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Category: Основное -->
+                        <tr>
+                            <td colspan="4" class="table-category">Основное</td>
+                        </tr>
+                        <tr>
+                            <td>Количество проектов</td>
+                            <td><span class="table-text-val">3</span></td>
+                            <td class="col-highlight"><span class="table-text-val">Безлимитно</span></td>
+                            <td><span class="table-text-val">Безлимитно</span></td>
+                        </tr>
+                        <tr>
+                            <td>Облачное хранилище</td>
+                            <td><span class="table-text-val">5 ГБ</span></td>
+                            <td class="col-highlight"><span class="table-text-val">100 ГБ</span></td>
+                            <td><span class="table-text-val">1 ТБ</span></td>
+                        </tr>
+                        <tr>
+                            <td>Пользователи в аккаунте</td>
+                            <td><span class="table-text-val">1</span></td>
+                            <td class="col-highlight"><span class="table-text-val">до 10</span></td>
+                            <td><span class="table-text-val">Безлимитно</span></td>
+                        </tr>
+
+                        <!-- Category: Инструменты и интеграции -->
+                        <tr>
+                            <td colspan="4" class="table-category">Инструменты и интеграции</td>
+                        </tr>
+                        <tr>
+                            <td>Интеграция с API</td>
+                            <td>
+                                <svg class="icon-cross" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                            </td>
+                            <td class="col-highlight">
+                                <svg class="icon-check" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                            </td>
+                            <td>
+                                <svg class="icon-check" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Собственный домен</td>
+                            <td>
+                                <svg class="icon-cross" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                            </td>
+                            <td class="col-highlight">
+                                <svg class="icon-check" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                            </td>
+                            <td>
+                                <svg class="icon-check" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Экспорт данных (CSV/JSON)</td>
+                            <td>
+                                <svg class="icon-cross" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                            </td>
+                            <td class="col-highlight">
+                                <svg class="icon-check" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                            </td>
+                            <td>
+                                <svg class="icon-check" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                            </td>
+                        </tr>
+
+                        <!-- Category: Безопасность и поддержка -->
+                        <tr>
+                            <td colspan="4" class="table-category">Безопасность и поддержка</td>
+                        </tr>
+                        <tr>
+                            <td>Двухфакторная аутентификация</td>
+                            <td>
+                                <svg class="icon-check" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                            </td>
+                            <td class="col-highlight">
+                                <svg class="icon-check" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                            </td>
+                            <td>
+                                <svg class="icon-check" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Приоритетная поддержка</td>
+                            <td>
+                                <span class="table-text-val" style="color: var(--text-muted);">Email</span>
+                            </td>
+                            <td class="col-highlight">
+                                <span class="table-text-val">24/7 Чат</span>
+                            </td>
+                            <td>
+                                <span class="table-text-val">Персональный менеджер</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>SLA (Гарантия аптайма)</td>
+                            <td>
+                                <svg class="icon-cross" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                            </td>
+                            <td class="col-highlight">
+                                <svg class="icon-cross" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                            </td>
+                            <td>
+                                <span class="table-text-val" style="color: #10b981;">99.99%</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="faq-section">
+        <div class="container">
+            <h2 class="faq-title">Часто задаваемые вопросы</h2>
+            <div class="faq-grid">
+                
+                <div class="faq-item">
+                    <button class="faq-trigger" onclick="toggleFaq(this)">
+                        <span>Можно ли изменить тарифный план в любое время?</span>
+                        <svg class="faq-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div class="faq-content">
+                        <p>Да, вы можете перейти на более дорогой или дешевый тариф в любой момент в личном кабинете. При апгрейде разница в стоимости будет рассчитана пропорционально оставшимся дням.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-trigger" onclick="toggleFaq(this)">
+                        <span>Как работает пробный период?</span>
+                        <svg class="faq-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div class="faq-content">
+                        <p>Мы предлагаем 14-дневный полнофункциональный тестовый период для тарифа «Профессиональный». Банковская карта для активации триала не требуется.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-trigger" onclick="toggleFaq(this)">
+                        <span>Какие способы оплаты вы принимаете?</span>
+                        <svg class="faq-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div class="faq-content">
+                        <p>Мы принимаем к оплате банковские карты (Visa, Mastercard, МИР), а также предоставляем возможность безналичного расчета для юридических лиц на корпоративном тарифе.</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 SaaS Platform. Все права защищены.</p>
+            <p style="font-size: 12px; opacity: 0.7;">Сделано с любовью для идеального пользовательского опыта.</p>
+        </div>
+    </footer>
+
+    <!-- Modal Form (Mock Checkout) -->
+    <div class="modal-overlay" id="modal-overlay" onclick="closeModalOnBackdrop(event)">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+            <h3 class="modal-title" id="modal-plan-title">Активация тарифа</h3>
+            <p class="modal-desc">Заполните форму ниже, чтобы начать работу с выбранным тарифным планом.</p>
+            
+            <form onsubmit="handleFormSubmit(event)">
+                <div class="form-group">
+                    <label class="form-label" for="user-name">Ваше имя</label>
+                    <input class="form-input" type="text" id="user-name" placeholder="Иван Иванов" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="user-email">Электронная почта</label>
+                    <input class="form-input" type="email" id="user-email" placeholder="ivan@example.com" required>
+                </div>
+                <div class="form-group" id="company-group" style="display: none;">
+                    <label class="form-label" for="company-name">Название компании</label>
+                    <input class="form-input" type="text" id="company-name" placeholder="ООО Вектор">
+                </div>
+                <button type="submit" class="btn-submit">Продолжить</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript for Interactivity -->
+    <script>
+        let currentBilling = 'monthly';
+
+        // Function to handle Monthly/Yearly Billing Toggle
+        function setBilling(type) {
+            currentBilling = type;
+            
+            const btnMonthly = document.getElementById('btn-monthly');
+            const btnYearly = document.getElementById('btn-yearly');
+            
+            const priceBasic = document.getElementById('price-basic');
+            const pricePro = document.getElementById('price-pro');
+            const priceEnterprise = document.getElementById('price-enterprise');
+
+            const noteBasic = document.getElementById('note-basic');
+            const notePro = document.getElementById('note-pro');
+            const noteEnterprise = document.getElementById('note-enterprise');
+
+            const periodBasic = document.getElementById('period-basic');
+            const periodPro = document.getElementById('period-pro');
+            const periodEnterprise = document.getElementById('period-enterprise');
+
+            if (type === 'yearly') {
+                btnMonthly.classList.remove('active');
+                btnYearly.classList.add('active');
+
+                // Animate and update prices
+                updatePriceWithAnimation(priceBasic, priceBasic.getAttribute('data-yearly'));
+                updatePriceWithAnimation(pricePro, formatPrice(pricePro.getAttribute('data-yearly')));
+                updatePriceWithAnimation(priceEnterprise, formatPrice(priceEnterprise.getAttribute('data-yearly')));
+
+                // Update periods
+                periodBasic.textContent = ' / мес';
+                periodPro.textContent = ' / мес';
+                periodEnterprise.textContent = ' / мес';
+
+                // Show yearly note
+                noteBasic.classList.add('visible');
+                notePro.classList.add('visible');
+                noteEnterprise.classList.add('visible');
+            } else {
+                btnYearly.classList.remove('active');
+                btnMonthly.classList.add('active');
+
+                // Animate and update prices
+                updatePriceWithAnimation(priceBasic, priceBasic.getAttribute('data-monthly'));
+                updatePriceWithAnimation(pricePro, formatPrice(pricePro.getAttribute('data-monthly')));
+                updatePriceWithAnimation(priceEnterprise, formatPrice(priceEnterprise.getAttribute('data-monthly')));
+
+                // Update periods
+                periodBasic.textContent = ' / мес';
+                periodPro.textContent = ' / мес';
+                periodEnterprise.textContent = ' / мес';
+
+                // Hide yearly note
+                noteBasic.classList.remove('visible');
+                notePro.classList.remove('visible');
+                noteEnterprise.classList.remove('visible');
+            }
+        }
+
+        // Helper function to format prices with spaces
+        function formatPrice(val) {
+            return parseInt(val).toLocaleString('ru-RU');
+        }
+
+        // Smooth price switching animation
+        function updatePriceWithAnimation(element, newValue) {
+            element.style.transform = 'scale(0.8)';
+            element.style.opacity = '0';
+            
+            setTimeout(() => {
+                element.textContent = newValue;
+                element.style.transform = 'scale(1)';
+                element.style.opacity = '1';
+            }, 150);
+        }
+
+        // FAQ Accordion Toggle
+        function toggleFaq(button) {
+            const item = button.parentElement;
+            const isActive = item.classList.contains('active');
+            
+            // Close all items
+            document.querySelectorAll('.faq-item').forEach(el => {
+                el.classList.remove('active');
+                el.querySelector('.faq-content').style.maxHeight = null;
+            });
+
+            // Open clicked item if it wasn't active
+            if (!isActive) {
+                item.classList.add('active');
+                const content = item.querySelector('.faq-content');
+                content.style.maxHeight = content.scrollHeight + 'px';
+            }
+        }
+
+        // Modal Logic
+        const modalOverlay = document.getElementById('modal-overlay');
+        const modalPlanTitle = document.getElementById('modal-plan-title');
+        const companyGroup = document.getElementById('company-group');
+        const companyInput = document.getElementById('company-name');
+
+        function openModal(planName) {
+            modalPlanTitle.textContent = `Тариф «${planName}»`;
+            
+            // If corporate plan, make company name required and visible
+            if (planName === 'Корпоративный') {
+                companyGroup.style.display = 'block';
+                companyInput.required = true;
+            } else {
+                companyGroup.style.display = 'none';
+                companyInput.required = false;
+            }
+
+            modalOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden'; // Prevent background scroll
+        }
+
+        function closeModal() {
+            modalOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        function closeModalOnBackdrop(event) {
+            if (event.target === modalOverlay) {
+                closeModal();
+            }
+        }
+
+        function handleFormSubmit(event) {
+            event.preventDefault();
+            const name = document.getElementById('user-name').value;
+            const email = document.getElementById('user-email').value;
+            
+            alert(`Спасибо, ${name}! Заявка на тариф успешно отправлена. Мы свяжемся с вами по адресу ${email} в ближайшее время.`);
+            closeModal();
+            
+            // Reset form
+            event.target.reset();
+        }
+    </script>
+</body>
+</html>

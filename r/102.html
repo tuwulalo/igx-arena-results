@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>ОКЕАН · 3D-погружение в глубины</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--cyan:#43e8ff;--teal:#1ad6c8;--foam:#cdf6ff;--gold:#ffcf5c;--coral:#ff7a8a;
+--glass:rgba(8,26,48,.42);--glass2:rgba(6,18,36,.74);--stroke:rgba(120,220,255,.22);
+--txt:#eafcff;--muted:#9fc7da;--sh:0 18px 50px -12px rgba(0,0,0,.65)}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;color:var(--txt);
+font-family:'Sora',system-ui,sans-serif;-webkit-font-smoothing:antialiased;user-select:none}
+canvas{display:block;position:fixed;inset:0;z-index:0}
+#grade{position:fixed;inset:0;z-index:5;pointer-events:none;transition:opacity .4s;
+background:radial-gradient(120% 90% at 50% 0%,rgba(120,230,255,.06),transparent 55%),radial-gradient(140% 120% at 50% 120%,rgba(0,0,0,.4),transparent 60%)}
+#grade.deep{background:radial-gradient(120% 90% at 50% 0%,rgba(20,60,120,.1),transparent 55%),radial-gradient(140% 120% at 50% 120%,rgba(0,0,0,.66),transparent 62%)}
+#intro{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;
+background:radial-gradient(90% 70% at 50% 8%,#1b8fc4,#0a5a86 28%,#063a5e 60%,#02192f);transition:opacity 1s,visibility 1s}
+#intro.hide{opacity:0;visibility:hidden}
+#intro::before{content:"";position:absolute;inset:0;background:radial-gradient(60% 40% at 50% 18%,rgba(255,255,255,.22),transparent 60%);mix-blend-mode:screen;opacity:.7}
+.intro-card{position:relative;text-align:center;padding:44px 50px;max-width:680px;width:90%;
+background:linear-gradient(160deg,rgba(10,40,70,.55),rgba(3,16,30,.62));border:1px solid var(--stroke);
+border-radius:26px;box-shadow:var(--sh);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.ring{width:94px;height:94px;margin:0 auto 20px;border-radius:50%;
+background:conic-gradient(from 0deg,var(--cyan),var(--teal),var(--coral),var(--gold),var(--cyan));
+display:flex;align-items:center;justify-content:center;animation:spin 14s linear infinite;box-shadow:0 0 50px rgba(67,232,255,.5)}
+.ring::after{content:"";width:76px;height:76px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#0a3a5c,#021527)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.intro-card h1{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(42px,8vw,84px);letter-spacing:.16em;line-height:1;
+background:linear-gradient(180deg,#fff,#8fe9ff 55%,#2bb6e0);-webkit-background-clip:text;background-clip:text;color:transparent;
+filter:drop-shadow(0 4px 24px rgba(60,200,255,.35))}
+.intro-card .sub{margin-top:12px;font-size:14px;letter-spacing:.4em;text-transform:uppercase;color:var(--cyan)}
+.intro-card .desc{margin:24px auto 6px;max-width:480px;font-size:14.5px;line-height:1.7;color:var(--muted);font-weight:300}
+.dive-btn{margin-top:28px;cursor:pointer;font-family:'Orbitron';font-weight:700;font-size:14.5px;letter-spacing:.18em;color:#02141f;
+padding:16px 40px;border:none;border-radius:40px;background:linear-gradient(135deg,#5cf0ff,#19b6e6 55%,#0e7fc0);
+box-shadow:0 14px 36px -8px rgba(28,180,230,.7),inset 0 1px 0 rgba(255,255,255,.5);transition:transform .15s,box-shadow .25s}
+.dive-btn:hover{transform:translateY(-2px) scale(1.02);box-shadow:0 22px 48px -8px rgba(28,180,230,.85)}
+.dive-btn:active{transform:translateY(0) scale(.99)}
+.hint{margin-top:24px;font-size:12.5px;color:#9fc7da;line-height:1.9}
+.hint b{color:var(--foam);font-weight:600}
+.loader-bar{height:4px;width:100%;background:rgba(255,255,255,.08);border-radius:4px;margin-top:20px;overflow:hidden}
+.loader-bar i{display:block;height:100%;width:0;border-radius:4px;background:linear-gradient(90deg,var(--teal),var(--cyan));transition:width .3s}
+#hud{position:fixed;inset:0;z-index:20;pointer-events:none;opacity:0;transition:opacity 1.2s}
+#hud.show{opacity:1}
+#hud>*{pointer-events:auto}
+.top-bar{position:absolute;top:20px;left:20px;right:20px;display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+.brand{display:flex;align-items:center;gap:12px;padding:11px 17px;border-radius:16px;background:var(--glass);border:1px solid var(--stroke);backdrop-filter:blur(10px);box-shadow:var(--sh)}
+.brand .dot{width:11px;height:11px;border-radius:50%;background:var(--cyan);box-shadow:0 0 14px var(--cyan);animation:pulse 2.4s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.35;transform:scale(.7)}}
+.brand .t{font-family:'Orbitron';font-weight:700;letter-spacing:.2em;font-size:13px}
+.brand .t small{display:block;font-family:'Sora';font-weight:400;letter-spacing:.06em;font-size:10px;color:var(--muted);margin-top:2px;text-transform:uppercase}
+.zone-panel{padding:13px 17px;border-radius:16px;min-width:226px;text-align:right;background:var(--glass);border:1px solid var(--stroke);backdrop-filter:blur(10px);box-shadow:var(--sh)}
+.zone-panel .zname{font-family:'Orbitron';font-weight:600;font-size:15px;letter-spacing:.06em;background:linear-gradient(90deg,#fff,#7fe9ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.zone-panel .zlat{font-size:10.5px;color:var(--muted);font-style:italic;margin-top:2px}
+.zone-panel .stats{display:flex;gap:16px;justify-content:flex-end;margin-top:9px}
+.stat{text-align:right}
+.stat .k{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.stat .v{font-family:'Orbitron';font-weight:600;font-size:14px;color:var(--foam);margin-top:1px}
+.depth-meter{position:absolute;right:22px;top:50%;transform:translateY(-50%);width:60px;height:290px;border-radius:30px;
+background:linear-gradient(180deg,rgba(90,210,255,.16),rgba(30,120,190,.16) 28%,rgba(10,50,100,.2) 55%,rgba(3,12,28,.34));
+border:1px solid var(--stroke);backdrop-filter:blur(8px);box-shadow:var(--sh);overflow:hidden}
+.depth-meter .scale{position:absolute;left:9px;top:0;bottom:0;width:2px;background:linear-gradient(180deg,rgba(255,255,255,.5),rgba(255,255,255,.08))}
+.depth-meter .tick{position:absolute;left:7px;width:8px;height:1px;background:rgba(255,255,255,.4)}
+.depth-meter .marker{position:absolute;left:5px;width:20px;height:20px;border-radius:50%;
+background:radial-gradient(circle at 35% 30%,#fff,#5cf0ff 60%,#0e7fc0);box-shadow:0 0 16px rgba(92,240,255,.85);transform:translateY(-50%);transition:top .25s}
+.depth-meter .read{position:absolute;left:50%;transform:translateX(-50%);bottom:-56px;text-align:center;width:120px}
+.depth-meter .read .num{font-family:'Orbitron';font-weight:700;font-size:28px;background:linear-gradient(180deg,#fff,#7fe9ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.depth-meter .read .unit{font-size:10.5px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase}
+.species-panel{position:absolute;left:20px;bottom:92px;width:244px;padding:14px 15px;border-radius:18px;background:var(--glass);border:1px solid var(--stroke);backdrop-filter:blur(10px);box-shadow:var(--sh)}
+.species-panel h4{font-family:'Orbitron';font-size:10.5px;letter-spacing:.16em;color:var(--cyan);text-transform:uppercase;display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.species-panel h4 .cnt{color:var(--foam);font-weight:600}
+.species-list{display:flex;flex-direction:column;gap:6px;max-height:180px;overflow:auto;padding-right:3px}
+.species-list::-webkit-scrollbar{width:4px}
+.species-list::-webkit-scrollbar-thumb{background:rgba(120,220,255,.3);border-radius:4px}
+.sp{display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:11px;cursor:pointer;background:rgba(255,255,255,.03);border:1px solid transparent;transition:all .2s}
+.sp:hover{background:rgba(120,220,255,.08);border-color:var(--stroke)}
+.sp .ic{width:26px;height:26px;border-radius:8px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;font-size:15px;background:rgba(255,255,255,.05);filter:grayscale(1);opacity:.32;transition:all .3s}
+.sp.found .ic{filter:none;opacity:1}
+.sp .nm{font-size:12.5px;font-weight:500;color:var(--muted);line-height:1.2}
+.sp .nm small{display:block;font-size:10px;color:#6f93a6;font-weight:300}
+.sp.found .nm{color:var(--foam)}
+.bottom-bar{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);display:flex;gap:9px;align-items:center;padding:8px;border-radius:50px;background:var(--glass2);border:1px solid var(--stroke);backdrop-filter:blur(12px);box-shadow:var(--sh)}
+.btn{cursor:pointer;font-family:'Sora';font-weight:600;font-size:12px;color:var(--foam);padding:10px 16px;border-radius:40px;border:1px solid transparent;background:rgba(255,255,255,.05);display:flex;align-items:center;gap:7px;transition:all .2s;letter-spacing:.02em}
+.btn:hover{background:rgba(120,220,255,.14);border-color:var(--stroke)}
+.btn.active{background:linear-gradient(135deg,rgba(92,240,255,.28),rgba(28,180,230,.22));border-color:rgba(120,230,255,.5);color:#fff;box-shadow:0 0 18px rgba(60,200,255,.3)}
+.btn.primary{background:linear-gradient(135deg,#5cf0ff,#0e9fd0);color:#02141f}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn .ic{font-size:14px;line-height:1}
+.vdiv{width:1px;height:24px;background:var(--stroke)}
+.crosshair{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:22px;height:22px;pointer-events:none;opacity:.45}
+.crosshair::before,.crosshair::after{content:"";position:absolute;background:rgba(255,255,255,.7)}
+.crosshair::before{left:50%;top:0;width:1px;height:100%;transform:translateX(-50%)}
+.crosshair::after{top:50%;left:0;height:1px;width:100%;transform:translateY(-50%)}
+.crosshair i{position:absolute;inset:0;margin:auto;width:6px;height:6px;border-radius:50%;border:1px solid rgba(255,255,255,.7)}
+.compass{position:absolute;top:20px;left:50%;transform:translateX(-50%);width:168px;height:32px;border-radius:20px;overflow:hidden;background:var(--glass);border:1px solid var(--stroke);backdrop-filter:blur(8px)}
+.compass .rose{position:absolute;top:0;left:0;height:100%;font-family:'Orbitron';font-weight:600;font-size:11px;color:var(--muted);will-change:transform}
+.compass .rose span{display:inline-block;width:30px;text-align:center}
+.compass .rose span.n{color:var(--coral)}
+.compass::before{content:"";position:absolute;left:50%;top:0;width:1px;height:7px;background:var(--cyan);transform:translateX(-50%);z-index:2}
+.toast-wrap{position:absolute;top:76px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:9px;align-items:center;pointer-events:none}
+.toast{padding:12px 20px;border-radius:30px;background:linear-gradient(135deg,rgba(10,50,90,.85),rgba(4,20,40,.85));border:1px solid var(--stroke);backdrop-filter:blur(10px);box-shadow:var(--sh);display:flex;align-items:center;gap:12px;animation:tin .5s cubic-bezier(.2,1.4,.4,1) both,tout .5s ease 3.6s forwards}
+.toast .emo{font-size:21px}
+.toast .ti{font-family:'Orbitron';font-size:12.5px;font-weight:600;color:var(--foam);letter-spacing:.04em}
+.toast .ts{font-size:11px;color:var(--muted);margin-top:2px}
+@keyframes tin{from{opacity:0;transform:translateY(-16px) scale(.9)}}
+@keyframes tout{to{opacity:0;transform:translateY(-16px) scale(.9)}}
+.modal{position:fixed;inset:0;z-index:70;display:none;align-items:center;justify-content:center;background:rgba(1,8,18,.72);backdrop-filter:blur(8px);padding:24px}
+.modal.open{display:flex;animation:fade .3s}
+@keyframes fade{from{opacity:0}}
+.modal-card{max-width:470px;width:100%;padding:30px;border-radius:22px;background:linear-gradient(160deg,rgba(10,40,70,.92),rgba(3,16,30,.95));border:1px solid var(--stroke);box-shadow:var(--sh);text-align:center;position:relative}
+.modal-card .big{font-size:50px;margin-bottom:6px}
+.modal-card h3{font-family:'Orbitron';font-size:21px;color:var(--foam);letter-spacing:.04em}
+.modal-card .latin{font-style:italic;color:var(--cyan);font-size:12.5px;margin-top:4px}
+.modal-card p{margin:16px auto 0;max-width:380px;font-size:13.5px;line-height:1.7;color:var(--muted);font-weight:300}
+.modal-card .tagrow{margin-top:16px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.modal-card .tag{font-size:10.5px;padding:6px 12px;border-radius:20px;background:rgba(120,220,255,.1);border:1px solid var(--stroke);color:var(--cyan);letter-spacing:.04em}
+.modal-card .close{position:absolute;top:13px;right:16px;cursor:pointer;font-size:22px;color:var(--muted);background:none;border:none;line-height:1}
+.modal-card .close:hover{color:#fff}
+.mobile-pad{display:none;position:absolute;bottom:80px;right:22px;flex-direction:column;gap:8px}
+.mobile-pad button{width:52px;height:52px;border-radius:16px;border:1px solid var(--stroke);background:var(--glass2);color:var(--foam);font-size:20px;backdrop-filter:blur(8px)}
+@media(max-width:760px){.species-panel{display:none}.depth-meter{height:220px;width:50px}
+.mobile-pad{display:flex}.zone-panel{min-width:0;padding:10px 12px}.zone-panel .stats{gap:10px}
+.top-bar{gap:8px}.bottom-bar{flex-wrap:wrap;justify-content:center;max-width:94vw;border-radius:22px}.btn{padding:9px 11px;font-size:10.5px}}
+</style>
+</head>
+<body>
+<div id="intro">
+  <div class="intro-card">
+    <div class="ring"></div>
+    <h1>ОКЕАН</h1>
+    <div class="sub">3D · погружение в глубины</div>
+    <p class="desc">Опуститесь сквозь слои океана — от залитой солнцем поверхности до ледяной бездны. Рифовые рыбы, медузы, акулы, киты и светящиеся удильщики ждут в своих зонах. Исследуйте мир, который живёт по своим законам.</p>
+    <button class="dive-btn" id="diveBtn">▼ Начать погружение</button>
+    <div class="loader-bar"><i id="loaderFill"></i></div>
+    <div class="hint"><b>WASD</b> — движение · <b>Мышь</b> — осмотр · <b>Пробел</b>/<b>Q</b> — погружение · <b>E</b> — всплытие · <b>Shift</b> — ускорение</div>
+  </div>
+</div>
+<div id="grade"></div>
+<div id="hud">
+  <div class="top-bar">
+    <div class="brand"><div class="dot"></div><div class="t">ОКЕАН<small>Deep Dive Simulator</small></div></div>
+    <div class="zone-panel">
+      <div class="zname" id="zoneName">Зона солнечного света</div>
+      <div class="zlat" id="zoneLat">Epipelagic · 0–30 м</div>
+      <div class="stats">
+        <div class="stat"><div class="k">Температура</div><div class="v"><span id="tempVal">22</span>°C</div></div>
+        <div class="stat"><div class="k">Давление</div><div class="v"><span id="pressVal">1.0</span> атм</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="compass"><div class="rose" id="compassRose"></div></div>
+  <div class="crosshair"><i></i></div>
+  <div class="depth-meter">
+    <div class="scale"></div>
+    <div class="marker" id="depthMarker" style="top:1%"></div>
+    <div class="read"><div class="num" id="depthNum">0</div><div class="unit">метров</div></div>
+  </div>
+  <div class="species-panel">
+    <h4>Виды <span><span class="cnt" id="spCount">0</span>/10</span></h4>
+    <div class="species-list" id="speciesList"></div>
+  </div>
+  <div class="toast-wrap" id="toastWrap"></div>
+  <div class="bottom-bar">
+    <button class="btn active" id="btnAuto"><span class="ic">◎</span>Авто-тур</button>
+    <button class="btn" id="btnDive"><span class="ic">▼</span>Глубже</button>
+    <button class="btn" id="btnRise"><span class="ic">▲</span>Вверх</button>
+    <div class="vdiv"></div>
+    <button class="btn primary" id="btnView"><span class="ic">⚓</span>Сменить зону</button>
+    <button class="btn" id="btnLight"><span class="ic">☀</span>Яркость</button>
+    <button class="btn" id="btnSound"><span class="ic">♪</span>Звук</button>
+    <button class="btn" id="btnHelp"><span class="ic">?</span></button>
+  </div>
+  <div class="mobile-pad">
+    <button data-k="KeyE">▲</button>
+    <button data-k="KeyW">↑</button>
+    <button data-k="KeyS">↓</button>
+    <button data-k="Space">▼</button>
+  </div>
+</div>
+<div class="modal" id="modal">
+  <div class="modal-card">
+    <button class="close" id="modalClose">×</button>
+    <div class="big" id="mEmoji">🐠</div>
+    <h3 id="mTitle"></h3>
+    <div class="latin" id="mLatin"></div>
+    <p id="mDesc"></p>
+    <div class="tagrow" id="mTags"></div>
+  </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(()=>{
+"use strict";
+const T=THREE;
+const rand=(a,b)=>a+Math.random()*(b-a);
+const lerp=(a,b,t)=>a+(b-a)*t;
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const _c1=new T.Color(),_c2=new T.Color();
+
+/* ---------- renderer / scene / camera ---------- */
+const renderer=new T.WebGLRenderer({antialias:true,powerPreference:"high-performance"});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(innerWidth,innerHeight);
+renderer.outputEncoding=T.sRGBEncoding;
+document.body.appendChild(renderer.domElement);
+const scene=new T.Scene();
+const camera=new T.PerspectiveCamera(62,innerWidth/innerHeight,0.1,2000);
+camera.position.set(0,-6,42);
+
+/* ---------- lights (bright) ---------- */
+const ambient=new T.AmbientLight(0xeafcff,0.95); scene.add(ambient);
+const hemi=new T.HemisphereLight(0xdff6ff,0x103258,1.5); scene.add(hemi);
+const sun=new T.DirectionalLight(0xffffff,1.6); sun.position.set(180,420,120); scene.add(sun);
+const sun2=new T.DirectionalLight(0x9fe0ff,0.7); sun2.position.set(-200,200,-150); scene.add(sun2);
+const flash=new T.SpotLight(0xbfeaff,0,140,Math.PI/5,0.5,1.2);
+const flashTarget=new T.Object3D(); flashTarget.position.set(0,0,-1);
+camera.add(flash); camera.add(flashTarget); flash.target=flashTarget; scene.add(camera);
+
+/* ---------- shared geometry ---------- */
+const GEO={
+  body:new T.SphereGeometry(1,14,11),
+  eye:new T.SphereGeometry(0.07,6,6),
+  fin:(()=>{const s=new T.Shape();s.moveTo(0,0);s.lineTo(-0.6,0.85);s.lineTo(-0.46,0);s.lineTo(-0.6,-0.85);s.lineTo(0,0);return new T.ShapeGeometry(s);})()
+};
+const eyeMat=new T.MeshBasicMaterial({color:0x0a0a0a});
+/* fish material: vivid color + strong emissive so they stay visible at any depth */
+function fishMat(col,glow){const c=new T.Color(col);
+  return new T.MeshPhongMaterial({color:c,shininess:140,side:T.DoubleSide,specular:0xffffff,
+    emissive:c.clone().multiplyScalar(glow||0.5)});}
+function makeFish(mat,len){
+  const g=new T.Group();
+  const body=new T.Mesh(GEO.body,mat); body.scale.set(len,len*0.5,len*0.45); g.add(body);
+  const tail=new T.Mesh(GEO.fin,mat); tail.scale.set(len*0.95,len*0.72,len*0.72); tail.position.x=-len*0.92; g.add(tail);
+  const dorsal=new T.Mesh(GEO.fin,mat); dorsal.scale.set(len*0.5,len*0.42,1); dorsal.position.set(-len*0.05,len*0.3,0); g.add(dorsal);
+  for(const s of [1,-1]){const e=new T.Mesh(GEO.eye,eyeMat);e.position.set(len*0.56,len*0.1,len*0.22*s);g.add(e);}
+  g.userData.tail=tail; return g;
+}
+
+/* ---------- boids school ---------- */
+class School{
+  constructor(o){
+    this.center=o.center.clone(); this.radius=o.radius; this.y0=o.band[0]; this.y1=o.band[1];
+    this.fish=[]; this.maxSpeed=o.maxSpeed;
+    for(let i=0;i<o.count;i++){
+      const col=o.colors[(Math.random()*o.colors.length)|0];
+      const len=o.size*rand(0.8,1.25);
+      const m=makeFish(fishMat(col,o.glow||0.5),len);
+      const p=new T.Vector3(o.center.x+rand(-o.radius,o.radius),lerp(o.band[0],o.band[1],Math.random()),o.center.z+rand(-o.radius,o.radius));
+      const v=new T.Vector3(rand(-1,1),rand(-0.3,0.3),rand(-1,1)).normalize().multiplyScalar(o.maxSpeed*0.6);
+      scene.add(m); this.fish.push({m,p,v,phase:rand(0,10)});
+    }
+  }
+  update(dt,t){
+    const n=this.fish.length; let cx=0,cy=0,cz=0,avx=0,avy=0,avz=0;
+    for(const f of this.fish){cx+=f.p.x;cy+=f.p.y;cz+=f.p.z;avx+=f.v.x;avy+=f.v.y;avz+=f.v.z;}
+    cx/=n;cy/=n;cz/=n; avx/=n;avy/=n;avz/=n;
+    const sepR2=5.8, fwd=new T.Vector3(1,0,0);
+    for(const f of this.fish){
+      let sx=0,sy=0,sz=0;
+      for(const g of this.fish){ if(g===f)continue;
+        const dx=f.p.x-g.p.x,dy=f.p.y-g.p.y,dz=f.p.z-g.p.z,d2=dx*dx+dy*dy+dz*dz;
+        if(d2<sepR2&&d2>0.001){const inv=1/d2;sx+=dx*inv;sy+=dy*inv;sz+=dz*inv;} }
+      f.v.x+=(cx-f.p.x)*0.18*dt+(avx-f.v.x)*0.5*dt+sx*4.5*dt;
+      f.v.y+=(cy-f.p.y)*0.18*dt+(avy-f.v.y)*0.5*dt+sy*4.5*dt;
+      f.v.z+=(cz-f.p.z)*0.18*dt+(avz-f.v.z)*0.5*dt+sz*4.5*dt;
+      f.v.x+=rand(-0.4,0.4)*dt; f.v.z+=rand(-0.4,0.4)*dt;
+      const fdx=f.p.x-this.center.x,fdz=f.p.z-this.center.z,flat=Math.hypot(fdx,fdz);
+      if(flat>this.radius){f.v.x-=fdx*0.06*dt;f.v.z-=fdz*0.06*dt;}
+      if(f.p.y<this.y0)f.v.y+=(this.y0-f.p.y)*0.6*dt;
+      if(f.p.y>this.y1)f.v.y+=(this.y1-f.p.y)*0.6*dt;
+      const sp=f.v.length(); if(sp>this.maxSpeed)f.v.multiplyScalar(this.maxSpeed/sp); else if(sp<0.4)f.v.multiplyScalar(1.05);
+      f.p.addScaledVector(f.v,dt); f.m.position.copy(f.p);
+      if(sp>0.01)f.m.quaternion.setFromUnitVectors(fwd,f.v.clone().normalize());
+      f.m.userData.tail.rotation.y=Math.sin(t*9+f.phase)*0.6;
+    }
+  }
+}
+
+/* ---------- patroller (shark/whale/turtle) ---------- */
+class Patroller{
+  constructor(mesh,o){this.mesh=mesh;this.c=o.center.clone();this.r=o.radius;this.y=o.y;this.t=rand(0,6.28);
+    this.speed=o.speed;this.amp=o.amp||0;this.bobSpd=o.bobSpd||1;this.tail=o.tail;this.extra=o.extra;scene.add(mesh);}
+  update(dt,time){
+    this.t+=this.speed*dt;
+    const px=this.c.x+Math.cos(this.t)*this.r, pz=this.c.z+Math.sin(this.t)*this.r;
+    const py=this.y+Math.sin(time*this.bobSpd)*this.amp;
+    this.mesh.position.set(px,py,pz);
+    this.mesh.quaternion.setFromUnitVectors(new T.Vector3(1,0,0),new T.Vector3(-Math.sin(this.t),0,Math.cos(this.t)));
+    if(this.tail)this.tail.rotation.y=Math.sin(time*5)*0.5;
+    if(this.extra)this.extra(dt,time);
+  }
+}
+function makeShark(){
+  const g=new T.Group();
+  const m=new T.MeshPhongMaterial({color:0x7a8a96,shininess:80,side:T.DoubleSide,emissive:0x2a3540,specular:0xffffff});
+  const m2=new T.MeshPhongMaterial({color:0xdce8ee,shininess:60,side:T.DoubleSide,emissive:0x3a4854});
+  const body=new T.Mesh(new T.SphereGeometry(1,18,12),m); body.scale.set(4.2,1.5,1.4); g.add(body);
+  const snout=new T.Mesh(GEO.body,m); snout.scale.set(1.3,0.7,0.7); snout.position.x=4.4; g.add(snout);
+  const belly=new T.Mesh(new T.SphereGeometry(1,16,12),m2); belly.scale.set(3.4,0.7,1.1); belly.position.y=-0.5; g.add(belly);
+  const df=new T.Mesh(GEO.fin,m); df.scale.set(1.5,1.9,1); df.position.set(0,1.2,0); g.add(df);
+  for(const s of [1,-1]){const p=new T.Mesh(GEO.fin,m);p.scale.set(1.3,0.9,1);p.position.set(0.4,-0.3,1.2*s);p.rotation.z=0.5*s;g.add(p);}
+  const tail=new T.Mesh(GEO.fin,m); tail.scale.set(1.4,1.7,1); tail.position.x=-3.9; g.add(tail);
+  for(const s of [1,-1]){const e=new T.Mesh(GEO.eye,new T.MeshBasicMaterial({color:0x111}));e.position.set(2.6,0.2,0.55*s);g.add(e);}
+  g.userData.tail=tail; return g;
+}
+function makeWhale(){
+  const g=new T.Group();
+  const top=new T.MeshPhongMaterial({color:0x4a6172,shininess:40,emissive:0x1a242e,specular:0xffffff});
+  const bel=new T.MeshPhongMaterial({color:0xc8d6e0,shininess:30,emissive:0x33414c});
+  const body=new T.Mesh(new T.SphereGeometry(1,22,16),top); body.scale.set(8.5,3.2,3.5); g.add(body);
+  const belly=new T.Mesh(new T.SphereGeometry(1,20,14),bel); belly.scale.set(6.8,1.8,2.9); belly.position.y=-1.1; g.add(belly);
+  const head=new T.Mesh(new T.SphereGeometry(1,16,12),top); head.scale.set(2.4,2.4,2.8); head.position.x=7.4; g.add(head);
+  const jaw=new T.Mesh(new T.SphereGeometry(1,16,12),bel); jaw.scale.set(2.4,1.3,2.6); jaw.position.set(7.6,-1,0); g.add(jaw);
+  const fluke=new T.Mesh(new T.SphereGeometry(1,14,10),top); fluke.scale.set(1.4,0.25,3.2); fluke.position.x=-8.6; g.add(fluke);
+  for(const s of [1,-1]){const p=new T.Mesh(new T.SphereGeometry(1,10,8),top);p.scale.set(1.8,0.4,0.7);p.position.set(1.2,-1,2.4*s);p.rotation.z=0.6*s;g.add(p);}
+  for(const z of [1.6,-1.6]){const e=new T.Mesh(GEO.eye,new T.MeshBasicMaterial({color:0x0a0a0a}));e.position.set(6.2,0.4,z);g.add(e);}
+  g.userData.fluke=fluke; return g;
+}
+function makeTurtle(){
+  const g=new T.Group();
+  const sh=new T.MeshPhongMaterial({color:0x56a06a,shininess:50,emissive:0x183f24,specular:0xffffff});
+  const sk=new T.MeshPhongMaterial({color:0xb6dabb,shininess:30,emissive:0x2c4a32});
+  const shell=new T.Mesh(new T.SphereGeometry(1,18,14),sh); shell.scale.set(1.7,0.7,1.3); g.add(shell);
+  for(let i=0;i<6;i++){const a=i/6*6.283;const plate=new T.Mesh(new T.SphereGeometry(0.4,8,6),new T.MeshPhongMaterial({color:0x3a7848,emissive:0x143020}));
+    plate.position.set(Math.cos(a)*0.7,0.5,Math.sin(a)*0.5); plate.scale.set(1,0.3,1); g.add(plate);}
+  const head=new T.Mesh(new T.SphereGeometry(0.5,12,10),sk); head.position.set(1.8,0,0); g.add(head);
+  const flips=[]; const fp=[[1,0.9],[1,-0.9],[-0.9,0.8],[-0.9,-0.8]];
+  for(const p of fp){const f=new T.Mesh(new T.SphereGeometry(0.6,10,8),sk);f.scale.set(0.9,0.25,0.5);f.position.set(p[0],0,p[1]);g.add(f);flips.push({m:f,phase:rand(0,9)});}
+  g.userData.flips=flips; return g;
+}
+function makeJelly(color){
+  const g=new T.Group();
+  const bm=new T.MeshPhongMaterial({color,transparent:true,opacity:0.55,side:T.DoubleSide,emissive:new T.Color(color).multiplyScalar(0.7),shininess:160,specular:0xffffff});
+  const bell=new T.Mesh(new T.SphereGeometry(1.1,22,16,0,6.283,0,1.82),bm); g.add(bell);
+  const inner=new T.Mesh(new T.SphereGeometry(0.7,14,10),new T.MeshBasicMaterial({color,transparent:true,opacity:0.4})); g.add(inner);
+  const tm=new T.MeshBasicMaterial({color,transparent:true,opacity:0.7}); const tents=[];
+  for(let i=0;i<9;i++){const a=i/9*6.283,r=0.55;
+    const tx=new T.Mesh(new T.CylinderGeometry(0.03,0.01,rand(2.2,3.6),5,6,true),tm);
+    tx.position.set(Math.cos(a)*r,-2,Math.sin(a)*r); g.add(tx); tents.push({m:tx,phase:rand(0,9)});}
+  g.userData={bell,tents,phase:rand(0,9)}; scene.add(g); return g;
+}
+function makeAngler(){
+  const g=new T.Group();
+  const m=new T.MeshPhongMaterial({color:0x303a48,shininess:20,emissive:0x0c1018});
+  const body=new T.Mesh(new T.SphereGeometry(1,16,12),m); body.scale.set(1.3,1.1,1.2); g.add(body);
+  const head=new T.Mesh(new T.SphereGeometry(0.9,14,10),m); head.scale.set(1.1,1,1.1); head.position.x=1.1; g.add(head);
+  const mouth=new T.Mesh(new T.SphereGeometry(0.5,10,8),new T.MeshBasicMaterial({color:0x000})); mouth.position.set(1.7,-0.15,0); mouth.scale.set(0.8,0.7,0.7); g.add(mouth);
+  const tm=new T.MeshBasicMaterial({color:0xddeef0});
+  for(let i=0;i<7;i++){const th=new T.Mesh(new T.ConeGeometry(0.05,0.3,4),tm);th.position.set(2.0,0.05,(i-3)*0.18);th.rotation.z=Math.PI/2;g.add(th);}
+  const stalk=new T.Mesh(new T.CylinderGeometry(0.04,0.04,1.6,6),m); stalk.position.set(1,1,0); stalk.rotation.z=-0.5; g.add(stalk);
+  const lure=new T.Mesh(new T.SphereGeometry(0.22,12,10),new T.MeshBasicMaterial({color:0xfff2a8})); lure.position.set(1.75,1.7,0); g.add(lure);
+  const ll=new T.PointLight(0xffe28a,3,22,2); ll.position.copy(lure.position); g.add(ll);
+  const tail=new T.Mesh(GEO.fin,m); tail.scale.set(0.9,1,1); tail.position.x=-1.4; g.add(tail);
+  for(const z of [0.5,-0.5]){const e=new T.Mesh(new T.SphereGeometry(0.12,8,6),new T.MeshBasicMaterial({color:0xfff6d0}));e.position.set(1.4,0.3,z);g.add(e);}
+  g.userData={tail,lure,ll}; scene.add(g); return g;
+}
+
+/* ---------- decor ---------- */
+function makeCoral(){
+  const g=new T.Group();
+  const pal=[0xff7a8a,0xff9d4d,0xffd24d,0xb07cff,0xff5ed0,0x6effb0];
+  for(let i=0;i<rand(5,10)|0;i++){
+    const col=pal[(Math.random()*pal.length)|0], h=rand(1.4,4.2);
+    const mat=new T.MeshPhongMaterial({color:col,shininess:60,emissive:new T.Color(col).multiplyScalar(0.35),specular:0xffffff});
+    const c=new T.Mesh(new T.CylinderGeometry(rand(0.1,0.3),rand(0.25,0.6),h,7),mat);
+    const a=rand(0,6.283),r=rand(0,1.1);
+    c.position.set(Math.cos(a)*r,h/2,Math.sin(a)*r); c.rotation.set(rand(-0.3,0.3),0,rand(-0.3,0.3)); g.add(c);
+    const tip=new T.Mesh(new T.SphereGeometry(rand(0.2,0.4),8,6),mat); tip.position.set(c.position.x,h,c.position.z); g.add(tip);
+  }
+  return g;
+}
+function makeKelp(){
+  const g=new T.Group(); const h=rand(8,16);
+  const mat=new T.MeshPhongMaterial({color:0x46a05a,side:T.DoubleSide,shininess:30,emissive:0x143020});
+  const blades=[];
+  for(let i=0;i<8;i++){const b=new T.Mesh(new T.CylinderGeometry(0.12-i*0.01,0.16-i*0.01,h/8+0.1,6),mat);b.position.y=h/8*i+h/16;g.add(b);blades.push(b);}
+  g.userData={blades,phase:rand(0,9)}; return g;
+}
+
+/* ---------- build world ---------- */
+const water=new T.Mesh(new T.PlaneGeometry(2200,2200,86,86),
+  new T.MeshPhongMaterial({color:0x3aa0d8,transparent:true,opacity:0.5,side:T.DoubleSide,shininess:200,emissive:0x1a5a88,emissiveIntensity:0.5,specular:0xbfe9ff}));
+water.rotation.x=-Math.PI/2; scene.add(water);
+const waterGeo=water.geometry;
+const sbGeo=new T.PlaneGeometry(2400,2400,90,90);
+const seabed=new T.Mesh(sbGeo,new T.MeshPhongMaterial({color:0x6a5e3a,shininess:8,specular:0x44402c,emissive:0x221e10}));
+seabed.rotation.x=-Math.PI/2; seabed.position.y=-252; scene.add(seabed);
+{const p=sbGeo.attributes.position;for(let i=0;i<p.count;i++){const x=p.getX(i),y=p.getY(i);
+  p.setZ(i,Math.sin(x*0.012)*3+Math.cos(y*0.015)*3+Math.sin((x+y)*0.03)*1.4);}p.needsUpdate=true;sbGeo.computeVertexNormals();}
+const causticTex=(()=>{const c=document.createElement('canvas');c.width=c.height=256;const x=c.getContext('2d');
+  const img=x.createImageData(256,256);
+  for(let i=0;i<256;i++)for(let j=0;j<256;j++){let v=Math.sin(i*0.07+Math.sin(j*0.05)*2.4)+Math.sin(j*0.08+Math.cos(i*0.06)*2.4)+Math.sin((i+j)*0.05);
+    v=Math.pow((v+3)/6,4);const k=(i*256+j)*4;img.data[k]=200;img.data[k+1]=240;img.data[k+2]=255;img.data[k+3]=Math.min(255,v*255);}
+  x.putImageData(img,0,0);const t=new T.CanvasTexture(c);t.wrapS=t.wrapT=T.RepeatWrapping;t.repeat.set(30,30);return t;})();
+const caustic=new T.Mesh(new T.PlaneGeometry(2400,2400),new T.MeshBasicMaterial({map:causticTex,transparent:true,opacity:0.6,blending:T.AdditiveBlending,depthWrite:false}));
+caustic.rotation.x=-Math.PI/2; caustic.position.y=-250.5; scene.add(caustic);
+const rays=[];
+for(let i=0;i<7;i++){const r=new T.Mesh(new T.PlaneGeometry(rand(18,42),rand(160,260)),
+  new T.MeshBasicMaterial({color:0xcfefff,transparent:true,opacity:rand(0.06,0.13),blending:T.AdditiveBlending,depthWrite:false,side:T.DoubleSide}));
+  r.rotation.x=-Math.PI/2; r.position.set(rand(-300,300),-130,rand(-300,300)); r.rotation.z=rand(-0.2,0.2);
+  r.userData={sway:rand(0,9),base:r.material.opacity}; scene.add(r); rays.push(r);}
+for(let i=0;i<70;i++){const a=rand(0,6.283),r=rand(20,420);const c=makeCoral();c.position.set(Math.cos(a)*r,-249,Math.sin(a)*r);c.scale.setScalar(rand(0.7,1.7));scene.add(c);}
+for(let i=0;i<46;i++){const a=rand(0,6.283),r=rand(30,520);const rk=new T.Mesh(new T.IcosahedronGeometry(rand(1.2,3.2),0),
+  new T.MeshPhongMaterial({color:new T.Color().setHSL(0.08,0.2,rand(0.3,0.45)),flatShading:true,shininess:8,emissive:0x14110a}));
+  rk.scale.set(rand(0.8,1.4),rand(0.5,0.9),rand(0.8,1.4));rk.position.set(Math.cos(a)*r,-248,Math.sin(a)*r);scene.add(rk);}
+const kelps=[];
+for(let i=0;i<60;i++){const a=rand(0,6.283),r=rand(20,460);const k=makeKelp();k.position.set(Math.cos(a)*r,-249,Math.sin(a)*r);scene.add(k);kelps.push(k);}
+// schools — all with glow so always visible
+const schoolA=new School({count:75,center:new T.Vector3(-60,-12,30),radius:55,band:[-2,-22],size:0.6,colors:[0xff8a3d,0xffd23d,0x4dc7ff,0xff5ed0,0x6effb0],glow:0.55,maxSpeed:9});
+const schoolB=new School({count:58,center:new T.Vector3(90,-40,-40),radius:70,band:[-24,-58],size:0.75,colors:[0x4dc7ff,0x7fffd6,0xb0e0ff,0xffe06a],glow:0.55,maxSpeed:8});
+const schoolC=new School({count:46,center:new T.Vector3(-30,-95,80),radius:80,band:[-60,-140],size:0.9,colors:[0xc0d4e0,0xaad4e8,0xdfeef5],glow:0.6,maxSpeed:7});
+const schoolD=new School({count:38,center:new T.Vector3(40,-180,-60),radius:90,band:[-150,-220],size:0.95,colors:[0x7a8eff,0xb07cff,0x6ad8d8,0x6effb0],glow:0.85,maxSpeed:6.5});
+const shark1=new Patroller(makeShark(),{center:new T.Vector3(0,-110,0),radius:170,y:-115,speed:0.18,amp:6,bobSpd:0.4});
+const shark2=new Patroller(makeShark(),{center:new T.Vector3(0,-150,0),radius:120,y:-160,speed:0.13,amp:4,bobSpd:0.3});
+shark2.mesh.scale.setScalar(1.25);
+const whale=new Patroller(makeWhale(),{center:new T.Vector3(0,-195,0),radius:230,y:-200,speed:0.07,amp:5,bobSpd:0.25,
+  extra:(dt,t)=>{const f=whale.mesh.userData.fluke;f.scale.y=0.25+Math.sin(t*1.6)*0.12;f.rotation.z=Math.sin(t*1.6)*0.25;}});
+const turtles=[];
+for(let i=0;i<4;i++){const tt=makeTurtle();
+  turtles.push(new Patroller(tt,{center:new T.Vector3(rand(-120,120),0,rand(-120,120)),radius:rand(40,90),y:rand(-12,-45),speed:rand(0.08,0.16),amp:3,bobSpd:0.6,
+    extra:(dt,t)=>{tt.userData.flips.forEach(f=>{f.m.rotation.z=Math.sin(t*2+f.phase)*0.5;});}}));}
+const jellies=[];
+for(let i=0;i<14;i++){const j=makeJelly([0xff6ed0,0x6effe0,0xb06eff,0xffae6e,0x6ec0ff][(Math.random()*5)|0]);
+  j.position.set(rand(-180,180),rand(-60,-30),rand(-180,180));
+  j.userData.drift=new T.Vector3(rand(-0.3,0.3),rand(0.4,0.9),rand(-0.3,0.3)); jellies.push(j);}
+const angler=makeAngler(); angler.position.set(rand(-60,60),-235,rand(-60,60));
+function makePoints(count,spread,color,size,opacity,additive){
+  const pos=new Float32Array(count*3);
+  for(let i=0;i<count;i++){pos[i*3]=rand(-spread,spread);pos[i*3+1]=rand(-245,5);pos[i*3+2]=rand(-spread,spread);}
+  const gg=new T.BufferGeometry(); gg.setAttribute('position',new T.BufferAttribute(pos,3));
+  const mm=new T.PointsMaterial({color,size,transparent:true,opacity,sizeAttenuation:true,
+    blending:additive?T.AdditiveBlending:T.NormalBlending,depthWrite:false});
+  const pts=new T.Points(gg,mm); scene.add(pts); return pts;
+}
+const snow=makePoints(1600,680,0xdfeef5,0.5,0.55,false);
+const bubbles=makePoints(380,260,0xcdf6ff,0.7,0.6,false);
+const bio=makePoints(700,560,0x5cf0ff,0.9,0,true);
+
+/* ---------- atmosphere (brighter, much lighter fog) ---------- */
+scene.fog=new T.FogExp2(0x7fd4ee,0.006);
+scene.background=new T.Color(0x7fd4ee);
+const STOPS=[
+  {d:0,fog:0x7fd4ee,dens:0.006,sun:1.6,hemi:1.5,amb:0.95,flash:0,grade:false},
+  {d:30,fog:0x3f93c4,dens:0.009,sun:1.2,hemi:1.15,amb:0.8,flash:0.1,grade:false},
+  {d:90,fog:0x1d5a92,dens:0.015,sun:0.8,hemi:0.85,amb:0.6,flash:0.3,grade:true},
+  {d:170,fog:0x0f335e,dens:0.024,sun:0.4,hemi:0.6,amb:0.45,flash:0.7,grade:true},
+  {d:250,fog:0x06182f,dens:0.035,sun:0.18,hemi:0.4,amb:0.35,flash:1.2,grade:true}];
+function depthAtm(d){let i=0;while(i<STOPS.length-1&&d>STOPS[i+1].d)i++;
+  const a=STOPS[i],b=STOPS[Math.min(i+1,STOPS.length-1)],tt=(b.d===a.d)?0:clamp((d-a.d)/(b.d-a.d),0,1);
+  return{dens:lerp(a.dens,b.dens,tt),sun:lerp(a.sun,b.sun,tt),hemi:lerp(a.hemi,b.hemi,tt),amb:lerp(a.amb,b.amb,tt),
+    flash:lerp(a.flash,b.flash,tt),fog:_c1.setHex(a.fog).lerp(_c2.setHex(b.fog),tt).clone(),grade:tt>0.4};}
+const ZONES=[{min:0,name:'Зона солнечного света',latin:'Epipelagic',max:30},
+  {min:30,name:'Сумеречная зона',latin:'Mesopelagic',max:90},
+  {min:90,name:'Полночная зона',latin:'Bathypelagic',max:170},
+  {min:170,name:'Бездна',latin:'Abyssopelagic',max:''}];
+// global brightness multiplier (toggled by user)
+let brightBoost=1;
+function applyLights(at){ sun.intensity=at.sun*brightBoost; sun2.intensity=0.7*brightBoost;
+  hemi.intensity=at.hemi*brightBoost; ambient.intensity=at.amb*brightBoost; flash.intensity=at.flash; }
+
+/* ---------- controls ---------- */
+const keys={};
+addEventListener('keydown',e=>{keys[e.code]=true;
+  if(['Space','KeyW','KeyS','KeyA','KeyD','KeyQ','KeyE','ArrowUp','ArrowDown'].includes(e.code))e.preventDefault();
+  if(/^(Key[WSADQE]|Space)$/.test(e.code))setAuto(false);});
+addEventListener('keyup',e=>{keys[e.code]=false;});
+document.querySelectorAll('.mobile-pad button').forEach(b=>{const k=b.dataset.k;
+  const dn=e=>{e.preventDefault();keys[k]=true;setAuto(false);},up=e=>{e.preventDefault();keys[k]=false;};
+  b.addEventListener('touchstart',dn,{passive:false});b.addEventListener('touchend',up);
+  b.addEventListener('mousedown',dn);b.addEventListener('mouseup',up);b.addEventListener('mouseleave',up);});
+let yaw=0,pitch=-0.12,locked=false,dragging=false,lastX=0,lastY=0,started=false;
+const canvas=renderer.domElement;
+canvas.addEventListener('click',()=>{if(!locked&&started)canvas.requestPointerLock&&canvas.requestPointerLock();});
+document.addEventListener('pointerlockchange',()=>{locked=(document.pointerLockElement===canvas);});
+document.addEventListener('mousemove',e=>{
+  if(locked){yaw-=e.movementX*0.0022;pitch=clamp(pitch-e.movementY*0.0022,-1.4,1.4);applyLook();return;}
+  if(dragging){yaw-=(e.clientX-lastX)*0.004;pitch=clamp(pitch-(e.clientY-lastY)*0.004,-1.4,1.4);lastX=e.clientX;lastY=e.clientY;applyLook();}});
+canvas.addEventListener('mousedown',e=>{if(!locked){dragging=true;lastX=e.clientX;lastY=e.clientY;}});
+addEventListener('mouseup',()=>dragging=false);
+canvas.addEventListener('touchstart',e=>{const t=e.touches[0];dragging=true;lastX=t.clientX;lastY=t.clientY;},{passive:true});
+canvas.addEventListener('touchmove',e=>{if(!dragging)return;const t=e.touches[0];
+  yaw-=(t.clientX-lastX)*0.005;pitch=clamp(pitch-(t.clientY-lastY)*0.005,-1.4,1.4);lastX=t.clientX;lastY=t.clientY;applyLook();},{passive:true});
+addEventListener('touchend',()=>dragging=false);
+const euler=new T.Euler(0,0,0,'YXZ');
+function applyLook(){euler.set(pitch,yaw,0,'YXZ');camera.quaternion.setFromEuler(euler);}
+applyLook();
+const vel=new T.Vector3();
+let autoTour=true,autoDepthTarget=10,autoDir=1,diveBtn=0,riseBtn=0;
+function setAuto(v){if(autoTour===v)return;autoTour=v;document.getElementById('btnAuto').classList.toggle('active',v);}
+const fwdV=new T.Vector3(),rightV=new T.Vector3();
+function anyKey(){return keys.KeyW||keys.KeyS||keys.KeyA||keys.KeyD||keys.KeyQ||keys.KeyE||keys.Space||keys.ArrowUp||keys.ArrowDown;}
+function updateMovement(dt,time){
+  if(autoTour&&!locked&&!dragging&&!anyKey()&&!diveBtn&&!riseBtn){
+    autoDepthTarget+=autoDir*dt*3.2;
+    if(autoDepthTarget>235){autoDepthTarget=235;autoDir=-1;} if(autoDepthTarget<6){autoDepthTarget=6;autoDir=1;}
+    yaw+=dt*0.04; pitch=-0.12+Math.sin(time*0.13)*0.05; applyLook();
+    camera.position.y=lerp(camera.position.y,-autoDepthTarget,Math.min(1,dt*0.6));
+    fwdV.set(0,0,-1).applyEuler(euler); camera.position.addScaledVector(fwdV,4*dt); vel.set(0,0,0);
+  }else{
+    const accel=(anyKey()||diveBtn||riseBtn)?22:0;
+    const f=(keys.KeyW?1:0)-(keys.KeyS?1:0), s=(keys.KeyD?1:0)-(keys.KeyA?1:0);
+    const v=((keys.Space||keys.KeyQ)?-1:0)+(keys.KeyE?1:0);
+    fwdV.set(0,0,-1).applyEuler(euler); rightV.set(1,0,0).applyEuler(euler);
+    if(f)vel.addScaledVector(fwdV,f*accel*dt);
+    if(s)vel.addScaledVector(rightV,s*accel*dt);
+    if(v)vel.y+=v*accel*dt;
+    vel.y-=diveBtn*accel*dt; vel.y+=riseBtn*accel*dt;
+    const max=keys.ShiftLeft?38:17, sp=vel.length();
+    if(sp>max)vel.multiplyScalar(max/sp);
+    vel.multiplyScalar(Math.pow(0.004,dt));
+    camera.position.addScaledVector(vel,dt);
+  }
+  camera.position.x=clamp(camera.position.x,-640,640);
+  camera.position.z=clamp(camera.position.z,-640,640);
+  camera.position.y=clamp(camera.position.y,-243,-1.5);
+}
+const hold=(id,set)=>{const b=document.getElementById(id);const dn=e=>{e.preventDefault();set(1);setAuto(false);},up=()=>set(0);
+  b.addEventListener('mousedown',dn);b.addEventListener('mouseup',up);b.addEventListener('mouseleave',up);
+  b.addEventListener('touchstart',dn,{passive:false});b.addEventListener('touchend',up);};
+hold('btnDive',v=>diveBtn=v); hold('btnRise',v=>riseBtn=v);
+
+/* ---------- UI ---------- */
+const el=id=>document.getElementById(id);
+const zoneName=el('zoneName'),zoneLat=el('zoneLat'),tempVal=el('tempVal'),pressVal=el('pressVal'),
+  depthMarker=el('depthMarker'),depthNum=el('depthNum'),grade=el('grade'),speciesList=el('speciesList'),spCount=el('spCount');
+const meter=document.querySelector('.depth-meter');
+[0,30,90,170,250].forEach(d=>{const tk=document.createElement('div');tk.className='tick';tk.style.top=clamp(d/250*100,0,100)+'%';meter.appendChild(tk);});
+const SPECIES=[
+  {id:'reef',emoji:'🐠',name:'Рифовые рыбы',latin:'Pomacentridae',min:0,max:30,desc:'Яркие красавцы коралловых рифов. Держатся стаями у поверхности, где солнце питает риф и раскрашивает их в сотни оттенков.',tags:['Стая','0–30 м','Кораллы']},
+  {id:'turtle',emoji:'🐢',name:'Морская черепаха',latin:'Cheloniidae',min:0,max:45,desc:'Древний странник океана. Грациозно скользит у поверхности, вспахивая воду ластами в ритме, не менявшемся миллионы лет.',tags:['Одиночка','0–45 м']},
+  {id:'coral',emoji:'🪸',name:'Кораллы',latin:'Anthozoa',min:0,max:70,desc:'Живые города на морском дне. Крошечные полипы строят известковые скелеты, образуя рифы, видимые даже из космоса.',tags:['Риф','Дно','Город']},
+  {id:'school',emoji:'🐟',name:'Селедевые',latin:'Clupeidae',min:20,max:140,desc:'Серебристые косяки, движущиеся как единый организм. Их синхронность — главный секрет выживания в открытой воде.',tags:['Косяк','20–140 м']},
+  {id:'jelly',emoji:'🪼',name:'Медуза',latin:'Scyphozoa',min:30,max:90,desc:'Прозрачные зонтики пульсируют в сумерках. Их щупальца тянутся на метры, парализуя добычу ядом и светясь в темноте.',tags:['Планктон','30–90 м','Свет']},
+  {id:'pelagic',emoji:'🐡',name:'Пелагические рыбы',latin:'Carangidae',min:30,max:170,desc:'Быстрые стайные хищники открытого моря — хозяева средних слоёв, где кончается свет и начинается охота.',tags:['Стая','30–170 м']},
+  {id:'shark',emoji:'🦈',name:'Акула',latin:'Selachimorpha',min:90,max:200,desc:'Безмолвный патруль глубин. Идеальная форма хищника, отточенная эволюцией за четыреста миллионов лет.',tags:['Хищник','90–200 м']},
+  {id:'whale',emoji:'🐋',name:'Кит',latin:'Cetacea',min:120,max:240,desc:'Гигант среди гигантов. Его песня разносится на сотни километров в подводной ночи — голос самого океана.',tags:['Гигант','120–240 м']},
+  {id:'bio',emoji:'✨',name:'Биолюминесцентный планктон',latin:'Bioluminescentia',min:150,max:250,desc:'Живые огоньки бездны. Каждый вспыхивает холодным синим светом, отпугивая хищников или подманивая добычу.',tags:['Свет','150–250 м']},
+  {id:'angler',emoji:'🎣',name:'Удильщик',latin:'Lophiiformes',min:170,max:250,desc:'Обитатель вечной тьмы. Заманивает жертву светящейся «удочкой» прямо в пасть, усеянную прозрачными иглами зубов.',tags:['Бездна','Свет','Хищник']}];
+const found=new Set();
+SPECIES.forEach(s=>{const d=document.createElement('div');d.className='sp';d.id='sp-'+s.id;
+  d.innerHTML=`<div class="ic">${s.emoji}</div><div class="nm">${s.name}<small>${s.latin}</small></div>`;
+  d.addEventListener('click',()=>openModal(s));speciesList.appendChild(d);});
+function checkSpecies(depth){for(const s of SPECIES)if(!found.has(s.id)&&depth>=s.min&&depth<=s.max){
+  found.add(s.id);el('sp-'+s.id).classList.add('found');spCount.textContent=found.size;showToast(s.emoji,s.name,'Новый вид обнаружен в этой зоне');}}
+function showToast(emoji,title,sub){const w=el('toastWrap');const t=document.createElement('div');t.className='toast';
+  t.innerHTML=`<div class="emo">${emoji}</div><div><div class="ti">${title}</div><div class="ts">${sub}</div></div>`;
+  w.appendChild(t);setTimeout(()=>t.remove(),4200);}
+const modal=el('modal');
+function openModal(s){el('mEmoji').textContent=s.emoji;el('mTitle').textContent=s.name;el('mLatin').textContent=s.latin;
+  el('mDesc').textContent=s.desc;el('mTags').innerHTML=s.tags.map(t=>`<span class="tag">${t}</span>`).join('');modal.classList.add('open');}
+el('modalClose').addEventListener('click',()=>modal.classList.remove('open'));
+modal.addEventListener('click',e=>{if(e.target===modal)modal.classList.remove('open');});
+const roseEl=el('compassRose');const CW=720;{let h='';
+  for(let deg=-180;deg<=540;deg+=15){const m=((deg%360)+360)%360;let lab='';
+    if(m===0)lab='С';else if(m===45)lab='СВ';else if(m===90)lab='В';else if(m===135)lab='ЮВ';
+    else if(m===180)lab='Ю';else if(m===225)lab='ЮЗ';else if(m===270)lab='З';else if(m===315)lab='СЗ';
+    h+=`<span class="${lab?'n':''}">${lab||'·'}</span>`;}
+  roseEl.innerHTML=h;}
+function updateCompass(){const h=((-yaw*180/Math.PI)%360+360)%360;roseEl.style.transform=`translateX(${84-(h/360)*CW}px)`;}
+function updateHUD(depth){
+  depthNum.textContent=Math.round(depth);
+  depthMarker.style.top=clamp(depth/250*100,0,100)+'%';
+  const at=depthAtm(depth); let zi=0;for(let i=0;i<ZONES.length;i++)if(depth>=ZONES[i].min)zi=i;
+  const Z=ZONES[zi];
+  if(zoneName.textContent!==Z.name){zoneName.textContent=Z.name;zoneLat.textContent=Z.latin+' · '+Z.min+(Z.max!==''?'–'+Z.max:'+')+' м';}
+  tempVal.textContent=(Math.round(lerp(22,3,clamp(depth/250,0,1))*10)/10);
+  pressVal.textContent=(1+depth/10).toFixed(1);
+  scene.fog.color.copy(at.fog);scene.fog.density=at.dens;scene.background.copy(at.fog);
+  applyLights(at); grade.classList.toggle('deep',at.grade); checkSpecies(depth);updateCompass();
+  if(audioCtx&&filter)filter.frequency.setTargetAtTime(lerp(900,220,clamp(depth/250,0,1)),audioCtx.currentTime,0.3);
+}
+// buttons
+el('btnAuto').addEventListener('click',()=>setAuto(!autoTour));
+const presets=[12,55,130,210];let presetIdx=0;
+el('btnView').addEventListener('click',()=>{presetIdx=(presetIdx+1)%presets.length;autoDepthTarget=presets[presetIdx];autoDir=1;setAuto(true);showToast('⚓','Смена зоны','Курс на новую глубину');});
+// brightness toggle (low / normal / bright)
+const brightLevels=[1,1.5,2.1];let brightIdx=1;brightBoost=brightLevels[brightIdx];
+el('btnLight').addEventListener('click',function(){brightIdx=(brightIdx+1)%brightLevels.length;brightBoost=brightLevels[brightIdx];
+  this.classList.toggle('active',brightIdx!==1);this.innerHTML=`<span class="ic">☀</span>${['Тускло','Ясно','Очень ярко'][brightIdx]}`;});
+el('btnHelp').addEventListener('click',()=>openModal({emoji:'🤿',name:'Управление погружением',latin:'Как исследовать океан',
+  desc:'WASD — движение в толще воды. Мышь (или палец) — осмотр вокруг. Пробел или Q — погружение, E — всплытие, Shift — ускорение. Нажмите ◎ Авто-тур, чтобы довериться течению, или ⚓ Сменить зону для прыжка между зонами. Кнопка ☀ Яркость делает подводный мир светлее, если рыбу плохо видно.',
+  tags:['WASD','Мышь / палец','Пробел · Q / E','Shift','Авто-тур','☀ Яркость']}));
+let audioCtx,masterGain,filter,soundOn=false;
+function initAudio(){if(audioCtx)return;try{
+  audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+  const sr=audioCtx.sampleRate,len=sr*3,buf=audioCtx.createBuffer(1,len,sr),d=buf.getChannelData(0);
+  let last=0;for(let i=0;i<len;i++){const w=Math.random()*2-1;last=(last+0.02*w)/1.02;d[i]=last*3.5;}
+  const src=audioCtx.createBufferSource();src.buffer=buf;src.loop=true;
+  filter=audioCtx.createBiquadFilter();filter.type='lowpass';filter.frequency.value=700;filter.Q.value=0.7;
+  masterGain=audioCtx.createGain();masterGain.gain.value=0.0001;
+  src.connect(filter);filter.connect(masterGain);masterGain.connect(audioCtx.destination);src.start();
+}catch(e){audioCtx=null;}}
+el('btnSound').addEventListener('click',function(){initAudio();
+  if(!audioCtx){showToast('🔇','Звук недоступен','Браузер заблокировал аудио');return;}
+  soundOn=!soundOn;masterGain.gain.setTargetAtTime(soundOn?0.13:0.0001,audioCtx.currentTime,0.25);
+  this.classList.toggle('active',soundOn);
+  this.innerHTML=(soundOn?'<span class="ic">♫</span>':'<span class="ic">♪</span>')+'Звук';});
+
+/* ---------- updates ---------- */
+function updateParticles(dt){
+  const sp=snow.geometry.attributes.position;
+  for(let i=0;i<sp.count;i++){let y=sp.getY(i)-dt*1.4;if(y<-245)y=4;sp.setY(i,y);sp.setX(i,sp.getX(i)+Math.sin(y*0.1+i)*dt*0.25);}
+  sp.needsUpdate=true;
+  const bp=bubbles.geometry.attributes.position;
+  for(let i=0;i<bp.count;i++){let y=bp.getY(i)+dt*(2.5+Math.random()*2.5);if(y>3)y=-244;bp.setY(i,y);bp.setX(i,bp.getX(i)+Math.sin(y*0.5+i)*dt*0.5);}
+  bp.needsUpdate=true;
+  bio.material.opacity=clamp((-camera.position.y-110)/130,0,1)*0.95;
+}
+function updateJellies(dt,t){for(const j of jellies){const u=j.userData;
+  j.position.y+=u.drift.y*dt;j.position.x+=u.drift.x*dt;j.position.z+=u.drift.z*dt;
+  if(j.position.y>-28){j.position.y=-60;j.position.x=rand(-180,180);j.position.z=rand(-180,180);}
+  const pl=0.85+Math.sin(t*1.4+u.phase)*0.18;u.bell.scale.set(pl,pl*0.85+(1-pl)*0.6,pl);
+  u.tents.forEach(te=>{te.rotation.x=Math.sin(t*2+te.phase)*0.25;te.rotation.z=Math.cos(t*1.6+te.phase)*0.25;});}}
+function updateAngler(t){const u=angler.userData;
+  angler.position.y=-235+Math.sin(t*0.5)*1.5;angler.rotation.y=Math.sin(t*0.2)*0.5;
+  u.tail.rotation.y=Math.sin(t*4)*0.4;u.ll.intensity=2.5+Math.sin(t*3)*2;u.lure.scale.setScalar(1+Math.sin(t*3)*0.12);}
+function updateKelp(t){for(const k of kelps){const u=k.userData;u.blades.forEach((b,i)=>{b.rotation.z=Math.sin(t*0.9+u.phase+i*0.3)*(0.05+0.04*i);});}}
+
+/* ---------- animate ---------- */
+let lastT=performance.now();
+function animate(now){
+  requestAnimationFrame(animate);
+  let dt=(now-lastT)/1000;lastT=now;dt=Math.min(dt,0.05);const t=now/1000;
+  const wp=waterGeo.attributes.position;
+  for(let i=0;i<wp.count;i++){const x=wp.getX(i),y=wp.getY(i);
+    wp.setZ(i,Math.sin(x*0.02+t*1.2)*1.3+Math.cos(y*0.025+t)*1.1+Math.sin((x+y)*0.04+t*1.6)*0.4);}
+  wp.needsUpdate=true;
+  causticTex.offset.x+=dt*0.008;causticTex.offset.y+=dt*0.005;
+  const depth=started?-camera.position.y:6;
+  const rayFade=clamp(1-depth/80,0,1);
+  rays.forEach(r=>{r.rotation.z=Math.sin(t*0.3+r.userData.sway)*0.12;r.material.opacity=r.userData.base*rayFade;});
+  updateParticles(dt);
+  schoolA.update(dt,t);schoolB.update(dt,t);schoolC.update(dt,t);schoolD.update(dt,t);
+  shark1.update(dt,t);shark2.update(dt,t);whale.update(dt,t);
+  turtles.forEach(p=>p.update(dt,t));
+  updateJellies(dt,t);updateAngler(t);updateKelp(t);
+  if(started){updateMovement(dt,t);updateHUD(-camera.position.y);}else{applyLights(depthAtm(6));}
+  renderer.render(scene,camera);
+}
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;renderer.setSize(innerWidth,innerHeight);camera.updateProjectionMatrix();});
+el('loaderFill').style.width='100%';
+requestAnimationFrame(animate);
+el('diveBtn').addEventListener('click',()=>{el('intro').classList.add('hide');el('hud').classList.add('show');started=true;setAuto(true);
+  setTimeout(()=>showToast('🤿','Погружение начато','Опускайтесь сквозь слои океана'),900);});
+})();
+</script>
+</body>
+</html>

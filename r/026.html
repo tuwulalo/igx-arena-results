@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Drum Studio</title>
+    <style>
+        :root {
+            --primary: #ff0055;
+            --primary-glow: rgba(255, 0, 85, 0.5);
+            --accent: #00ffcc;
+            --accent-glow: rgba(0, 255, 204, 0.3);
+            --bg-dark: #0a0a12;
+            --panel-bg: rgba(15, 15, 25, 0.7);
+            --text: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--bg-dark);
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            color: var(--text);
+        }
+
+        #canvas-container {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        /* UI Overlay */
+        .ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px;
+        }
+
+        .interactive {
+            pointer-events: auto;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px var(--primary-glow);
+        }
+
+        /* Controls Panel */
+        .controls-panel {
+            background: var(--panel-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 15px 25px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+            box-shadow: 0 0 15px var(--primary-glow);
+            transform: translateY(-2px);
+        }
+
+        .btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #000;
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        /* Kit Selector */
+        .kit-selector {
+            display: flex;
+            background: rgba(0,0,0,0.4);
+            border-radius: 8px;
+            padding: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .kit-btn {
+            background: transparent;
+            border: none;
+            color: #888;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+            transition: all 0.2s;
+            text-transform: uppercase;
+        }
+
+        .kit-btn.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text);
+        }
+
+        /* Bottom HUD */
+        .bottom-hud {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            width: 100%;
+        }
+
+        /* Key Map Legend */
+        .key-legend {
+            background: var(--panel-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 15px;
+            max-width: 450px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .legend-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #888;
+            margin-bottom: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding-bottom: 5px;
+        }
+
+        .legend-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+        }
+
+        .key-cap {
+            background: #222;
+            border: 1px solid #444;
+            border-bottom: 3px solid #111;
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-family: monospace;
+            font-weight: bold;
+            font-size: 11px;
+            color: var(--accent);
+            min-width: 24px;
+            text-align: center;
+        }
+
+        /* Visualizer */
+        .visualizer-container {
+            background: var(--panel-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 15px;
+            width: 300px;
+            height: 120px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .visualizer-canvas {
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+        }
+
+        /* Welcome Overlay */
+        .welcome-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(15, 15, 25, 0.95) 0%, rgba(5, 5, 10, 1) 100%);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            transition: opacity 0.8s ease, visibility 0.8s;
+        }
+
+        .welcome-title {
+            font-size: 48px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            text-align: center;
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: pulse-glow 2s infinite alternate;
+        }
+
+        .welcome-subtitle {
+            font-size: 16px;
+            color: #aaa;
+            max-width: 500px;
+            text-align: center;
+            line-height: 1.6;
+            padding: 0 20px;
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, var(--primary), #ff0077);
+            border: none;
+            color: white;
+            padding: 18px 45px;
+            font-size: 18px;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 0 30px var(--primary-glow);
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .start-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 40px var(--primary);
+        }
+
+        @keyframes pulse-glow {
+            0% { filter: drop-shadow(0 0 10px var(--primary-glow)); }
+            100% { filter: drop-shadow(0 0 25px var(--primary)); }
+        }
+
+        /* Tooltip style for 3D hover */
+        #tooltip {
+            position: absolute;
+            background: rgba(0,0,0,0.85);
+            border: 1px solid var(--accent);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            pointer-events: none;
+            display: none;
+            z-index: 50;
+            color: #fff;
+            font-weight: bold;
+            box-shadow: 0 0 15px var(--accent-glow);
+            transform: translate(-50%, -100%);
+            margin-top: -15px;
+        }
+
+        /* Mobile warning */
+        .mobile-warning {
+            display: none;
+            font-size: 12px;
+            color: #ffaa00;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .legend-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .controls-panel {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+            .bottom-hud {
+                flex-direction: column-reverse;
+                align-items: stretch;
+                gap: 15px;
+            }
+            .visualizer-container {
+                width: 100%;
+            }
+            .mobile-warning {
+                display: block;
+            }
+        }
+    </style>
+    <!-- Three.js and OrbitControls -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+</head>
+<body>
+
+    <div id="canvas-container"></div>
+    <div id="tooltip">KICK</div>
+
+    <!-- Welcome / Audio Unlock Screen -->
+    <div class="welcome-overlay" id="welcomeScreen">
+        <h1 class="welcome-title">3D Drum Studio</h1>
+        <p class="welcome-subtitle">
+            Добро пожаловать в интерактивную виртуальную студию. Играйте на барабанах кликами мыши или кнопками клавиатуры. Наслаждайтесь процедурным синтезом звука в реальном времени.
+        </p>
+        <button class="start-btn interactive" id="enterBtn">Войти в студию</button>
+        <div class="mobile-warning">Рекомендуется использовать наушники и горизонтальный режим на мобильных устройствах.</div>
+    </div>
+
+    <!-- UI Overlay Layer -->
+    <div class="ui-layer">
+        <!-- Top Header & Menu -->
+        <header>
+            <div class="logo">DrumStudio // 3D</div>
+            
+            <div class="controls-panel interactive">
+                <div class="kit-selector">
+                    <button class="kit-btn active" onclick="setKit('acoustic', this)">Acoustic</button>
+                    <button class="kit-btn" onclick="setKit('electronic', this)">808 Synth</button>
+                    <button class="kit-btn" onclick="setKit('cyberpunk', this)">Cyberpunk</button>
+                </div>
+                <button class="btn" id="demoBtn" onclick="toggleDemo()">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                    Demo Beat
+                </button>
+                <button class="btn" onclick="resetCamera()">Reset View</button>
+            </div>
+        </header>
+
+        <!-- Bottom HUD -->
+        <div class="bottom-hud">
+            <!-- Keyboard Controls Legend -->
+            <div class="key-legend interactive">
+                <div class="legend-title">Управление клавиатурой</div>
+                <div class="legend-grid">
+                    <div class="legend-item"><span class="key-cap">Space</span> Kick</div>
+                    <div class="legend-item"><span class="key-cap">S</span> Snare</div>
+                    <div class="legend-item"><span class="key-cap">A</span> Hi-Hat Close</div>
+                    <div class="legend-item"><span class="key-cap">W</span> Hi-Hat Open</div>
+                    <div class="legend-item"><span class="key-cap">F</span> Tom High</div>
+                    <div class="legend-item"><span class="key-cap">G</span> Tom Mid</div>
+                    <div class="legend-item"><span class="key-cap">H</span> Floor Tom</div>
+                    <div class="legend-item"><span class="key-cap">Q</span> Crash Cymbal</div>
+                    <div class="legend-item"><span class="key-cap">E</span> Ride Cymbal</div>
+                </div>
+            </div>
+
+            <!-- Sound Visualizer -->
+            <div class="visualizer-container">
+                <div class="legend-title" style="margin-bottom: 5px;">Спектр звука</div>
+                <canvas class="visualizer-canvas" id="visualizer"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* --- Web Audio API Procedural Sound Synthesis --- */
+        let audioCtx = null;
+        let masterGain = null;
+        let analyser = null;
+        let currentKit = 'acoustic';
+
+        function initAudio() {
+            if (audioCtx) return;
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            masterGain = audioCtx.createGain();
+            masterGain.gain.setValueAtTime(0.7, audioCtx.currentTime);
+            analyser = audioCtx.createAnalyser();
+            analyser.fftSize = 128;
+            masterGain.connect(analyser);
+            analyser.connect(audioCtx.destination);
+            setupVisualizer();
+        }
+
+        // Noise buffer helper for Snare and Cymbals
+        let noiseBuffer = null;
+        function getNoiseBuffer() {
+            if (noiseBuffer) return noiseBuffer;
+            const bufferSize = audioCtx.sampleRate * 2;
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = Math.random() * 2 - 1;
+            }
+            noiseBuffer = buffer;
+            return noiseBuffer;
+        }
+
+        function playKick(time) {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(masterGain);
+
+            if (currentKit === 'acoustic') {
+                osc.frequency.setValueAtTime(150, time);
+                osc.frequency.exponentialRampToValueAtTime(0.01, time + 0.12);
+                gain.gain.setValueAtTime(1.5, time);
+                gain.gain.exponentialRampToValueAtTime(0.01, time + 0.15);
+            } else if (currentKit === 'electronic') {
+                osc.frequency.setValueAtTime(180, time);
+                osc.frequency.exponentialRampToValueAtTime(35, time + 0.3);
+                gain.gain.setValueAtTime(1.8, time);
+                gain.gain.exponentialRampToValueAtTime(0.01, time + 0.35);
+            } else { // cyberpunk
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(100, time);
+                osc.frequency.linearRampToValueAtTime(10, time + 0.25);
+                gain.gain.setValueAtTime(1.2, time);
+                gain.gain.exponentialRampToValueAtTime(0.01, time + 0.25);
+            }
+
+            osc.start(time);
+            osc.stop(time + 0.4);
+        }
+
+        function playSnare(time) {
+            const noise = audioCtx.createBufferSource();
+            noise.buffer = getNoiseBuffer();
+            const noiseFilter = audioCtx.createBiquadFilter();
+            noiseFilter.type = 'highpass';
+            noiseFilter.frequency.value = (currentKit === 'cyberpunk') ? 800 : 1200;
+            
+            const noiseGain = audioCtx.createGain();
+            noise.connect(noiseFilter);
+            noiseFilter.connect(noiseGain);
+            noiseGain.connect(masterGain);
+
+            const osc = audioCtx.createOscillator();
+            const oscGain = audioCtx.createGain();
+            osc.connect(oscGain);
+            oscGain.connect(masterGain);
+
+            if (currentKit === 'acoustic') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(180, time);
+                osc.frequency.linearRampToValueAtTime(100, time + 0.08);
+                oscGain.gain.setValueAtTime(0.6, time);
+                oscGain.gain.exponentialRampToValueAtTime(0.01, time + 0.1);
+
+                noiseGain.gain.setValueAtTime(0.8, time);
+                noiseGain.gain.exponentialRampToValueAtTime(0.01, time + 0.18);
+            } else if (currentKit === 'electronic') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(180, time);
+                oscGain.gain.setValueAtTime(0.8, time);
+                oscGain.gain.exponentialRampToValueAtTime(0.01, time + 0.12);
+
+                noiseGain.gain.setValueAtTime(1.2, time);
+                noiseGain.gain.exponentialRampToValueAtTime(0.01, time + 0.25);
+            } else { // cyberpunk
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(250, time);
+                osc.frequency.linearRampToValueAtTime(150, time + 0.15);
+                oscGain.gain.setValueAtTime(0.7, time);
+                oscGain.gain.exponentialRampToValueAtTime(0.01, time + 0.15);
+
+                noiseGain.gain.setValueAtTime(1.0, time);
+                noiseGain.gain.exponentialRampToValueAtTime(0.01, time + 0.3);
+            }
+
+            noise.start(time);
+            osc.start(time);
+            noise.stop(time + 0.3);
+            osc.stop(time + 0.3);
+        }
+
+        function playHiHat(time, isOpen = false) {
+            const noise = audioCtx.createBufferSource();
+            noise.buffer = getNoiseBuffer();
+            
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'bandpass';
+            filter.frequency.value = (currentKit === 'cyberpunk') ? 8000 : 10000;
+            
+            const gain = audioCtx.createGain();
+            noise.connect(filter);
+            filter.connect(gain);
+            gain.connect(masterGain);
+
+            const duration = isOpen ? 0.35 : 0.05;
+            gain.gain.setValueAtTime(currentKit === 'electronic' ? 0.5 : 0.3, time);
+            gain.gain.exponentialRampToValueAtTime(0.001, time + duration);
+
+            noise.start(time);
+            noise.stop(time + duration + 0.05);
+        }
+
+        function playTom(time, pitch, duration) {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(masterGain);
+
+            osc.type = currentKit === 'cyberpunk' ? 'sawtooth' : 'sine';
+            osc.frequency.setValueAtTime(pitch, time);
+            osc.frequency.exponentialRampToValueAtTime(pitch * 0.4, time + duration);
+            
+            gain.gain.setValueAtTime(1.0, time);
+            gain.gain.exponentialRampToValueAtTime(0.01, time + duration);
+
+            osc.start(time);
+            osc.stop(time + duration + 0.05);
+        }
+
+        function playCrash(time) {
+            const noise = audioCtx.createBufferSource();
+            noise.buffer = getNoiseBuffer();
+            
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'highpass';
+            filter.frequency.value = 4000;
+
+            const gain = audioCtx.createGain();
+            noise.connect(filter);
+            filter.connect(gain);
+            gain.connect(masterGain);
+
+            const duration = currentKit === 'cyberpunk' ? 1.5 : 1.0;
+            gain.gain.setValueAtTime(0.5, time);
+            gain.gain.exponentialRampToValueAtTime(0.005, time + duration);
+
+            const osc = audioCtx.createOscillator();
+            const oscGain = audioCtx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(330, time);
+            osc.connect(oscGain);
+            oscGain.connect(masterGain);
+            oscGain.gain.setValueAtTime(0.2, time);
+            oscGain.gain.exponentialRampToValueAtTime(0.001, time + 0.5);
+
+            noise.start(time);
+            osc.start(time);
+            noise.stop(time + duration + 0.1);
+            osc.stop(time + 0.6);
+        }
+
+        function playRide(time) {
+            const noise = audioCtx.createBufferSource();
+            noise.buffer = getNoiseBuffer();
+            
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'bandpass';
+            filter.frequency.value = 8000;
+
+            const gain = audioCtx.createGain();
+            noise.connect(filter);
+            filter.connect(gain);
+            gain.connect(masterGain);
+
+            gain.gain.setValueAtTime(0.25, time);
+            gain.gain.exponentialRampToValueAtTime(0.005, time + 0.6);
+
+            const osc = audioCtx.createOscillator();
+            const oscGain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(450, time);
+            osc.connect(oscGain);
+            oscGain.connect(masterGain);
+            oscGain.gain.setValueAtTime(0.3, time);
+            oscGain.gain.exponentialRampToValueAtTime(0.001, time + 0.4);
+
+            noise.start(time);
+            osc.start(time);
+            noise.stop(time + 0.7);
+            osc.stop(time + 0.5);
+        }
+
+        function playInstrumentSound(inst) {
+            if (!audioCtx) return;
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const now = audioCtx.currentTime;
+            switch(inst) {
+                case 'kick': playKick(now); break;
+                case 'snare': playSnare(now); break;
+                case 'hihat': playHiHat(now, false); break;
+                case 'hihatOpen': playHiHat(now, true); break;
+                case 'tom1': playTom(now, 160, 0.2); break;
+                case 'tom2': playTom(now, 120, 0.25); break;
+                case 'floorTom': playTom(now, 85, 0.35); break;
+                case 'crash': playCrash(now); break;
+                case 'ride': playRide(now); break;
+            }
+            triggerVisualHit(inst);
+        }
+
+        /* --- UI Visualizer Setup --- */
+        function setupVisualizer() {
+            const canvas = document.getElementById('visualizer');
+            const ctx = canvas.getContext('2d');
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+
+            function draw() {
+                requestAnimationFrame(draw);
+                if (!analyser) return;
+                analyser.getByteFrequencyData(dataArray);
+
+                ctx.fillStyle = 'rgba(10, 10, 18, 0.3)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                const barWidth = (canvas.width / bufferLength) * 2.5;
+                let barHeight;
+                let x = 0;
+
+                for(let i = 0; i < bufferLength; i++) {
+                    barHeight = dataArray[i] / 2;
+                    let color = 'rgb(255, 0, 85)';
+                    if (currentKit === 'electronic') color = 'rgb(0, 255, 204)';
+                    if (currentKit === 'cyberpunk') color = 'rgb(255, 0, 255)';
+
+                    ctx.fillStyle = color;
+                    ctx.fillRect(x, canvas.height - barHeight, barWidth - 1, barHeight);
+                    x += barWidth;
+                }
+            }
+            draw();
+        }
+
+        function setKit(kit, btn) {
+            currentKit = kit;
+            document.querySelectorAll('.kit-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            // Adjust scene lighting based on kit selection
+            if (kit === 'acoustic') {
+                updateStudioLighting(0x00ffcc, 0xff0055);
+            } else if (kit === 'electronic') {
+                updateStudioLighting(0x00ffff, 0x9900ff);
+            } else {
+                updateStudioLighting(0xff00ff, 0x00ffff);
+            }
+        }
+
+
+        /* --- Three.js 3D Engine Setup --- */
+        let scene, camera, renderer, controls;
+        let clickableObjects = [];
+        let instrumentGroups = {};
+        const tooltip = document.getElementById('tooltip');
+
+        // Color & Material definitions
+        const CHROME = new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: 0.9, roughness: 0.1 });
+        const BRASS = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.8, roughness: 0.2, side: THREE.DoubleSide });
+        const SKIN = new THREE.MeshStandardMaterial({ color: 0xf5f5f5, roughness: 0.7 });
+        const SHELL_MAT = new THREE.MeshStandardMaterial({ color: 0x111111, metalness: 0.5, roughness: 0.2 });
+
+        function init3D() {
+            const container = document.getElementById('canvas-container');
+            
+            // Scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x05050a);
+            scene.fog = new THREE.FogExp2(0x05050a, 0.08);
+
+            // Camera
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+            camera.position.set(0, 3.5, 5);
+
+            // Renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            container.appendChild(renderer.domElement);
+
+            // Controls
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.maxPolarAngle = Math.PI / 2 - 0.05; 
+            controls.minDistance = 2;
+            controls.maxDistance = 10;
+            controls.target.set(0, 0.8, 0);
+
+            // Build Environment & Drum Kit
+            createStudio();
+            createDrumKit();
+
+            // Event Listeners
+            window.addEventListener('resize', onWindowResize);
+            renderer.domElement.addEventListener('pointerdown', onPointerDown);
+            renderer.domElement.addEventListener('pointermove', onPointerMove);
+        }
+
+        /* --- Studio Environment Construction --- */
+        let spotLightLeft, spotLightRight, neonStrip;
+        
+        function createStudio() {
+            // Floor (Polished dark concrete)
+            const floorGeo = new THREE.PlaneGeometry(20, 20);
+            const floorMat = new THREE.MeshStandardMaterial({ 
+                color: 0x111116, 
+                roughness: 0.4, 
+                metalness: 0.2 
+            });
+            const floor = new THREE.Mesh(floorGeo, floorMat);
+            floor.rotation.x = -Math.PI / 2;
+            floor.receiveShadow = true;
+            scene.add(floor);
+
+            // Grid helper for studio vibe
+            const grid = new THREE.GridHelper(20, 40, 0x333344, 0x1a1a26);
+            grid.position.y = 0.01;
+            scene.add(grid);
+
+            // Rug under drums
+            const rugGeo = new THREE.CylinderGeometry(1.8, 1.8, 0.01, 32);
+            const rugMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.9 });
+            const rug = new THREE.Mesh(rugGeo, rugMat);
+            rug.position.y = 0.005;
+            rug.receiveShadow = true;
+            scene.add(rug);
+
+            // Studio Back Wall
+            const wallGeo = new THREE.PlaneGeometry(20, 8);
+            const wallMat = new THREE.MeshStandardMaterial({ color: 0x08080f, roughness: 0.8 });
+            const backWall = new THREE.Mesh(wallGeo, wallMat);
+            backWall.position.set(0, 4, -5);
+            backWall.receiveShadow = true;
+            scene.add(backWall);
+
+            // Acoustic Panels on Wall
+            for (let i = -2; i <= 2; i++) {
+                if (i === 0) continue;
+                const panelGeo = new THREE.BoxGeometry(1.5, 3, 0.1);
+                const panelMat = new THREE.MeshStandardMaterial({ color: 0x181824, roughness: 0.9 });
+                const panel = new THREE.Mesh(panelGeo, panelMat);
+                panel.position.set(i * 3, 2.5, -4.9);
+                panel.castShadow = true;
+                scene.add(panel);
+            }
+
+            // Neon Light Strip on Back Wall
+            const neonGeo = new THREE.CylinderGeometry(0.04, 0.04, 12, 8);
+            const neonMat = new THREE.MeshBasicMaterial({ color: 0xff0055 });
+            neonStrip = new THREE.Mesh(neonGeo, neonMat);
+            neonStrip.rotation.z = Math.PI / 2;
+            neonStrip.position.set(0, 4.5, -4.8);
+            scene.add(neonStrip);
+
+            // Ambient Light
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.15);
+            scene.add(ambientLight);
+
+            // Spotlight Left
+            spotLightLeft = new THREE.SpotLight(0x00ffcc, 5, 15, Math.PI / 4, 0.5, 1);
+            spotLightLeft.position.set(-4, 6, 2);
+            spotLightLeft.castShadow = true;
+            spotLightLeft.shadow.mapSize.width = 1024;
+            spotLightLeft.shadow.mapSize.height = 1024;
+            scene.add(spotLightLeft);
+
+            // Spotlight Right
+            spotLightRight = new THREE.SpotLight(0xff0055, 5, 15, Math.PI / 4, 0.5, 1);
+            spotLightRight.position.set(4, 6, 2);
+            spotLightRight.castShadow = true;
+            spotLightRight.shadow.mapSize.width = 1024;
+            spotLightRight.shadow.mapSize.height = 1024;
+            scene.add(spotLightRight);
+        }
+
+        function updateStudioLighting(colorLeft, colorRight) {
+            if (spotLightLeft) spotLightLeft.color.setHex(colorLeft);
+            if (spotLightRight) spotLightRight.color.setHex(colorRight);
+            if (neonStrip) neonStrip.material.color.setHex(colorRight);
+        }
+
+        /* --- Drum Kit Builder (Procedural Mesh Construction) --- */
+        function createDrumKit() {
+            // Kick Drum (Center bottom)
+            buildDrum('kick', {
+                radius: 0.6, length: 0.8, 
+                pos: [0, 0.6, 0], rot: [Math.PI / 2, 0, 0],
+                label: 'Kick Drum (Space)'
+            });
+
+            // Snare Drum (Left)
+            buildDrum('snare', {
+                radius: 0.4, length: 0.25, 
+                pos: [-0.65, 0.85, 0.4], rot: [0.1, 0, 0.1],
+                label: 'Snare (S)', standHeight: 0.8
+            });
+
+            // Tom 1 (High Tom - Rack Left)
+            buildDrum('tom1', {
+                radius: 0.3, length: 0.25, 
+                pos: [-0.35, 1.25, -0.1], rot: [0.3, 0.2, -0.1],
+                label: 'High Tom (F)', standHeight: 1.0
+            });
+
+            // Tom 2 (Mid Tom - Rack Right)
+            buildDrum('tom2', {
+                radius: 0.35, length: 0.28, 
+                pos: [0.35, 1.25, -0.1], rot: [0.3, -0.2, 0.1],
+                label: 'Mid Tom (G)', standHeight: 1.0
+            });
+
+            // Floor Tom (Right bottom)
+            buildDrum('floorTom', {
+                radius: 0.45, length: 0.45, 
+                pos: [0.75, 0.7, 0.3], rot: [-0.05, 0, -0.05],
+                label: 'Floor Tom (H)', standHeight: 0.6
+            });
+
+            // Hi-Hat Cymbals (Left)
+            buildCymbal('hihat', {
+                radius: 0.35, pos: [-1.0, 1.1, 0.2], 
+                label: 'Hi-Hat (A/W)', double: true, standHeight: 1.1
+            });
+
+            // Crash Cymbal (Left Top)
+            buildCymbal('crash', {
+                radius: 0.45, pos: [-0.9, 1.6, -0.3], 
+                label: 'Crash Cymbal (Q)', standHeight: 1.6, tilt: 0.15
+            });
+
+            // Ride Cymbal (Right Top)
+            buildCymbal('ride', {
+                radius: 0.52, pos: [0.9, 1.5, -0.2], 
+                label: 'Ride Cymbal (E)', standHeight: 1.5, tilt: 0.2
+            });
+        }
+
+        // Helper to construct a standard drum
+        function buildDrum(name, opt) {
+            const group = new THREE.Group();
+            group.position.set(...opt.pos);
+            group.rotation.set(...opt.rot);
+
+            // Shell
+            const shellGeo = new THREE.CylinderGeometry(opt.radius, opt.radius, opt.length, 32, 1, true);
+            const shell = new THREE.Mesh(shellGeo, SHELL_MAT);
+            shell.castShadow = true;
+            shell.receiveShadow = true;
+            group.add(shell);
+
+            // Drum Skins (Top/Bottom)
+            const skinGeo = new THREE.CylinderGeometry(opt.radius - 0.01, opt.radius - 0.01, 0.01, 32);
+            
+            const topSkin = new THREE.Mesh(skinGeo, SKIN);
+            topSkin.position.y = opt.length / 2;
+            topSkin.castShadow = true;
+            group.add(topSkin);
+
+            const bottomSkin = topSkin.clone();
+            bottomSkin.position.y = -opt.length / 2;
+            group.add(bottomSkin);
+
+            // Metal Rims
+            const rimGeo = new THREE.CylinderGeometry(opt.radius + 0.01, opt.radius + 0.01, 0.03, 32, 1, true);
+            const topRim = new THREE.Mesh(rimGeo, CHROME);
+            topRim.position.y = opt.length / 2;
+            group.add(topRim);
+
+            const bottomRim = topRim.clone();
+            bottomRim.position.y = -opt.length / 2;
+            group.add(bottomRim);
+
+            // Stand (if applicable)
+            if (opt.standHeight) {
+                const standGroup = new THREE.Group();
+                // absolute position for stand base
+                standGroup.position.set(opt.pos[0], 0, opt.pos[2]);
+                
+                const poleGeo = new THREE.CylinderGeometry(0.015, 0.015, opt.standHeight, 8);
+                const pole = new THREE.Mesh(poleGeo, CHROME);
+                pole.position.y = opt.standHeight / 2;
+                pole.castShadow = true;
+                standGroup.add(pole);
+
+                // Tripod base
+                for (let i = 0; i < 3; i++) {
+                    const legGeo = new THREE.CylinderGeometry(0.01, 0.01, 0.4, 8);
+                    const leg = new THREE.Mesh(legGeo, CHROME);
+                    leg.rotation.z = 0.6;
+                    leg.rotation.y = (Math.PI * 2 / 3) * i;
+                    leg.position.y = 0.15;
+                    leg.position.x = Math.sin(leg.rotation.y) * 0.15;
+                    leg.position.z = Math.cos(leg.rotation.y) * 0.15;
+                    standGroup.add(leg);
+                }
+                scene.add(standGroup);
+            }
+
+            // Register clickable mesh
+            topSkin.userData = { instrument: name, label: opt.label, parentGroup: group };
+            clickableObjects.push(topSkin);
+
+            scene.add(group);
+            instrumentGroups[name] = group;
+        }
+
+        // Helper to construct cymbals
+        function buildCymbal(name, opt) {
+            const group = new THREE.Group();
+            group.position.set(...opt.pos);
+            if (opt.tilt) {
+                group.rotation.x = opt.tilt;
+                group.rotation.z = opt.tilt * 0.5;
+            }
+
+            // Cymbal Plate (using low cylinder to represent cymbal shape)
+            const cymbalGeo = new THREE.CylinderGeometry(opt.radius, opt.radius * 0.95, 0.01, 32);
+            const cymbal = new THREE.Mesh(cymbalGeo, BRASS);
+            cymbal.castShadow = true;
+            cymbal.receiveShadow = true;
+            group.add(cymbal);
+
+            // Bell (center dome)
+            const bellGeo = new THREE.SphereGeometry(opt.radius * 0.2, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2);
+            const bell = new THREE.Mesh(bellGeo, BRASS);
+            bell.position.y = 0.005;
+            group.add(bell);
+
+            if (opt.double) {
+                // Hi-hat bottom cymbal
+                const bottomCymbal = cymbal.clone();
+                bottomCymbal.position.y = -0.05;
+                group.add(bottomCymbal);
+            }
+
+            // Stand
+            if (opt.standHeight) {
+                const standGroup = new THREE.Group();
+                standGroup.position.set(opt.pos[0], 0, opt.pos[2]);
+
+                const poleGeo = new THREE.CylinderGeometry(0.015, 0.015, opt.standHeight, 8);
+                const pole = new THREE.Mesh(poleGeo, CHROME);
+                pole.position.y = opt.standHeight / 2;
+                pole.castShadow = true;
+                standGroup.add(pole);
+
+                // Tripod base
+                for (let i = 0; i < 3; i++) {
+                    const legGeo = new THREE.CylinderGeometry(0.01, 0.01, 0.5, 8);
+                    const leg = new THREE.Mesh(legGeo, CHROME);
+                    leg.rotation.z = 0.7;
+                    leg.rotation.y = (Math.PI * 2 / 3) * i;
+                    leg.position.y = 0.18;
+                    leg.position.x = Math.sin(leg.rotation.y) * 0.18;
+                    leg.position.z = Math.cos(leg.rotation.y) * 0.18;
+                    standGroup.add(leg);
+                }
+                scene.add(standGroup);
+            }
+
+            // Register clickable mesh
+            cymbal.userData = { instrument: name, label: opt.label, parentGroup: group };
+            clickableObjects.push(cymbal);
+
+            scene.add(group);
+            instrumentGroups[name] = group;
+        }
+
+        /* --- Hit Visual Feedback Animations --- */
+        const activeTweens = {};
+
+        function triggerVisualHit(inst) {
+            const group = instrumentGroups[inst];
+            if (!group) return;
+
+            // Reset scale/rotation if already animating
+            if (activeTweens[inst]) {
+                cancelAnimationFrame(activeTweens[inst].animId);
+            }
+
+            const startTime = performance.now();
+            const duration = 150; // ms
+            const originalScale = { x: 1, y: 1, z: 1 };
+            const targetScale = inst.includes('hat') || inst.includes('crash') || inst.includes('ride') 
+                ? { x: 1.02, y: 0.95, z: 1.02 } 
+                : { x: 1.08, y: 0.9, z: 1.08 };
+
+            const originalRot = { x: group.rotation.x, z: group.rotation.z };
+            const targetRotX = originalRot.x + (Math.random() * 0.08 - 0.04);
+            const targetRotZ = originalRot.z + (Math.random() * 0.08 - 0.04);
+
+            function animateHit() {
+                const elapsed = performance.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                // Ease out elastic
+                let scaleFactor, rotFactor;
+                if (progress < 0.3) {
+                    // Squeeze down
+                    const p = progress / 0.3;
+                    scaleFactor = THREE.MathUtils.lerp(1, 0.9, p);
+                    rotFactor = p;
+                } else {
+                    // Bounce back up
+                    const p = (progress - 0.3) / 0.7;
+                    scaleFactor = THREE.MathUtils.lerp(0.9, 1, p);
+                    rotFactor = THREE.MathUtils.lerp(1, 0, p);
+                }
+
+                if (inst.includes('kick')) {
+                    group.scale.set(1, 1, scaleFactor);
+                } else {
+                    group.scale.set(scaleFactor, scaleFactor, scaleFactor);
+                }
+
+                // Wobble cymbals
+                if (inst.includes('crash') || inst.includes('ride') || inst.includes('hihat')) {
+                    group.rotation.x = THREE.MathUtils.lerp(originalRot.x, targetRotX, rotFactor);
+                    group.rotation.z = THREE.MathUtils.lerp(originalRot.z, targetRotZ, rotFactor);
+                }
+
+                if (progress < 1) {
+                    activeTweens[inst].animId = requestAnimationFrame(animateHit);
+                } else {
+                    // Reset fully
+                    group.scale.set(1, 1, 1);
+                    if (inst.includes('crash') || inst.includes('ride') || inst.includes('hihat')) {
+                        group.rotation.x = originalRot.x;
+                        group.rotation.z = originalRot.z;
+                    }
+                    delete activeTweens[inst];
+                }
+            }
+
+            activeTweens[inst] = { animId: requestAnimationFrame(animateHit) };
+        }
+
+        /* --- Raycasting & Pointer Events --- */
+        const raycaster = new THREE.Raycaster();
+        const pointer = new THREE.Vector2();
+
+        function onPointerMove(event) {
+            pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
+            pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+            raycaster.setFromCamera(pointer, camera);
+            const intersects = raycaster.intersectObjects(clickableObjects);
+
+            if (intersects.length > 0) {
+                const obj = intersects[0].object;
+                tooltip.style.display = 'block';
+                tooltip.style.left = event.clientX + 'px';
+                tooltip.style.top = event.clientY + 'px';
+                tooltip.innerText = obj.userData.label;
+                document.body.style.cursor = 'pointer';
+            } else {
+                tooltip.style.display = 'none';
+                document.body.style.cursor = 'default';
+            }
+        }
+
+        function onPointerDown(event) {
+            pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
+            pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+            raycaster.setFromCamera(pointer, camera);
+            const intersects = raycaster.intersectObjects(clickableObjects);
+
+            if (intersects.length > 0) {
+                const inst = intersects[0].object.userData.instrument;
+                playInstrumentSound(inst);
+            }
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function resetCamera() {
+            if (controls) {
+                controls.reset();
+                camera.position.set(0, 3.5, 5);
+                controls.target.set(0, 0.8, 0);
+            }
+        }
+
+        /* --- Keyboard Mapping Listener --- */
+        const keyMap = {
+            ' ': 'kick',
+            's': 'snare',
+            'S': 'snare',
+            'a': 'hihat',
+            'A': 'hihat',
+            'w': 'hihatOpen',
+            'W': 'hihatOpen',
+            'f': 'tom1',
+            'F': 'tom1',
+            'g': 'tom2',
+            'G': 'tom2',
+            'h': 'floorTom',
+            'H': 'floorTom',
+            'q': 'crash',
+            'Q': 'crash',
+            'e': 'ride',
+            'E': 'ride'
+        };
+
+        window.addEventListener('keydown', (e) => {
+            const inst = keyMap[e.key];
+            if (inst) {
+                playInstrumentSound(inst);
+            }
+        });
+
+
+        /* --- Demo Beat Sequencer --- */
+        let demoInterval = null;
+        let isDemoPlaying = false;
+        let demoStep = 0;
+
+        // Simple 8-step beat
+        const demoBeat = [
+            ['kick', 'hihat'],
+            ['hihat'],
+            ['snare', 'hihat'],
+            ['hihat'],
+            ['kick', 'hihat'],
+            ['kick', 'hihatOpen'],
+            ['snare', 'hihat'],
+            ['hihat']
+        ];
+
+        function toggleDemo() {
+            const btn = document.getElementById('demoBtn');
+            if (isDemoPlaying) {
+                clearInterval(demoInterval);
+                isDemoPlaying = false;
+                btn.classList.remove('active');
+                btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> Demo Beat`;
+            } else {
+                if (audioCtx && audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                isDemoPlaying = true;
+                btn.classList.add('active');
+                btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg> Stop Beat`;
+                
+                demoStep = 0;
+                demoInterval = setInterval(() => {
+                    const instruments = demoBeat[demoStep];
+                    instruments.forEach(inst => playInstrumentSound(inst));
+                    demoStep = (demoStep + 1) % demoBeat.length;
+                }, 250); // 120 BPM
+            }
+        }
+
+
+        /* --- Initialization & Entry Logic --- */
+        function startStudio() {
+            // Unlock Web Audio Context
+            try {
+                initAudio();
+            } catch (e) {
+                console.error("Audio initialization failed:", e);
+            }
+
+            // Hide Welcome Screen Overlay smoothly
+            const welcome = document.getElementById('welcomeScreen');
+            if (welcome) {
+                welcome.style.opacity = '0';
+                welcome.style.visibility = 'hidden';
+                setTimeout(() => {
+                    welcome.style.display = 'none';
+                }, 800);
+            }
+
+            // Initialize 3D Engine if not already initialized
+            if (!scene) {
+                init3D();
+                animate();
+            }
+        }
+
+        // Render Loop
+        function animate() {
+            requestAnimationFrame(animate);
+            if (controls) controls.update();
+            if (renderer && scene && camera) {
+                renderer.render(scene, camera);
+            }
+        }
+
+        // Bind start button event explicitly to ensure it fires reliably
+        document.addEventListener('DOMContentLoaded', () => {
+            const enterBtn = document.getElementById('enterBtn');
+            if (enterBtn) {
+                enterBtn.addEventListener('click', startStudio);
+                enterBtn.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    startStudio();
+                });
+            }
+        });
+    </script>
+</body>
+</html>

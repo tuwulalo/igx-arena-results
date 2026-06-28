@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3D DRUM STUDIO • THREE.JS</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0c;color:#eee;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;overflow:hidden}
+.header{height:64px;background:linear-gradient(#111,#0a0a0c);display:flex;align-items:center;justify-content:space-between;padding:0 24px;border-bottom:1px solid #222}
+.header h1{font-size:20px;letter-spacing:3px;font-weight:300}
+.header .badge{background:#ff2d55;color:#fff;padding:2px 10px;border-radius:12px;font-size:10px;font-weight:600}
+#container{display:flex;height:calc(100vh - 64px)}
+#canvas-container{flex:1;position:relative;background:#050506}
+#three-canvas{display:block;width:100%;height:100%}
+#overlay{position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none}
+#overlay .info{position:absolute;top:24px;left:24px;background:rgba(0,0,0,.65);padding:10px 16px;border-radius:8px;font-size:12px;letter-spacing:.5px}
+.sidebar{width:300px;background:#111;border-left:1px solid #222;display:flex;flex-direction:column}
+.panel{padding:20px;border-bottom:1px solid #222}
+.panel h3{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px;color:#888}
+.drum-btn{display:flex;align-items:center;justify-content:space-between;width:100%;padding:12px 14px;margin-bottom:6px;background:#1a1a1e;border:1px solid #333;border-radius:8px;cursor:pointer;transition:all .1s;font-size:13px;color:#ccc}
+.drum-btn:hover{background:#25252b;border-color:#ff2d55}
+.drum-btn:active{transform:scale(.985)}
+.drum-btn .key{font-size:10px;background:#222;padding:1px 7px;border-radius:4px;color:#666}
+.controls{display:flex;gap:8px;padding:16px}
+.controls button{flex:1;padding:12px;background:#1f1f24;border:none;color:#fff;border-radius:8px;font-size:13px;cursor:pointer;transition:.1s}
+.controls button:hover{background:#ff2d55}
+.slider-container{padding:0 20px 20px}
+input[type=range]{width:100%;accent-color:#ff2d55}
+.status{padding:12px 20px;font-size:11px;color:#555;border-top:1px solid #222;margin-top:auto}
+#hit-log{position:absolute;bottom:20px;left:24px;background:rgba(0,0,0,.7);padding:8px 14px;border-radius:6px;font-size:11px;color:#aaa;max-width:220px}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>3D DRUM STUDIO <span class="badge">THREE.JS</span></h1>
+  <div style="color:#666;font-size:12px">CLICK • DRAG TO ROTATE • SPACE = KICK</div>
+</div>
+<div id="container">
+  <div id="canvas-container">
+    <canvas id="three-canvas"></canvas>
+    <div id="overlay">
+      <div class="info">DRAG TO ORBIT • SCROLL ZOOM • HIT DRUMS WITH MOUSE</div>
+      <div id="hit-log"></div>
+    </div>
+  </div>
+  <div class="sidebar">
+    <div class="panel">
+      <h3>DRUM KIT</h3>
+      <button class="drum-btn" data-drum="kick"><span>🥁 KICK</span><span class="key">SPACE</span></button>
+      <button class="drum-btn" data-drum="snare"><span>🥁 SNARE</span><span class="key">S</span></button>
+      <button class="drum-btn" data-drum="hihat"><span>🥁 HI-HAT</span><span class="key">H</span></button>
+      <button class="drum-btn" data-drum="tom1"><span>🥁 TOM 1</span><span class="key">T</span></button>
+      <button class="drum-btn" data-drum="tom2"><span>🥁 TOM 2</span><span class="key">Y</span></button>
+      <button class="drum-btn" data-drum="crash"><span>🥁 CRASH</span><span class="key">C</span></button>
+      <button class="drum-btn" data-drum="ride"><span>🥁 RIDE</span><span class="key">R</span></button>
+    </div>
+    <div class="panel">
+      <h3>CONTROLS</h3>
+      <div class="controls">
+        <button onclick="playDemo()">DEMO</button>
+        <button onclick="resetCamera()">RESET VIEW</button>
+      </div>
+      <div class="slider-container">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:11px;color:#888">MASTER VOLUME</span><span id="vol-val" style="font-size:11px;color:#ff2d55">0.85</span></div>
+        <input type="range" id="volume" min="0" max="1" step="0.01" value="0.85" oninput="updateVolume()">
+      </div>
+    </div>
+    <div class="status">PRODUCTION READY • 3D REAL-TIME • WEB AUDIO SYNTH</div>
+  </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+<script>
+const canvas = document.getElementById('three-canvas');
+const container = document.getElementById('canvas-container');
+let scene, camera, renderer, raycaster, mouse;
+let drums = {};
+let audioCtx, masterGain;
+let hitLog = document.getElementById('hit-log');
+let volume = 0.85;
+let anims = [];
+let isDragging = false, prevX = 0, prevY = 0, yaw = 0.8, pitch = 0.6;
+let cameraRadius = 11;
+
+function initThree() {
+  scene = new THREE.Scene();
+  scene.fog = new THREE.Fog(0x050506, 20, 60);
+  camera = new THREE.PerspectiveCamera(52, container.clientWidth / container.clientHeight, 0.1, 100);
+  renderer = new THREE.WebGLRenderer({canvas, antialias: true, alpha: true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(container.clientWidth, container.clientHeight);
+  renderer.shadowMap.enabled = true;
+  raycaster = new THREE.Raycaster();
+  mouse = new THREE.Vector2();
+
+  // Lights
+  const amb = new THREE.AmbientLight(0x404050, 0.6);
+  scene.add(amb);
+  const dir = new THREE.DirectionalLight(0xfff2cc, 1.1);
+  dir.position.set(8, 18, 6);
+  dir.castShadow = true;
+  dir.shadow.mapSize.width = 1024;
+  dir.shadow.mapSize.height = 1024;
+  scene.add(dir);
+  const rim = new THREE.PointLight(0x66aaff, 0.8);
+  rim.position.set(-12, 4, -8);
+  scene.add(rim);
+
+  // Studio floor
+  const floorGeo = new THREE.PlaneGeometry(28, 22);
+  const floorMat = new THREE.MeshLambertMaterial({color: 0x151515});
+  const floor = new THREE.Mesh(floorGeo, floorMat);
+  floor.rotation.x = -Math.PI / 2;
+  floor.position.y = -1.3;
+  floor.receiveShadow = true;
+  scene.add(floor);
+
+  // Studio walls (dark panels)
+  const wallMat = new THREE.MeshLambertMaterial({color: 0x0f0f12});
+  const backWall = new THREE.Mesh(new THREE.PlaneGeometry(28, 16), wallMat);
+  backWall.position.set(0, 6.5, -11);
+  scene.add(backWall);
+  const sideWall = new THREE.Mesh(new THREE.PlaneGeometry(22, 16), wallMat);
+  sideWall.rotation.y = Math.PI / 2;
+  sideWall.position.set(-14, 6.5, 0);
+  scene.add(sideWall);
+
+  // Create drums
+  createDrumKit();
+
+  // Camera
+  updateCamera();
+
+  // Events
+  window.addEventListener('resize', onResize);
+  canvas.addEventListener('mousedown', onMouseDown);
+  window.addEventListener('mouseup', onMouseUp);
+  window.addEventListener('mousemove', onMouseMove);
+  canvas.addEventListener('wheel', onWheel);
+  window.addEventListener('keydown', onKeyDown);
+  canvas.addEventListener('click', onClick);
+}
+
+function createDrumKit() {
+  // KICK
+  const kickGroup = new THREE.Group();
+  const kickBody = new THREE.Mesh(
+    new THREE.CylinderGeometry(2.6, 2.6, 2.4, 36),
+    new THREE.MeshLambertMaterial({color: 0x222222, flatShading: false})
+  );
+  kickBody.castShadow = kickBody.receiveShadow = true;
+  kickGroup.add(kickBody);
+  const kickHead = new THREE.Mesh(
+    new THREE.CylinderGeometry(2.5, 2.5, 0.22, 36),
+    new THREE.MeshLambertMaterial({color: 0xeeeeee})
+  );
+  kickHead.position.y = 1.3;
+  kickHead.castShadow = true;
+  kickGroup.add(kickHead);
+  kickGroup.userData = {type: 'kick', head: kickHead, origY: 1.3};
+  kickGroup.position.set(0, 0, 0);
+  scene.add(kickGroup);
+  drums.kick = kickGroup;
+
+  // SNARE
+  const snareGroup = new THREE.Group();
+  const snareBody = new THREE.Mesh(
+    new THREE.CylinderGeometry(1.5, 1.5, 1.1, 32),
+    new THREE.MeshLambertMaterial({color: 0x2a2a2e})
+  );
+  snareBody.castShadow = snareBody.receiveShadow = true;
+  snareGroup.add(snareBody);
+  const snareHead = new THREE.Mesh(new THREE.CylinderGeometry(1.45, 1.45, 0.18, 32), new THREE.MeshLambertMaterial({color: 0xddd}));
+  snareHead.position.y = 0.65;
+  snareHead.castShadow = true;
+  snareGroup.add(snareHead);
+  snareGroup.userData = {type: 'snare', head: snareHead, origY: 0.65};
+  snareGroup.position.set(-3.8, 0.8, 3.2);
+  scene.add(snareGroup);
+  drums.snare = snareGroup;
+
+  // TOMS
+  const tom1G = createTom(1.25, 0.95, 0xedb36f, -1.9, 1.15, 4.8);
+  const tom2G = createTom(1.0, 0.8, 0xedb36f, -4.2, 1.15, 4.3);
+  drums.tom1 = tom1G;
+  drums.tom2 = tom2G;
+
+  // HI-HAT
+  const hihatG = new THREE.Group();
+  const hhTop = new THREE.Mesh(new THREE.CylinderGeometry(1.75, 1.75, 0.08, 28), new THREE.MeshLambertMaterial({color: 0xcccccc, metalness:0.9}));
+  hhTop.castShadow = true;
+  const hhBot = new THREE.Mesh(new THREE.CylinderGeometry(1.8, 1.8, 0.08, 28), new THREE.MeshLambertMaterial({color: 0xaaaaaa}));
+  hhBot.position.y = -0.35;
+  hihatG.add(hhTop, hhBot);
+  hihatG.userData = {type: 'hihat', head: hhTop, origY: 0};
+  hihatG.position.set(3.6, 1.45, 4.2);
+  scene.add(hihatG);
+  drums.hihat = hihatG;
+
+  // CRASH
+  const crashG = createCymbal(2.6, 0xdddddd, 5.4, 2.1, 0.3);
+  crashG.userData = {type: 'crash'};
+  drums.crash = crashG;
+
+  // RIDE
+  const rideG = createCymbal(2.2, 0xc8c8c6, 3.8, 2.35, 2.8);
+  rideG.userData = {type: 'ride'};
+  drums.ride = rideG;
+
+  // Stand legs etc (simple)
+  const standMat = new THREE.MeshLambertMaterial({color: 0x333333});
+}
+
+function createTom(radius, height, color, x, y, z) {
+  const g = new THREE.Group();
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, height, 28), new THREE.MeshLambertMaterial({color: 0x1f1f22}));
+  body.castShadow = true;
+  g.add(body);
+  const head = new THREE.Mesh(new THREE.CylinderGeometry(radius - 0.06, radius - 0.06, 0.15, 28), new THREE.MeshLambertMaterial({color: 0xe6e6e6}));
+  head.position.y = height / 2 + 0.02;
+  head.castShadow = true;
+  g.add(head);
+  g.userData = {type: `tom${radius>1.1?'1':'2'}`, head, origY: head.position.y};
+  g.position.set(x, y, z);
+  scene.add(g);
+  return g;
+}
+
+function createCymbal(rad, color, x, y, z) {
+  const g = new THREE.Group();
+  const c = new THREE.Mesh(new THREE.CylinderGeometry(rad, rad * 0.94, 0.09, 42), new THREE.MeshLambertMaterial({color}));
+  c.castShadow = true;
+  g.add(c);
+  g.position.set(x, y, z);
+  g.rotation.x = 0.4;
+  scene.add(g);
+  return g;
+}
+
+function updateCamera() {
+  const x = Math.sin(yaw) * cameraRadius * Math.cos(pitch);
+  const y = Math.sin(pitch) * cameraRadius * 0.6 + 3.5;
+  const z = Math.cos(yaw) * cameraRadius * Math.cos(pitch);
+  camera.position.set(x, y, z);
+  camera.lookAt(0, 0.8, 2);
+}
+
+function onResize() {
+  camera.aspect = container.clientWidth / container.clientHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(container.clientWidth, container.clientHeight);
+}
+
+function onMouseDown(e) {
+  isDragging = true;
+  prevX = e.clientX;
+  prevY = e.clientY;
+}
+
+function onMouseUp() { isDragging = false; }
+
+function onMouseMove(e) {
+  if (!isDragging) return;
+  const dx = (e.clientX - prevX) * 0.0035;
+  const dy = (e.clientY - prevY) * 0.0035;
+  yaw -= dx;
+  pitch = Math.max(-0.9, Math.min(1.35, pitch - dy));
+  updateCamera();
+  prevX = e.clientX;
+  prevY = e.clientY;
+}
+
+function onWheel(e) {
+  cameraRadius = Math.max(6, Math.min(22, cameraRadius + e.deltaY * 0.012));
+  updateCamera();
+}
+
+function onKeyDown(e) {
+  if (e.key === ' ' || e.key === 'Spacebar') { e.preventDefault(); triggerDrum('kick'); }
+  if (e.key.toLowerCase() === 's') triggerDrum('snare');
+  if (e.key.toLowerCase() === 'h') triggerDrum('hihat');
+  if (e.key.toLowerCase() === 't') triggerDrum('tom1');
+  if (e.key.toLowerCase() === 'y') triggerDrum('tom2');
+  if (e.key.toLowerCase() === 'c') triggerDrum('crash');
+  if (e.key.toLowerCase() === 'r') triggerDrum('ride');
+}
+
+function onClick(e) {
+  const rect = canvas.getBoundingClientRect();
+  mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+  mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+  raycaster.setFromCamera(mouse, camera);
+  const intersects = raycaster.intersectObjects(scene.children, true);
+  if (intersects.length) {
+    const obj = intersects[0].object.parent || intersects[0].object;
+    for (let k in drums) {
+      if (drums[k] === obj || drums[k].children.includes(obj)) {
+        triggerDrum(drums[k].userData.type);
+        return;
+      }
+    }
+  }
+}
+
+function initAudio() {
+  if (audioCtx) return;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  masterGain = audioCtx.createGain();
+  masterGain.gain.value = volume;
+  masterGain.connect(audioCtx.destination);
+}
+
+function updateVolume() {
+  volume = parseFloat(document.getElementById('volume').value);
+  document.getElementById('vol-val').innerText = volume.toFixed(2);
+  if (masterGain) masterGain.gain.value = volume;
+}
+
+function playDrumSound(type) {
+  initAudio();
+  const now = audioCtx.currentTime;
+  const g = masterGain.gain.value;
+
+  if (type === 'kick') {
+    const osc = audioCtx.createOscillator();
+    osc.frequency.value = 58;
+    const g1 = audioCtx.createGain();
+    g1.gain.value = 1.8 * g;
+    const filter = audioCtx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.value = 900;
+    osc.connect(filter);
+    filter.connect(g1);
+    g1.connect(masterGain);
+    osc.start(now);
+    g1.gain.exponentialRampToValueAtTime(0.0001, now + 0.9);
+    osc.stop(now + 0.95);
+  } else if (type === 'snare') {
+    const noise = audioCtx.createBufferSource();
+    const buffer = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.6, audioCtx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+    noise.buffer = buffer;
+    const nf = audioCtx.createBiquadFilter();
+    nf.type = 'bandpass';
+    nf.frequency.value = 1800;
+    nf.Q.value = 0.9;
+    const ng = audioCtx.createGain();
+    ng.gain.value = 0.9 * g;
+    noise.connect(nf); nf.connect(ng); ng.connect(masterGain);
+    noise.start(now);
+    ng.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
+    // body
+    const osc = audioCtx.createOscillator();
+    osc.frequency.value = 185;
+    const og = audioCtx.createGain();
+    og.gain.value = 0.8 * g;
+    const lowf = audioCtx.createBiquadFilter();
+    lowf.frequency.value = 600;
+    osc.connect(lowf); lowf.connect(og); og.connect(masterGain);
+    osc.start(now);
+    og.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+  } else if (type === 'hihat') {
+    const noise = audioCtx.createBufferSource();
+    const buf = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.35, audioCtx.sampleRate);
+    for (let i = 0; i < buf.length; i++) buf.getChannelData(0)[i] = Math.random() * 2 - 1;
+    noise.buffer = buf;
+    const f = audioCtx.createBiquadFilter();
+    f.type = 'highpass';
+    f.frequency.value = 5800;
+    const hg = audioCtx.createGain();
+    hg.gain.value = 0.55 * g;
+    noise.connect(f); f.connect(hg); hg.connect(masterGain);
+    noise.start(now);
+    hg.gain.exponentialRampToValueAtTime(0.0005, now + 0.3);
+  } else if (type.includes('tom')) {
+    const freq = type === 'tom1' ? 210 : 168;
+    const osc = audioCtx.createOscillator();
+    osc.frequency.value = freq;
+    const tg = audioCtx.createGain();
+    tg.gain.value = 1.2 * g;
+    const filt = audioCtx.createBiquadFilter();
+    filt.type = 'lowpass';
+    filt.frequency.value = 1200;
+    osc.connect(filt); filt.connect(tg); tg.connect(masterGain);
+    osc.start(now);
+    tg.gain.exponentialRampToValueAtTime(0.001, now + 0.75);
+  } else { // cymbals
+    const noise = audioCtx.createBufferSource();
+    const buf = audioCtx.createBuffer(1, audioCtx.sampleRate * 1.9, audioCtx.sampleRate);
+    for (let i = 0; i < buf.length; i++) buf.getChannelData(0)[i] = Math.random() * 2 - 1;
+    noise.buffer = buf;
+    const hf = audioCtx.createBiquadFilter();
+    hf.type = 'highpass';
+    hf.frequency.value = 3400;
+    const cg = audioCtx.createGain();
+    cg.gain.value = (type === 'crash' ? 0.65 : 0.45) * g;
+    noise.connect(hf); hf.connect(cg); cg.connect(masterGain);
+    noise.start(now);
+    cg.gain.exponentialRampToValueAtTime(0.0001, now + (type === 'crash' ? 1.45 : 2.2));
+  }
+}
+
+function triggerDrum(type) {
+  const drum = drums[type];
+  if (!drum) return;
+  playDrumSound(type);
+  // Log hit
+  const hitEl = document.createElement('div');
+  hitEl.style.cssText = 'margin:2px 0';
+  hitEl.innerHTML = `<span style="color:#ff2d55">HIT</span> ${type.toUpperCase()}`;
+  hitLog.appendChild(hitEl);
+  setTimeout(() => hitEl.remove(), 1200);
+  if (hitLog.children.length > 4) hitLog.removeChild(hitLog.children[0]);
+  // Animation
+  if (drum.userData.head) {
+    const head = drum.userData.head;
+    const orig = drum.userData.origY;
+    head.position.y = orig - 0.18;
+    if (type.includes('cym')) drum.rotation.z = (Math.random() - 0.5) * 0.3;
+    anims.push({head, orig, start: Date.now(), duration: type.includes('cym') ? 620 : 240, rot: type.includes('cym') ? drum : null});
+  }
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+  const t = Date.now();
+  for (let i = anims.length - 1; i >= 0; i--) {
+    const a = anims[i];
+    const p = Math.min(1, (t - a.start) / a.duration);
+    const ease = 1 - (p - 1) ** 2;
+    a.head.position.y = a.orig - 0.18 * (1 - ease);
+    if (a.rot) a.rot.rotation.z *= 0.94;
+    if (p >= 1) {
+      a.head.position.y = a.orig;
+      if (a.rot) a.rot.rotation.z = 0;
+      anims.splice(i, 1);
+    }
+  }
+  renderer.render(scene, camera);
+}
+
+function playDemo() {
+  const seq = ['kick', 'hihat', 'snare', 'hihat', 'kick', 'tom1', 'crash', 'snare', 'ride'];
+  seq.forEach((d, i) => setTimeout(() => triggerDrum(d), i * 165));
+}
+
+function resetCamera() {
+  yaw = 0.8;
+  pitch = 0.6;
+  cameraRadius = 11;
+  updateCamera();
+}
+
+function setupDrumButtons() {
+  document.querySelectorAll('.drum-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const type = btn.dataset.drum;
+      triggerDrum(type);
+    });
+  });
+  document.getElementById('volume').value = volume;
+}
+
+function init() {
+  initThree();
+  setupDrumButtons();
+  updateCamera();
+  animate();
+  // Boot hint
+  setTimeout(() => {
+    hitLog.innerHTML = '<span style="color:#555">CLICK ANY DRUM TO PLAY</span>';
+  }, 1200);
+  // Easter: press shift for full demo
+  window.addEventListener('keydown', e => { if (e.key === 'Shift') playDemo(); });
+}
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D Drum Studio — Interactive Three.js</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --accent-1: #ff6b6b;
+      --accent-2: #feca57;
+      --accent-3: #4ecdc4;
+      --bg: #0a0a0f;
+      --panel: rgba(255, 255, 255, 0.06);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg);
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      color: #fff;
+    }
+
+    #canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+      outline: none;
+    }
+
+    #loading {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at 50% 50%, #14141c 0%, #0a0a0f 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      transition: opacity 0.6s ease, visibility 0.6s ease;
+    }
+
+    #loading.hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .spinner {
+      width: 56px;
+      height: 56px;
+      border: 3px solid rgba(255, 255, 255, 0.08);
+      border-top-color: var(--accent-1);
+      border-right-color: var(--accent-2);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    .loading-text {
+      margin-top: 1.25rem;
+      font-size: 0.9rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    #overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: clamp(1rem, 3vw, 2.5rem);
+      z-index: 10;
+    }
+
+    .overlay-content {
+      pointer-events: auto;
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .brand h1 {
+      font-size: clamp(2rem, 5vw, 4rem);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 4px 24px rgba(255, 107, 107, 0.25));
+    }
+
+    .brand p {
+      font-size: clamp(0.85rem, 1.4vw, 1rem);
+      color: rgba(255, 255, 255, 0.65);
+      max-width: 420px;
+      line-height: 1.5;
+    }
+
+    .controls {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1.25rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 0.85rem 1.75rem;
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      border: none;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.25);
+    }
+
+    .btn:active {
+      transform: scale(0.96);
+    }
+
+    .btn-primary {
+      color: #0a0a0f;
+      background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 36px rgba(255, 107, 107, 0.35);
+    }
+
+    .btn-secondary {
+      color: #fff;
+      background: var(--panel);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(12px);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .bottom-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      align-items: center;
+      width: 100%;
+    }
+
+    .keys-grid {
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      padding: 0.75rem 1rem;
+      background: var(--panel);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+    }
+
+    .key {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: rgba(255, 255, 255, 0.9);
+      transition: all 0.12s ease;
+      user-select: none;
+    }
+
+    .key small {
+      font-size: 0.55rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: rgba(255, 255, 255, 0.5);
+      margin-top: 2px;
+    }
+
+    .key.active {
+      background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+      color: #0a0a0f;
+      border-color: transparent;
+      transform: scale(1.12) translateY(-3px);
+      box-shadow: 0 8px 24px rgba(255, 107, 107, 0.45);
+    }
+
+    .key.active small {
+      color: rgba(10, 10, 15, 0.7);
+    }
+
+    #visualizer {
+      display: flex;
+      gap: 4px;
+      align-items: flex-end;
+      height: 56px;
+      padding: 0 1rem;
+      pointer-events: none;
+    }
+
+    .bar {
+      width: 5px;
+      background: linear-gradient(to top, var(--accent-1), var(--accent-2));
+      border-radius: 3px;
+      transition: height 0.05s ease-out;
+      opacity: 0.85;
+    }
+
+    .hint {
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.4);
+      letter-spacing: 0.04em;
+      text-align: center;
+    }
+
+    .studio-badge {
+      position: absolute;
+      top: clamp(1rem, 3vw, 2.5rem);
+      right: clamp(1rem, 3vw, 2.5rem);
+      padding: 0.5rem 1rem;
+      background: var(--panel);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.55);
+      backdrop-filter: blur(12px);
+      pointer-events: auto;
+    }
+
+    @media (max-width: 640px) {
+      .keys-grid {
+        gap: 0.4rem;
+        padding: 0.5rem;
+      }
+      .key {
+        width: 42px;
+        height: 42px;
+        font-size: 0.8rem;
+      }
+      .controls {
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="loading">
+    <div class="spinner"></div>
+    <div class="loading-text">Загрузка студии</div>
+  </div>
+
+  <div class="studio-badge">Three.js + Web Audio</div>
+
+  <div id="overlay">
+    <div class="overlay-content brand">
+      <h1>3D Drum Studio</h1>
+      <p>Интерактивная ударная установка в браузере. Кликай по инструментам мышью, перетаскивай сцену или играй с клавиатуры.</p>
+      <div class="controls">
+        <button id="start-btn" class="btn btn-primary">Включить звук</button>
+        <button id="demo-btn" class="btn btn-secondary">▶ Демо-бит</button>
+      </div>
+    </div>
+
+    <div class="bottom-panel">
+      <div class="keys-grid">
+        <div class="key" data-drum="kick">A<small>Kick</small></div>
+        <div class="key" data-drum="snare">S<small>Snare</small></div>
+        <div class="key" data-drum="hihat">D<small>Hi-Hat</small></div>
+        <div class="key" data-drum="tom1">F<small>Tom 1</small></div>
+        <div class="key" data-drum="tom2">G<small>Tom 2</small></div>
+        <div class="key" data-drum="floortom">H<small>Floor</small></div>
+        <div class="key" data-drum="crash">J<small>Crash</small></div>
+        <div class="key" data-drum="ride">K<small>Ride</small></div>
+      </div>
+      <div id="visualizer"></div>
+      <div class="hint">ЛКМ — удар · ПКМ / колесо — вращение и масштаб · Клавиши A–K — быстрая игра</div>
+    </div>
+  </div>
+
+  <canvas id="canvas"></canvas>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+    // --- Core DOM elements ---
+    const canvas = document.getElementById('canvas');
+    const startBtn = document.getElementById('start-btn');
+    const demoBtn = document.getElementById('demo-btn');
+    const loading = document.getElementById('loading');
+    const visualizer = document.getElementById('visualizer');
+    const keyEls = document.querySelectorAll('.key');
+
+    // --- Three.js scene setup ---
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0a0a0f);
+    scene.fog = new THREE.FogExp2(0x0a0a0f, 0.014);
+
+    const camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 17, 28);
+
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: 'high-performance' });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.15;
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.055;
+    controls.maxPolarAngle = Math.PI / 2 - 0.04;
+    controls.minDistance = 12;
+    controls.maxDistance = 55;
+    controls.target.set(0, 2.5, 0);
+
+    // --- Lighting ---
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.22);
+    scene.add(ambientLight);
+
+    const mainSpot = new THREE.SpotLight(0xff6b6b, 2200);
+    mainSpot.position.set(10, 26, 16);
+    mainSpot.angle = Math.PI / 5.5;
+    mainSpot.penumbra = 0.55;
+    mainSpot.castShadow = true;
+    mainSpot.shadow.mapSize.set(2048, 2048);
+    mainSpot.shadow.bias = -0.00012;
+    scene.add(mainSpot);
+
+    const fillSpot = new THREE.SpotLight(0x4ecdc4, 1300);
+    fillSpot.position.set(-13, 23, 10);
+    fillSpot.angle = Math.PI / 6;
+    fillSpot.penumbra = 0.65;
+    scene.add(fillSpot);
+
+    const rimLight = new THREE.PointLight(0xfeca57, 420, 55);
+    rimLight.position.set(0, 14, -10);
+    scene.add(rimLight);
+
+    // --- Floor & environment ---
+    const floorGeo = new THREE.PlaneGeometry(140, 140);
+    const floorMat = new THREE.MeshStandardMaterial({
+      color: 0x111118,
+      roughness: 0.14,
+      metalness: 0.62,
+    });
+    const floor = new THREE.Mesh(floorGeo, floorMat);
+    floor.rotation.x = -Math.PI / 2;
+    floor.receiveShadow = true;
+    scene.add(floor);
+
+    const grid = new THREE.GridHelper(140, 70, 0x2a2a36, 0x16161f);
+    grid.position.y = 0.015;
+    scene.add(grid);
+
+    // --- Shared materials ---
+    const materials = {
+      chrome: new THREE.MeshStandardMaterial({ color: 0xddeeff, metalness: 0.96, roughness: 0.12 }),
+      rim: new THREE.MeshStandardMaterial({ color: 0xeeeeff, metalness: 0.9, roughness: 0.15 }),
+      head: new THREE.MeshStandardMaterial({ color: 0xf5f0e6, metalness: 0.04, roughness: 0.78 }),
+      cymbal: new THREE.MeshStandardMaterial({ color: 0xffd65c, metalness: 0.92, roughness: 0.18 }),
+      stand: new THREE.MeshStandardMaterial({ color: 0x999faa, metalness: 0.9, roughness: 0.22 }),
+      redShell: new THREE.MeshStandardMaterial({ color: 0xcc2222, metalness: 0.24, roughness: 0.34 }),
+      blackShell: new THREE.MeshStandardMaterial({ color: 0x1a1a22, metalness: 0.2, roughness: 0.42 }),
+      silverShell: new THREE.MeshStandardMaterial({ color: 0xb0b8c4, metalness: 0.35, roughness: 0.3 }),
+    };
+
+    const drumKit = new THREE.Group();
+    scene.add(drumKit);
+
+    const drums = [];
+
+    // --- Drum construction helpers ---
+    function createDrum(name, type, position, size, shellMat) {
+      const group = new THREE.Group();
+      group.position.set(...position);
+
+      const shellGeo = new THREE.CylinderGeometry(size.radius, size.radius, size.height, 56, 1, true);
+      const shell = new THREE.Mesh(shellGeo, shellMat);
+      shell.castShadow = true;
+      shell.receiveShadow = true;
+      group.add(shell);
+
+      const headGeo = new THREE.CircleGeometry(size.radius, 48);
+      const topHead = new THREE.Mesh(headGeo, materials.head);
+      topHead.rotation.x = -Math.PI / 2;
+      topHead.position.y = size.height / 2 + 0.008;
+      topHead.castShadow = true;
+      topHead.receiveShadow = true;
+      topHead.userData.isHead = true;
+      group.add(topHead);
+
+      const bottomHead = topHead.clone();
+      bottomHead.rotation.x = Math.PI / 2;
+      bottomHead.position.y = -size.height / 2 - 0.008;
+      group.add(bottomHead);
+
+      const rimGeo = new THREE.TorusGeometry(size.radius + 0.06, 0.065, 14, 56);
+      const topRim = new THREE.Mesh(rimGeo, materials.rim);
+      topRim.rotation.x = Math.PI / 2;
+      topRim.position.y = size.height / 2;
+      topRim.castShadow = true;
+      group.add(topRim);
+
+      const bottomRim = topRim.clone();
+      bottomRim.position.y = -size.height / 2;
+      group.add(bottomRim);
+
+      // Lugs for realism
+      const lugCount = 8;
+      for (let i = 0; i < lugCount; i++) {
+        const angle = (i / lugCount) * Math.PI * 2;
+        const lug = new THREE.Mesh(new THREE.BoxGeometry(0.12, size.height * 0.9, 0.08), materials.chrome);
+        lug.position.set(
+          Math.cos(angle) * (size.radius + 0.02),
+          0,
+          Math.sin(angle) * (size.radius + 0.02)
+        );
+        lug.lookAt(0, 0, 0);
+        group.add(lug);
+      }
+
+      group.userData = {
+        name,
+        type,
+        originalScale: group.scale.clone(),
+        originalY: position[1],
+        color: shellMat.color.getHex()
+      };
+
+      drumKit.add(group);
+      drums.push(group);
+      return group;
+    }
+
+    function createCymbal(name, type, position, radius) {
+      const group = new THREE.Group();
+      group.position.set(...position);
+
+      const cymbalGeo = new THREE.CylinderGeometry(radius, radius, 0.035, 72);
+      const cymbal = new THREE.Mesh(cymbalGeo, materials.cymbal);
+      cymbal.castShadow = true;
+      cymbal.receiveShadow = true;
+      cymbal.userData.isCymbal = true;
+      group.add(cymbal);
+
+      const bellGeo = new THREE.SphereGeometry(radius * 0.16, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2);
+      const bell = new THREE.Mesh(bellGeo, materials.cymbal);
+      bell.position.y = 0.045;
+      group.add(bell);
+
+      const standHeight = position[1] - 0.6;
+      const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.055, standHeight, 18), materials.stand);
+      pole.position.y = -standHeight / 2;
+      pole.castShadow = true;
+      group.add(pole);
+
+      const base = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 0.9, 0.08, 40), materials.chrome);
+      base.position.y = -standHeight - 0.04;
+      base.receiveShadow = true;
+      base.castShadow = true;
+      group.add(base);
+
+      group.userData = {
+        name,
+        type,
+        originalScale: group.scale.clone(),
+        originalY: position[1],
+        color: 0xffd65c
+      };
+
+      drumKit.add(group);
+      drums.push(group);
+      return group;
+    }
+
+    function createStand(position, height) {
+      const group = new THREE.Group();
+      group.position.set(...position);
+
+      const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, height, 16), materials.stand);
+      pole.position.y = height / 2;
+      pole.castShadow = true;
+      group.add(pole);
+
+      const base = new THREE.Mesh(new THREE.CylinderGeometry(0.85, 0.85, 0.08, 40), materials.chrome);
+      base.position.y = 0.04;
+      base.receiveShadow = true;
+      base.castShadow = true;
+      group.add(base);
+
+      drumKit.add(group);
+    }
+
+    // --- Build the kit ---
+    createDrum('kick', 'kick', [0, 1.55, 0], { radius: 2.35, height: 2.85 }, materials.redShell);
+    createDrum('snare', 'snare', [-3.6, 1.15, 1.6], { radius: 1.32, height: 0.95 }, materials.silverShell);
+    createDrum('tom1', 'tom', [1.55, 4.25, 0.6], { radius: 1.12, height: 1.35 }, materials.redShell);
+    createDrum('tom2', 'tom', [-1.55, 4.25, 0.6], { radius: 1.12, height: 1.35 }, materials.redShell);
+    createDrum('floortom', 'floortom', [4.4, 1.85, 1.4], { radius: 1.55, height: 1.75 }, materials.blackShell);
+
+    createCymbal('hihat', 'hihat', [-5.6, 5.3, 1.1], 1.35);
+    createCymbal('crash', 'crash', [-6.3, 7.7, -1.6], 2.0);
+    createCymbal('ride', 'ride', [5.8, 7.2, -1.2], 2.15);
+
+    // Hardware stands
+    createStand([-3.6, 0, 1.6], 0.65);
+    createStand([0, 0, -1.8], 5.8);
+    createStand([4.4, 0, 1.4], 0.9);
+    createStand([-5.6, 0, 1.1], 5.1);
+    createStand([-6.3, 0, -1.6], 7.5);
+    createStand([5.8, 0, -1.2], 6.9);
+
+    // --- Floating labels ---
+    function createLabel(text, position) {
+      const c = document.createElement('canvas');
+      c.width = 256;
+      c.height = 72;
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = 'rgba(10, 10, 15, 0.72)';
+      ctx.beginPath();
+      ctx.roundRect(0, 0, 256, 72, 16);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.18)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '700 26px Inter, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(text, 128, 36);
+
+      const texture = new THREE.CanvasTexture(c);
+      const spriteMat = new THREE.SpriteMaterial({ map: texture, transparent: true, opacity: 0, depthTest: false });
+      const sprite = new THREE.Sprite(spriteMat);
+      sprite.position.copy(position);
+      sprite.position.y += 2.8;
+      sprite.scale.set(3.2, 0.9, 1);
+      scene.add(sprite);
+      return sprite;
+    }
+
+    const labels = {
+      kick: createLabel('KICK — A', new THREE.Vector3(0, 1.55, 0)),
+      snare: createLabel('SNARE — S', new THREE.Vector3(-3.6, 1.15, 1.6)),
+      hihat: createLabel('HI-HAT — D', new THREE.Vector3(-5.6, 5.3, 1.1)),
+      tom1: createLabel('TOM 1 — F', new THREE.Vector3(1.55, 4.25, 0.6)),
+      tom2: createLabel('TOM 2 — G', new THREE.Vector3(-1.55, 4.25, 0.6)),
+      floortom: createLabel('FLOOR — H', new THREE.Vector3(4.4, 1.85, 1.4)),
+      crash: createLabel('CRASH — J', new THREE.Vector3(-6.3, 7.7, -1.6)),
+      ride: createLabel('RIDE — K', new THREE.Vector3(5.8, 7.2, -1.2)),
+    };
+
+    // --- Audio with Tone.js ---
+    let audioStarted = false;
+    const instruments = {};
+
+    function initAudio() {
+      const reverb = new Tone.Reverb({ decay: 1.9, wet: 0.2 }).toDestination();
+      const limiter = new Tone.Limiter(-1).connect(reverb);
+
+      instruments.kick = new Tone.MembraneSynth({
+        pitchDecay: 0.052,
+        octaves: 10,
+        oscillator: { type: 'sine' },
+        envelope: { attack: 0.001, decay: 0.42, sustain: 0.012, release: 1.4 }
+      }).connect(limiter);
+
+      const snareNoise = new Tone.NoiseSynth({
+        noise: { type: 'pink' },
+        envelope: { attack: 0.001, decay: 0.22, sustain: 0 }
+      }).connect(limiter);
+      snareNoise.volume.value = -2;
+
+      const snareTone = new Tone.MembraneSynth({
+        pitchDecay: 0.02,
+        octaves: 2.5,
+        oscillator: { type: 'triangle' },
+        envelope: { attack: 0.001, decay: 0.14, sustain: 0, release: 0.1 }
+      }).connect(limiter);
+      snareTone.volume.value = -4;
+
+      instruments.snare = {
+        trigger: () => {
+          snareNoise.triggerAttackRelease('8n');
+          snareTone.triggerAttackRelease('C2', '8n');
+        }
+      };
+
+      instruments.hihat = new Tone.MetalSynth({
+        frequency: 220,
+        envelope: { attack: 0.001, decay: 0.055, release: 0.012 },
+        harmonicity: 5.2,
+        modulationIndex: 34,
+        resonance: 4200,
+        octaves: 1.5
+      }).connect(limiter);
+      instruments.hihat.volume.value = -9;
+
+      const tomMaker = () => new Tone.MembraneSynth({
+        pitchDecay: 0.032,
+        octaves: 4.5,
+        oscillator: { type: 'sine' },
+        envelope: { attack: 0.001, decay: 0.36, sustain: 0.015, release: 0.65 }
+      }).connect(limiter);
+
+      instruments.tom1 = tomMaker();
+      instruments.tom2 = tomMaker();
+      instruments.floortom = tomMaker();
+
+      instruments.crash = new Tone.MetalSynth({
+        frequency: 320,
+        envelope: { attack: 0.001, decay: 1.35, release: 0.25 },
+        harmonicity: 3.1,
+        modulationIndex: 26,
+        resonance: 3200,
+        octaves: 1.25
+      }).connect(limiter);
+      instruments.crash.volume.value = -7;
+
+      instruments.ride = new Tone.MetalSynth({
+        frequency: 520,
+        envelope: { attack: 0.001, decay: 0.85, release: 0.2 },
+        harmonicity: 3.6,
+        modulationIndex: 22,
+        resonance: 5200,
+        octaves: 1.55
+      }).connect(limiter);
+      instruments.ride.volume.value = -11;
+    }
+
+    function startAudio() {
+      if (audioStarted) return;
+      Tone.start();
+      initAudio();
+      audioStarted = true;
+      startBtn.textContent = 'Студия активна';
+      startBtn.disabled = true;
+      startBtn.style.opacity = '0.55';
+      startBtn.style.cursor = 'default';
+    }
+
+    startBtn.addEventListener('click', startAudio);
+
+    // --- Particles system ---
+    const activeParticles = [];
+
+    function spawnParticles(position, color) {
+      const count = 14;
+      const geometry = new THREE.BufferGeometry();
+      const positions = new Float32Array(count * 3);
+      const velocities = [];
+
+      for (let i = 0; i < count; i++) {
+        positions[i * 3] = position.x;
+        positions[i * 3 + 1] = position.y;
+        positions[i * 3 + 2] = position.z;
+        velocities.push({
+          x: (Math.random() - 0.5) * 0.35,
+          y: Math.random() * 0.35 + 0.08,
+          z: (Math.random() - 0.5) * 0.35
+        });
+      }
+
+      geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      const material = new THREE.PointsMaterial({
+        color,
+        size: 0.16,
+        transparent: true,
+        opacity: 1,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+      });
+
+      const points = new THREE.Points(geometry, material);
+      points.userData = { velocities, born: performance.now() };
+      scene.add(points);
+      activeParticles.push(points);
+    }
+
+    function updateParticles(time) {
+      for (let i = activeParticles.length - 1; i >= 0; i--) {
+        const p = activeParticles[i];
+        const age = time - p.userData.born;
+        if (age > 700) {
+          scene.remove(p);
+          p.geometry.dispose();
+          p.material.dispose();
+          activeParticles.splice(i, 1);
+          continue;
+        }
+        const pos = p.geometry.attributes.position.array;
+        for (let j = 0; j < p.userData.velocities.length; j++) {
+          const v = p.userData.velocities[j];
+          pos[j * 3] += v.x;
+          pos[j * 3 + 1] += v.y;
+          pos[j * 3 + 2] += v.z;
+          v.y -= 0.011;
+        }
+        p.geometry.attributes.position.needsUpdate = true;
+        p.material.opacity = 1 - age / 700;
+      }
+    }
+
+    // --- Interaction ---
+    const raycaster = new THREE.Raycaster();
+    const pointer = new THREE.Vector2();
+    let hoveredDrum = null;
+
+    function triggerDrum(name) {
+      if (!audioStarted) {
+        startAudio();
+      }
+
+      const drum = drums.find(d => d.userData.name === name);
+      if (!drum) return;
+
+      const type = drum.userData.type;
+      const now = Tone.now();
+
+      switch (type) {
+        case 'kick':
+          instruments.kick.triggerAttackRelease('C1', '8n', now);
+          break;
+        case 'snare':
+          instruments.snare.trigger();
+          break;
+        case 'hihat':
+          instruments.hihat.triggerAttackRelease('32n', now);
+          break;
+        case 'tom':
+          const note = name === 'tom1' ? 'A2' : 'F2';
+          instruments[name].triggerAttackRelease(note, '8n', now);
+          break;
+        case 'floortom':
+          instruments.floortom.triggerAttackRelease('D2', '8n', now);
+          break;
+        case 'crash':
+          instruments.crash.triggerAttackRelease('8n', now);
+          break;
+        case 'ride':
+          instruments.ride.triggerAttackRelease('8n', now);
+          break;
+      }
+
+      drum.userData.hitTime = performance.now();
+
+      // Key visual
+      const keyEl = document.querySelector(`.key[data-drum="${name}"]`);
+      if (keyEl) {
+        keyEl.classList.add('active');
+        setTimeout(() => keyEl.classList.remove('active'), 140);
+      }
+
+      // Particles
+      const color = type === 'kick' ? 0xff6b6b : type === 'snare' ? 0x4ecdc4 : 0xfeca57;
+      const spawnPos = drum.position.clone();
+      spawnPos.y += type === 'hihat' || type === 'crash' || type === 'ride' ? 0.4 : 1.2;
+      spawnParticles(spawnPos, color);
+
+      // Visualizer bump
+      bumpVisualizer();
+    }
+
+    function onPointerDown(event) {
+      if (event.target.closest('.btn') || event.target.closest('.key')) return;
+
+      const clientX = event.clientX ?? event.touches?.[0]?.clientX;
+      const clientY = event.clientY ?? event.touches?.[0]?.clientY;
+      if (clientX == null) return;
+
+      pointer.x = (clientX / window.innerWidth) * 2 - 1;
+      pointer.y = -(clientY / window.innerHeight) * 2 + 1;
+
+      raycaster.setFromCamera(pointer, camera);
+      const intersects = raycaster.intersectObjects(drumKit.children, true);
+
+      if (intersects.length > 0) {
+        let obj = intersects[0].object;
+        let drum = null;
+        while (obj) {
+          if (obj.userData?.name) { drum = obj; break; }
+          obj = obj.parent;
+        }
+        if (drum) triggerDrum(drum.userData.name);
+      }
+    }
+
+    function onPointerMove(event) {
+      pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
+      pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+      raycaster.setFromCamera(pointer, camera);
+      const intersects = raycaster.intersectObjects(drumKit.children, true);
+
+      canvas.style.cursor = intersects.length > 0 ? 'pointer' : 'default';
+
+      // Clear previous hover
+      if (hoveredDrum) {
+        hoveredDrum.traverse(child => {
+          if (child.isMesh && child.material.emissive) {
+            child.material.emissive.setHex(0x000000);
+          }
+        });
+        hoveredDrum = null;
+      }
+
+      if (intersects.length > 0) {
+        let obj = intersects[0].object;
+        let drum = null;
+        while (obj) {
+          if (obj.userData?.name) { drum = obj; break; }
+          obj = obj.parent;
+        }
+        if (drum) {
+          hoveredDrum = drum;
+          drum.traverse(child => {
+            if (child.isMesh && child.material.emissive) {
+              child.material.emissive.setHex(0x222222);
+            }
+          });
+        }
+      }
+
+      // Fade labels based on camera distance / interaction
+      const camDist = camera.position.distanceTo(controls.target);
+      Object.values(labels).forEach(sprite => {
+        sprite.material.opacity = Math.max(0, 1 - (camDist - 18) / 22);
+      });
+    }
+
+    canvas.addEventListener('pointerdown', onPointerDown);
+    canvas.addEventListener('pointermove', onPointerMove);
+
+    window.addEventListener('keydown', (e) => {
+      const map = {
+        a: 'kick', s: 'snare', d: 'hihat', f: 'tom1',
+        g: 'tom2', h: 'floortom', j: 'crash', k: 'ride'
+      };
+      const drum = map[e.key.toLowerCase()];
+      if (drum) triggerDrum(drum);
+    });
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // --- Visualizer bars ---
+    const bars = Array.from({ length: 18 }, () => {
+      const bar = document.createElement('div');
+      bar.className = 'bar';
+      bar.style.height = '3px';
+      visualizer.appendChild(bar);
+      return bar;
+    });
+
+    let visualizerDecay = 0;
+    function bumpVisualizer() {
+      visualizerDecay = 1;
+    }
+
+    function updateVisualizer() {
+      visualizerDecay *= 0.92;
+      bars.forEach((bar, i) => {
+        const base = Math.sin((performance.now() * 0.005) + i * 0.7) * 0.5 + 0.5;
+        const h = 3 + base * 10 + visualizerDecay * (Math.random() * 45 + 5);
+        bar.style.height = `${Math.min(h, 56)}px`;
+      });
+    }
+
+    // --- Demo beat ---
+    let demoPlaying = false;
+    let demoInterval = null;
+    const demoPattern = [
+      { drum: 'kick' }, { drum: 'hihat' }, { drum: 'snare' }, { drum: 'hihat' },
+      { drum: 'kick' }, { drum: 'hihat' }, { drum: 'kick' }, { drum: 'hihat' },
+      { drum: 'snare' }, { drum: 'hihat' }, { drum: 'kick' }, { drum: 'hihat' },
+      { drum: 'tom1' }, { drum: 'hihat' }, { drum: 'snare' }, { drum: 'crash' }
+    ];
+
+    demoBtn.addEventListener('click', () => {
+      if (demoPlaying) {
+        clearInterval(demoInterval);
+        demoPlaying = false;
+        demoBtn.textContent = '▶ Демо-бит';
+        return;
+      }
+      if (!audioStarted) startAudio();
+      demoPlaying = true;
+      demoBtn.textContent = '⏹ Стоп';
+      let step = 0;
+      demoInterval = setInterval(() => {
+        triggerDrum(demoPattern[step % demoPattern.length].drum);
+        step++;
+      }, 230);
+    });
+
+    // --- Animation loop ---
+    function animateDrums(time) {
+      drums.forEach(drum => {
+        if (!drum.userData.hitTime) return;
+        const elapsed = time - drum.userData.hitTime;
+        const isCymbal = drum.userData.type === 'crash' || drum.userData.type === 'ride' || drum.userData.type === 'hihat';
+        const duration = isCymbal ? 650 : 280;
+
+        if (elapsed < duration) {
+          const t = elapsed / duration;
+          const decay = Math.exp(-t * 5);
+          const scale = 1 - 0.085 * decay * Math.sin(t * Math.PI * 5);
+          drum.scale.setScalar(scale);
+
+          if (isCymbal) {
+            drum.rotation.z = 0.06 * decay * Math.sin(t * Math.PI * 14);
+            drum.rotation.x = 0.03 * decay * Math.cos(t * Math.PI * 12);
+          }
+        } else {
+          drum.userData.hitTime = null;
+          drum.scale.copy(drum.userData.originalScale);
+          drum.rotation.z = 0;
+          drum.rotation.x = 0;
+        }
+      });
+    }
+
+    function animate(time) {
+      requestAnimationFrame(animate);
+      controls.update();
+      animateDrums(time);
+      updateParticles(time);
+      updateVisualizer();
+
+      // Gentle idle sway
+      drumKit.rotation.y = Math.sin(time * 0.00018) * 0.04;
+      drumKit.position.y = Math.sin(time * 0.00035) * 0.08;
+
+      renderer.render(scene, camera);
+    }
+
+    // Hide loader once initial frame is ready
+    requestAnimationFrame(() => {
+      loading.classList.add('hidden');
+    });
+
+    animate(0);
+  </script>
+</body>
+</html>

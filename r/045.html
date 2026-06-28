@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PS Arena • PlayStation 5</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Roboto+Mono:wght@400;500&display=swap');
+:root { --ps-blue: #0070f3; }
+body { font-family: 'Inter', system_ui, sans-serif; }
+.mono { font-family: 'Roboto Mono', monospace; }
+.ps-bg { background: radial-gradient(circle at center, #0a0a0a 0%, #000000 100%); }
+.game-tile { transition: all 0.2s cubic-bezier(0.23, 1, 0.32, 1); }
+.game-tile:hover { transform: translateY(-8px) scale(1.02); box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.4); }
+.ps-btn { transition: all 0.1s ease; }
+.ps-btn:active { transform: scale(0.96); }
+#game-container { background: #000; }
+canvas { image-rendering: crisp-edges; }
+.hud { font-family: 'Inter', sans-serif; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+.block { box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.3), inset 0 1px 0 rgb(255 255 255 / 0.1); }
+.ps5-nav { background: rgba(20,20,20,0.95); backdrop-filter: blur(20px); }
+</style>
+</head>
+<body class="bg-black text-white overflow-hidden select-none">
+<div class="flex h-screen ps-bg">
+  <!-- SIDEBAR -->
+  <div class="w-72 bg-zinc-950 border-r border-zinc-800 flex flex-col">
+    <div class="p-6 flex items-center gap-x-3 border-b border-zinc-800">
+      <div class="w-9 h-9 bg-gradient-to-br from-blue-600 to-blue-500 rounded-xl flex items-center justify-center">
+        <span class="font-black text-3xl tracking-[-3px]">PS</span>
+      </div>
+      <div>
+        <div class="text-xl font-semibold tracking-tight">PlayStation 5</div>
+        <div class="text-[10px] text-zinc-500 -mt-1">ARENA EDITION</div>
+      </div>
+    </div>
+
+    <div class="px-3 pt-6">
+      <div class="px-4 py-2 text-xs font-medium text-zinc-500 tracking-widest">БИБЛИОТЕКА</div>
+      
+      <div onclick="showLibrary()" class="flex items-center gap-x-3 px-4 py-3 hover:bg-zinc-900 rounded-2xl cursor-pointer mb-1">
+        <div class="w-9 h-9 bg-zinc-800 rounded-xl flex items-center justify-center"><span class="text-xl">📚</span></div>
+        <div class="font-medium">Все игры</div>
+      </div>
+      <div onclick="showStore()" class="flex items-center gap-x-3 px-4 py-3 hover:bg-zinc-900 rounded-2xl cursor-pointer mb-1">
+        <div class="w-9 h-9 bg-zinc-800 rounded-xl flex items-center justify-center"><span class="text-xl">🛒</span></div>
+        <div class="font-medium">PlayStation Store</div>
+      </div>
+    </div>
+
+    <div class="mt-auto p-6 border-t border-zinc-800">
+      <div class="flex items-center gap-x-3">
+        <div class="w-9 h-9 bg-gradient-to-br from-violet-500 to-fuchsia-500 rounded-full flex items-center justify-center text-sm font-bold">AR</div>
+        <div>
+          <div class="font-medium">Alex Rivera</div>
+          <div class="text-xs text-emerald-400">Premium • 146 игр</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="flex-1 flex flex-col">
+    <!-- TOP BAR -->
+    <div class="h-16 border-b border-zinc-800 px-8 flex items-center justify-between bg-zinc-950/80 backdrop-blur-xl">
+      <div class="flex items-center gap-x-8">
+        <div class="text-xl font-semibold tracking-tight">Добро пожаловать, Alex</div>
+        <div class="px-3 py-1 bg-zinc-900 rounded-full text-xs flex items-center gap-x-2">
+          <div class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+          <span class="font-mono text-emerald-400">60 FPS • ONLINE</span>
+        </div>
+      </div>
+      
+      <div class="flex items-center gap-x-6 text-sm">
+        <div class="flex items-center gap-x-2">
+          <div>28 июня</div>
+          <div class="text-zinc-500">•</div>
+          <div class="mono">14:31</div>
+        </div>
+        <div class="px-4 py-1.5 bg-zinc-900 rounded-3xl flex items-center text-xs font-medium cursor-pointer" onclick="showSettings()">
+          НАСТРОЙКИ
+        </div>
+      </div>
+    </div>
+
+    <!-- HERO / GAMES GRID -->
+    <div class="flex-1 overflow-auto p-8" id="main-content">
+      <div class="max-w-[1600px]">
+        <div class="flex items-end justify-between mb-6 px-1">
+          <div>
+            <div class="text-5xl font-semibold tracking-tighter">Библиотека</div>
+            <div class="text-zinc-400 mt-1">Выбери игру и погрузись в 3D</div>
+          </div>
+          <div class="px-5 py-2 bg-zinc-900 hover:bg-zinc-800 transition-colors cursor-pointer rounded-3xl text-sm font-medium flex items-center gap-x-2" onclick="showLibrary()">
+            <span>Посмотреть всё</span>
+            <span class="text-xs opacity-60">→</span>
+          </div>
+        </div>
+
+        <!-- GAME TILES -->
+        <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+          
+          <!-- Minecraft -->
+          <div onclick="launchGame(0)" class="game-tile bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 rounded-3xl overflow-hidden cursor-pointer block">
+            <div class="h-48 bg-gradient-to-br from-emerald-700 via-emerald-600 to-teal-700 relative flex items-center justify-center">
+              <div class="text-center">
+                <div class="text-8xl opacity-90">🟫</div>
+                <div class="absolute inset-0 bg-[radial-gradient(#fff_0.7px,transparent_1px)] bg-[length:5px_5px] opacity-20"></div>
+              </div>
+              <div class="absolute top-4 right-4 px-4 py-1 text-xs font-mono tracking-[3px] bg-black/50 backdrop-blur rounded-2xl">60 FPS</div>
+            </div>
+            <div class="p-5">
+              <div class="flex justify-between items-baseline">
+                <div>
+                  <div class="font-semibold tracking-tight text-xl">Minecraft</div>
+                  <div class="text-xs text-emerald-400">V Классика • 3D</div>
+                </div>
+                <div class="text-right"><div class="text-[10px] text-zinc-400">v1.21</div></div>
+              </div>
+              <div class="text-xs text-zinc-500 mt-3 flex items-center justify-between">
+                <div>136 млн игроков</div>
+                <div class="px-2.5 py-px bg-emerald-900/70 text-emerald-400 text-[10px] rounded">3D</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- UFC -->
+          <div onclick="launchGame(1)" class="game-tile bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 rounded-3xl overflow-hidden cursor-pointer block">
+            <div class="h-48 bg-gradient-to-br from-rose-700 via-red-600 to-orange-700 relative flex items-center justify-center">
+              <div class="text-center">
+                <div class="text-8xl">🥊</div>
+              </div>
+              <div class="absolute top-4 right-4 px-4 py-1 text-xs font-mono tracking-[3px] bg-black/50 backdrop-blur rounded-2xl">60 FPS</div>
+            </div>
+            <div class="p-5">
+              <div class="flex justify-between items-baseline">
+                <div>
+                  <div class="font-semibold tracking-tight text-xl">UFC 5</div>
+                  <div class="text-xs text-rose-400">Официальная арена</div>
+                </div>
+                <div class="text-right"><div class="text-[10px] text-zinc-400">v5.2</div></div>
+              </div>
+              <div class="text-xs text-zinc-500 mt-3 flex items-center justify-between">
+                <div>4.8 млн игроков</div>
+                <div class="px-2.5 py-px bg-violet-900/70 text-violet-400 text-[10px] rounded">3D</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- GTA -->
+          <div onclick="launchGame(2)" class="game-tile bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 rounded-3xl overflow-hidden cursor-pointer block">
+            <div class="h-48 bg-gradient-to-br from-blue-800 via-indigo-700 to-violet-700 relative flex items-center justify-center">
+              <div class="text-center">
+                <div class="text-8xl">🚗</div>
+              </div>
+              <div class="absolute top-4 right-4 px-4 py-1 text-xs font-mono tracking-[3px] bg-black/50 backdrop-blur rounded-2xl">60 FPS</div>
+            </div>
+            <div class="p-5">
+              <div class="flex justify-between items-baseline">
+                <div>
+                  <div class="font-semibold tracking-tight text-xl">GTA: Vice City</div>
+                  <div class="text-xs text-indigo-400">3D Edition</div>
+                </div>
+                <div class="text-right"><div class="text-[10px] text-zinc-400">v2.1</div></div>
+              </div>
+              <div class="text-xs text-zinc-500 mt-3 flex items-center justify-between">
+                <div>87 млн игроков</div>
+                <div class="px-2.5 py-px bg-sky-900 text-sky-400 text-[10px] rounded">3D</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="game-tile bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 rounded-3xl overflow-hidden flex flex-col justify-center items-center p-8 cursor-pointer" onclick="showLibrary()">
+            <div class="text-6xl mb-6 opacity-60">＋</div>
+            <div class="font-semibold">Добавить игру</div>
+            <div class="text-xs text-zinc-500 mt-1.5 text-center">Синхронизация PS Plus</div>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- GAME MODAL -->
+<div id="game-modal" class="hidden fixed inset-0 z-50 bg-black flex flex-col">
+  <div class="h-14 bg-zinc-950 border-b border-zinc-800 flex-shrink-0 px-6 flex items-center justify-between">
+    <div class="flex items-center gap-x-4">
+      <div onclick="exitGame()" class="cursor-pointer px-4 py-2 flex items-center gap-x-2 hover:bg-zinc-800 rounded-2xl text-sm font-medium">
+        <span>←</span> <span>Выход в меню</span>
+      </div>
+      <div id="game-title" class="font-semibold text-xl tracking-tight"></div>
+    </div>
+    <div class="flex items-center gap-x-3 text-xs">
+      <div id="fps-counter" class="mono px-4 py-1 bg-zinc-900 text-emerald-400 rounded-3xl font-medium">60 FPS</div>
+      <div onclick="exitGame()" class="cursor-pointer text-xs px-5 py-1.5 hover:bg-red-950 text-red-300 bg-red-950/50 transition-colors rounded-2xl">ЗАКРЫТЬ ИГРУ</div>
+    </div>
+  </div>
+  
+  <div id="game-container" class="flex-1 relative overflow-hidden"></div>
+  
+  <!-- Game HUD overlay -->
+  <div id="game-hud" class="hud absolute inset-0 pointer-events-none z-10 hidden">
+    <!-- Populated by JS per game -->
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 bg-zinc-900 border border-zinc-700 text-sm px-6 py-3 rounded-3xl flex items-center gap-x-2 shadow-2xl z-[100]"></div>
+
+<script>
+// Tailwind script
+function initTailwind() {
+  document.querySelectorAll('.game-tile').forEach(el => {
+    el.addEventListener('mouseenter', () => el.style.transform = 'translateY(-6px) scale(1.01)');
+    el.addEventListener('mouseleave', () => el.style.transform = '');
+  });
+}
+
+// GLOBAL VARS
+let currentGame = null;
+let gameScene, gameCamera, gameRenderer, gameLoop, keys = {};
+let fpsInterval = null;
+let player = { x: 0, y: 2, z: 0, yaw: 0, pitch: 0 };
+let minecraftWorld = [], ufcFighter1, ufcFighter2, ufcHealth1 = 100, ufcHealth2 = 100, gtaCar;
+
+// ===== UTILS =====
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.innerHTML = `<span>${msg}</span>`;
+  t.style.display = 'flex';
+  setTimeout(() => { t.style.display = 'none'; }, 2400);
+}
+
+function showSettings() {
+  showToast('Настройки PS5: графика • звук • управление');
+}
+
+function showLibrary() {
+  showToast('Библиотека обновлена — 142 игры доступны');
+}
+
+function showStore() {
+  showToast('PlayStation Store • 317 новых игр');
+}
+
+function updateFPS() {
+  let frame = 0, last = Date.now();
+  return function count() {
+    frame++;
+    const now = Date.now();
+    if (now - last > 500) {
+      const fpsEl = document.getElementById('fps-counter');
+      if (fpsEl) fpsEl.innerHTML = `${Math.round(frame * 1000 / (now - last))} FPS`;
+      frame = 0;
+      last = now;
+    }
+    requestAnimationFrame(count);
+  };
+}
+
+// ===== GAME LAUNCHER =====
+function launchGame(gameId) {
+  const modal = document.getElementById('game-modal');
+  const container = document.getElementById('game-container');
+  const hud = document.getElementById('game-hud');
+  modal.classList.remove('hidden');
+  container.innerHTML = '';
+  hud.innerHTML = '';
+  hud.classList.remove('hidden');
+
+  let title = '';
+  if (gameId === 0) { title = 'Minecraft'; startMinecraft(container, hud); }
+  else if (gameId === 1) { title = 'UFC 5'; startUFC(container, hud); }
+  else if (gameId === 2) { title = 'GTA: Vice City'; startGTA(container, hud); }
+  
+  document.getElementById('game-title').innerHTML = title;
+  currentGame = gameId;
+  
+  // Start FPS counter
+  if (fpsInterval) cancelAnimationFrame(fpsInterval);
+  fpsInterval = requestAnimationFrame(updateFPS());
+}
+
+function exitGame() {
+  const modal = document.getElementById('game-modal');
+  const container = document.getElementById('game-container');
+  const hud = document.getElementById('game-hud');
+  modal.classList.add('hidden');
+  container.innerHTML = '';
+  hud.innerHTML = '';
+  hud.classList.add('hidden');
+  
+  if (gameLoop) cancelAnimationFrame(gameLoop);
+  if (gameRenderer) {
+    gameRenderer.dispose();
+    gameRenderer = null;
+  }
+  document.onkeydown = null;
+  document.onkeyup = null;
+  document.onmousemove = null;
+  window.onresize = null;
+  showToast('Игра завершена — возвращаемся в меню');
+}
+
+// ===== MINECRAFT =====
+function startMinecraft(container, hudContainer) {
+  container.innerHTML = '<canvas id="mc-canvas" style="width:100%;height:100%;outline:none"></canvas>';
+  const canvas = document.getElementById('mc-canvas');
+  
+  const scene = new THREE.Scene();
+  scene.fog = new THREE.Fog(0x111111, 10, 65);
+  gameScene = scene;
+  
+  const camera = new THREE.PerspectiveCamera(82, container.clientWidth / container.clientHeight, 0.1, 300);
+  gameCamera = camera;
+  camera.position.set(0, 8, 18);
+  
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(container.clientWidth, container.clientHeight);
+  gameRenderer = renderer;
+
+  // Lights
+  const hemi = new THREE.HemisphereLight(0xffffff, 0x112211, 0.65);
+  scene.add(hemi);
+  const sun = new THREE.DirectionalLight(0xffe8b3, 1.1);
+  sun.position.set(30, 60, -20);
+  scene.add(sun);
+
+  // Floor
+  const floorGeo = new THREE.PlaneGeometry(140, 140);
+  const floorMat = new THREE.MeshLambertMaterial({ color: 0x0f5e3a });
+  const floor = new THREE.Mesh(floorGeo, floorMat);
+  floor.rotation.x = -Math.PI/2; floor.position.y = 0;
+  scene.add(floor);
+
+  // Generate simple world
+  minecraftWorld = [];
+  const cubeMat = new THREE.MeshLambertMaterial({ color: 0x3a7d4f });
+  const stoneMat = new THREE.MeshLambertMaterial({ color: 0x666666 });
+  
+  for (let x = -9; x < 10; x++) {
+    for (let z = -9; z < 10; z++) {
+      const height = 1 + Math.floor(Math.random() * 3);
+      for (let y = 0; y < height; y++) {
+        const mat = y < 2 ? cubeMat : stoneMat;
+        const block = new THREE.Mesh(new THREE.BoxGeometry(1,1,1), mat);
+        block.position.set(x, y+0.5, z);
+        scene.add(block);
+        minecraftWorld.push(block);
+      }
+    }
+  }
+  
+  // Trees
+  for (let i = 0; i < 4; i++) {
+    const tx = Math.floor(Math.random()*14)-7;
+    const tz = Math.floor(Math.random()*14)-7;
+    const trunk = new THREE.Mesh(new THREE.BoxGeometry(0.9,3.2,0.9), new THREE.MeshLambertMaterial({color:0x4b3000}));
+    trunk.position.set(tx, 2.1, tz);
+    scene.add(trunk);
+    const leaves = new THREE.Mesh(new THREE.SphereGeometry(2.6), new THREE.MeshLambertMaterial({color:0x0f772b}));
+    leaves.position.set(tx, 5.4, tz);
+    scene.add(leaves);
+  }
+
+  // Player
+  player = { x: 0, y: 8, z: 22, yaw: 0, pitch: -0.35, vx:0, vy:0, vz:0 };
+  camera.position.set(player.x, player.y, player.z);
+
+  // HUD
+  hudContainer.innerHTML = `
+    <div class="absolute top-8 left-1/2 -translate-x-1/2 px-6 py-1.5 bg-black/60 text-xs font-mono tracking-[4px] border border-white/20 rounded">MINECRAFT • CLASSIC 3D</div>
+    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-4 text-center">
+      <div class="px-8 py-1 text-xs bg-zinc-900/80 border border-white/20 rounded">WASD — движение &nbsp;&nbsp; SPACE — прыжок &nbsp;&nbsp; MOUSE — взгляд &nbsp;&nbsp; ESC — выйти</div>
+    </div>
+    <div class="absolute top-8 right-8 px-4 text-xs bg-black/60 font-mono py-px rounded tracking-wider border border-white/20">BLOCKS: 284</div>
+  `;
+  
+  // Controls
+  keys = {};
+  document.onkeydown = e => { keys[e.key.toLowerCase()] = true; if (e.key === ' ') { player.vy = 0.4; e.preventDefault(); } };
+  document.onkeyup = e => keys[e.key.toLowerCase()] = false;
+  
+  canvas.onclick = () => { canvas.requestPointerLock(); };
+  let isLocked = false;
+  document.addEventListener('pointerlockchange', e => { isLocked = !!document.pointerLockElement; });
+  
+  document.onmousemove = e => {
+    if (!isLocked) return;
+    player.yaw -= e.movementX * 0.0018;
+    player.pitch -= e.movementY * 0.0014;
+    player.pitch = Math.max(-1.35, Math.min(1.35, player.pitch));
+  };
+  
+  // Game loop
+  let lastTime = performance.now();
+  function animate() {
+    gameLoop = requestAnimationFrame(animate);
+    
+    const dt = Math.min((performance.now() - lastTime) / 1000, 0.033);
+    lastTime = performance.now();
+    
+    // Movement
+    const speed = 14;
+    const dirX = Math.sin(player.yaw) * speed * dt;
+    const dirZ = Math.cos(player.yaw) * speed * dt;
+    
+    if (keys['w']) { player.x -= dirX; player.z -= dirZ; }
+    if (keys['s']) { player.x += dirX; player.z += dirZ; }
+    if (keys['a']) { player.x -= dirZ; player.z += dirX; }
+    if (keys['d']) { player.x += dirZ; player.z -= dirX; }
+    
+    // Gravity & collision
+    player.vy = (player.vy || 0) - 0.025;
+    player.y += player.vy;
+    
+    if (player.y < 3) { player.y = 3; player.vy = 0; }
+    
+    // Update camera
+    camera.position.x = player.x;
+    camera.position.y = player.y + 4;
+    camera.position.z = player.z;
+    camera.rotation.order = 'YXZ';
+    camera.rotation.y = player.yaw;
+    camera.rotation.x = player.pitch;
+    
+    renderer.render(scene, camera);
+  }
+  animate();
+  
+  window.onresize = () => {
+    if (!camera) return;
+    camera.aspect = container.clientWidth / container.clientHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(container.clientWidth, container.clientHeight);
+  };
+}
+
+// ===== UFC =====
+function startUFC(container, hudContainer) {
+  container.innerHTML = '<canvas id="ufc-canvas" style="width:100%;height:100%"></canvas>';
+  const canvas = document.getElementById('ufc-canvas');
+  
+  const scene = new THREE.Scene();
+  gameScene = scene;
+  
+  const camera = new THREE.PerspectiveCamera(68, container.clientWidth/container.clientHeight, 0.4, 90);
+  gameCamera = camera;
+  camera.position.set(0, 4.5, 15);
+  camera.lookAt(0, 2.2, 0);
+  
+  const renderer = new THREE.WebGLRenderer({canvas, antialias:true});
+  renderer.setPixelRatio(1.8);
+  renderer.setSize(container.clientWidth, container.clientHeight);
+  gameRenderer = renderer;
+  
+  const light = new THREE.DirectionalLight(0xfff5cc, 0.9);
+  light.position.set(10, 32, 14);
+  scene.add(light);
+  scene.add(new THREE.AmbientLight(0x223355, 0.5));
+  
+  // Arena
+  const ring = new THREE.Mesh(new THREE.CylinderGeometry(9, 9, 1.5, 42), new THREE.MeshLambertMaterial({color:0x222222}));
+  ring.position.y = 0.7;
+  scene.add(ring);
+  
+  // Fighters
+  const fighterMat1 = new THREE.MeshPhongMaterial({color:0xff3333, shininess:22});
+  const fighterMat2 = new THREE.MeshPhongMaterial({color:0x3366ff, shininess:22});
+  
+  function makeFighter(x, mat) {
+    const f = new THREE.Group();
+    const body = new THREE.Mesh(new THREE.CylinderGeometry(0.85, 0.85, 2.9, 24), mat);
+    body.position.y = 2.6;
+    f.add(body);
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.7), mat);
+    head.position.y = 4.6;
+    f.add(head);
+    const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.27, 0.27, 1.4, 14), mat);
+    arm.position.set(1.1, 3, 0);
+    f.add(arm);
+    return f;
+  }
+  
+  ufcFighter1 = makeFighter(-2.8, fighterMat1);
+  ufcFighter2 = makeFighter(3, fighterMat2);
+  scene.add(ufcFighter1);
+  scene.add(ufcFighter2);
+  
+  ufcHealth1 = 100; ufcHealth2 = 100;
+  
+  hudContainer.innerHTML = `
+    <div class="absolute inset-x-0 top-12 flex justify-between px-9">
+      <div class="w-80"><div class="flex justify-between px-1 text-sm mb-1.5"><div class="font-bold">CONOR</div><div id="h1" class="font-mono">${ufcHealth1}</div></div><div class="h-2 bg-zinc-800 rounded-full"><div id="hp1" class="h-2 bg-red-500 transition-all" style="width:100%"></div></div></div>
+      <div class="text-center font-medium text-xs pt-1 tracking-[2px]">VS</div>
+      <div class="w-80"><div class="flex justify-between px-1 text-sm mb-1.5"><div id="h2" class="font-mono">${ufcHealth2}</div><div class="font-bold">KHABIB</div></div><div class="h-2 bg-zinc-800 rounded-full"><div id="hp2" class="h-2 bg-blue-500 transition-all" style="width:100%"></div></div></div>
+    </div>
+    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 px-7 py-px font-mono text-xs bg-black/70 tracking-widest rounded-xl border border-white/30">SPACE — УДАР • Q — БЛОК • WASD — ДВИЖЕНИЕ</div>
+  `;
+  
+  keys = {};
+  document.onkeydown = e => {
+    keys[e.key.toLowerCase()] = true;
+    if (e.key.toLowerCase() === ' ') {
+      // Punch
+      ufcHealth2 = Math.max(0, ufcHealth2 - 13);
+      document.getElementById('hp2').style.width = ufcHealth2 + '%';
+      document.getElementById('h2').innerHTML = ufcHealth2;
+      ufcFighter1.position.x = -3.4;
+      setTimeout(()=>{ if(ufcFighter1) ufcFighter1.position.x = -2.8; }, 130);
+      if (ufcHealth2 <= 0) { showToast('ПОБЕДА! CONOR ВЫИГРАЛ БОЙ'); }
+    }
+    if (e.key.toLowerCase() === 'q') ufcFighter1.position.y = 0.4;
+  };
+  document.onkeyup = e => {
+    keys[e.key.toLowerCase()] = false;
+    if (e.key.toLowerCase() === 'q' && ufcFighter1) ufcFighter1.position.y = 0;
+  };
+  
+  function aiMove() {
+    if (!ufcFighter2 || ufcHealth2 <= 0) return;
+    const t = performance.now() / 420;
+    ufcFighter2.position.x = 3 + Math.sin(t) * 1.8;
+    if (Math.random() < 0.025) {
+      ufcHealth1 = Math.max(0, ufcHealth1 - 7);
+      const hp1 = document.getElementById('hp1');
+      if (hp1) hp1.style.width = ufcHealth1 + '%';
+      const h1 = document.getElementById('h1'); if (h1) h1.innerHTML = ufcHealth1;
+      if (ufcHealth1 <= 0) showToast('ПОБЕДА ХАБИБА');
+    }
+  }
+  
+  function animate() {
+    gameLoop = requestAnimationFrame(animate);
+    
+    if (keys['a'] && ufcFighter1) ufcFighter1.position.x = Math.max(-4.5, ufcFighter1.position.x - 0.16);
+    if (keys['d'] && ufcFighter1) ufcFighter1.position.x = Math.min(0.5, ufcFighter1.position.x + 0.16);
+    
+    aiMove();
+    renderer.render(scene, camera);
+  }
+  animate();
+  
+  window.onresize = () => {
+    camera.aspect = container.clientWidth / container.clientHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(container.clientWidth, container.clientHeight);
+  };
+}
+
+// ===== GTA =====
+function startGTA(container, hudContainer) {
+  container.innerHTML = '<canvas id="gta-canvas" style="width:100%;height:100%"></canvas>';
+  const canvas = document.getElementById('gta-canvas');
+  
+  const scene = new THREE.Scene();
+  scene.fog = new THREE.Fog(0x112233, 30, 95);
+  gameScene = scene;
+  
+  const camera = new THREE.PerspectiveCamera(74, container.clientWidth/container.clientHeight, 0.6, 170);
+  gameCamera = camera;
+  
+  const renderer = new THREE.WebGLRenderer({canvas, antialias:true});
+  renderer.setPixelRatio(1.9);
+  renderer.setClearColor(0x0e1421);
+  renderer.setSize(container.clientWidth, container.clientHeight);
+  gameRenderer = renderer;
+  
+  const sun = new THREE.DirectionalLight(0xffe4aa, 1);
+  sun.position.set(55, 80, -50);
+  scene.add(sun);
+  scene.add(new THREE.HemisphereLight(0x334466, 0x111111, 0.8));
+  
+  // Ground
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(200,200), new THREE.MeshLambertMaterial({color:0x1f232b}));
+  ground.rotation.x = -1.570796;
+  scene.add(ground);
+  
+  // Buildings
+  const bMat = new THREE.MeshLambertMaterial({color:0x343a42});
+  for (let i = -3; i <= 3; i++) {
+    for (let j = -3; j <= 3; j++) {
+      if (Math.abs(i) < 1 && Math.abs(j) < 1) continue;
+      const h = 8 + Math.random() * 17;
+      const b = new THREE.Mesh(new THREE.BoxGeometry(6.5, h, 6.5), bMat);
+      b.position.set(i * 17, h/2, j * 18);
+      scene.add(b);
+    }
+  }
+  
+  // Road lines
+  const lineMat = new THREE.MeshLambertMaterial({color:0xfff});
+  for (let i = -8; i < 9; i++) {
+    const line = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.2, 1), lineMat);
+    line.position.set(0, 0.4, i*6);
+    scene.add(line);
+  }
+  
+  // Player car
+  gtaCar = new THREE.Group();
+  const body = new THREE.Mesh(new THREE.BoxGeometry(2.4, 1.8, 4.2), new THREE.MeshPhongMaterial({color:0x00bbff}));
+  body.position.set(0, 2, 0);
+  gtaCar.add(body);
+  const roof = new THREE.Mesh(new THREE.BoxGeometry(2.15, 1.2, 2), new THREE.MeshPhongMaterial({color:0x00bbff}));
+  roof.position.set(0, 3.6, -0.2);
+  gtaCar.add(roof);
+  const wheelMat = new THREE.MeshLambertMaterial({color:0x21120e});
+  [-1.2, 1.2].forEach(x => [1.8, -1.4].forEach(z => {
+    const w = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.7, 0.38, 18), wheelMat);
+    w.rotation.z = Math.PI/2; w.position.set(x, 1.1, z); gtaCar.add(w);
+  }));
+  scene.add(gtaCar);
+  
+  gtaCar.position.set(-8, 0, 4);
+  
+  hudContainer.innerHTML = `
+    <div class="absolute top-6 left-1/2 -translate-x-1/2 px-7 text-sm py-1.5 font-mono bg-black/70 tracking-widest border border-white/30 rounded-2xl">VICE CITY • 3D • SPEED: <span id="speed">92</span> km/h</div>
+    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 text-xs px-6 font-mono py-1.5 bg-zinc-900/90 rounded-3xl border border-zinc-700">WASD / СТРЕЛКИ — ВОЖДЕНИЕ &nbsp;&nbsp; SPACE — ТОРМОЗ &nbsp;&nbsp; MOUSE — КАМЕРА</div>
+  `;
+  
+  keys = {};
+  document.onkeydown = e => keys[e.key.toLowerCase()] = true;
+  document.onkeyup = e => { keys[e.key.toLowerCase()] = false; };
+  
+  let camAngle = 0;
+  function animate() {
+    gameLoop = requestAnimationFrame(animate);
+    
+    const speedVal = document.getElementById('speed');
+    
+    let spd = 0.18;
+    if (keys['w'] || keys['arrowup']) { 
+      gtaCar.position.z -= Math.cos(camAngle) * spd * 2.3;
+      gtaCar.position.x -= Math.sin(camAngle) * spd * 2.3;
+      if (speedVal) speedVal.innerHTML = '141';
+    }
+    if (keys['s'] || keys['arrowdown']) {
+      gtaCar.position.z += Math.cos(camAngle) * spd * 1.1;
+      gtaCar.position.x += Math.sin(camAngle) * spd * 1.1;
+      if (speedVal) speedVal.innerHTML = '38';
+    }
+    if (keys['a'] || keys['arrowleft']) camAngle += 0.033;
+    if (keys['d'] || keys['arrowright']) camAngle -= 0.033;
+    if (keys[' ']) { if (speedVal) speedVal.innerHTML = '0'; }
+    
+    gtaCar.rotation.y = camAngle;
+    
+    // Camera follow
+    camera.position.x = gtaCar.position.x + Math.sin(camAngle) * 14;
+    camera.position.z = gtaCar.position.z + Math.cos(camAngle) * 15.8;
+    camera.position.y = 9.5;
+    camera.lookAt(gtaCar.position.x, 4.5, gtaCar.position.z);
+    
+    renderer.render(scene, camera);
+  }
+  animate();
+  
+  window.onresize = () => {
+    camera.aspect = container.clientWidth / container.clientHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(container.clientWidth, container.clientHeight);
+  };
+}
+
+// Boot
+initTailwind();
+console.log('%c[PS Arena] PlayStation 5 simulation ready — 60 FPS guaranteed', 'color:#555');
+</script>
+</body>
+</html>

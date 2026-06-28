@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="theme-color" content="#faf8ef" />
+<title>2048 — собери плитку</title>
+<style>
+  /* ---------- БАЗОВЫЙ СБРОС ---------- */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    background:
+      radial-gradient(1200px 600px at 80% -10%, #fff1c1 0%, transparent 60%),
+      radial-gradient(900px 500px at -10% 110%, #ffe1e1 0%, transparent 55%),
+      linear-gradient(180deg, #faf8ef 0%, #f3efe2 100%);
+    color: #776e65;
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 24px 16px 48px;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+    overflow-x: hidden;
+  }
+
+  /* ---------- КОНТЕЙНЕР ---------- */
+  .wrap {
+    width: 100%;
+    max-width: 520px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  /* ---------- ШАПКА ---------- */
+  header { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .brand {
+    font-size: 64px;
+    line-height: 0.9;
+    font-weight: 800;
+    letter-spacing: -2px;
+    color: #776e65;
+    text-shadow: 0 2px 0 rgba(255,255,255,0.5);
+  }
+  .brand .accent { color: #edc22e; }
+
+  .scores { display: flex; gap: 8px; }
+  .score-box {
+    background: #bbada0;
+    color: #fff;
+    padding: 10px 16px;
+    border-radius: 10px;
+    min-width: 92px;
+    text-align: center;
+    box-shadow: inset 0 -3px 0 rgba(0,0,0,0.08), 0 4px 14px rgba(187,173,160,0.35);
+    position: relative;
+    transition: transform .18s ease;
+  }
+  .score-box.bump { transform: scale(1.08); }
+  .score-box .label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #eee4da;
+  }
+  .score-box .value {
+    font-size: 22px;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.1;
+    margin-top: 2px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---------- ПОДЗАГОЛОВОК ---------- */
+  .sub {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .sub p { font-size: 14px; color: #776e65; max-width: 320px; line-height: 1.4; }
+  .sub p b { color: #776e65; }
+
+  .buttons { display: flex; gap: 8px; }
+  .btn {
+    appearance: none;
+    border: none;
+    cursor: pointer;
+    background: #8f7a66;
+    color: #f9f6f2;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 10px 18px;
+    border-radius: 8px;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 0 #6e5b48, 0 8px 18px rgba(143,122,102,0.25);
+    transition: transform .08s ease, box-shadow .08s ease, background .2s ease;
+  }
+  .btn:hover { background: #9f8b77; }
+  .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #6e5b48, 0 3px 8px rgba(143,122,102,0.25); }
+  .btn.secondary { background: #bbada0; box-shadow: 0 4px 0 #9d8d80, 0 8px 18px rgba(187,173,160,0.25); }
+  .btn.secondary:hover { background: #c8bbad; }
+
+  /* ---------- ИГРОВОЕ ПОЛЕ ---------- */
+  .game {
+    position: relative;
+    background: #bbada0;
+    padding: 12px;
+    border-radius: 14px;
+    box-shadow:
+      0 12px 40px rgba(143,122,102,0.25),
+      inset 0 0 0 1px rgba(255,255,255,0.05);
+    touch-action: none;
+  }
+  .grid {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    gap: 12px;
+    aspect-ratio: 1 / 1;
+    width: 100%;
+  }
+  .cell {
+    background: rgba(238, 228, 218, 0.35);
+    border-radius: 8px;
+    aspect-ratio: 1 / 1;
+  }
+
+  /* ---------- ПЛИТКИ ---------- */
+  .tiles {
+    position: absolute;
+    inset: 12px;
+    pointer-events: none;
+  }
+  .tile {
+    position: absolute;
+    width: calc((100% - 36px) / 4);
+    height: calc((100% - 36px) / 4);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: clamp(20px, 6vw, 38px);
+    color: #776e65;
+    background: #eee4da;
+    transition: transform 180ms cubic-bezier(.22,.61,.36,1), background 220ms ease, color 220ms ease, box-shadow 220ms ease;
+    will-change: transform;
+    box-shadow: 0 2px 0 rgba(0,0,0,0.05);
+    font-variant-numeric: tabular-nums;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.25);
+  }
+  /* Позиции по сетке 4×4 (gap 12px учитывается через CSS переменные) */
+  .tile[data-pos="0,0"] { --c:0;  --r:0;  }
+  .tile[data-pos="1,0"] { --c:1;  --r:0;  }
+  .tile[data-pos="2,0"] { --c:2;  --r:0;  }
+  .tile[data-pos="3,0"] { --c:3;  --r:0;  }
+  .tile[data-pos="0,1"] { --c:0;  --r:1;  }
+  .tile[data-pos="1,1"] { --c:1;  --r:1;  }
+  .tile[data-pos="2,1"] { --c:2;  --r:1;  }
+  .tile[data-pos="3,1"] { --c:3;  --r:1;  }
+  .tile[data-pos="0,2"] { --c:0;  --r:2;  }
+  .tile[data-pos="1,2"] { --c:1;  --r:2;  }
+  .tile[data-pos="2,2"] { --c:2;  --r:2;  }
+  .tile[data-pos="3,2"] { --c:3;  --r:2;  }
+  .tile[data-pos="0,3"] { --c:0;  --r:3;  }
+  .tile[data-pos="1,3"] { --c:1;  --r:3;  }
+  .tile[data-pos="2,3"] { --c:2;  --r:3;  }
+  .tile[data-pos="3,3"] { --c:3;  --r:3;  }
+  .tile {
+    transform: translate(
+      calc(var(--c) * (100% + 12px)),
+      calc(var(--r) * (100% + 12px))
+    );
+  }
+
+  /* Цвета плиток по значению */
+  .tile.v-2    { background: #eee4da; color: #776e65; }
+  .tile.v-4    { background: #ede0c8; color: #776e65; }
+  .tile.v-8    { background: #f2b179; color: #f9f6f2; }
+  .tile.v-16   { background: #f59563; color: #f9f6f2; }
+  .tile.v-32   { background: #f67c5f; color: #f9f6f2; }
+  .tile.v-64   { background: #f65e3b; color: #f9f6f2; box-shadow: 0 2px 0 rgba(0,0,0,0.1), 0 0 16px rgba(246,94,59,0.35); }
+  .tile.v-128  { background: #edcf72; color: #f9f6f2; box-shadow: 0 2px 0 rgba(0,0,0,0.1), 0 0 22px rgba(243,215,116,0.4); font-size: clamp(18px, 5.2vw, 34px); }
+  .tile.v-256  { background: #edcc61; color: #f9f6f2; box-shadow: 0 2px 0 rgba(0,0,0,0.1), 0 0 26px rgba(243,215,116,0.45); font-size: clamp(18px, 5.2vw, 34px); }
+  .tile.v-512  { background: #edc850; color: #f9f6f2; box-shadow: 0 2px 0 rgba(0,0,0,0.1), 0 0 30px rgba(243,215,116,0.5); font-size: clamp(18px, 5.2vw, 34px); }
+  .tile.v-1024 { background: #edc53f; color: #f9f6f2; box-shadow: 0 2px 0 rgba(0,0,0,0.1), 0 0 34px rgba(243,215,116,0.55); font-size: clamp(16px, 4.4vw, 30px); }
+  .tile.v-2048 { background: #edc22e; color: #f9f6f2; box-shadow: 0 2px 0 rgba(0,0,0,0.15), 0 0 44px rgba(237,194,46,0.7); font-size: clamp(16px, 4.4vw, 30px); }
+  .tile.v-super { background: linear-gradient(135deg, #3c3a32 0%, #1a1a17 100%); color: #f9f6f2; box-shadow: 0 0 50px rgba(0,0,0,0.4); font-size: clamp(14px, 4vw, 26px); }
+
+  /* Появление новой плитки */
+  .tile.spawn { animation: spawn .22s ease-out; }
+  @keyframes spawn {
+    0%   { transform: translate(calc(var(--c) * (100% + 12px)), calc(var(--r) * (100% + 12px))) scale(0); opacity: 0; }
+    60%  { transform: translate(calc(var(--c) * (100% + 12px)), calc(var(--r) * (100% + 12px))) scale(1.08); opacity: 1; }
+    100% { transform: translate(calc(var(--c) * (100% + 12px)), calc(var(--r) * (100% + 12px))) scale(1); opacity: 1; }
+  }
+  /* Слияние */
+  .tile.merge {
+    animation: merge .22s ease-out;
+    z-index: 2;
+  }
+  @keyframes merge {
+    0%   { transform: translate(calc(var(--c) * (100% + 12px)), calc(var(--r) * (100% + 12px))) scale(1); }
+    50%  { transform: translate(calc(var(--c) * (100% + 12px)), calc(var(--r) * (100% + 12px))) scale(1.18); }
+    100% { transform: translate(calc(var(--c) * (100% + 12px)), calc(var(--r) * (100% + 12px))) scale(1); }
+  }
+
+  /* ---------- ОВЕРЛЕИ (победа / поражение) ---------- */
+  .overlay {
+    position: absolute;
+    inset: 12px;
+    border-radius: 10px;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    text-align: center;
+    padding: 24px;
+    background: rgba(238, 228, 218, 0.73);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    z-index: 5;
+    animation: fadeIn .35s ease forwards;
+  }
+  .overlay.show { display: flex; }
+  .overlay h2 { font-size: 36px; font-weight: 800; color: #776e65; }
+  .overlay p { font-size: 15px; color: #776e65; max-width: 320px; }
+  .overlay.win { background: rgba(237, 194, 46, 0.5); }
+  .overlay.win h2 { color: #f9f6f2; }
+  .overlay.win p { color: #fff8e1; }
+  .overlay .actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  /* ---------- ИНФО-ПОЛОСА ---------- */
+  .info-bar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .info-card {
+    background: rgba(187, 173, 160, 0.18);
+    border: 1px solid rgba(187, 173, 160, 0.35);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+  .info-card h3 { font-size: 12px; letter-spacing: 1.2px; text-transform: uppercase; color: #8f7a66; margin-bottom: 6px; }
+  .info-card p { font-size: 13px; line-height: 1.45; color: #776e65; }
+
+  /* ---------- ПОДВАЛ ---------- */
+  footer {
+    text-align: center;
+    font-size: 12px;
+    color: #a39c93;
+    padding-top: 6px;
+  }
+  footer a { color: #8f7a66; text-decoration: none; border-bottom: 1px dashed #8f7a66; }
+  footer a:hover { color: #6e5b48; }
+
+  /* ---------- АДАПТИВ ---------- */
+  @media (max-width: 480px) {
+    .brand { font-size: 52px; }
+    .sub p { font-size: 13px; }
+    .info-bar { grid-template-columns: 1fr; }
+  }
+  @media (min-width: 720px) {
+    .wrap { max-width: 520px; }
+  }
+
+  /* ---------- ДОСТУПНОСТЬ ---------- */
+  .btn:focus-visible { outline: 3px solid #edc22e; outline-offset: 2px; }
+  .game:focus-visible { outline: 3px solid #edc22e; outline-offset: 4px; }
+
+  /* ---------- ПЛАШКА СООБЩЕНИЯ ---------- */
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 28px;
+    transform: translateX(-50%) translateY(20px);
+    background: #2f2f2f;
+    color: #fff;
+    padding: 10px 16px;
+    border-radius: 999px;
+    font-size: 13px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .25s ease, transform .25s ease;
+    z-index: 50;
+    max-width: 90vw;
+    text-align: center;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">204<span class="accent">8</span></div>
+      <div class="scores">
+        <div class="score-box" id="scoreBox">
+          <div class="label">СЧЁТ</div>
+          <div class="value" id="score">0</div>
+        </div>
+        <div class="score-box" id="bestBox">
+          <div class="label">РЕКОРД</div>
+          <div class="value" id="best">0</div>
+        </div>
+      </div>
+    </header>
+
+    <div class="sub">
+      <p>Соединяй одинаковые плитки, чтобы получить <b>2048</b>. Управление: <b>стрелки</b> или <b>WASD</b>.</p>
+      <div class="buttons">
+        <button class="btn" id="newGameBtn" type="button">Новая игра</button>
+        <button class="btn secondary" id="undoBtn" type="button">Отмена</button>
+      </div>
+    </div>
+
+    <div class="game" id="game" tabindex="0" aria-label="Игровое поле 2048">
+      <div class="grid" id="grid" aria-hidden="true">
+        <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+        <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+        <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+        <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+      </div>
+      <div class="tiles" id="tiles"></div>
+
+      <div class="overlay win" id="overlayWin" role="dialog" aria-live="polite">
+        <h2>Победа!</h2>
+        <p>Ты собрал плитку <b>2048</b>. Можешь продолжить играть ради более высокого результата.</p>
+        <div class="actions">
+          <button class="btn" data-action="continue" type="button">Продолжить</button>
+          <button class="btn secondary" data-action="restart" type="button">Заново</button>
+        </div>
+      </div>
+
+      <div class="overlay lose" id="overlayLose" role="dialog" aria-live="polite">
+        <h2>Игра окончена</h2>
+        <p>Ходов больше нет. Попробуй ещё раз — рекорд ждёт!</p>
+        <div class="actions">
+          <button class="btn" data-action="restart" type="button">Новая игра</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-bar">
+      <div class="info-card">
+        <h3>Как играть</h3>
+        <p>Свайпом или стрелками сдвигай плитки. Одинаковые числа складываются в одно с удвоенным значением. После каждого хода появляется новая плитка <b>2</b> или <b>4</b>.</p>
+      </div>
+      <div class="info-card">
+        <h3>Подсказки</h3>
+        <p>Старайся держать крупные плитки в углу и не разбрасывай их по полю. Планируй ходы на пару шагов вперёд.</p>
+      </div>
+    </div>
+
+    <footer>
+      Классическая головоломка <b>2048</b>. Прогресс и рекорд сохраняются автоматически.
+    </footer>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+(() => {
+  'use strict';
+
+  /* ================== КОНСТАНТЫ ================== */
+  const SIZE = 4;
+  const STORAGE_SCORE = 'igx2048_score';
+  const STORAGE_BEST  = 'igx2048_best';
+  const STORAGE_STATE = 'igx2048_state';
+  const STORAGE_WIN   = 'igx2048_won';
+  const WIN_TARGET = 2048;
+
+  /* ================== DOM ================== */
+  const $ = (sel) => document.querySelector(sel);
+  const gameEl       = $('#game');
+  const tilesEl      = $('#tiles');
+  const scoreEl      = $('#score');
+  const bestEl       = $('#best');
+  const scoreBox     = $('#scoreBox');
+  const bestBox      = $('#bestBox');
+  const newGameBtn   = $('#newGameBtn');
+  const undoBtn      = $('#undoBtn');
+  const overlayWin   = $('#overlayWin');
+  const overlayLose  = $('#overlayLose');
+  const toastEl      = $('#toast');
+
+  /* ================== СОСТОЯНИЕ ================== */
+  let grid;          // 4x4 — числа (0 = пусто)
+  let score;
+  let best;
+  let tilesById;     // id -> {value, row, col, merged, isNew}
+  let nextId;
+  let history;       // стек снимков
+  let won;           // побеждал ли игрок в текущей партии
+  let keepPlaying;   // продолжает после победы
+  let busy;          // блокировка во время анимации
+
+  /* ================== УТИЛИТЫ ================== */
+  function emptyGrid() {
+    return Array.from({ length: SIZE }, () => Array(SIZE).fill(0));
+  }
+
+  function cloneGrid(g) {
+    return g.map(row => row.slice());
+  }
+
+  function deepCloneState() {
+    return {
+      grid: cloneGrid(grid),
+      score: score,
+      won: won,
+      tilesById: Object.fromEntries(
+        Object.entries(tilesById).map(([k, v]) => [k, { value: v.value, row: v.row, col: v.col, merged: !!v.merged }])
+      ),
+      nextId: nextId,
+      keepPlaying: keepPlaying
+    };
+  }
+
+  function loadState(snap) {
+    grid = cloneGrid(snap.grid);
+    score = snap.score;
+    won = !!snap.won;
+    keepPlaying = !!snap.keepPlaying;
+    nextId = snap.nextId;
+    tilesById = {};
+    for (const k of Object.keys(snap.tilesById)) {
+      const t = snap.tilesById[k];
+      tilesById[k] = { value: t.value, row: t.row, col: t.col, merged: false };
+    }
+  }
+
+  function savePersisted() {
+    try {
+      const snap = deepCloneState();
+      localStorage.setItem(STORAGE_STATE, JSON.stringify(snap));
+      localStorage.setItem(STORAGE_SCORE, String(score));
+      localStorage.setItem(STORAGE_BEST, String(best));
+      localStorage.setItem(STORAGE_WIN, won ? '1' : '0');
+    } catch (e) { /* quota и пр. — игнорируем */ }
+  }
+
+  function loadPersisted() {
+    try {
+      const sScore = parseInt(localStorage.getItem(STORAGE_SCORE) || '0', 10);
+      const sBest  = parseInt(localStorage.getItem(STORAGE_BEST)  || '0', 10);
+      const sWin   = localStorage.getItem(STORAGE_WIN) === '1';
+      const raw    = localStorage.getItem(STORAGE_STATE);
+      if (raw) {
+        const snap = JSON.parse(raw);
+        if (snap && snap.grid && Array.isArray(snap.grid) && snap.grid.length === SIZE) {
+          loadState(snap);
+          score = snap.score || 0;
+          won = sWin;
+          best = Math.max(sBest, score, sScore);
+          return true;
+        }
+      }
+    } catch (e) { /* ignore */ }
+    return false;
+  }
+
+  function spawnTile() {
+    const empties = [];
+    for (let r = 0; r < SIZE; r++) {
+      for (let c = 0; c < SIZE; c++) {
+        if (grid[r][c] === 0) empties.push([r, c]);
+      }
+    }
+    if (empties.length === 0) return null;
+    const [r, c] = empties[Math.floor(Math.random() * empties.length)];
+    const value = Math.random() < 0.9 ? 2 : 4;
+    grid[r][c] = value;
+    const id = 't' + (nextId++);
+    tilesById[id] = { value, row: r, col: c, merged: false, isNew: true };
+    return id;
+  }
+
+  /* ================== РЕНДЕР ================== */
+  function valueClass(v) {
+    if (v <= 2048) return 'v-' + v;
+    return 'v-super';
+  }
+
+  function renderTiles(animateIds) {
+    animateIds = animateIds || new Set();
+    const existing = new Map();
+    Array.from(tilesEl.children).forEach(el => existing.set(el.dataset.id, el));
+
+    const wantedIds = new Set(Object.keys(tilesById));
+
+    // Удалить лишние
+    existing.forEach((el, id) => {
+      if (!wantedIds.has(id)) el.remove();
+    });
+
+    // Создать / обновить
+    for (const id of wantedIds) {
+      const t = tilesById[id];
+      let el = existing.get(id);
+      const isNewSpawn = animateIds.has(id) && t.isNew;
+      const justMerged = animateIds.has(id) && t.merged;
+
+      if (!el) {
+        el = document.createElement('div');
+        el.className = 'tile ' + valueClass(t.value);
+        el.dataset.id = id;
+        el.dataset.pos = t.col + ',' + t.row;
+        el.textContent = t.value;
+        tilesEl.appendChild(el);
+        if (isNewSpawn) {
+          el.classList.add('spawn');
+          el.addEventListener('animationend', () => el.classList.remove('spawn'), { once: true });
+        }
+      } else {
+        el.className = 'tile ' + valueClass(t.value) + (justMerged ? ' merge' : '');
+        el.dataset.pos = t.col + ',' + t.row;
+        el.textContent = t.value;
+        if (justMerged) {
+          el.addEventListener('animationend', () => el.classList.remove('merge'), { once: true });
+        }
+      }
+      // CSS-переменные для трансформа
+      el.style.setProperty('--c', t.col);
+      el.style.setProperty('--r', t.row);
+    }
+  }
+
+  function renderScore(animate) {
+    scoreEl.textContent = score;
+    bestEl.textContent = best;
+    if (animate === 'score') {
+      scoreBox.classList.remove('bump');
+      void scoreBox.offsetWidth;
+      scoreBox.classList.add('bump');
+      setTimeout(() => scoreBox.classList.remove('bump'), 180);
+    } else if (animate === 'best') {
+      bestBox.classList.remove('bump');
+      void bestBox.offsetWidth;
+      bestBox.classList.add('bump');
+      setTimeout(() => bestBox.classList.remove('bump'), 180);
+    }
+  }
+
+  function showOverlay(which) {
+    overlayWin.classList.toggle('show', which === 'win');
+    overlayLose.classList.toggle('show', which === 'lose');
+  }
+
+  /* ================== ДВИЖЕНИЕ ================== */
+  // dir: 'left' | 'right' | 'up' | 'down'
+  function move(dir) {
+    if (busy) return false;
+
+    const before = deepCloneState();
+    let moved = false;
+    let mergedIds = new Set();
+    let scored = 0;
+    let didWin = false;
+
+    // Сбрасываем флаг merged
+    for (const id in tilesById) tilesById[id].merged = false;
+
+    const order = (() => {
+      // Для каждого направления задаём порядок обхода
+      switch (dir) {
+        case 'left':  return { getCell: (r, c) => [r, c] };
+        case 'right': return { getCell: (r, c) => [r, SIZE - 1 - c] };
+        case 'up':    return { getCell: (c, r) => [r, c] };
+        case 'down':  return { getCell: (c, r) => [SIZE - 1 - r, c] };
+        default:      return null;
+      }
+    })();
+    if (!order) return false;
+
+    // Для каждой "линии" (строки или столбца)
+    // getCell(lineIndex, slotIndex) -> [r, c]
+    // Идём в порядке движения (для 'right' — справа налево, для 'down' — снизу вверх и т.п.)
+    function processLine(getCell) {
+      for (let i = 0; i < SIZE; i++) {
+        // 1. Собираем непустые плитки в порядке движения
+        const tiles = []; // {value, id}
+        for (let k = 0; k < SIZE; k++) {
+          const [r, c] = getCell(i, k);
+          const v = grid[r][c];
+          if (v !== 0) {
+            const id = findTileIdAt(r, c);
+            if (id) tiles.push({ value: v, id });
+          }
+        }
+
+        // 2. Сжатие + слияние (классическое правило 2048: одна плитка участвует в слиянии не более одного раза за ход)
+        const result = []; // {value, ids:[id], _merged}
+        let k = 0;
+        while (k < tiles.length) {
+          const cur = tiles[k];
+          const nxt = tiles[k + 1];
+          if (nxt && nxt.value === cur.value) {
+            const newValue = cur.value * 2;
+            scored += newValue;
+            result.push({ value: newValue, ids: [cur.id, nxt.id], _merged: true });
+            // Помечаем исходные плитки на удаление
+            if (tilesById[cur.id]) tilesById[cur.id]._willBeRemoved = true;
+            if (tilesById[nxt.id]) tilesById[nxt.id]._willBeRemoved = true;
+            k += 2;
+          } else {
+            result.push({ value: cur.value, ids: [cur.id], _merged: false });
+            k++;
+          }
+        }
+        // Дополним пустыми до SIZE
+        while (result.length < SIZE) result.push({ value: 0, ids: [], _merged: false });
+
+        // 3. Записать обратно
+        for (let k = 0; k < SIZE; k++) {
+          const [r, c] = getCell(i, k);
+          const item = result[k];
+          const prevVal = grid[r][c];
+          grid[r][c] = item.value;
+          if (prevVal !== item.value) moved = true;
+
+          if (item.value === 0) {
+            // пусто — старая плитка убрана сборщиком
+          } else if (item._merged) {
+            // создаём новую плитку как результат слияния
+            const newId = 't' + (nextId++);
+            tilesById[newId] = { value: item.value, row: r, col: c, merged: true };
+            mergedIds.add(newId);
+            if (item.value >= WIN_TARGET) didWin = true;
+          } else {
+            // перемещаем существующую
+            const id = item.ids[0];
+            if (id && tilesById[id]) {
+              if (tilesById[id].row !== r || tilesById[id].col !== c) moved = true;
+              tilesById[id].row = r;
+              tilesById[id].col = c;
+              tilesById[id].merged = false;
+              tilesById[id].isNew = false;
+            }
+          }
+        }
+      }
+    }
+
+    processLine(order.getCell);
+
+    // Удалить помеченные на удаление
+    let changed = false;
+    for (const id in tilesById) {
+      if (tilesById[id]._willBeRemoved) {
+        delete tilesById[id];
+        changed = true;
+      } else {
+        tilesById[id].isNew = false;
+        delete tilesById[id]._willBeRemoved;
+      }
+    }
+
+    if (!moved && scored === 0) {
+      // Ничего не изменилось — откатим клон
+      loadState(before);
+      return false;
+    }
+
+    // Сохраним снимок в историю
+    history.push(before);
+    if (history.length > 30) history.shift();
+
+    // Обновим счёт
+    score += scored;
+    if (score > best) {
+      best = score;
+    }
+
+    // Спавн новой плитки (после анимации)
+    busy = true;
+    renderTiles(new Set());
+    savePersisted();
+    renderScore(scored > 0 ? 'score' : null);
+
+    setTimeout(() => {
+      const newId = spawnTile();
+      // Почистим флаг isNew у старых плиток
+      for (const id in tilesById) {
+        tilesById[id].isNew = false;
+      }
+      if (newId) tilesById[newId].isNew = true;
+
+      const animSet = new Set(mergedIds);
+      if (newId) animSet.add(newId);
+      renderTiles(animSet);
+
+      // Проверка победы
+      if (didWin && !won) {
+        won = true;
+        if (!keepPlaying) {
+          setTimeout(() => showOverlay('win'), 220);
+        }
+        toast('🏆 Плитка ' + WIN_TARGET + ' собрана!');
+      }
+
+      // Проверка поражения
+      if (!canMove()) {
+        setTimeout(() => showOverlay('lose'), 220);
+      }
+
+      busy = false;
+    }, 170);
+
+    return true;
+  }
+
+  function findTileIdAt(r, c) {
+    for (const id in tilesById) {
+      const t = tilesById[id];
+      if (t.row === r && t.col === c) return id;
+    }
+    return null;
+  }
+
+  function canMove() {
+    // есть пустая клетка?
+    for (let r = 0; r < SIZE; r++) {
+      for (let c = 0; c < SIZE; c++) {
+        if (grid[r][c] === 0) return true;
+      }
+    }
+    // есть пара для слияния?
+    for (let r = 0; r < SIZE; r++) {
+      for (let c = 0; c < SIZE; c++) {
+        const v = grid[r][c];
+        if (c + 1 < SIZE && grid[r][c + 1] === v) return true;
+        if (r + 1 < SIZE && grid[r + 1][c] === v) return true;
+      }
+    }
+    return false;
+  }
+
+  /* ================== ВВОД ================== */
+  function handleKey(e) {
+    const key = e.key;
+    let dir = null;
+    if (key === 'ArrowLeft'  || key === 'a' || key === 'A' || key === 'ф' || key === 'Ф') dir = 'left';
+    if (key === 'ArrowRight' || key === 'd' || key === 'D' || key === 'в' || key === 'В') dir = 'right';
+    if (key === 'ArrowUp'    || key === 'w' || key === 'W' || key === 'ц' || key === 'Ц') dir = 'up';
+    if (key === 'ArrowDown'  || key === 's' || key === 'S' || key === 'ы' || key === 'Ы' || key === 'і' || key === 'І') dir = 'down';
+    if (dir) {
+      e.preventDefault();
+      move(dir);
+    }
+  }
+
+  // Свайпы
+  let touchStartX = 0, touchStartY = 0, touchActive = false;
+  function onTouchStart(e) {
+    if (e.touches.length !== 1) return;
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+    touchActive = true;
+  }
+  function onTouchEnd(e) {
+    if (!touchActive) return;
+    touchActive = false;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - touchStartX;
+    const dy = t.clientY - touchStartY;
+    const ax = Math.abs(dx), ay = Math.abs(dy);
+    const threshold = 24;
+    if (Math.max(ax, ay) < threshold) return;
+    if (ax > ay) move(dx > 0 ? 'right' : 'left');
+    else move(dy > 0 ? 'down' : 'up');
+  }
+
+  /* ================== ИСТОРИЯ / ОТМЕНА ================== */
+  function undo() {
+    if (busy) return;
+    if (history.length === 0) {
+      toast('Нечего отменять');
+      return;
+    }
+    const snap = history.pop();
+    loadState(snap);
+    // Сбросить merged/isNew
+    for (const id in tilesById) {
+      tilesById[id].merged = false;
+      tilesById[id].isNew = false;
+    }
+    showOverlay(null);
+    score = snap.score;
+    if (score > best) best = score;
+    renderTiles();
+    renderScore(null);
+    savePersisted();
+  }
+
+  /* ================== СТАРТ / ПЕРЕЗАПУСК ================== */
+  function newGame() {
+    grid = emptyGrid();
+    score = 0;
+    won = false;
+    keepPlaying = false;
+    nextId = 1;
+    tilesById = {};
+    history = [];
+    tilesEl.innerHTML = '';
+    showOverlay(null);
+    spawnTile();
+    spawnTile();
+    renderTiles(new Set(Object.keys(tilesById)));
+    renderScore(null);
+    savePersisted();
+  }
+
+  function continueGame() {
+    keepPlaying = true;
+    showOverlay(null);
+    savePersisted();
+  }
+
+  /* ================== TOAST ================== */
+  let toastTimer = null;
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toastEl.classList.remove('show'), 1800);
+  }
+
+  /* ================== ИНИЦИАЛИЗАЦИЯ ================== */
+  function init() {
+    // Загрузка
+    best = parseInt(localStorage.getItem(STORAGE_BEST) || '0', 10) || 0;
+    if (!loadPersisted()) {
+      grid = emptyGrid();
+      score = 0;
+      won = false;
+      keepPlaying = false;
+      nextId = 1;
+      tilesById = {};
+      history = [];
+      spawnTile();
+      spawnTile();
+    }
+    renderTiles(new Set(Object.keys(tilesById)));
+    renderScore(null);
+
+    // Слушатели
+    window.addEventListener('keydown', handleKey, { passive: false });
+    gameEl.addEventListener('touchstart', onTouchStart, { passive: true });
+    gameEl.addEventListener('touchend',   onTouchEnd,   { passive: true });
+    newGameBtn.addEventListener('click', newGame);
+    undoBtn.addEventListener('click', undo);
+    overlayWin.querySelector('[data-action="continue"]').addEventListener('click', continueGame);
+    overlayWin.querySelector('[data-action="restart"]').addEventListener('click', newGame);
+    overlayLose.querySelector('[data-action="restart"]').addEventListener('click', newGame);
+
+    // Фокус, чтобы клавиши работали без клика
+    gameEl.focus();
+    document.addEventListener('click', (e) => {
+      // Если кликнули не по интерактивному элементу — фокус на игру
+      const tag = (e.target.tagName || '').toLowerCase();
+      if (tag === 'button' || tag === 'a' || tag === 'input' || tag === 'textarea') return;
+      gameEl.focus();
+    });
+  }
+
+  // Стартуем после готовности DOM
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
+</body>
+</html>

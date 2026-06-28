@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Задачи — To-Do</title>
+<style>
+  :root{
+    --bg:#0f1226;
+    --bg-grad-1:#1b1f4a;
+    --bg-grad-2:#0c0e22;
+    --card:#191d3a;
+    --card-2:#20264a;
+    --line:#2a3160;
+    --text:#e9ebff;
+    --muted:#9aa0c8;
+    --accent:#6c8cff;
+    --accent-2:#8a6cff;
+    --green:#37d99a;
+    --red:#ff6b81;
+    --shadow:0 20px 50px -20px rgba(0,0,0,.7);
+    --radius:16px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:'Segoe UI',system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;
+    color:var(--text);
+    background:
+      radial-gradient(1200px 600px at 15% -10%, rgba(108,140,255,.18), transparent 60%),
+      radial-gradient(1000px 500px at 100% 0%, rgba(138,108,255,.16), transparent 55%),
+      linear-gradient(160deg,var(--bg-grad-1),var(--bg-grad-2) 70%);
+    min-height:100%;
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    padding:48px 16px;
+  }
+  .app{
+    width:100%;
+    max-width:560px;
+  }
+  .head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    margin-bottom:22px;
+  }
+  .title{
+    display:flex;align-items:center;gap:14px;
+  }
+  .logo{
+    width:48px;height:48px;border-radius:14px;
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    display:grid;place-items:center;
+    box-shadow:0 10px 24px -8px rgba(108,140,255,.7);
+    flex-shrink:0;
+  }
+  .logo svg{width:26px;height:26px}
+  .title h1{font-size:26px;font-weight:700;letter-spacing:.3px;line-height:1.1}
+  .title p{font-size:13px;color:var(--muted);margin-top:3px}
+  .date{
+    text-align:right;font-size:12px;color:var(--muted);
+    background:rgba(255,255,255,.04);
+    border:1px solid var(--line);
+    padding:8px 12px;border-radius:12px;
+    text-transform:capitalize;
+  }
+  .card{
+    background:linear-gradient(180deg,var(--card),var(--card-2));
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    overflow:hidden;
+  }
+  .input-row{
+    display:flex;gap:10px;padding:18px;
+    border-bottom:1px solid var(--line);
+  }
+  .input-row input{
+    flex:1;
+    background:rgba(255,255,255,.04);
+    border:1px solid var(--line);
+    color:var(--text);
+    padding:14px 16px;
+    border-radius:12px;
+    font-size:15px;
+    outline:none;
+    transition:border-color .2s, box-shadow .2s, background .2s;
+  }
+  .input-row input::placeholder{color:var(--muted)}
+  .input-row input:focus{
+    border-color:var(--accent);
+    box-shadow:0 0 0 3px rgba(108,140,255,.18);
+    background:rgba(255,255,255,.06);
+  }
+  .btn-add{
+    border:none;cursor:pointer;
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    color:#fff;font-weight:600;font-size:15px;
+    padding:0 20px;border-radius:12px;
+    display:flex;align-items:center;gap:8px;
+    transition:transform .12s, filter .2s, box-shadow .2s;
+    box-shadow:0 10px 22px -10px rgba(108,140,255,.9);
+  }
+  .btn-add:hover{filter:brightness(1.07)}
+  .btn-add:active{transform:scale(.96)}
+  .btn-add svg{width:18px;height:18px}
+
+  .toolbar{
+    display:flex;align-items:center;justify-content:space-between;
+    gap:10px;padding:14px 18px;flex-wrap:wrap;
+    border-bottom:1px solid var(--line);
+  }
+  .filters{display:flex;gap:6px;background:rgba(0,0,0,.18);padding:5px;border-radius:12px}
+  .filters button{
+    border:none;cursor:pointer;
+    background:transparent;color:var(--muted);
+    font-size:13px;font-weight:600;
+    padding:8px 14px;border-radius:8px;
+    transition:all .18s;
+  }
+  .filters button:hover{color:var(--text)}
+  .filters button.active{
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    color:#fff;
+    box-shadow:0 6px 14px -6px rgba(108,140,255,.8);
+  }
+  .counter{font-size:13px;color:var(--muted)}
+  .counter b{color:var(--text)}
+
+  ul{list-style:none}
+  .task{
+    display:flex;align-items:center;gap:14px;
+    padding:15px 18px;
+    border-bottom:1px solid rgba(42,49,96,.6);
+    animation:pop .25s ease;
+    transition:background .2s;
+  }
+  .task:hover{background:rgba(255,255,255,.025)}
+  @keyframes pop{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+
+  .check{
+    width:24px;height:24px;border-radius:50%;
+    border:2px solid var(--line);
+    flex-shrink:0;cursor:pointer;
+    display:grid;place-items:center;
+    transition:all .2s;
+    background:transparent;
+  }
+  .check:hover{border-color:var(--accent)}
+  .check svg{width:14px;height:14px;opacity:0;transform:scale(.4);transition:all .2s}
+  .task.done .check{
+    background:linear-gradient(135deg,var(--green),#2bb37f);
+    border-color:transparent;
+  }
+  .task.done .check svg{opacity:1;transform:scale(1)}
+
+  .task-text{
+    flex:1;font-size:15px;line-height:1.4;word-break:break-word;
+    cursor:pointer;transition:color .2s;
+  }
+  .task.done .task-text{color:var(--muted);text-decoration:line-through}
+
+  .del{
+    border:none;background:transparent;cursor:pointer;
+    color:var(--muted);width:34px;height:34px;border-radius:9px;
+    display:grid;place-items:center;flex-shrink:0;
+    opacity:.6;transition:all .18s;
+  }
+  .del:hover{background:rgba(255,107,129,.14);color:var(--red);opacity:1}
+  .del svg{width:17px;height:17px}
+
+  .empty{
+    text-align:center;padding:54px 24px;color:var(--muted);
+  }
+  .empty svg{width:60px;height:60px;opacity:.4;margin-bottom:14px}
+  .empty p{font-size:15px}
+  .empty span{font-size:13px;opacity:.8;display:block;margin-top:5px}
+
+  .footer{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:13px 18px;font-size:13px;color:var(--muted);
+    background:rgba(0,0,0,.12);
+  }
+  .clear{
+    border:none;background:transparent;cursor:pointer;
+    color:var(--muted);font-size:13px;font-weight:600;
+    padding:6px 10px;border-radius:8px;transition:all .18s;
+  }
+  .clear:hover{color:var(--red);background:rgba(255,107,129,.1)}
+  .clear:disabled{opacity:.3;cursor:default;background:transparent;color:var(--muted)}
+
+  .credit{text-align:center;margin-top:18px;font-size:12px;color:var(--muted);opacity:.7}
+</style>
+</head>
+<body>
+  <div class="app">
+    <header class="head">
+      <div class="title">
+        <div class="logo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+          </svg>
+        </div>
+        <div>
+          <h1>Мои задачи</h1>
+          <p>Планируй день и доводи дела до конца</p>
+        </div>
+      </div>
+      <div class="date" id="date"></div>
+    </header>
+
+    <div class="card">
+      <form class="input-row" id="form" autocomplete="off">
+        <input type="text" id="input" placeholder="Что нужно сделать?" maxlength="200" aria-label="Новая задача">
+        <button class="btn-add" type="submit">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          Добавить
+        </button>
+      </form>
+
+      <div class="toolbar">
+        <div class="filters" id="filters">
+          <button data-filter="all" class="active">Все</button>
+          <button data-filter="active">Активные</button>
+          <button data-filter="done">Выполненные</button>
+        </div>
+        <div class="counter" id="counter"></div>
+      </div>
+
+      <ul id="list"></ul>
+
+      <div class="footer">
+        <span id="footInfo"></span>
+        <button class="clear" id="clearDone">Очистить выполненные</button>
+      </div>
+    </div>
+
+    <p class="credit">Данные сохраняются локально в вашем браузере</p>
+  </div>
+
+<script>
+(function(){
+  "use strict";
+  var STORAGE_KEY = "todo.tasks.v1";
+  var FILTER_KEY  = "todo.filter.v1";
+
+  var tasks = load();
+  var filter = localStorage.getItem(FILTER_KEY) || "all";
+
+  var form     = document.getElementById("form");
+  var input    = document.getElementById("input");
+  var listEl   = document.getElementById("list");
+  var counter  = document.getElementById("counter");
+  var footInfo = document.getElementById("footInfo");
+  var clearBtn = document.getElementById("clearDone");
+  var filtersEl= document.getElementById("filters");
+
+  // дата
+  try{
+    var d = new Date();
+    document.getElementById("date").textContent =
+      d.toLocaleDateString("ru-RU",{weekday:"long",day:"numeric",month:"long"});
+  }catch(e){}
+
+  function load(){
+    try{
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return [];
+      var arr = JSON.parse(raw);
+      return Array.isArray(arr) ? arr.filter(function(t){return t && typeof t.text==="string";}) : [];
+    }catch(e){ return []; }
+  }
+  function save(){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks)); }catch(e){}
+  }
+  function uid(){
+    return Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+  }
+
+  function addTask(text){
+    text = text.trim();
+    if(!text) return;
+    tasks.unshift({ id:uid(), text:text, done:false });
+    save();
+    render();
+  }
+  function toggle(id){
+    for(var i=0;i<tasks.length;i++){
+      if(tasks[i].id===id){ tasks[i].done = !tasks[i].done; break; }
+    }
+    save(); render();
+  }
+  function remove(id){
+    tasks = tasks.filter(function(t){ return t.id!==id; });
+    save(); render();
+  }
+  function clearDone(){
+    tasks = tasks.filter(function(t){ return !t.done; });
+    save(); render();
+  }
+  function setFilter(f){
+    filter = f;
+    try{ localStorage.setItem(FILTER_KEY, f); }catch(e){}
+    render();
+  }
+
+  function esc(s){
+    return s.replace(/[&<>"']/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+    });
+  }
+
+  function visible(){
+    if(filter==="active") return tasks.filter(function(t){return !t.done;});
+    if(filter==="done")   return tasks.filter(function(t){return t.done;});
+    return tasks.slice();
+  }
+
+  var CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
+  var TRASH = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M10 11v6M14 11v6"/></svg>';
+
+  function render(){
+    // filters active state
+    var btns = filtersEl.querySelectorAll("button");
+    for(var i=0;i<btns.length;i++){
+      btns[i].classList.toggle("active", btns[i].getAttribute("data-filter")===filter);
+    }
+
+    var items = visible();
+    listEl.innerHTML = "";
+
+    if(items.length===0){
+      var msg, sub;
+      if(tasks.length===0){ msg="Список пуст"; sub="Добавьте первую задачу выше"; }
+      else if(filter==="active"){ msg="Нет активных задач"; sub="Всё выполнено — отличная работа!"; }
+      else if(filter==="done"){ msg="Нет выполненных задач"; sub="Отметьте задачу как сделанную"; }
+      else { msg="Ничего не найдено"; sub=""; }
+      var emp = document.createElement("li");
+      emp.className="empty";
+      emp.innerHTML =
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>'+
+        '<p>'+msg+'</p>'+(sub?'<span>'+sub+'</span>':'');
+      listEl.appendChild(emp);
+    } else {
+      items.forEach(function(t){
+        var li = document.createElement("li");
+        li.className = "task" + (t.done?" done":"");
+        li.innerHTML =
+          '<button class="check" data-act="toggle" aria-label="Отметить">'+CHECK+'</button>'+
+          '<span class="task-text" data-act="toggle">'+esc(t.text)+'</span>'+
+          '<button class="del" data-act="del" aria-label="Удалить">'+TRASH+'</button>';
+        li.setAttribute("data-id", t.id);
+        listEl.appendChild(li);
+      });
+    }
+
+    var total  = tasks.length;
+    var done   = tasks.filter(function(t){return t.done;}).length;
+    var active = total - done;
+
+    counter.innerHTML = total ? ('Осталось: <b>'+active+'</b>') : '';
+    footInfo.textContent = total
+      ? (total+' '+plural(total,['задача','задачи','задач'])+' · '+done+' выполнено')
+      : 'Нет задач';
+    clearBtn.disabled = done===0;
+  }
+
+  function plural(n, forms){
+    n = Math.abs(n)%100; var n1=n%10;
+    if(n>10 && n<20) return forms[2];
+    if(n1>1 && n1<5) return forms[1];
+    if(n1===1) return forms[0];
+    return forms[2];
+  }
+
+  // events
+  form.addEventListener("submit", function(e){
+    e.preventDefault();
+    addTask(input.value);
+    input.value="";
+    input.focus();
+  });
+
+  listEl.addEventListener("click", function(e){
+    var el = e.target.closest("[data-act]");
+    if(!el) return;
+    var li = e.target.closest(".task");
+    if(!li) return;
+    var id = li.getAttribute("data-id");
+    var act = el.getAttribute("data-act");
+    if(act==="toggle") toggle(id);
+    else if(act==="del") remove(id);
+  });
+
+  filtersEl.addEventListener("click", function(e){
+    var b = e.target.closest("button[data-filter]");
+    if(b) setFilter(b.getAttribute("data-filter"));
+  });
+
+  clearBtn.addEventListener("click", clearDone);
+
+  render();
+})();
+</script>
+</body>
+</html>

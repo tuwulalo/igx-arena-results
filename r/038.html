@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Flappy Bird 3D</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { overflow: hidden; background: #000; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+#gameCanvas { display: block; width: 100vw; height: 100vh; }
+.overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; z-index: 10; }
+.overlay.active { pointer-events: all; }
+#startScreen { background: radial-gradient(ellipse at center, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.7) 100%); }
+#gameOverScreen { background: radial-gradient(ellipse at center, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.8) 100%); opacity: 0; transition: opacity 0.5s ease; }
+#gameOverScreen.active { opacity: 1; }
+.title { font-size: 72px; font-weight: 900; color: #FFD700; text-shadow: 0 4px 0 #B8860B, 0 8px 0 #8B6914, 0 12px 20px rgba(0,0,0,0.5); letter-spacing: -2px; margin-bottom: 20px; animation: bounce 2s ease-in-out infinite; }
+@keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+.subtitle { font-size: 22px; color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.5); margin-bottom: 40px; opacity: 0.9; }
+.btn { padding: 18px 50px; font-size: 24px; font-weight: 700; border: none; border-radius: 50px; cursor: pointer; transition: all 0.2s ease; text-transform: uppercase; letter-spacing: 2px; pointer-events: all; }
+.btn-play { background: linear-gradient(135deg, #4CAF50, #45a049); color: #fff; box-shadow: 0 6px 0 #2d7a2d, 0 10px 30px rgba(0,0,0,0.3); }
+.btn-play:hover { transform: translateY(-3px); box-shadow: 0 9px 0 #2d7a2d, 0 15px 35px rgba(0,0,0,0.3); }
+.btn-play:active { transform: translateY(3px); box-shadow: 0 3px 0 #2d7a2d, 0 5px 15px rgba(0,0,0,0.3); }
+.btn-retry { background: linear-gradient(135deg, #FF6B35, #f55a24); color: #fff; box-shadow: 0 6px 0 #c44a1a, 0 10px 30px rgba(0,0,0,0.3); margin-top: 20px; }
+.btn-retry:hover { transform: translateY(-3px); box-shadow: 0 9px 0 #c44a1a, 0 15px 35px rgba(0,0,0,0.3); }
+.btn-retry:active { transform: translateY(3px); box-shadow: 0 3px 0 #c44a1a, 0 5px 15px rgba(0,0,0,0.3); }
+#scoreDisplay { position: fixed; top: 30px; left: 50%; transform: translateX(-50%); font-size: 64px; font-weight: 900; color: #fff; text-shadow: 0 3px 0 rgba(0,0,0,0.3), 0 6px 20px rgba(0,0,0,0.3); z-index: 20; opacity: 0; transition: opacity 0.3s ease; }
+#scoreDisplay.visible { opacity: 1; }
+.game-over-title { font-size: 56px; font-weight: 900; color: #FF4444; text-shadow: 0 3px 0 #aa0000, 0 6px 15px rgba(0,0,0,0.5); margin-bottom: 10px; }
+.final-score { font-size: 36px; color: #FFD700; font-weight: 700; margin: 10px 0; text-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+.best-score { font-size: 22px; color: #aaa; font-weight: 500; margin-bottom: 10px; }
+.medal { font-size: 60px; margin: 10px 0; }
+.instructions { font-size: 16px; color: rgba(255,255,255,0.7); margin-top: 20px; }
+.hidden { display: none !important; }
+#flashOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; opacity: 0; pointer-events: none; z-index: 30; transition: opacity 0.1s ease; }
+</style>
+</head>
+<body>
+<canvas id="gameCanvas"></canvas>
+<div id="flashOverlay"></div>
+<div id="scoreDisplay">0</div>
+
+<div id="startScreen" class="overlay active">
+<div class="title">Flappy Bird</div>
+<div class="subtitle">3D Edition</div>
+<button class="btn btn-play" id="btnPlay">Play</button>
+<div class="instructions">Tap, Click or Press Space to Flap</div>
+</div>
+
+<div id="gameOverScreen" class="overlay">
+<div class="game-over-title">Game Over</div>
+<div class="medal" id="medal"></div>
+<div class="final-score" id="finalScore">Score: 0</div>
+<div class="best-score" id="bestScore">Best: 0</div>
+<button class="btn btn-retry" id="btnRetry">Retry</button>
+</div>
+
+<script>
+(function() {
+const canvas = document.getElementById('gameCanvas');
+const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
+if (!gl) { alert('WebGL not supported'); return; }
+
+const scoreDisplay = document.getElementById('scoreDisplay');
+const startScreen = document.getElementById('startScreen');
+const gameOverScreen = document.getElementById('gameOverScreen');
+const finalScoreEl = document.getElementById('finalScore');
+const bestScoreEl = document.getElementById('bestScore');
+const medalEl = document.getElementById('medal');
+const flashOverlay = document.getElementById('flashOverlay');
+const btnPlay = document.getElementById('btnPlay');
+const btnRetry = document.getElementById('btnRetry');
+
+let W, H;
+function resize() {
+    W = window.innerWidth; H = window.innerHeight;
+    canvas.width = W * devicePixelRatio;
+    canvas.height = H * devicePixelRatio;
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+    gl.viewport(0, 0, canvas.width, canvas.height);
+}
+resize();
+window.addEventListener('resize', resize);
+
+// Matrix math
+const mat4 = {
+    create() { let m = new Float32Array(16); m[0]=m[5]=m[10]=m[15]=1; return m; },
+    perspective(fov, aspect, near, far) {
+        let m = new Float32Array(16);
+        let f = 1/Math.tan(fov/2), nf = 1/(near-far);
+        m[0]=f/aspect; m[5]=f; m[10]=(far+near)*nf; m[11]=-1; m[14]=2*far*near*nf;
+        return m;
+    },
+    translate(m, v) {
+        let r = new Float32Array(m);
+        r[12] = m[0]*v[0]+m[4]*v[1]+m[8]*v[2]+m[12];
+        r[13] = m[1]*v[0]+m[5]*v[1]+m[9]*v[2]+m[13];
+        r[14] = m[2]*v[0]+m[6]*v[1]+m[10]*v[2]+m[14];
+        r[15] = m[3]*v[0]+m[7]*v[1]+m[11]*v[2]+m[15];
+        return r;
+    },
+    rotateX(m, a) {
+        let s=Math.sin(a), c=Math.cos(a), r=new Float32Array(m);
+        let a10=m[4],a11=m[5],a12=m[6],a13=m[7],a20=m[8],a21=m[9],a22=m[10],a23=m[11];
+        r[4]=a10*c+a20*s; r[5]=a11*c+a21*s; r[6]=a12*c+a22*s; r[7]=a13*c+a23*s;
+        r[8]=a20*c-a10*s; r[9]=a21*c-a11*s; r[10]=a22*c-a12*s; r[11]=a23*c-a13*s;
+        return r;
+    },
+    rotateY(m, a) {
+        let s=Math.sin(a), c=Math.cos(a), r=new Float32Array(m);
+        let a00=m[0],a01=m[1],a02=m[2],a03=m[3],a20=m[8],a21=m[9],a22=m[10],a23=m[11];
+        r[0]=a00*c-a20*s; r[1]=a01*c-a21*s; r[2]=a02*c-a22*s; r[3]=a03*c-a23*s;
+        r[8]=a00*s+a20*c; r[9]=a01*s+a21*c; r[10]=a02*s+a22*c; r[11]=a03*s+a23*c;
+        return r;
+    },
+    rotateZ(m, a) {
+        let s=Math.sin(a), c=Math.cos(a), r=new Float32Array(m);
+        let a00=m[0],a01=m[1],a02=m[2],a03=m[3],a10=m[4],a11=m[5],a12=m[6],a13=m[7];
+        r[0]=a00*c+a10*s; r[1]=a01*c+a11*s; r[2]=a02*c+a12*s; r[3]=a03*c+a13*s;
+        r[4]=a10*c-a00*s; r[5]=a11*c-a01*s; r[6]=a12*c-a02*s; r[7]=a13*c-a03*s;
+        return r;
+    },
+    scale(m, v) {
+        let r = new Float32Array(m);
+        r[0]*=v[0]; r[1]*=v[0]; r[2]*=v[0]; r[3]*=v[0];
+        r[4]*=v[1]; r[5]*=v[1]; r[6]*=v[1]; r[7]*=v[1];
+        r[8]*=v[2]; r[9]*=v[2]; r[10]*=v[2]; r[11]*=v[2];
+        return r;
+    },
+    multiply(a, b) {
+        let r = new Float32Array(16);
+        for(let i=0;i<4;i++) for(let j=0;j<4;j++) {
+            r[j*4+i] = a[i]*b[j*4] + a[4+i]*b[j*4+1] + a[8+i]*b[j*4+2] + a[12+i]*b[j*4+3];
+        }
+        return r;
+    },
+    lookAt(eye, center, up) {
+        let z0=eye[0]-center[0], z1=eye[1]-center[1], z2=eye[2]-center[2];
+        let len = 1/Math.sqrt(z0*z0+z1*z1+z2*z2);
+        z0*=len; z1*=len; z2*=len;
+        let x0=up[1]*z2-up[2]*z1, x1=up[2]*z0-up[0]*z2, x2=up[0]*z1-up[1]*z0;
+        len = Math.sqrt(x0*x0+x1*x1+x2*x2);
+        if(len){len=1/len; x0*=len; x1*=len; x2*=len;}
+        let y0=z1*x2-z2*x1, y1=z2*x0-z0*x2, y2=z0*x1-z1*x0;
+        let m = new Float32Array(16);
+        m[0]=x0;m[1]=y0;m[2]=z0;m[3]=0;
+        m[4]=x1;m[5]=y1;m[6]=z1;m[7]=0;
+        m[8]=x2;m[9]=y2;m[10]=z2;m[11]=0;
+        m[12]=-(x0*eye[0]+x1*eye[1]+x2*eye[2]);
+        m[13]=-(y0*eye[0]+y1*eye[1]+y2*eye[2]);
+        m[14]=-(z0*eye[0]+z1*eye[1]+z2*eye[2]);
+        m[15]=1;
+        return m;
+    }
+};
+
+// Shaders
+const vsSource = `
+attribute vec3 aPos;
+attribute vec3 aNormal;
+uniform mat4 uProj;
+uniform mat4 uView;
+uniform mat4 uModel;
+varying vec3 vNormal;
+varying vec3 vWorldPos;
+void main() {
+    vec4 worldPos = uModel * vec4(aPos, 1.0);
+    vWorldPos = worldPos.xyz;
+    vNormal = mat3(uModel) * aNormal;
+    gl_Position = uProj * uView * worldPos;
+}`;
+
+const fsSource = `
+precision mediump float;
+varying vec3 vNormal;
+varying vec3 vWorldPos;
+uniform vec3 uColor;
+uniform vec3 uLightDir;
+uniform vec3 uAmbient;
+uniform float uFogDensity;
+uniform vec3 uFogColor;
+void main() {
+    vec3 n = normalize(vNormal);
+    float diff = max(dot(n, normalize(uLightDir)), 0.0);
+    vec3 color = uColor * (uAmbient + vec3(diff * 0.7));
+    float dist = length(vWorldPos - vec3(0.0, 0.0, 8.0));
+    float fog = 1.0 - exp(-dist * uFogDensity);
+    color = mix(color, uFogColor, clamp(fog, 0.0, 1.0));
+    gl_FragColor = vec4(color, 1.0);
+}`;
+
+function compileShader(src, type) {
+    let s = gl.createShader(type);
+    gl.shaderSource(s, src);
+    gl.compileShader(s);
+    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) { console.error(gl.getShaderInfoLog(s)); return null; }
+    return s;
+}
+
+let vs = compileShader(vsSource, gl.VERTEX_SHADER);
+let fs = compileShader(fsSource, gl.FRAGMENT_SHADER);
+let program = gl.createProgram();
+gl.attachShader(program, vs);
+gl.attachShader(program, fs);
+gl.linkProgram(program);
+gl.useProgram(program);
+
+let aPos = gl.getAttribLocation(program, 'aPos');
+let aNormal = gl.getAttribLocation(program, 'aNormal');
+let uProj = gl.getUniformLocation(program, 'uProj');
+let uView = gl.getUniformLocation(program, 'uView');
+let uModel = gl.getUniformLocation(program, 'uModel');
+let uColor = gl.getUniformLocation(program, 'uColor');
+let uLightDir = gl.getUniformLocation(program, 'uLightDir');
+let uAmbient = gl.getUniformLocation(program, 'uAmbient');
+let uFogDensity = gl.getUniformLocation(program, 'uFogDensity');
+let uFogColor = gl.getUniformLocation(program, 'uFogColor');
+
+gl.enable(gl.DEPTH_TEST);
+gl.enable(gl.CULL_FACE);
+
+// Geometry generators
+function createBox(sx, sy, sz) {
+    let x=sx/2, y=sy/2, z=sz/2;
+    let verts = [];
+    let faces = [
+        [[-x,-y,z],[x,-y,z],[x,y,z],[-x,y,z],[0,0,1]],
+        [[-x,-y,-z],[-x,y,-z],[x,y,-z],[x,-y,-z],[0,0,-1]],
+        [[-x,y,-z],[-x,y,z],[x,y,z],[x,y,-z],[0,1,0]],
+        [[-x,-y,-z],[x,-y,-z],[x,-y,z],[-x,-y,z],[0,-1,0]],
+        [[x,-y,-z],[x,y,-z],[x,y,z],[x,-y,z],[1,0,0]],
+        [[-x,-y,-z],[-x,-y,z],[-x,y,z],[-x,y,-z],[-1,0,0]],
+    ];
+    for(let f of faces) {
+        let [a,b,c,d,n] = f;
+        verts.push(...a,...n, ...b,...n, ...c,...n, ...a,...n, ...c,...n, ...d,...n);
+    }
+    return createMesh(new Float32Array(verts));
+}
+
+function createCylinder(radius, height, segs) {
+    let verts = [];
+    for(let i=0; i<segs; i++) {
+        let a0 = (i/segs)*Math.PI*2, a1 = ((i+1)/segs)*Math.PI*2;
+        let x0=Math.cos(a0)*radius, z0=Math.sin(a0)*radius;
+        let x1=Math.cos(a1)*radius, z1=Math.sin(a1)*radius;
+        let nx0=Math.cos(a0), nz0=Math.sin(a0);
+        let nx1=Math.cos(a1), nz1=Math.sin(a1);
+        let h2 = height/2;
+        verts.push(x0,-h2,z0, nx0,0,nz0, x1,-h2,z1, nx1,0,nz1, x1,h2,z1, nx1,0,nz1);
+        verts.push(x0,-h2,z0, nx0,0,nz0, x1,h2,z1, nx1,0,nz1, x0,h2,z0, nx0,0,nz0);
+        // top cap
+        verts.push(0,h2,0, 0,1,0, x0,h2,z0, 0,1,0, x1,h2,z1, 0,1,0);
+        // bottom cap
+        verts.push(0,-h2,0, 0,-1,0, x1,-h2,z1, 0,-1,0, x0,-h2,z0, 0,-1,0);
+    }
+    return createMesh(new Float32Array(verts));
+}
+
+function createSphere(radius, segs) {
+    let verts = [];
+    for(let lat=0; lat<segs; lat++) {
+        let t0 = (lat/segs)*Math.PI, t1 = ((lat+1)/segs)*Math.PI;
+        for(let lon=0; lon<segs; lon++) {
+            let p0 = (lon/segs)*Math.PI*2, p1 = ((lon+1)/segs)*Math.PI*2;
+            let v00 = [Math.sin(t0)*Math.cos(p0), Math.cos(t0), Math.sin(t0)*Math.sin(p0)];
+            let v10 = [Math.sin(t1)*Math.cos(p0), Math.cos(t1), Math.sin(t1)*Math.sin(p0)];
+            let v11 = [Math.sin(t1)*Math.cos(p1), Math.cos(t1), Math.sin(t1)*Math.sin(p1)];
+            let v01 = [Math.sin(t0)*Math.cos(p1), Math.cos(t0), Math.sin(t0)*Math.sin(p1)];
+            let push = (v) => { verts.push(v[0]*radius, v[1]*radius, v[2]*radius, v[0], v[1], v[2]); };
+            push(v00); push(v10); push(v11);
+            push(v00); push(v11); push(v01);
+        }
+    }
+    return createMesh(new Float32Array(verts));
+}
+
+function createMesh(data) {
+    let buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
+    return { buffer: buf, count: data.length / 6 };
+}
+
+function drawMesh(mesh, model, color) {
+    gl.bindBuffer(gl.ARRAY_BUFFER, mesh.buffer);
+    gl.enableVertexAttribArray(aPos);
+    gl.vertexAttribPointer(aPos, 3, gl.FLOAT, false, 24, 0);
+    gl.enableVertexAttribArray(aNormal);
+    gl.vertexAttribPointer(aNormal, 3, gl.FLOAT, false, 24, 12);
+    gl.uniformMatrix4fv(uModel, false, model);
+    gl.uniform3fv(uColor, color);
+    gl.drawArrays(gl.TRIANGLES, 0, mesh.count);
+}
+
+// Create meshes
+let boxMesh = createBox(1, 1, 1);
+let sphereMesh = createSphere(1, 12);
+let cylMesh = createCylinder(1, 1, 16);
+
+// Audio
+let audioCtx;
+function initAudio() { if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+function playSound(freq, dur, type, vol) {
+    if(!audioCtx) return;
+    let osc = audioCtx.createOscillator();
+    let gain = audioCtx.createGain();
+    osc.type = type || 'sine';
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(freq*0.5, audioCtx.currentTime+dur);
+    gain.gain.setValueAtTime(vol||0.3, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+dur);
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.start(); osc.stop(audioCtx.currentTime+dur);
+}
+function flapSound() { playSound(600, 0.1, 'sine', 0.2); playSound(800, 0.08, 'sine', 0.15); }
+function scoreSound() { playSound(880, 0.1, 'sine', 0.2); setTimeout(()=>playSound(1100, 0.15, 'sine', 0.2), 80); }
+function hitSound() { playSound(200, 0.3, 'sawtooth', 0.3); playSound(100, 0.4, 'square', 0.2); }
+
+// Game state
+let state = 'menu'; // menu, playing, dead
+let score = 0;
+let bestScore = parseInt(localStorage.getItem('flappy3d_best') || '0');
+let birdY = 0, birdVel = 0, birdRot = 0;
+let pipes = [];
+let clouds = [];
+let particles = [];
+let groundOffset = 0;
+let time = 0;
+let flapAnim = 0;
+let deathTimer = 0;
+let shakeAmount = 0;
+
+const GRAVITY = -28;
+const FLAP_VEL = 9.5;
+const PIPE_SPEED = 5.5;
+const PIPE_GAP = 4.8;
+const PIPE_SPACING = 7;
+const BIRD_X = 0;
+const GROUND_Y = -6;
+const CEILING_Y = 8;
+
+// Init clouds
+for(let i=0; i<15; i++) {
+    clouds.push({
+        x: Math.random()*60 - 10,
+        y: Math.random()*6 + 3,
+        z: Math.random()*-20 - 5,
+        sx: Math.random()*2+1.5,
+        sy: Math.random()*0.5+0.4,
+        sz: Math.random()*1+0.8,
+        speed: Math.random()*0.3+0.1
+    });
+}
+
+function resetGame() {
+    birdY = 0; birdVel = 0; birdRot = 0;
+    pipes = []; score = 0; particles = [];
+    groundOffset = 0; deathTimer = 0; shakeAmount = 0;
+    for(let i=0; i<5; i++) {
+        pipes.push({
+            x: 15 + i * PIPE_SPACING,
+            gapY: (Math.random()-0.5)*4,
+            scored: false
+        });
+    }
+}
+
+function flap() {
+    if(state === 'playing') {
+        birdVel = FLAP_VEL;
+        flapAnim = 1;
+        flapSound();
+    }
+}
+
+function startGame() {
+    initAudio();
+    resetGame();
+    state = 'playing';
+    startScreen.classList.remove('active');
+    startScreen.classList.add('hidden');
+    gameOverScreen.classList.remove('active');
+    scoreDisplay.classList.add('visible');
+    scoreDisplay.textContent = '0';
+}
+
+function die() {
+    if(state !== 'playing') return;
+    state = 'dead';
+    hitSound();
+    shakeAmount = 1;
+    flashOverlay.style.opacity = '0.8';
+    setTimeout(() => flashOverlay.style.opacity = '0', 100);
+    // particles
+    for(let i=0; i<20; i++) {
+        particles.push({
+            x: BIRD_X, y: birdY, z: 0,
+            vx: (Math.random()-0.5)*10,
+            vy: (Math.random()-0.5)*10,
+            vz: (Math.random()-0.5)*5,
+            life: 1,
+            color: [1, 0.8+Math.random()*0.2, 0]
+        });
+    }
+    if(score > bestScore) { bestScore = score; localStorage.setItem('flappy3d_best', bestScore); }
+    deathTimer = 0;
+}
+
+function showGameOver() {
+    gameOverScreen.classList.add('active');
+    finalScoreEl.textContent = 'Score: ' + score;
+    bestScoreEl.textContent = 'Best: ' + bestScore;
+    if(score >= 40) medalEl.textContent = '🏆';
+    else if(score >= 20) medalEl.textContent = '🥇';
+    else if(score >= 10) medalEl.textContent = '🥈';
+    else if(score >= 5) medalEl.textContent = '🥉';
+    else medalEl.textContent = '';
+    scoreDisplay.classList.remove('visible');
+}
+
+// Input
+function handleInput(e) {
+    if(e) e.preventDefault();
+    if(state === 'playing') flap();
+    else if(state === 'dead' && deathTimer > 1) { startGame(); }
+}
+window.addEventListener('keydown', (e) => { if(e.code==='Space'||e.code==='ArrowUp') handleInput(e); });
+canvas.addEventListener('mousedown', handleInput);
+canvas.addEventListener('touchstart', handleInput);
+btnPlay.addEventListener('click', (e) => { e.stopPropagation(); startGame(); });
+btnRetry.addEventListener('click', (e) => { e.stopPropagation(); startGame(); });
+
+// Render
+function render(dt) {
+    time += dt;
+    
+    let bgR = 0.4, bgG = 0.7, bgB = 1.0;
+    gl.clearColor(bgR, bgG, bgB, 1);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    
+    let aspect = canvas.width / canvas.height;
+    let proj = mat4.perspective(Math.PI/3, aspect, 0.1, 100);
+    
+    let shakeX = shakeAmount * (Math.random()-0.5) * 0.3;
+    let shakeY = shakeAmount * (Math.random()-0.5) * 0.3;
+    shakeAmount *= 0.9;
+    
+    let camY = state === 'dead' ? birdY * 0.3 + 2 : 2;
+    let view = mat4.lookAt([shakeX, camY + shakeY, 12], [shakeX, camY*0.5 + shakeY, 0], [0,1,0]);
+    
+    gl.uniformMatrix4fv(uProj, false, proj);
+    gl.uniformMatrix4fv(uView, false, view);
+    gl.uniform3fv(uLightDir, [0.5, 1, 0.8]);
+    gl.uniform3fv(uAmbient, [0.4, 0.4, 0.5]);
+    gl.uniform1f(uFogDensity, 0.015);
+    gl.uniform3fv(uFogColor, [bgR, bgG, bgB]);
+    
+    // Ground
+    let groundModel = mat4.create();
+    groundModel = mat4.translate(groundModel, [0, GROUND_Y - 0.5, 0]);
+    groundModel = mat4.scale(groundModel, [80, 1, 30]);
+    drawMesh(boxMesh, groundModel, [0.35, 0.65, 0.2]);
+    
+    // Ground detail strip
+    let stripModel = mat4.create();
+    stripModel = mat4.translate(stripModel, [0, GROUND_Y + 0.02, 0]);
+    stripModel = mat4.scale(stripModel, [80, 0.1, 30]);
+    drawMesh(boxMesh, stripModel, [0.55, 0.8, 0.3]);
+    
+    // Ground moving tiles
+    if(state === 'playing') groundOffset = (groundOffset + PIPE_SPEED * dt) % 2;
+    for(let i=-5; i<10; i++) {
+        let tx = i*2 - groundOffset;
+        let tileModel = mat4.create();
+        tileModel = mat4.translate(tileModel, [tx, GROUND_Y + 0.05, 2]);
+        tileModel = mat4.scale(tileModel, [0.8, 0.15, 0.3]);
+        drawMesh(boxMesh, tileModel, [0.45, 0.72, 0.25]);
+    }
+    
+    // Clouds
+    for(let c of clouds) {
+        if(state === 'playing') c.x -= c.speed * dt;
+        if(c.x < -15) c.x = 50;
+        let cm = mat4.create();
+        cm = mat4.translate(cm, [c.x, c.y, c.z]);
+        cm = mat4.scale(cm, [c.sx, c.sy, c.sz]);
+        drawMesh(sphereMesh, cm, [0.95, 0.95, 1.0]);
+        // second puff
+        let cm2 = mat4.create();
+        cm2 = mat4.translate(cm2, [c.x + c.sx*0.5, c.y + c.sy*0.2, c.z]);
+        cm2 = mat4.scale(cm2, [c.sx*0.7, c.sy*0.8, c.sz*0.7]);
+        drawMesh(sphereMesh, cm2, [0.93, 0.93, 0.98]);
+    }
+    
+    // Pipes
+    for(let p of pipes) {
+        if(state === 'playing') p.x -= PIPE_SPEED * dt;
+        
+        let pipeRadius = 0.9;
+        let pipeHeight = 12;
+        let topY = p.gapY + PIPE_GAP/2 + pipeHeight/2;
+        let botY = p.gapY - PIPE_GAP/2 - pipeHeight/2;
+        
+        // Top pipe
+        let tm = mat4.create();
+        tm = mat4.translate(tm, [p.x, topY, 0]);
+        tm = mat4.scale(tm, [pipeRadius, pipeHeight, pipeRadius]);
+        drawMesh(cylMesh, tm, [0.2, 0.7, 0.15]);
+        
+        // Top pipe cap
+        let tcm = mat4.create();
+        tcm = mat4.translate(tcm, [p.x, p.gapY + PIPE_GAP/2 + 0.3, 0]);
+        tcm = mat4.scale(tcm, [pipeRadius*1.3, 0.6, pipeRadius*1.3]);
+        drawMesh(cylMesh, tcm, [0.15, 0.6, 0.1]);
+        
+        // Bottom pipe
+        let bm = mat4.create();
+        bm = mat4.translate(bm, [p.x, botY, 0]);
+        bm = mat4.scale(bm, [pipeRadius, pipeHeight, pipeRadius]);
+        drawMesh(cylMesh, bm, [0.2, 0.7, 0.15]);
+        
+        // Bottom pipe cap
+        let bcm = mat4.create();
+        bcm = mat4.translate(bcm, [p.x, p.gapY - PIPE_GAP/2 - 0.3, 0]);
+        bcm = mat4.scale(bcm, [pipeRadius*1.3, 0.6, pipeRadius*1.3]);
+        drawMesh(cylMesh, bcm, [0.15, 0.6, 0.1]);
+        
+        // Pipe highlight
+        let hlm = mat4.create();
+        hlm = mat4.translate(hlm, [p.x - pipeRadius*0.3, topY, pipeRadius*0.3]);
+        hlm = mat4.scale(hlm, [0.15, pipeHeight*0.95, 0.15]);
+        drawMesh(boxMesh, hlm, [0.35, 0.85, 0.3]);
+        
+        let hlm2 = mat4.create();
+        hlm2 = mat4.translate(hlm2, [p.x - pipeRadius*0.3, botY, pipeRadius*0.3]);
+        hlm2 = mat4.scale(hlm2, [0.15, pipeHeight*0.95, 0.15]);
+        drawMesh(boxMesh, hlm2, [0.35, 0.85, 0.3]);
+        
+        // Recycle pipes
+        if(p.x < -10) {
+            p.x += PIPE_SPACING * 5;
+            p.gapY = (Math.random()-0.5)*4;
+            p.scored = false;
+        }
+        
+        // Score
+        if(!p.scored && p.x < BIRD_X && state === 'playing') {
+            p.scored = true;
+            score++;
+            scoreDisplay.textContent = score;
+            scoreSound();
+        }
+    }
+    
+    // Bird physics
+    if(state === 'playing') {
+        birdVel += GRAVITY * dt;
+        birdY += birdVel * dt;
+        birdRot = Math.max(-1.2, Math.min(0.5, birdVel * 0.06));
+        flapAnim *= 0.85;
+        
+        if(birdY < GROUND_Y + 0.8) { birdY = GROUND_Y + 0.8; die(); }
+        if(birdY > CEILING_Y) { birdY = CEILING_Y; birdVel = 0; }
+        
+        // Collision with pipes
+        for(let p of pipes) {
+            let dx = Math.abs(p.x - BIRD_X);
+            if(dx < 1.2) {
+                let halfGap = PIPE_GAP / 2;
+                if(birdY > p.gapY + halfGap - 0.5 || birdY < p.gapY - halfGap + 0.5) {
+                    die();
+                }
+            }
+        }
+    } else if(state === 'dead') {
+        birdVel += GRAVITY * dt;
+        birdY += birdVel * dt;
+        birdRot -= dt * 3;
+        if(birdY < GROUND_Y + 0.8) { birdY = GROUND_Y + 0.8; birdVel = 0; }
+        deathTimer += dt;
+        if(deathTimer > 1.5 && !gameOverScreen.classList.contains('active')) {
+            showGameOver();
+        }
+    } else {
+        birdY = Math.sin(time * 2) * 0.5;
+        birdRot = 0;
+    }
+    
+    // Draw bird
+    let bm = mat4.create();
+    bm = mat4.translate(bm, [BIRD_X, birdY, 0]);
+    bm = mat4.rotateZ(bm, birdRot);
+    
+    // Body
+    let bodyM = mat4.scale(bm, [0.55, 0.45, 0.45]);
+    drawMesh(sphereMesh, bodyM, [1.0, 0.85, 0.0]);
+    
+    // Belly
+    let bellyM = mat4.create();
+    bellyM = mat4.translate(bellyM, [BIRD_X + 0.05, birdY - 0.15, 0.15]);
+    bellyM = mat4.rotateZ(bellyM, birdRot);
+    bellyM = mat4.scale(bellyM, [0.35, 0.25, 0.25]);
+    drawMesh(sphereMesh, bellyM, [1.0, 0.95, 0.6]);
+    
+    // Wing
+    let wingAngle = flapAnim * 1.5 + Math.sin(time * 15) * 0.2;
+    let wingM = mat4.create();
+    wingM = mat4.translate(wingM, [BIRD_X - 0.1, birdY + 0.05, 0.3]);
+    wingM = mat4.rotateZ(wingM, birdRot);
+    wingM = mat4.rotateX(wingM, wingAngle);
+    wingM = mat4.scale(wingM, [0.35, 0.08, 0.25]);
+    drawMesh(boxMesh, wingM, [0.9, 0.7, 0.0]);
+    
+    // Wing other side
+    let wingM2 = mat4.create();
+    wingM2 = mat4.translate(wingM2, [BIRD_X - 0.1, birdY + 0.05, -0.3]);
+    wingM2 = mat4.rotateZ(wingM2, birdRot);
+    wingM2 = mat4.rotateX(wingM2, -wingAngle);
+    wingM2 = mat4.scale(wingM2, [0.35, 0.08, 0.25]);
+    drawMesh(boxMesh, wingM2, [0.9, 0.7, 0.0]);
+    
+    // Eye (right)
+    let eyeM = mat4.create();
+    eyeM = mat4.translate(eyeM, [BIRD_X + 0.35, birdY + 0.15, 0.2]);
+    eyeM = mat4.rotateZ(eyeM, birdRot);
+    eyeM = mat4.scale(eyeM, [0.12, 0.12, 0.1]);
+    drawMesh(sphereMesh, eyeM, [1, 1, 1]);
+    
+    // Pupil
+    let pupilM = mat4.create();
+    pupilM = mat4.translate(pupilM, [BIRD_X + 0.42, birdY + 0.15, 0.22]);
+    pupilM = mat4.rotateZ(pupilM, birdRot);
+    pupilM = mat4.scale(pupilM, [0.06, 0.07, 0.06]);
+    drawMesh(sphereMesh, pupilM, [0.1, 0.1, 0.1]);
+    
+    // Eye (left)
+    let eyeM2 = mat4.create();
+    eyeM2 = mat4.translate(eyeM2, [BIRD_X + 0.35, birdY + 0.15, -0.2]);
+    eyeM2 = mat4.rotateZ(eyeM2, birdRot);
+    eyeM2 = mat4.scale(eyeM2, [0.12, 0.12, 0.1]);
+    drawMesh(sphereMesh, eyeM2, [1, 1, 1]);
+    
+    // Beak
+    let beakM = mat4.create();
+    beakM = mat4.translate(beakM, [BIRD_X + 0.55, birdY - 0.02, 0]);
+    beakM = mat4.rotateZ(beakM, birdRot);
+    beakM = mat4.scale(beakM, [0.25, 0.1, 0.12]);
+    drawMesh(boxMesh, beakM, [1.0, 0.4, 0.0]);
+    
+    // Tail
+    let tailM = mat4.create();
+    tailM = mat4.translate(tailM, [BIRD_X - 0.5, birdY + 0.1, 0]);
+    tailM = mat4.rotateZ(tailM, birdRot + 0.3);
+    tailM = mat4.scale(tailM, [0.2, 0.06, 0.15]);
+    drawMesh(boxMesh, tailM, [0.85, 0.6, 0.0]);
+    
+    // Particles
+    for(let i = particles.length-1; i >= 0; i--) {
+        let p = particles[i];
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+        p.z += p.vz * dt;
+        p.vy += GRAVITY * 0.5 * dt;
+        p.life -= dt * 1.5;
+        if(p.life <= 0) { particles.splice(i, 1); continue; }
+        let pm = mat4.create();
+        pm = mat4.translate(pm, [p.x, p.y, p.z]);
+        let s = p.life * 0.2;
+        pm = mat4.scale(pm, [s, s, s]);
+        drawMesh(boxMesh, pm, p.color);
+    }
+    
+    // Background mountains
+    for(let i=0; i<8; i++) {
+        let mx = i * 12 - 20;
+        let mh = 3 + Math.sin(i*2.3)*1.5;
+        let mm = mat4.create();
+        mm = mat4.translate(mm, [mx, GROUND_Y + mh/2, -12]);
+        mm = mat4.scale(mm, [5, mh, 4]);
+        drawMesh(sphereMesh, mm, [0.3, 0.5, 0.25]);
+    }
+    
+    // Sun
+    let sunM = mat4.create();
+    sunM = mat4.translate(sunM, [20, 12, -25]);
+    sunM = mat4.scale(sunM, [3, 3, 3]);
+    drawMesh(sphereMesh, sunM, [1.0, 0.95, 0.6]);
+}
+
+let lastTime = performance.now();
+function loop(now) {
+    let dt = Math.min((now - lastTime) / 1000, 0.05);
+    lastTime = now;
+    render(dt);
+    requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Кофейня «Тёплый Зерно» — кофе с характером</title>
+<style>
+  :root{
+    --bg:#1c1410;
+    --cream:#fbf3e8;
+    --cream-2:#f3e6d4;
+    --coffee:#3a2418;
+    --coffee-2:#5a3a26;
+    --caramel:#c08a4e;
+    --caramel-2:#a96f33;
+    --espresso:#26160e;
+    --accent:#e2a857;
+    --muted:#8a7a6a;
+    --shadow:0 18px 50px -18px rgba(40,22,10,.45);
+    --radius:22px;
+    --maxw:1180px;
+    --ff:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    --serif:'Playfair Display',Georgia,'Times New Roman',serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:var(--ff);
+    color:var(--coffee);
+    background:var(--cream);
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  h1,h2,h3{font-family:var(--serif);font-weight:700;line-height:1.12;letter-spacing:-.01em}
+  a{color:inherit;text-decoration:none}
+  img{max-width:100%;display:block}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+  .eyebrow{
+    display:inline-block;font-family:var(--ff);font-weight:600;font-size:.78rem;
+    letter-spacing:.22em;text-transform:uppercase;color:var(--caramel-2);
+    margin-bottom:14px;
+  }
+  .btn{
+    display:inline-flex;align-items:center;gap:10px;cursor:pointer;border:none;
+    font-family:var(--ff);font-weight:600;font-size:1rem;
+    padding:15px 30px;border-radius:50px;transition:.28s cubic-bezier(.2,.7,.3,1);
+    will-change:transform;
+  }
+  .btn-primary{
+    background:linear-gradient(135deg,var(--caramel),var(--caramel-2));
+    color:#fff;box-shadow:0 12px 26px -8px rgba(169,111,51,.7);
+  }
+  .btn-primary:hover{transform:translateY(-3px);box-shadow:0 18px 34px -10px rgba(169,111,51,.85)}
+  .btn-ghost{
+    background:rgba(255,255,255,.08);color:var(--cream);
+    border:1.5px solid rgba(251,243,232,.35);backdrop-filter:blur(4px);
+  }
+  .btn-ghost:hover{background:rgba(255,255,255,.16);transform:translateY(-3px)}
+
+  /* ---------- HEADER ---------- */
+  header{
+    position:fixed;top:0;left:0;right:0;z-index:50;
+    transition:.3s;padding:18px 0;
+  }
+  header.scrolled{
+    background:rgba(28,20,16,.82);backdrop-filter:blur(14px);
+    box-shadow:0 8px 30px -16px rgba(0,0,0,.6);padding:12px 0;
+  }
+  .nav{display:flex;align-items:center;justify-content:space-between}
+  .logo{display:flex;align-items:center;gap:12px;color:var(--cream);font-family:var(--serif);font-weight:700;font-size:1.35rem}
+  .logo .bean{
+    width:40px;height:40px;border-radius:12px;display:grid;place-items:center;
+    background:linear-gradient(135deg,var(--caramel),var(--caramel-2));font-size:1.2rem;
+    box-shadow:0 8px 18px -6px rgba(169,111,51,.7);
+  }
+  .nav-links{display:flex;gap:34px;align-items:center}
+  .nav-links a{color:var(--cream);font-weight:500;font-size:.96rem;opacity:.85;transition:.2s;position:relative}
+  .nav-links a:hover{opacity:1}
+  .nav-links a::after{content:"";position:absolute;left:0;bottom:-6px;height:2px;width:0;background:var(--accent);transition:.25s}
+  .nav-links a:hover::after{width:100%}
+  .nav .btn{padding:11px 22px;font-size:.92rem}
+  .burger{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;padding:8px}
+  .burger span{width:26px;height:2.5px;background:var(--cream);border-radius:2px;transition:.3s}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    position:relative;min-height:100vh;display:flex;align-items:center;
+    color:var(--cream);overflow:hidden;
+    background:
+      radial-gradient(circle at 78% 18%,rgba(226,168,87,.32),transparent 42%),
+      radial-gradient(circle at 12% 88%,rgba(169,111,51,.30),transparent 45%),
+      linear-gradient(140deg,#2a1a11 0%,#3a2418 38%,#5a3a26 72%,#7a4e2e 100%);
+  }
+  .hero::before{
+    content:"";position:absolute;inset:0;opacity:.5;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .hero-grid{
+    position:relative;z-index:2;display:grid;grid-template-columns:1.05fr .95fr;
+    gap:50px;align-items:center;width:100%;padding:120px 0 80px;
+  }
+  .hero-copy h1{font-size:clamp(2.6rem,5.4vw,4.6rem);margin-bottom:22px}
+  .hero-copy h1 .em{
+    background:linear-gradient(120deg,var(--accent),#f6d29a);
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+    font-style:italic;
+  }
+  .hero-copy p{font-size:1.15rem;max-width:520px;opacity:.9;margin-bottom:34px}
+  .hero-actions{display:flex;gap:16px;flex-wrap:wrap}
+  .hero-stats{display:flex;gap:38px;margin-top:48px}
+  .hero-stats .s b{font-family:var(--serif);font-size:1.9rem;display:block;color:var(--accent)}
+  .hero-stats .s span{font-size:.82rem;opacity:.75;letter-spacing:.04em}
+  .hero-visual{position:relative;height:520px}
+  .hero-card{
+    position:absolute;border-radius:26px;overflow:hidden;box-shadow:0 30px 70px -22px rgba(0,0,0,.7);
+    border:6px solid rgba(251,243,232,.12);
+  }
+  .hero-card img{width:100%;height:100%;object-fit:cover}
+  .hc1{inset:0;}
+  .hc2{
+    width:200px;height:200px;right:-26px;bottom:-26px;border-radius:24px;
+    animation:float 6s ease-in-out infinite;
+  }
+  .badge-float{
+    position:absolute;left:-22px;top:40px;background:var(--cream);color:var(--coffee);
+    padding:14px 18px;border-radius:16px;box-shadow:var(--shadow);display:flex;gap:12px;align-items:center;
+    animation:float 5s ease-in-out infinite reverse;z-index:3;
+  }
+  .badge-float .ico{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--caramel),var(--caramel-2));display:grid;place-items:center;font-size:1.3rem}
+  .badge-float b{font-family:var(--serif);font-size:1.05rem;display:block}
+  .badge-float span{font-size:.76rem;color:var(--muted)}
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-16px)}}
+  .scroll-hint{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);z-index:3;opacity:.7;font-size:.8rem;letter-spacing:.2em;text-transform:uppercase;display:flex;flex-direction:column;align-items:center;gap:8px}
+  .scroll-hint .mouse{width:24px;height:38px;border:2px solid var(--cream);border-radius:14px;position:relative}
+  .scroll-hint .mouse::after{content:"";position:absolute;top:7px;left:50%;transform:translateX(-50%);width:4px;height:7px;background:var(--cream);border-radius:2px;animation:scrolly 1.6s infinite}
+  @keyframes scrolly{0%{opacity:0;transform:translate(-50%,0)}40%{opacity:1}80%{opacity:0;transform:translate(-50%,12px)}}
+
+  /* ---------- SECTION SHELL ---------- */
+  section{padding:104px 0}
+  .sec-head{text-align:center;max-width:660px;margin:0 auto 60px}
+  .sec-head h2{font-size:clamp(2rem,3.6vw,2.9rem);margin-bottom:16px}
+  .sec-head p{color:var(--muted);font-size:1.06rem}
+
+  /* ---------- MENU ---------- */
+  .menu{background:linear-gradient(180deg,var(--cream) 0%,var(--cream-2) 100%)}
+  .menu-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
+  .card{
+    background:#fff;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);
+    transition:.32s cubic-bezier(.2,.7,.3,1);position:relative;border:1px solid rgba(58,36,24,.06);
+  }
+  .card:hover{transform:translateY(-8px);box-shadow:0 30px 60px -20px rgba(40,22,10,.5)}
+  .card-img{height:210px;position:relative;overflow:hidden}
+  .card-img img{width:100%;height:100%;object-fit:cover;transition:.5s}
+  .card:hover .card-img img{transform:scale(1.07)}
+  .card-tag{
+    position:absolute;top:14px;left:14px;background:rgba(28,20,16,.78);color:var(--cream);
+    font-size:.72rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+    padding:6px 12px;border-radius:50px;backdrop-filter:blur(4px);
+  }
+  .card-body{padding:24px 24px 26px}
+  .card-body .top{display:flex;justify-content:space-between;align-items:start;gap:12px;margin-bottom:8px}
+  .card-body h3{font-size:1.32rem}
+  .card-price{font-family:var(--serif);font-weight:700;font-size:1.3rem;color:var(--caramel-2);white-space:nowrap}
+  .card-body p{color:var(--muted);font-size:.95rem;margin-bottom:18px;min-height:48px}
+  .card-foot{display:flex;justify-content:space-between;align-items:center}
+  .rating{display:flex;align-items:center;gap:5px;font-size:.88rem;color:var(--coffee-2);font-weight:600}
+  .rating .star{color:var(--accent)}
+  .add{
+    border:none;cursor:pointer;background:var(--espresso);color:var(--cream);
+    width:42px;height:42px;border-radius:13px;font-size:1.3rem;display:grid;place-items:center;
+    transition:.25s;
+  }
+  .add:hover{background:var(--caramel-2);transform:rotate(90deg) scale(1.06)}
+
+  /* ---------- ABOUT ---------- */
+  .about{background:var(--espresso);color:var(--cream);position:relative;overflow:hidden}
+  .about::before{content:"";position:absolute;top:-120px;right:-120px;width:340px;height:340px;border-radius:50%;background:radial-gradient(circle,rgba(226,168,87,.22),transparent 70%)}
+  .about-grid{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;position:relative;z-index:2}
+  .about-imgs{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto auto;gap:18px}
+  .about-imgs img{border-radius:18px;box-shadow:var(--shadow);object-fit:cover;width:100%;height:100%}
+  .about-imgs .tall{grid-row:span 2;height:100%;min-height:340px}
+  .about-imgs .a2{height:160px}
+  .about-imgs .a3{height:162px}
+  .about-copy .eyebrow{color:var(--accent)}
+  .about-copy h2{font-size:clamp(2rem,3.6vw,2.8rem);margin-bottom:20px}
+  .about-copy p{opacity:.85;margin-bottom:18px;font-size:1.04rem}
+  .feat-list{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:30px}
+  .feat{display:flex;gap:14px;align-items:start}
+  .feat .fi{flex:none;width:46px;height:46px;border-radius:13px;display:grid;place-items:center;font-size:1.25rem;background:rgba(226,168,87,.16);border:1px solid rgba(226,168,87,.3)}
+  .feat b{font-family:var(--serif);font-size:1.05rem;display:block;margin-bottom:2px}
+  .feat span{font-size:.88rem;opacity:.75;line-height:1.45}
+
+  /* ---------- GALLERY ---------- */
+  .gallery-grid{
+    display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:200px;gap:16px;
+  }
+  .gal{border-radius:18px;overflow:hidden;position:relative;cursor:pointer;box-shadow:var(--shadow)}
+  .gal img{width:100%;height:100%;object-fit:cover;transition:.55s}
+  .gal::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(28,20,16,.55),transparent 55%);opacity:0;transition:.4s}
+  .gal:hover img{transform:scale(1.08)}
+  .gal:hover::after{opacity:1}
+  .gal .cap{position:absolute;left:16px;bottom:14px;color:var(--cream);font-weight:600;z-index:2;opacity:0;transform:translateY(8px);transition:.4s}
+  .gal:hover .cap{opacity:1;transform:translateY(0)}
+  .g-wide{grid-column:span 2}
+  .g-tall{grid-row:span 2}
+
+  /* ---------- BOOKING / FORM ---------- */
+  .booking{background:linear-gradient(160deg,var(--cream-2),var(--cream))}
+  .book-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:54px;align-items:stretch}
+  .book-info{
+    background:linear-gradient(150deg,var(--coffee),var(--espresso));color:var(--cream);
+    border-radius:var(--radius);padding:46px;box-shadow:var(--shadow);position:relative;overflow:hidden;
+  }
+  .book-info::after{content:"☕";position:absolute;font-size:13rem;right:-30px;bottom:-50px;opacity:.06}
+  .book-info h3{font-size:1.9rem;margin-bottom:14px}
+  .book-info>p{opacity:.82;margin-bottom:30px}
+  .info-row{display:flex;gap:15px;align-items:center;margin-bottom:20px}
+  .info-row .ir-ico{flex:none;width:48px;height:48px;border-radius:14px;background:rgba(226,168,87,.16);border:1px solid rgba(226,168,87,.3);display:grid;place-items:center;font-size:1.25rem}
+  .info-row b{display:block;font-family:var(--serif);font-size:1.05rem}
+  .info-row span{font-size:.9rem;opacity:.78}
+  .hours{margin-top:28px;border-top:1px solid rgba(251,243,232,.16);padding-top:22px}
+  .hours .h-row{display:flex;justify-content:space-between;font-size:.92rem;padding:4px 0;opacity:.85}
+  .hours .h-row b{color:var(--accent);font-weight:600}
+
+  .book-form{
+    background:#fff;border-radius:var(--radius);padding:44px;box-shadow:var(--shadow);
+    border:1px solid rgba(58,36,24,.06);
+  }
+  .book-form h3{font-size:1.7rem;margin-bottom:6px}
+  .book-form .sub{color:var(--muted);margin-bottom:28px;font-size:.96rem}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .field{margin-bottom:20px;position:relative}
+  .field label{display:block;font-size:.85rem;font-weight:600;margin-bottom:8px;color:var(--coffee-2)}
+  .field label .req{color:#c0492e}
+  .field input,.field select,.field textarea{
+    width:100%;font-family:var(--ff);font-size:.98rem;color:var(--coffee);
+    padding:13px 15px;border:1.5px solid #e6d9c8;border-radius:13px;background:#fdfaf5;
+    transition:.2s;outline:none;
+  }
+  .field textarea{resize:vertical;min-height:84px}
+  .field input:focus,.field select:focus,.field textarea:focus{
+    border-color:var(--caramel);background:#fff;box-shadow:0 0 0 4px rgba(192,138,78,.13);
+  }
+  .field.error input,.field.error select,.field.error textarea{border-color:#d65a3c;background:#fdf3f0}
+  .err-msg{display:none;color:#c0492e;font-size:.8rem;margin-top:6px;font-weight:500}
+  .field.error .err-msg{display:block}
+  .form-note{font-size:.82rem;color:var(--muted);margin:6px 0 22px;display:flex;gap:8px;align-items:start}
+  .submit-btn{width:100%;justify-content:center;font-size:1.05rem;padding:16px}
+  .form-success{
+    display:none;text-align:center;padding:30px 10px;
+  }
+  .form-success.show{display:block;animation:pop .5s cubic-bezier(.2,.8,.3,1.2)}
+  @keyframes pop{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
+  .form-success .ok{width:74px;height:74px;border-radius:50%;background:linear-gradient(135deg,#5aa15a,#3c7c3c);color:#fff;font-size:2.2rem;display:grid;place-items:center;margin:0 auto 18px;box-shadow:0 14px 30px -10px rgba(60,124,60,.6)}
+  .form-success h3{font-size:1.6rem;margin-bottom:10px}
+  .form-success p{color:var(--muted)}
+
+  /* ---------- FOOTER ---------- */
+  footer{background:var(--espresso);color:var(--cream);padding:64px 0 28px}
+  .foot-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1.4fr;gap:40px;margin-bottom:44px}
+  .foot-brand p{opacity:.72;margin-top:16px;max-width:280px;font-size:.95rem}
+  .socials{display:flex;gap:12px;margin-top:22px}
+  .socials a{width:42px;height:42px;border-radius:12px;background:rgba(251,243,232,.08);display:grid;place-items:center;transition:.25s;font-size:1.05rem}
+  .socials a:hover{background:var(--caramel-2);transform:translateY(-3px)}
+  .foot-col h4{font-family:var(--ff);font-size:.82rem;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:18px}
+  .foot-col a{display:block;opacity:.75;margin-bottom:11px;font-size:.94rem;transition:.2s}
+  .foot-col a:hover{opacity:1;padding-left:4px;color:var(--accent)}
+  .foot-news p{opacity:.72;font-size:.94rem;margin-bottom:14px}
+  .news-form{display:flex;gap:8px}
+  .news-form input{flex:1;padding:12px 14px;border-radius:11px;border:1.5px solid rgba(251,243,232,.2);background:rgba(251,243,232,.06);color:var(--cream);font-family:var(--ff);outline:none}
+  .news-form input::placeholder{color:rgba(251,243,232,.5)}
+  .news-form input:focus{border-color:var(--caramel)}
+  .news-form button{flex:none;border:none;cursor:pointer;background:linear-gradient(135deg,var(--caramel),var(--caramel-2));color:#fff;width:48px;border-radius:11px;font-size:1.2rem;transition:.25s}
+  .news-form button:hover{transform:translateY(-2px)}
+  .foot-bottom{border-top:1px solid rgba(251,243,232,.12);padding-top:24px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;opacity:.65;font-size:.86rem}
+
+  /* ---------- REVEAL ANIM ---------- */
+  .reveal{opacity:0;transform:translateY(34px);transition:.7s cubic-bezier(.2,.7,.3,1)}
+  .reveal.in{opacity:1;transform:none}
+
+  /* ---------- RESPONSIVE ---------- */
+  @media(max-width:980px){
+    .hero-grid{grid-template-columns:1fr;gap:30px;padding-top:130px}
+    .hero-visual{height:380px;max-width:460px}
+    .about-grid,.book-grid{grid-template-columns:1fr;gap:36px}
+    .menu-grid{grid-template-columns:repeat(2,1fr)}
+    .foot-grid{grid-template-columns:1fr 1fr;gap:32px}
+    .gallery-grid{grid-template-columns:repeat(2,1fr)}
+    .g-wide{grid-column:span 2}
+  }
+  @media(max-width:640px){
+    section{padding:72px 0}
+    .nav-links{
+      position:fixed;top:0;right:0;height:100vh;width:74%;max-width:320px;
+      background:rgba(28,20,16,.97);backdrop-filter:blur(14px);flex-direction:column;
+      justify-content:center;gap:30px;transform:translateX(100%);transition:.35s;z-index:60;
+    }
+    .nav-links.open{transform:translateX(0)}
+    .burger{display:flex;z-index:70}
+    .menu-grid{grid-template-columns:1fr}
+    .form-row{grid-template-columns:1fr}
+    .feat-list{grid-template-columns:1fr}
+    .foot-grid{grid-template-columns:1fr}
+    .hero-stats{gap:24px}
+    .book-info,.book-form{padding:30px}
+    .gallery-grid{grid-template-columns:1fr 1fr;grid-auto-rows:150px}
+  }
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- ============ HEADER ============ -->
+<header id="header">
+  <div class="wrap nav">
+    <a href="#home" class="logo"><span class="bean">☕</span>Тёплый&nbsp;Зерно</a>
+    <nav class="nav-links" id="navLinks">
+      <a href="#menu">Меню</a>
+      <a href="#about">О нас</a>
+      <a href="#gallery">Галерея</a>
+      <a href="#booking">Контакты</a>
+      <a href="#booking" class="btn btn-primary">Забронировать</a>
+    </nav>
+    <button class="burger" id="burger" aria-label="Меню"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<!-- ============ HERO ============ -->
+<section class="hero" id="home">
+  <div class="wrap hero-grid">
+    <div class="hero-copy reveal">
+      <span class="eyebrow" style="color:var(--accent)">☕ Спешелти-кофе с 2014 года</span>
+      <h1>Утро начинается с&nbsp;<span class="em">тёплого</span> зерна</h1>
+      <p>Мы обжариваем зерно сами, варим на дровах ремесленный кофе и встречаем каждого гостя как старого друга. Загляните за чашкой настроения.</p>
+      <div class="hero-actions">
+        <a href="#booking" class="btn btn-primary">Забронировать столик →</a>
+        <a href="#menu" class="btn btn-ghost">Смотреть меню</a>
+      </div>
+      <div class="hero-stats">
+        <div class="s"><b>12</b><span>сортов зерна</span></div>
+        <div class="s"><b>4.9★</b><span>средний рейтинг</span></div>
+        <div class="s"><b>30к+</b><span>чашек в год</span></div>
+      </div>
+    </div>
+    <div class="hero-visual reveal">
+      <div class="hero-card hc1"><img src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=900&q=80" alt="Уютный интерьер кофейни"></div>
+      <div class="hero-card hc2"><img src="https://images.unsplash.com/photo-1511920170033-f8396924c348?auto=format&fit=crop&w=500&q=80" alt="Чашка кофе"></div>
+      <div class="badge-float">
+        <span class="ico">🔥</span>
+        <div><b>Свежая обжарка</b><span>каждое утро в 7:00</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="scroll-hint"><span class="mouse"></span>листайте вниз</div>
+</section>
+
+<!-- ============ MENU ============ -->
+<section class="menu" id="menu">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Наше меню</span>
+      <h2>Шесть причин зайти на чашку</h2>
+      <p>Каждый напиток собран вручную из свежеобжаренного зерна. Выбирайте любимое — или попробуйте всё по очереди.</p>
+    </div>
+    <div class="menu-grid" id="menuGrid"></div>
+  </div>
+</section>
+
+<!-- ============ ABOUT ============ -->
+<section class="about" id="about">
+  <div class="wrap about-grid">
+    <div class="about-imgs reveal">
+      <img class="tall" src="https://images.unsplash.com/photo-1442512595331-e89e73853f31?auto=format&fit=crop&w=600&q=80" alt="Бариста за работой">
+      <img class="a2" src="https://images.unsplash.com/photo-1453614512568-c4024d13c247?auto=format&fit=crop&w=500&q=80" alt="Зёрна кофе">
+      <img class="a3" src="https://images.unsplash.com/photo-1507133750040-4a8f57021571?auto=format&fit=crop&w=500&q=80" alt="Латте-арт">
+    </div>
+    <div class="about-copy reveal">
+      <span class="eyebrow">О нас</span>
+      <h2>Маленькая кофейня с большой душой</h2>
+      <p>«Тёплый Зерно» вырос из домашней ростерии в уютное место на углу старой улицы. Здесь пахнет карамелью и свежей выпечкой, играет тёплый джаз, а бариста помнит ваш заказ наизусть.</p>
+      <p>Мы работаем только с фермерскими хозяйствами напрямую, обжариваем зерно небольшими партиями и верим, что хороший кофе — это про заботу, а не про спешку.</p>
+      <div class="feat-list">
+        <div class="feat"><span class="fi">🌱</span><div><b>Прямые поставки</b><span>зерно от фермеров Эфиопии и Колумбии</span></div></div>
+        <div class="feat"><span class="fi">🔥</span><div><b>Своя обжарка</b><span>малыми партиями каждое утро</span></div></div>
+        <div class="feat"><span class="fi">🥐</span><div><b>Свежая выпечка</b><span>круассаны и десерты из своей пекарни</span></div></div>
+        <div class="feat"><span class="fi">💛</span><div><b>Тёплый приём</b><span>атмосфера, в которую хочется вернуться</span></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ GALLERY ============ -->
+<section id="gallery">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Галерея</span>
+      <h2>Атмосфера в кадре</h2>
+      <p>Загляните внутрь: тёплый свет, аромат свежего эспрессо и моменты, ради которых хочется остаться подольше.</p>
+    </div>
+    <div class="gallery-grid reveal">
+      <div class="gal g-wide g-tall"><img src="https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=900&q=80" alt="Интерьер кофейни"><span class="cap">Наш уютный зал</span></div>
+      <div class="gal"><img src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=500&q=80" alt="Капучино"><span class="cap">Идеальная пенка</span></div>
+      <div class="gal"><img src="https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=500&q=80" alt="Зёрна"><span class="cap">Свежая обжарка</span></div>
+      <div class="gal"><img src="https://images.unsplash.com/photo-1559925393-8be0ec4767c8?auto=format&fit=crop&w=500&q=80" alt="Десерт"><span class="cap">К кофе — десерт</span></div>
+      <div class="gal"><img src="https://images.unsplash.com/photo-1521017432531-fbd92d768814?auto=format&fit=crop&w=500&q=80" alt="Бариста"><span class="cap">Мастера своего дела</span></div>
+      <div class="gal g-wide"><img src="https://images.unsplash.com/photo-1514066558159-fc8c737ef259?auto=format&fit=crop&w=900&q=80" alt="Кофе на столе"><span class="cap">Утренний ритуал</span></div>
+      <div class="gal"><img src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=500&q=80" alt="Латте"><span class="cap">Латте-арт</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ BOOKING ============ -->
+<section class="booking" id="booking">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Бронирование</span>
+      <h2>Займём для вас лучший столик</h2>
+      <p>Оставьте заявку — мы перезвоним в течение 15 минут и подтвердим бронь.</p>
+    </div>
+    <div class="book-grid">
+      <div class="book-info reveal">
+        <h3>Приходите в гости</h3>
+        <p>Мы в самом сердце города, в двух шагах от старой площади.</p>
+        <div class="info-row"><span class="ir-ico">📍</span><div><b>Адрес</b><span>ул. Кофейная, 14, Москва</span></div></div>
+        <div class="info-row"><span class="ir-ico">📞</span><div><b>Телефон</b><span>+7 (495) 123-45-67</span></div></div>
+        <div class="info-row"><span class="ir-ico">✉️</span><div><b>Почта</b><span>hello@teplyzerno.ru</span></div></div>
+        <div class="hours">
+          <div class="h-row"><span>Пн — Пт</span><b>08:00 — 22:00</b></div>
+          <div class="h-row"><span>Сб — Вс</span><b>09:00 — 23:00</b></div>
+          <div class="h-row"><span>Кухня</span><b>до 21:30</b></div>
+        </div>
+      </div>
+
+      <div class="book-form reveal">
+        <form id="bookForm" novalidate>
+          <h3>Бронь столика</h3>
+          <p class="sub">Заполните форму — это займёт меньше минуты.</p>
+          <div class="form-row">
+            <div class="field">
+              <label for="name">Имя <span class="req">*</span></label>
+              <input type="text" id="name" name="name" placeholder="Как вас зовут?">
+              <div class="err-msg">Пожалуйста, укажите имя (мин. 2 буквы)</div>
+            </div>
+            <div class="field">
+              <label for="phone">Телефон <span class="req">*</span></label>
+              <input type="tel" id="phone" name="phone" placeholder="+7 (___) ___-__-__">
+              <div class="err-msg">Введите корректный номер телефона</div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="field">
+              <label for="date">Дата <span class="req">*</span></label>
+              <input type="date" id="date" name="date">
+              <div class="err-msg">Выберите дату не раньше сегодняшней</div>
+            </div>
+            <div class="field">
+              <label for="time">Время <span class="req">*</span></label>
+              <input type="time" id="time" name="time" value="19:00">
+              <div class="err-msg">Укажите время в часы работы (08:00–22:30)</div>
+            </div>
+          </div>
+          <div class="field">
+            <label for="guests">Количество гостей <span class="req">*</span></label>
+            <select id="guests" name="guests">
+              <option value="">Выберите…</option>
+              <option value="1">1 гость</option>
+              <option value="2">2 гостя</option>
+              <option value="3">3 гостя</option>
+              <option value="4">4 гостя</option>
+              <option value="5">5 гостей</option>
+              <option value="6">6 гостей</option>
+              <option value="7+">Больше 6 (компания)</option>
+            </select>
+            <div class="err-msg">Укажите количество гостей</div>
+          </div>
+          <div class="field">
+            <label for="wishes">Пожелания</label>
+            <textarea id="wishes" name="wishes" placeholder="Столик у окна, детский стульчик, праздник…"></textarea>
+          </div>
+          <p class="form-note">🔒 Нажимая «Забронировать», вы соглашаетесь на обработку персональных данных.</p>
+          <button type="submit" class="btn btn-primary submit-btn">Забронировать столик</button>
+        </form>
+        <div class="form-success" id="formSuccess">
+          <div class="ok">✓</div>
+          <h3>Заявка принята!</h3>
+          <p id="successText">Спасибо! Мы перезвоним вам в ближайшие 15 минут, чтобы подтвердить бронь.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <a href="#home" class="logo"><span class="bean">☕</span>Тёплый&nbsp;Зерно</a>
+        <p>Ремесленная кофейня, где каждое зерно обжарено с любовью, а каждая чашка согревает.</p>
+        <div class="socials">
+          <a href="#" aria-label="Instagram">📷</a>
+          <a href="#" aria-label="Telegram">✈️</a>
+          <a href="#" aria-label="VK">💬</a>
+          <a href="#" aria-label="YouTube">▶️</a>
+        </div>
+      </div>
+      <div class="foot-col">
+        <h4>Навигация</h4>
+        <a href="#menu">Меню</a>
+        <a href="#about">О нас</a>
+        <a href="#gallery">Галерея</a>
+        <a href="#booking">Бронь</a>
+      </div>
+      <div class="foot-col">
+        <h4>Меню</h4>
+        <a href="#menu">Эспрессо</a>
+        <a href="#menu">Капучино</a>
+        <a href="#menu">Раф</a>
+        <a href="#menu">Десерты</a>
+      </div>
+      <div class="foot-news">
+        <h4>Рассылка</h4>
+        <p>Подпишитесь — присылаем акции и новинки сезона. Без спама.</p>
+        <form class="news-form" id="newsForm">
+          <input type="email" id="newsEmail" placeholder="ваш@email.ru" aria-label="Email">
+          <button type="submit" aria-label="Подписаться">→</button>
+        </form>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2026 Кофейня «Тёплый Зерно». Все права защищены.</span>
+      <span>Сделано с ☕ и любовью</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------- MENU DATA ---------- */
+  var menu = [
+    {name:"Эспрессо",tag:"Классика",price:"180 ₽",rating:"4.9",
+     desc:"Плотный, бархатистый шот из бленда Эфиопия+Бразилия с нотами тёмного шоколада.",
+     img:"https://images.unsplash.com/photo-1510707577719-ae7c14805e3a?auto=format&fit=crop&w=600&q=80"},
+    {name:"Капучино",tag:"Хит",price:"260 ₽",rating:"5.0",
+     desc:"Идеальный баланс эспрессо и шёлковой молочной пенки с латте-артом на верхушке.",
+     img:"https://images.unsplash.com/photo-1572442388796-11668a67e53d?auto=format&fit=crop&w=600&q=80"},
+    {name:"Раф «Карамель»",tag:"Авторский",price:"320 ₽",rating:"4.8",
+     desc:"Сливочный раф с домашним солёным сиропом из карамели и щепоткой морской соли.",
+     img:"https://images.unsplash.com/photo-1461023058943-07fcbe16d735?auto=format&fit=crop&w=600&q=80"},
+    {name:"Флэт Уайт",tag:"Спешелти",price:"280 ₽",rating:"4.9",
+     desc:"Двойной ристретто и тонкий слой микропены — для тех, кто любит вкус зерна ярче.",
+     img:"https://images.unsplash.com/photo-1517256064527-09c73fc73e38?auto=format&fit=crop&w=600&q=80"},
+    {name:"Фильтр V60",tag:"Альтернатива",price:"300 ₽",rating:"4.7",
+     desc:"Ручная воронка с зерном моно-обжарки. Ягодная кислотность и чистое послевкусие.",
+     img:"https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=600&q=80"},
+    {name:"Какао с маршмеллоу",tag:"Уют",price:"240 ₽",rating:"4.9",
+     desc:"Густое бельгийское какао с воздушным зефиром — идеально в холодный вечер.",
+     img:"https://images.unsplash.com/photo-1542990253-0d0f5be5f0ed?auto=format&fit=crop&w=600&q=80"}
+  ];
+
+  var grid = document.getElementById("menuGrid");
+  grid.innerHTML = menu.map(function(m){
+    return '<article class="card">'+
+      '<div class="card-img"><span class="card-tag">'+m.tag+'</span>'+
+      '<img src="'+m.img+'" alt="'+m.name+'" loading="lazy"></div>'+
+      '<div class="card-body">'+
+        '<div class="top"><h3>'+m.name+'</h3><span class="card-price">'+m.price+'</span></div>'+
+        '<p>'+m.desc+'</p>'+
+        '<div class="card-foot">'+
+          '<span class="rating"><span class="star">★</span>'+m.rating+'</span>'+
+          '<button class="add" aria-label="Добавить '+m.name+'">+</button>'+
+        '</div>'+
+      '</div>'+
+    '</article>';
+  }).join("");
+
+  /* ---------- HEADER SCROLL ---------- */
+  var header = document.getElementById("header");
+  window.addEventListener("scroll", function(){
+    header.classList.toggle("scrolled", window.scrollY > 40);
+  });
+
+  /* ---------- BURGER MENU ---------- */
+  var burger = document.getElementById("burger");
+  var navLinks = document.getElementById("navLinks");
+  burger.addEventListener("click", function(){ navLinks.classList.toggle("open"); });
+  navLinks.querySelectorAll("a").forEach(function(a){
+    a.addEventListener("click", function(){ navLinks.classList.remove("open"); });
+  });
+
+  /* ---------- REVEAL ON SCROLL ---------- */
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){ e.target.classList.add("in"); io.unobserve(e.target); }
+    });
+  }, {threshold:0.12});
+  document.querySelectorAll(".reveal").forEach(function(el){ io.observe(el); });
+
+  /* ---------- DATE MIN = TODAY ---------- */
+  var dateInput = document.getElementById("date");
+  var today = new Date();
+  var pad = function(n){ return (n<10?"0":"")+n; };
+  var todayStr = today.getFullYear()+"-"+pad(today.getMonth()+1)+"-"+pad(today.getDate());
+  dateInput.min = todayStr;
+  dateInput.value = todayStr;
+
+  /* ---------- FORM VALIDATION ---------- */
+  var form = document.getElementById("bookForm");
+  var success = document.getElementById("formSuccess");
+
+  function setError(field, on){
+    field.closest(".field").classList.toggle("error", on);
+  }
+  function clearOnInput(id){
+    var el = document.getElementById(id);
+    el.addEventListener("input", function(){ setError(el, false); });
+    el.addEventListener("change", function(){ setError(el, false); });
+  }
+  ["name","phone","date","time","guests"].forEach(clearOnInput);
+
+  function validPhone(v){
+    var digits = v.replace(/\D/g,"");
+    return digits.length >= 10 && digits.length <= 12;
+  }
+  function validTime(v){
+    if(!v) return false;
+    var parts = v.split(":");
+    var mins = (+parts[0])*60 + (+parts[1]);
+    return mins >= 8*60 && mins <= 22*60+30; /* 08:00 – 22:30 */
+  }
+
+  form.addEventListener("submit", function(e){
+    e.preventDefault();
+    var ok = true;
+
+    var name = document.getElementById("name");
+    if(name.value.trim().length < 2){ setError(name,true); ok=false; }
+
+    var phone = document.getElementById("phone");
+    if(!validPhone(phone.value)){ setError(phone,true); ok=false; }
+
+    var date = document.getElementById("date");
+    if(!date.value || date.value < todayStr){ setError(date,true); ok=false; }
+
+    var time = document.getElementById("time");
+    if(!validTime(time.value)){ setError(time,true); ok=false; }
+
+    var guests = document.getElementById("guests");
+    if(!guests.value){ setError(guests,true); ok=false; }
+
+    if(!ok){
+      var firstErr = form.querySelector(".field.error");
+      if(firstErr){ firstErr.scrollIntoView({behavior:"smooth",block:"center"}); }
+      return;
+    }
+
+    /* success */
+    var g = guests.options[guests.selectedIndex].text;
+    var dParts = date.value.split("-");
+    var human = dParts[2]+"."+dParts[1]+"."+dParts[0];
+    document.getElementById("successText").textContent =
+      "Спасибо, "+name.value.trim()+"! Бронь на "+human+" в "+time.value+" ("+g+") принята. Мы перезвоним в течение 15 минут.";
+    form.style.display = "none";
+    success.classList.add("show");
+    success.scrollIntoView({behavior:"smooth",block:"center"});
+  });
+
+  /* ---------- NEWSLETTER ---------- */
+  var news = document.getElementById("newsForm");
+  news.addEventListener("submit", function(e){
+    e.preventDefault();
+    var email = document.getElementById("newsEmail");
+    if(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)){
+      news.innerHTML = '<span style="opacity:.85;font-size:.95rem">✓ Спасибо! Вы подписаны.</span>';
+    } else {
+      email.style.borderColor = "#d65a3c";
+      email.focus();
+    }
+  });
+
+  /* ---------- ADD-TO-CART MICRO FEEDBACK ---------- */
+  grid.addEventListener("click", function(e){
+    var btn = e.target.closest(".add");
+    if(!btn) return;
+    btn.textContent = "✓";
+    btn.style.background = "#3c7c3c";
+    setTimeout(function(){ btn.textContent="+"; btn.style.background=""; }, 1100);
+  });
+
+})();
+</script>
+</body>
+</html>

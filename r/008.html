@@ -1,0 +1,1644 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FreshHub — Умные продукты для вашего дома</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --primary: #10B981;
+  --primary-dark: #059669;
+  --primary-light: #D1FAE5;
+  --primary-50: #ECFDF5;
+  --accent: #F59E0B;
+  --accent-light: #FEF3C7;
+  --dark: #0F172A;
+  --dark-700: #1E293B;
+  --dark-600: #334155;
+  --gray-500: #64748B;
+  --gray-400: #94A3B8;
+  --gray-300: #CBD5E1;
+  --gray-200: #E2E8F0;
+  --gray-100: #F1F5F9;
+  --gray-50: #F8FAFC;
+  --white: #FFFFFF;
+  --red: #EF4444;
+  --radius: 16px;
+  --radius-sm: 10px;
+  --radius-xs: 6px;
+  --shadow-sm: 0 1px 3px rgba(15,23,42,0.06), 0 1px 2px rgba(15,23,42,0.04);
+  --shadow: 0 4px 6px -1px rgba(15,23,42,0.07), 0 2px 4px -2px rgba(15,23,42,0.05);
+  --shadow-md: 0 10px 25px -3px rgba(15,23,42,0.08), 0 4px 6px -4px rgba(15,23,42,0.04);
+  --shadow-lg: 0 20px 50px -12px rgba(15,23,42,0.15);
+  --shadow-xl: 0 25px 60px -12px rgba(15,23,42,0.2);
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--gray-50);
+  color: var(--dark);
+  line-height: 1.6;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { text-decoration: none; color: inherit; }
+button { border: none; cursor: pointer; font-family: inherit; }
+img { max-width: 100%; display: block; }
+ul { list-style: none; }
+
+.container { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+
+/* ===== HEADER ===== */
+.header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid rgba(226,232,240,0.6);
+  transition: var(--transition);
+}
+.header.scrolled {
+  box-shadow: 0 1px 12px rgba(15,23,42,0.08);
+}
+.header-inner {
+  display: flex; align-items: center; justify-content: space-between;
+  height: 72px;
+}
+.logo {
+  display: flex; align-items: center; gap: 10px;
+  font-weight: 800; font-size: 22px; color: var(--dark);
+  cursor: pointer;
+}
+.logo-icon {
+  width: 40px; height: 40px; border-radius: 12px;
+  background: linear-gradient(135deg, var(--primary), #34D399);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 12px rgba(16,185,129,0.3);
+}
+.logo-icon svg { width: 22px; height: 22px; }
+.logo span { color: var(--primary); }
+
+.nav { display: flex; align-items: center; gap: 4px; }
+.nav a {
+  padding: 8px 18px; border-radius: 10px;
+  font-size: 14.5px; font-weight: 500; color: var(--dark-600);
+  transition: var(--transition); position: relative;
+}
+.nav a:hover { color: var(--primary-dark); background: var(--primary-50); }
+.nav a.active { color: var(--primary-dark); background: var(--primary-light); font-weight: 600; }
+
+.header-actions { display: flex; align-items: center; gap: 12px; }
+.btn-cart {
+  position: relative; display: flex; align-items: center; gap: 8px;
+  padding: 10px 20px; border-radius: 12px;
+  background: var(--primary); color: white;
+  font-weight: 600; font-size: 14px;
+  transition: var(--transition);
+  box-shadow: 0 2px 8px rgba(16,185,129,0.3);
+}
+.btn-cart:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(16,185,129,0.4); }
+.btn-cart svg { width: 18px; height: 18px; }
+.cart-badge {
+  position: absolute; top: -6px; right: -6px;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--red); color: white;
+  font-size: 11px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid white;
+}
+
+.mobile-toggle {
+  display: none; width: 40px; height: 40px;
+  border-radius: 10px; background: var(--gray-100);
+  align-items: center; justify-content: center;
+}
+.mobile-toggle span {
+  display: block; width: 18px; height: 2px;
+  background: var(--dark); border-radius: 2px;
+  position: relative; transition: var(--transition);
+}
+.mobile-toggle span::before, .mobile-toggle span::after {
+  content: ''; position: absolute; left: 0; width: 100%; height: 2px;
+  background: var(--dark); border-radius: 2px; transition: var(--transition);
+}
+.mobile-toggle span::before { top: -6px; }
+.mobile-toggle span::after { top: 6px; }
+
+/* ===== PAGES ===== */
+.page { display: none; padding-top: 72px; }
+.page.active { display: block; }
+
+/* ===== HERO ===== */
+.hero {
+  position: relative; overflow: hidden;
+  padding: 80px 0 100px;
+  background: linear-gradient(160deg, var(--white) 0%, var(--primary-50) 50%, var(--gray-50) 100%);
+}
+.hero::before {
+  content: ''; position: absolute; top: -200px; right: -200px;
+  width: 600px; height: 600px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(16,185,129,0.08) 0%, transparent 70%);
+}
+.hero::after {
+  content: ''; position: absolute; bottom: -100px; left: -100px;
+  width: 400px; height: 400px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(245,158,11,0.06) 0%, transparent 70%);
+}
+.hero-inner {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 60px; align-items: center; position: relative; z-index: 1;
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 16px 6px 8px; border-radius: 100px;
+  background: var(--white); border: 1px solid var(--gray-200);
+  font-size: 13px; font-weight: 500; color: var(--dark-600);
+  margin-bottom: 24px; box-shadow: var(--shadow-sm);
+}
+.hero-badge-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--primary); animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.3); }
+}
+.hero h1 {
+  font-size: 56px; font-weight: 900; line-height: 1.08;
+  letter-spacing: -0.03em; margin-bottom: 20px;
+  color: var(--dark);
+}
+.hero h1 .highlight {
+  background: linear-gradient(135deg, var(--primary), #34D399);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero-desc {
+  font-size: 18px; line-height: 1.7; color: var(--gray-500);
+  margin-bottom: 36px; max-width: 480px;
+}
+.hero-buttons { display: flex; gap: 14px; flex-wrap: wrap; }
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 16px 32px; border-radius: 14px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: white; font-weight: 600; font-size: 15px;
+  transition: var(--transition);
+  box-shadow: 0 4px 16px rgba(16,185,129,0.35);
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(16,185,129,0.45); }
+.btn-primary svg { width: 18px; height: 18px; }
+.btn-secondary {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 16px 32px; border-radius: 14px;
+  background: var(--white); color: var(--dark);
+  font-weight: 600; font-size: 15px;
+  border: 1.5px solid var(--gray-200);
+  transition: var(--transition);
+}
+.btn-secondary:hover { border-color: var(--primary); color: var(--primary-dark); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+
+.hero-visual {
+  position: relative; display: flex; justify-content: center; align-items: center;
+}
+.hero-card {
+  width: 100%; max-width: 480px; aspect-ratio: 1;
+  border-radius: 32px; position: relative;
+  background: linear-gradient(160deg, #ECFDF5, #D1FAE5, #A7F3D0);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--shadow-xl);
+  overflow: hidden;
+}
+.hero-card-inner {
+  text-align: center; padding: 40px;
+}
+.hero-emoji { font-size: 120px; margin-bottom: 16px; filter: drop-shadow(0 8px 16px rgba(0,0,0,0.1)); }
+.hero-card-text { font-size: 18px; font-weight: 600; color: var(--dark-700); }
+
+.floating-card {
+  position: absolute; padding: 14px 20px; border-radius: 16px;
+  background: var(--white); box-shadow: var(--shadow-lg);
+  display: flex; align-items: center; gap: 12px;
+  animation: float 4s ease-in-out infinite;
+}
+.floating-card:nth-child(2) { top: 20%; left: -30px; animation-delay: 0s; }
+.floating-card:nth-child(3) { bottom: 25%; right: -20px; animation-delay: 1.5s; }
+.floating-card:nth-child(4) { bottom: 10%; left: 10%; animation-delay: 3s; }
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+.floating-icon {
+  width: 40px; height: 40px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+}
+.floating-card-text { font-size: 13px; }
+.floating-card-text strong { display: block; font-weight: 600; color: var(--dark); }
+.floating-card-text span { color: var(--gray-500); font-size: 12px; }
+
+/* ===== STATS ===== */
+.stats {
+  padding: 40px 0;
+  border-bottom: 1px solid var(--gray-200);
+  background: var(--white);
+}
+.stats-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px;
+}
+.stat-item { text-align: center; }
+.stat-number {
+  font-size: 36px; font-weight: 800; color: var(--primary-dark);
+  letter-spacing: -0.02em;
+}
+.stat-label { font-size: 14px; color: var(--gray-500); margin-top: 4px; font-weight: 500; }
+
+/* ===== CATEGORIES ===== */
+.categories { padding: 100px 0; }
+.section-header { text-align: center; margin-bottom: 56px; }
+.section-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 14px; border-radius: 100px;
+  background: var(--primary-50); color: var(--primary-dark);
+  font-size: 13px; font-weight: 600; margin-bottom: 16px;
+  border: 1px solid var(--primary-light);
+}
+.section-title {
+  font-size: 40px; font-weight: 800; letter-spacing: -0.025em;
+  color: var(--dark); margin-bottom: 12px;
+}
+.section-desc {
+  font-size: 17px; color: var(--gray-500); max-width: 560px; margin: 0 auto;
+  line-height: 1.7;
+}
+
+.cat-grid {
+  display: grid; grid-template-columns: repeat(6, 1fr); gap: 20px;
+}
+.cat-card {
+  background: var(--white); border-radius: var(--radius);
+  padding: 32px 16px; text-align: center;
+  border: 1.5px solid var(--gray-200);
+  transition: var(--transition); cursor: pointer;
+}
+.cat-card:hover {
+  border-color: var(--primary); transform: translateY(-6px);
+  box-shadow: var(--shadow-lg);
+}
+.cat-icon {
+  width: 64px; height: 64px; border-radius: 16px;
+  margin: 0 auto 16px; display: flex; align-items: center; justify-content: center;
+  font-size: 32px;
+  background: var(--primary-50);
+}
+.cat-card:nth-child(2) .cat-icon { background: #FEF3C7; }
+.cat-card:nth-child(3) .cat-icon { background: #FCE7F3; }
+.cat-card:nth-child(4) .cat-icon { background: #DBEAFE; }
+.cat-card:nth-child(5) .cat-icon { background: #FEE2E2; }
+.cat-card:nth-child(6) .cat-icon { background: #E0E7FF; }
+.cat-name { font-size: 14px; font-weight: 600; color: var(--dark); }
+.cat-count { font-size: 12px; color: var(--gray-400); margin-top: 4px; }
+
+/* ===== PRODUCTS ===== */
+.products { padding: 80px 0 100px; background: var(--white); }
+.products-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px;
+}
+.product-card {
+  background: var(--gray-50); border-radius: var(--radius);
+  overflow: hidden; border: 1.5px solid var(--gray-100);
+  transition: var(--transition); position: relative;
+}
+.product-card:hover {
+  transform: translateY(-4px); box-shadow: var(--shadow-lg);
+  border-color: var(--primary-light);
+}
+.product-badge {
+  position: absolute; top: 14px; left: 14px; z-index: 2;
+  padding: 4px 10px; border-radius: 8px;
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+}
+.badge-sale { background: var(--red); color: white; }
+.badge-new { background: var(--primary); color: white; }
+.badge-hit { background: var(--accent); color: white; }
+.product-img {
+  height: 200px; display: flex; align-items: center; justify-content: center;
+  font-size: 72px; background: linear-gradient(180deg, var(--gray-50), var(--white));
+}
+.product-info { padding: 20px; }
+.product-category { font-size: 12px; color: var(--gray-400); font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
+.product-name { font-size: 16px; font-weight: 600; color: var(--dark); margin: 6px 0 4px; }
+.product-weight { font-size: 13px; color: var(--gray-400); margin-bottom: 14px; }
+.product-bottom { display: flex; align-items: center; justify-content: space-between; }
+.product-price { font-size: 20px; font-weight: 700; color: var(--dark); }
+.product-price .old {
+  font-size: 14px; color: var(--gray-400); text-decoration: line-through;
+  font-weight: 400; margin-left: 6px;
+}
+.btn-add {
+  width: 42px; height: 42px; border-radius: 12px;
+  background: var(--primary); color: white;
+  display: flex; align-items: center; justify-content: center;
+  transition: var(--transition); font-size: 20px;
+  box-shadow: 0 2px 8px rgba(16,185,129,0.3);
+}
+.btn-add:hover { background: var(--primary-dark); transform: scale(1.08); }
+
+/* ===== FEATURES ===== */
+.features { padding: 100px 0; }
+.features-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px;
+}
+.feature-card {
+  background: var(--white); border-radius: var(--radius);
+  padding: 36px; border: 1.5px solid var(--gray-200);
+  transition: var(--transition);
+}
+.feature-card:hover { border-color: var(--primary-light); box-shadow: var(--shadow-md); }
+.feature-icon {
+  width: 56px; height: 56px; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px; margin-bottom: 20px;
+  background: var(--primary-50);
+}
+.feature-card:nth-child(2) .feature-icon { background: #DBEAFE; }
+.feature-card:nth-child(3) .feature-icon { background: #FEF3C7; }
+.feature-card:nth-child(4) .feature-icon { background: #FCE7F3; }
+.feature-card:nth-child(5) .feature-icon { background: #E0E7FF; }
+.feature-card:nth-child(6) .feature-icon { background: #FEE2E2; }
+.feature-title { font-size: 18px; font-weight: 700; color: var(--dark); margin-bottom: 8px; }
+.feature-desc { font-size: 14.5px; color: var(--gray-500); line-height: 1.65; }
+
+/* ===== PROMO BANNER ===== */
+.promo-banner {
+  padding: 80px 0;
+  background: var(--white);
+}
+.promo-inner {
+  background: linear-gradient(135deg, var(--dark) 0%, var(--dark-700) 100%);
+  border-radius: 28px; padding: 72px 64px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 48px;
+  align-items: center; position: relative; overflow: hidden;
+}
+.promo-inner::before {
+  content: ''; position: absolute; top: -50%; right: -10%;
+  width: 500px; height: 500px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(16,185,129,0.15) 0%, transparent 70%);
+}
+.promo-content { position: relative; z-index: 1; }
+.promo-content h2 {
+  font-size: 38px; font-weight: 800; color: var(--white);
+  letter-spacing: -0.02em; margin-bottom: 16px; line-height: 1.2;
+}
+.promo-content p { font-size: 16px; color: var(--gray-400); margin-bottom: 32px; line-height: 1.7; }
+.promo-code {
+  display: inline-flex; align-items: center; gap: 12px;
+  padding: 14px 24px; border-radius: 14px;
+  background: rgba(16,185,129,0.15); border: 1px dashed var(--primary);
+  color: var(--primary); font-weight: 700; font-size: 18px;
+  letter-spacing: 0.05em;
+}
+.promo-visual {
+  position: relative; z-index: 1;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 140px; filter: drop-shadow(0 16px 32px rgba(0,0,0,0.3));
+}
+
+/* ===== CATALOG PAGE ===== */
+.catalog-hero {
+  padding: 48px 0 32px;
+  background: linear-gradient(180deg, var(--primary-50), var(--gray-50));
+}
+.catalog-filters {
+  display: flex; gap: 10px; flex-wrap: wrap; margin-top: 24px;
+}
+.filter-btn {
+  padding: 10px 22px; border-radius: 100px;
+  background: var(--white); color: var(--dark-600);
+  font-size: 14px; font-weight: 500;
+  border: 1.5px solid var(--gray-200);
+  transition: var(--transition);
+}
+.filter-btn:hover, .filter-btn.active {
+  background: var(--primary); color: white;
+  border-color: var(--primary);
+}
+.catalog-section { padding: 48px 0 100px; }
+.catalog-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px;
+}
+
+/* ===== ABOUT PAGE ===== */
+.about-hero {
+  padding: 80px 0 60px;
+  background: linear-gradient(160deg, var(--primary-50), var(--white));
+}
+.about-hero-inner {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center;
+}
+.about-hero h1 { font-size: 48px; font-weight: 900; letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 20px; }
+.about-hero p { font-size: 17px; color: var(--gray-500); line-height: 1.7; }
+.about-visual {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+}
+.about-stat-card {
+  background: var(--white); border-radius: var(--radius);
+  padding: 28px; text-align: center;
+  border: 1.5px solid var(--gray-200);
+  box-shadow: var(--shadow-sm);
+}
+.about-stat-card .num { font-size: 32px; font-weight: 800; color: var(--primary-dark); }
+.about-stat-card .label { font-size: 13px; color: var(--gray-500); margin-top: 4px; }
+
+.timeline { padding: 80px 0; }
+.timeline-grid { display: flex; flex-direction: column; gap: 0; position: relative; }
+.timeline-grid::before {
+  content: ''; position: absolute; left: 28px; top: 0; bottom: 0;
+  width: 2px; background: var(--gray-200);
+}
+.timeline-item {
+  display: flex; gap: 32px; padding: 24px 0; position: relative;
+}
+.timeline-dot {
+  width: 56px; height: 56px; border-radius: 50%; flex-shrink: 0;
+  background: var(--primary-50); border: 3px solid var(--primary);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700; color: var(--primary-dark);
+  z-index: 1;
+}
+.timeline-content h3 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+.timeline-content p { font-size: 15px; color: var(--gray-500); line-height: 1.65; }
+
+.team { padding: 80px 0 100px; background: var(--white); }
+.team-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; }
+.team-card {
+  text-align: center; padding: 36px 20px;
+  background: var(--gray-50); border-radius: var(--radius);
+  border: 1.5px solid var(--gray-100); transition: var(--transition);
+}
+.team-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+.team-avatar {
+  width: 88px; height: 88px; border-radius: 50%; margin: 0 auto 16px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 40px;
+  background: linear-gradient(135deg, var(--primary-light), var(--primary-50));
+}
+.team-name { font-size: 16px; font-weight: 700; color: var(--dark); }
+.team-role { font-size: 13px; color: var(--gray-500); margin-top: 4px; }
+
+/* ===== DELIVERY PAGE ===== */
+.delivery-hero {
+  padding: 80px 0 60px;
+  background: linear-gradient(160deg, #DBEAFE, var(--white));
+}
+.delivery-hero h1 { font-size: 48px; font-weight: 900; letter-spacing: -0.03em; margin-bottom: 16px; }
+.delivery-hero p { font-size: 17px; color: var(--gray-500); line-height: 1.7; max-width: 560px; }
+
+.delivery-options { padding: 80px 0; }
+.delivery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+.delivery-card {
+  background: var(--white); border-radius: var(--radius);
+  padding: 40px 32px; border: 1.5px solid var(--gray-200);
+  transition: var(--transition); position: relative; overflow: hidden;
+}
+.delivery-card.popular {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 1px var(--primary), var(--shadow-md);
+}
+.delivery-card.popular::before {
+  content: 'Популярный'; position: absolute; top: 16px; right: -32px;
+  background: var(--primary); color: white; font-size: 11px; font-weight: 700;
+  padding: 4px 40px; transform: rotate(45deg); text-transform: uppercase;
+}
+.delivery-card-icon { font-size: 48px; margin-bottom: 20px; }
+.delivery-card h3 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+.delivery-card .price { font-size: 28px; font-weight: 800; color: var(--primary-dark); margin-bottom: 16px; }
+.delivery-card .price span { font-size: 14px; font-weight: 400; color: var(--gray-400); }
+.delivery-card ul { margin-bottom: 24px; }
+.delivery-card ul li {
+  padding: 8px 0; font-size: 14px; color: var(--dark-600);
+  display: flex; align-items: center; gap: 10px;
+  border-bottom: 1px solid var(--gray-100);
+}
+.delivery-card ul li:last-child { border: none; }
+.delivery-check { color: var(--primary); font-weight: 700; }
+
+.delivery-zones { padding: 0 0 100px; }
+.zones-map {
+  background: var(--white); border-radius: var(--radius);
+  padding: 48px; border: 1.5px solid var(--gray-200);
+  display: grid; grid-template-columns: 1fr 1fr; gap: 48px;
+  align-items: center;
+}
+.zones-visual {
+  aspect-ratio: 1; border-radius: var(--radius);
+  background: linear-gradient(135deg, var(--primary-50), #DBEAFE);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 120px;
+}
+.zones-list { display: flex; flex-direction: column; gap: 16px; }
+.zone-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 24px; border-radius: var(--radius-sm);
+  background: var(--gray-50); border: 1px solid var(--gray-200);
+}
+.zone-item .zone-name { font-weight: 600; font-size: 15px; }
+.zone-item .zone-time { font-size: 13px; color: var(--gray-500); }
+.zone-item .zone-price { font-weight: 700; color: var(--primary-dark); }
+
+/* ===== CONTACTS PAGE ===== */
+.contacts-hero {
+  padding: 80px 0 60px;
+  background: linear-gradient(160deg, #FEF3C7, var(--white));
+}
+.contacts-hero h1 { font-size: 48px; font-weight: 900; letter-spacing: -0.03em; margin-bottom: 16px; }
+.contacts-hero p { font-size: 17px; color: var(--gray-500); line-height: 1.7; max-width: 560px; }
+
+.contacts-section { padding: 80px 0; }
+.contacts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; }
+.contact-form {
+  background: var(--white); border-radius: var(--radius);
+  padding: 40px; border: 1.5px solid var(--gray-200);
+}
+.contact-form h3 { font-size: 22px; font-weight: 700; margin-bottom: 24px; }
+.form-group { margin-bottom: 20px; }
+.form-group label {
+  display: block; font-size: 13px; font-weight: 600;
+  color: var(--dark-600); margin-bottom: 8px;
+}
+.form-group input, .form-group textarea, .form-group select {
+  width: 100%; padding: 14px 18px; border-radius: var(--radius-sm);
+  border: 1.5px solid var(--gray-200); font-size: 15px;
+  font-family: inherit; transition: var(--transition);
+  background: var(--gray-50);
+}
+.form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+  outline: none; border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(16,185,129,0.1);
+  background: var(--white);
+}
+.form-group textarea { resize: vertical; min-height: 120px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.btn-submit {
+  width: 100%; padding: 16px; border-radius: 14px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: white; font-weight: 600; font-size: 15px;
+  transition: var(--transition);
+  box-shadow: 0 4px 16px rgba(16,185,129,0.3);
+}
+.btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(16,185,129,0.4); }
+
+.contact-info-cards { display: flex; flex-direction: column; gap: 20px; }
+.info-card {
+  background: var(--white); border-radius: var(--radius);
+  padding: 28px; border: 1.5px solid var(--gray-200);
+  display: flex; gap: 20px; align-items: flex-start;
+  transition: var(--transition);
+}
+.info-card:hover { border-color: var(--primary-light); box-shadow: var(--shadow-sm); }
+.info-card-icon {
+  width: 52px; height: 52px; border-radius: 14px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; background: var(--primary-50);
+}
+.info-card h4 { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+.info-card p { font-size: 14px; color: var(--gray-500); line-height: 1.6; }
+.info-card a { color: var(--primary-dark); font-weight: 500; }
+
+.stores-section { padding: 0 0 100px; }
+.stores-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.store-card {
+  background: var(--white); border-radius: var(--radius);
+  overflow: hidden; border: 1.5px solid var(--gray-200);
+  transition: var(--transition);
+}
+.store-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+.store-map {
+  height: 160px;
+  background: linear-gradient(135deg, var(--primary-50), #DBEAFE);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 48px;
+}
+.store-info { padding: 24px; }
+.store-info h4 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+.store-info p { font-size: 13.5px; color: var(--gray-500); line-height: 1.6; }
+.store-hours {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-top: 12px; padding: 4px 12px; border-radius: 100px;
+  background: var(--primary-50); color: var(--primary-dark);
+  font-size: 12px; font-weight: 600;
+}
+
+/* ===== FOOTER ===== */
+.footer {
+  background: var(--dark); color: var(--gray-300); padding: 72px 0 32px;
+}
+.footer-grid {
+  display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px;
+  padding-bottom: 48px; border-bottom: 1px solid var(--dark-700);
+}
+.footer-brand .logo { color: var(--white); margin-bottom: 16px; }
+.footer-brand p { font-size: 14px; line-height: 1.7; color: var(--gray-400); max-width: 280px; }
+.footer-socials { display: flex; gap: 10px; margin-top: 20px; }
+.footer-social {
+  width: 40px; height: 40px; border-radius: 10px;
+  background: var(--dark-700); display: flex; align-items: center; justify-content: center;
+  font-size: 16px; transition: var(--transition);
+}
+.footer-social:hover { background: var(--primary); }
+.footer-col h4 { font-size: 14px; font-weight: 700; color: var(--white); margin-bottom: 20px; text-transform: uppercase; letter-spacing: 0.05em; }
+.footer-col a { display: block; font-size: 14px; color: var(--gray-400); padding: 6px 0; transition: var(--transition); }
+.footer-col a:hover { color: var(--primary); }
+.footer-bottom {
+  padding-top: 28px; display: flex; justify-content: space-between; align-items: center;
+  font-size: 13px; color: var(--gray-500);
+}
+
+/* ===== MOBILE MENU ===== */
+.mobile-menu {
+  display: none; position: fixed; top: 72px; left: 0; right: 0; bottom: 0;
+  background: rgba(255,255,255,0.98); backdrop-filter: blur(20px);
+  z-index: 999; padding: 24px;
+  flex-direction: column; gap: 8px;
+}
+.mobile-menu.open { display: flex; }
+.mobile-menu a {
+  padding: 16px 20px; border-radius: 12px;
+  font-size: 16px; font-weight: 500; color: var(--dark-600);
+  transition: var(--transition);
+}
+.mobile-menu a:hover, .mobile-menu a.active {
+  background: var(--primary-50); color: var(--primary-dark);
+}
+
+/* ===== TOAST ===== */
+.toast {
+  position: fixed; bottom: 32px; right: 32px; z-index: 9999;
+  padding: 16px 28px; border-radius: 14px;
+  background: var(--dark); color: var(--white);
+  font-size: 14px; font-weight: 500;
+  box-shadow: var(--shadow-xl);
+  transform: translateY(100px); opacity: 0;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex; align-items: center; gap: 10px;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast-icon { font-size: 18px; }
+
+/* ===== SCROLL TOP ===== */
+.scroll-top {
+  position: fixed; bottom: 32px; left: 32px; z-index: 999;
+  width: 48px; height: 48px; border-radius: 14px;
+  background: var(--white); color: var(--dark);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--shadow-lg); border: 1px solid var(--gray-200);
+  transition: var(--transition);
+  opacity: 0; pointer-events: none; transform: translateY(20px);
+}
+.scroll-top.show { opacity: 1; pointer-events: all; transform: translateY(0); }
+.scroll-top:hover { background: var(--primary); color: white; }
+
+/* ===== ANIMATIONS ===== */
+.fade-in {
+  opacity: 0; transform: translateY(24px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.fade-in.visible { opacity: 1; transform: translateY(0); }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+  .hero h1 { font-size: 42px; }
+  .cat-grid { grid-template-columns: repeat(3, 1fr); }
+  .products-grid, .catalog-grid { grid-template-columns: repeat(3, 1fr); }
+  .footer-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 768px) {
+  .nav { display: none; }
+  .mobile-toggle { display: flex; }
+  .hero-inner { grid-template-columns: 1fr; text-align: center; }
+  .hero h1 { font-size: 36px; }
+  .hero-desc { margin: 0 auto 36px; }
+  .hero-buttons { justify-content: center; }
+  .hero-visual { display: none; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 24px; }
+  .cat-grid { grid-template-columns: repeat(2, 1fr); }
+  .products-grid, .catalog-grid { grid-template-columns: repeat(2, 1fr); }
+  .features-grid { grid-template-columns: 1fr; }
+  .promo-inner { grid-template-columns: 1fr; padding: 48px 32px; }
+  .promo-visual { display: none; }
+  .about-hero-inner { grid-template-columns: 1fr; }
+  .delivery-grid { grid-template-columns: 1fr; }
+  .contacts-grid { grid-template-columns: 1fr; }
+  .stores-grid { grid-template-columns: 1fr; }
+  .zones-map { grid-template-columns: 1fr; }
+  .team-grid { grid-template-columns: repeat(2, 1fr); }
+  .section-title { font-size: 30px; }
+  .footer-grid { grid-template-columns: 1fr; }
+  .form-row { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header" id="header">
+  <div class="container header-inner">
+    <div class="logo" onclick="navigate('home')">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10"/>
+          <path d="M12 2c3 3 4.5 6.5 4.5 10"/>
+          <path d="M12 2c-3 3-4.5 6.5-4.5 10S9 19 12 22"/>
+          <path d="M2 12h10"/>
+          <path d="M17 9l3 3-3 3"/>
+          <line x1="22" y1="12" x2="12" y2="12"/>
+        </svg>
+      </div>
+      Fresh<span>Hub</span>
+    </div>
+    <nav class="nav" id="nav">
+      <a href="#" onclick="navigate('home'); return false;" class="active" data-page="home">Главная</a>
+      <a href="#" onclick="navigate('catalog'); return false;" data-page="catalog">Каталог</a>
+      <a href="#" onclick="navigate('about'); return false;" data-page="about">О нас</a>
+      <a href="#" onclick="navigate('delivery'); return false;" data-page="delivery">Доставка</a>
+      <a href="#" onclick="navigate('contacts'); return false;" data-page="contacts">Контакты</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn-cart" onclick="showToast('Корзина пока пуста', '🛒')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        Корзина
+        <span class="cart-badge" id="cartBadge">0</span>
+      </button>
+      <button class="mobile-toggle" onclick="toggleMobile()"><span></span></button>
+    </div>
+  </div>
+</header>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#" onclick="navigate('home'); closeMobile(); return false;" class="active" data-page="home">Главная</a>
+  <a href="#" onclick="navigate('catalog'); closeMobile(); return false;" data-page="catalog">Каталог</a>
+  <a href="#" onclick="navigate('about'); closeMobile(); return false;" data-page="about">О нас</a>
+  <a href="#" onclick="navigate('delivery'); closeMobile(); return false;" data-page="delivery">Доставка</a>
+  <a href="#" onclick="navigate('contacts'); closeMobile(); return false;" data-page="contacts">Контакты</a>
+</div>
+
+<!-- ==================== HOME PAGE ==================== -->
+<div class="page active" id="page-home">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="container hero-inner">
+      <div class="hero-content">
+        <div class="hero-badge">
+          <div class="hero-badge-dot"></div>
+          Доставка за 30 минут по всему городу
+        </div>
+        <h1>Свежие продукты<br>с <span class="highlight">доставкой</span><br>до двери</h1>
+        <p class="hero-desc">Более 12 000 товаров от проверенных поставщиков. Фермерские продукты, органические овощи и фрукты прямо к вашему столу.</p>
+        <div class="hero-buttons">
+          <button class="btn-primary" onclick="navigate('catalog')">
+            Перейти в каталог
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </button>
+          <button class="btn-secondary" onclick="navigate('delivery')">Узнать о доставке</button>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="hero-card">
+          <div class="hero-card-inner">
+            <div class="hero-emoji">🥑</div>
+            <div class="hero-card-text">Только свежее</div>
+          </div>
+        </div>
+        <div class="floating-card">
+          <div class="floating-icon" style="background:#D1FAE5;">🥦</div>
+          <div class="floating-card-text"><strong>Органика</strong><span>100% натурально</span></div>
+        </div>
+        <div class="floating-card">
+          <div class="floating-icon" style="background:#FEF3C7;">⚡</div>
+          <div class="floating-card-text"><strong>30 минут</strong><span>Быстрая доставка</span></div>
+        </div>
+        <div class="floating-card">
+          <div class="floating-icon" style="background:#DBEAFE;">💎</div>
+          <div class="floating-card-text"><strong>Премиум</strong><span>Лучшее качество</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section class="stats">
+    <div class="container">
+      <div class="stats-grid">
+        <div class="stat-item fade-in"><div class="stat-number">12 000+</div><div class="stat-label">Товаров в каталоге</div></div>
+        <div class="stat-item fade-in"><div class="stat-number">48</div><div class="stat-label">Магазинов в сети</div></div>
+        <div class="stat-item fade-in"><div class="stat-number">250K+</div><div class="stat-label">Довольных клиентов</div></div>
+        <div class="stat-item fade-in"><div class="stat-number">30 мин</div><div class="stat-label">Среднее время доставки</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CATEGORIES -->
+  <section class="categories">
+    <div class="container">
+      <div class="section-header fade-in">
+        <div class="section-tag">🏷️ Категории</div>
+        <h2 class="section-title">Всё, что вам нужно</h2>
+        <p class="section-desc">Широкий ассортимент продуктов на каждый день — от свежих овощей до готовой кулинарии</p>
+      </div>
+      <div class="cat-grid">
+        <div class="cat-card fade-in" onclick="navigate('catalog')">
+          <div class="cat-icon">🥬</div>
+          <div class="cat-name">Овощи и зелень</div>
+          <div class="cat-count">1 240 товаров</div>
+        </div>
+        <div class="cat-card fade-in" onclick="navigate('catalog')">
+          <div class="cat-icon">🍎</div>
+          <div class="cat-name">Фрукты и ягоды</div>
+          <div class="cat-count">890 товаров</div>
+        </div>
+        <div class="cat-card fade-in" onclick="navigate('catalog')">
+          <div class="cat-icon">🥩</div>
+          <div class="cat-name">Мясо и птица</div>
+          <div class="cat-count">650 товаров</div>
+        </div>
+        <div class="cat-card fade-in" onclick="navigate('catalog')">
+          <div class="cat-icon">🧀</div>
+          <div class="cat-name">Молочные продукты</div>
+          <div class="cat-count">1 100 товаров</div>
+        </div>
+        <div class="cat-card fade-in" onclick="navigate('catalog')">
+          <div class="cat-icon">🍞</div>
+          <div class="cat-name">Хлеб и выпечка</div>
+          <div class="cat-count">430 товаров</div>
+        </div>
+        <div class="cat-card fade-in" onclick="navigate('catalog')">
+          <div class="cat-icon">🍷</div>
+          <div class="cat-name">Напитки</div>
+          <div class="cat-count">780 товаров</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRODUCTS -->
+  <section class="products">
+    <div class="container">
+      <div class="section-header fade-in">
+        <div class="section-tag">🔥 Хиты продаж</div>
+        <h2 class="section-title">Популярные товары</h2>
+        <p class="section-desc">Самые востребованные продукты по лучшим ценам с доставкой на дом</p>
+      </div>
+      <div class="products-grid">
+        <div class="product-card fade-in">
+          <span class="product-badge badge-hit">Хит</span>
+          <div class="product-img">🥑</div>
+          <div class="product-info">
+            <div class="product-category">Фрукты</div>
+            <div class="product-name">Авокадо Хасс спелый</div>
+            <div class="product-weight">1 шт, ~180 г</div>
+            <div class="product-bottom">
+              <div class="product-price">149 ₽</div>
+              <button class="btn-add" onclick="addToCart()">+</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card fade-in">
+          <span class="product-badge badge-sale">-25%</span>
+          <div class="product-img">🫐</div>
+          <div class="product-info">
+            <div class="product-category">Ягоды</div>
+            <div class="product-name">Голубика садовая</div>
+            <div class="product-weight">125 г</div>
+            <div class="product-bottom">
+              <div class="product-price">289 ₽ <span class="old">389 ₽</span></div>
+              <button class="btn-add" onclick="addToCart()">+</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card fade-in">
+          <span class="product-badge badge-new">Новинка</span>
+          <div class="product-img">🥩</div>
+          <div class="product-info">
+            <div class="product-category">Мясо</div>
+            <div class="product-name">Стейк Рибай мраморный</div>
+            <div class="product-weight">300 г</div>
+            <div class="product-bottom">
+              <div class="product-price">1 290 ₽</div>
+              <button class="btn-add" onclick="addToCart()">+</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card fade-in">
+          <div class="product-img">🧀</div>
+          <div class="product-info">
+            <div class="product-category">Молочные</div>
+            <div class="product-name">Пармезан выдержанный</div>
+            <div class="product-weight">200 г</div>
+            <div class="product-bottom">
+              <div class="product-price">459 ₽</div>
+              <button class="btn-add" onclick="addToCart()">+</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card fade-in">
+          <span class="product-badge badge-hit">Хит</span>
+          <div class="product-img">🍣</div>
+          <div class="product-info">
+            <div class="product-category">Рыба</div>
+            <div class="product-name">Лосось филе свежее</div>
+            <div class="product-weight">300 г</div>
+            <div class="product-bottom">
+              <div class="product-price">890 ₽</div>
+              <button class="btn-add" onclick="addToCart()">+</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card fade-in">
+          <span class="product-badge badge-sale">-30%</span>
+          <div class="product-img">🥗</div>
+          <div class="product-info">
+            <div class="product-category">Салаты</div>
+            <div class="product-name">Микс салатов органик</div>
+            <div class="product-weight">150 г</div>
+            <div class="product-bottom">
+              <div class="product-price">169 ₽ <span class="old">239 ₽</span></div>
+              <button class="btn-add" onclick="addToCart()">+</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card fade-in">
+          <div class="product-img">🍓</div>
+          <div class="product-info">
+            <div class="product-category">Ягоды</div>
+            <div class="product-name">Клубника свежая</div>
+            <div class="product-weight">250 г</div>
+            <div class="product-bottom">
+              <div class="product-price">349 ₽</div>
+              <button class="btn-add" onclick="addToCart()">+</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card fade-in">
+          <span class="product-badge badge-new">Новинка</span>
+          <div class="product-img">🥐</div>
+          <div class="product-info">
+            <div class="product-category">Выпечка</div>
+            <div class="product-name">Круассан с миндалём</div>
+            <div class="product-weight">85 г</div>
+            <div class="product-bottom">
+              <div class="product-price">189 ₽</div>
+              <button class="btn-add" onclick="addToCart()">+</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="features">
+    <div class="container">
+      <div class="section-header fade-in">
+        <div class="section-tag">✨ Преимущества</div>
+        <h2 class="section-title">Почему выбирают FreshHub</h2>
+        <p class="section-desc">Мы создаём лучший опыт покупки продуктов, сочетая технологии и заботу о каждом клиенте</p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card fade-in">
+          <div class="feature-icon">🚀</div>
+          <div class="feature-title">Доставка за 30 минут</div>
+          <div class="feature-desc">Собственная логистическая сеть с термосумками. Курьеры на электробайках доставляют заказ молниеносно.</div>
+        </div>
+        <div class="feature-card fade-in">
+          <div class="feature-icon">🌿</div>
+          <div class="feature-title">Только свежее</div>
+          <div class="feature-desc">Контроль качества на каждом этапе. Продукты хранятся при идеальной температуре и проходят проверку.</div>
+        </div>
+        <div class="feature-card fade-in">
+          <div class="feature-icon">💰</div>
+          <div class="feature-title">Лучшие цены</div>
+          <div class="feature-desc">Прямые контракты с фермерами и производителями. Без посредников — экономия до 40% на каждой покупке.</div>
+        </div>
+        <div class="feature-card fade-in">
+          <div class="feature-icon">📱</div>
+          <div class="feature-title">Умное приложение</div>
+          <div class="feature-desc">Персональные рекомендации на основе AI. Списки покупок, подписки и отслеживание заказа в реальном времени.</div>
+        </div>
+        <div class="feature-card fade-in">
+          <div class="feature-icon">🎁</div>
+          <div class="feature-title">Программа лояльности</div>
+          <div class="feature-desc">Кэшбэк до 10% баллами на каждую покупку. Эксклюзивные скидки, ранний доступ к акциям и подарки.</div>
+        </div>
+        <div class="feature-card fade-in">
+          <div class="feature-icon">♻️</div>
+          <div class="feature-title">Эко-упаковка</div>
+          <div class="feature-desc">Биоразлагаемые пакеты и многоразовые контейнеры. Сдавайте упаковку курьеру и получайте бонусы.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROMO BANNER -->
+  <section class="promo-banner">
+    <div class="container">
+      <div class="promo-inner fade-in">
+        <div class="promo-content">
+          <h2>Первый заказ?<br>Скидка 20%!</h2>
+          <p>Используйте промокод при оформлении первого заказа и получите скидку на весь ассортимент. Доставка бесплатно от 1 500 ₽.</p>
+          <div class="promo-code">🎉 FRESH2025</div>
+        </div>
+        <div class="promo-visual">🛍️</div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ==================== CATALOG PAGE ==================== -->
+<div class="page" id="page-catalog">
+  <section class="catalog-hero">
+    <div class="container">
+      <div class="section-tag">📦 Каталог</div>
+      <h1 class="section-title" style="text-align:left;">Все продукты</h1>
+      <p class="section-desc" style="text-align:left; margin:0;">Более 12 000 товаров с доставкой на дом</p>
+      <div class="catalog-filters">
+        <button class="filter-btn active" onclick="filterProducts('all', this)">Все товары</button>
+        <button class="filter-btn" onclick="filterProducts('fruits', this)">🍎 Фрукты</button>
+        <button class="filter-btn" onclick="filterProducts('vegetables', this)">🥬 Овощи</button>
+        <button class="filter-btn" onclick="filterProducts('meat', this)">🥩 Мясо</button>
+        <button class="filter-btn" onclick="filterProducts('dairy', this)">🧀 Молочные</button>
+        <button class="filter-btn" onclick="filterProducts('bakery', this)">🍞 Выпечка</button>
+        <button class="filter-btn" onclick="filterProducts('drinks', this)">🥤 Напитки</button>
+      </div>
+    </div>
+  </section>
+  <section class="catalog-section">
+    <div class="container">
+      <div class="catalog-grid" id="catalogGrid">
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ==================== ABOUT PAGE ==================== -->
+<div class="page" id="page-about">
+  <section class="about-hero">
+    <div class="container">
+      <div class="about-hero-inner">
+        <div>
+          <div class="section-tag">🏢 О компании</div>
+          <h1>Мы меняем культуру<br>покупки продуктов</h1>
+          <p>FreshHub — это сеть умных продуктовых магазинов нового поколения. Мы объединяем технологии, качество и заботу об экологии, чтобы каждый день делать вашу жизнь проще и вкуснее.</p>
+        </div>
+        <div class="about-visual">
+          <div class="about-stat-card"><div class="num">2019</div><div class="label">Год основания</div></div>
+          <div class="about-stat-card"><div class="num">48</div><div class="label">Магазинов</div></div>
+          <div class="about-stat-card"><div class="num">3 200</div><div class="label">Сотрудников</div></div>
+          <div class="about-stat-card"><div class="num">15</div><div class="label">Городов</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="timeline">
+    <div class="container">
+      <div class="section-header fade-in">
+        <div class="section-tag">📅 История</div>
+        <h2 class="section-title">Наш путь</h2>
+      </div>
+      <div class="timeline-grid">
+        <div class="timeline-item fade-in">
+          <div class="timeline-dot">2019</div>
+          <div class="timeline-content">
+            <h3>Основание компании</h3>
+            <p>Два друга — Алексей Морозов и Дмитрий Волков — открыли первый магазин FreshHub в Москве с идеей сделать покупку продуктов удобной и технологичной.</p>
+          </div>
+        </div>
+        <div class="timeline-item fade-in">
+          <div class="timeline-dot">2020</div>
+          <div class="timeline-content">
+            <h3>Запуск доставки</h3>
+            <p>В условиях пандемии мы запустили экспресс-доставку за 30 минут. Это стало нашим ключевым конкурентным преимуществом.</p>
+          </div>
+        </div>
+        <div class="timeline-item fade-in">
+          <div class="timeline-dot">2021</div>
+          <div class="timeline-content">
+            <h3>Мобильное приложение</h3>
+            <p>Выпустили приложение с AI-рекомендациями. За первый месяц — 100 000 скачиваний и рейтинг 4.8 в App Store.</p>
+          </div>
+        </div>
+        <div class="timeline-item fade-in">
+          <div class="timeline-dot">2023</div>
+          <div class="timeline-content">
+            <h3>Выход в регионы</h3>
+            <p>Открыли магазины в 15 городах России. Запустили программу эко-упаковки и партнёрство с локальными фермерами.</p>
+          </div>
+        </div>
+        <div class="timeline-item fade-in">
+          <div class="timeline-dot">2025</div>
+          <div class="timeline-content">
+            <h3>Лидер рынка</h3>
+            <p>48 магазинов, 250 000+ постоянных клиентов, собственная логистическая платформа и планы на международную экспансию.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="team">
+    <div class="container">
+      <div class="section-header fade-in">
+        <div class="section-tag">👥 Команда</div>
+        <h2 class="section-title">Люди за FreshHub</h2>
+        <p class="section-desc">Профессионалы, которые каждый день делают сервис лучше</p>
+      </div>
+      <div class="team-grid">
+        <div class="team-card fade-in">
+          <div class="team-avatar">👨‍💼</div>
+          <div class="team-name">Алексей Морозов</div>
+          <div class="team-role">CEO и сооснователь</div>
+        </div>
+        <div class="team-card fade-in">
+          <div class="team-avatar">👨‍💻</div>
+          <div class="team-name">Дмитрий Волков</div>
+          <div class="team-role">CTO и сооснователь</div>
+        </div>
+        <div class="team-card fade-in">
+          <div class="team-avatar">👩‍🔬</div>
+          <div class="team-name">Елена Соколова</div>
+          <div class="team-role">Директор по качеству</div>
+        </div>
+        <div class="team-card fade-in">
+          <div class="team-avatar">👨‍🍳</div>
+          <div class="team-name">Марк Лебедев</div>
+          <div class="team-role">Шеф-технолог</div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ==================== DELIVERY PAGE ==================== -->
+<div class="page" id="page-delivery">
+  <section class="delivery-hero">
+    <div class="container">
+      <div class="section-tag">🚚 Доставка</div>
+      <h1>Быстрая доставка<br>по всему городу</h1>
+      <p>Три тарифа на любой случай — от экспресс-доставки за 30 минут до запланированной на удобный день</p>
+    </div>
+  </section>
+
+  <section class="delivery-options">
+    <div class="container">
+      <div class="delivery-grid">
+        <div class="delivery-card fade-in">
+          <div class="delivery-card-icon">🚶</div>
+          <h3>Экспресс</h3>
+          <div class="price">199 ₽ <span>/ заказ</span></div>
+          <ul>
+            <li><span class="delivery-check">✓</span> Доставка за 30 минут</li>
+            <li><span class="delivery-check">✓</span> Термосумки</li>
+            <li><span class="delivery-check">✓</span> До 15 кг</li>
+            <li><span class="delivery-check">✓</span> SMS-уведомления</li>
+            <li><span class="delivery-check">✓</span> Отслеживание курьера</li>
+          </ul>
+          <button class="btn-primary" style="width:100%;justify-content:center;" onclick="showToast('Тариф выбран!', '✅')">Выбрать</button>
+        </div>
+        <div class="delivery-card popular fade-in">
+          <div class="delivery-card-icon">🚗</div>
+          <h3>Стандарт</h3>
+          <div class="price">99 ₽ <span>/ заказ</span></div>
+          <ul>
+            <li><span class="delivery-check">✓</span> Доставка за 2 часа</li>
+            <li><span class="delivery-check">✓</span> Термосумки</li>
+            <li><span class="delivery-check">✓</span> До 30 кг</li>
+            <li><span class="delivery-check">✓</span> Выбор временного слота</li>
+            <li><span class="delivery-check">✓</span> Бесплатно от 1 500 ₽</li>
+          </ul>
+          <button class="btn-primary" style="width:100%;justify-content:center;" onclick="showToast('Тариф выбран!', '✅')">Выбрать</button>
+        </div>
+        <div class="delivery-card fade-in">
+          <div class="delivery-card-icon">📅</div>
+          <h3>Планируемая</h3>
+          <div class="price">Бесплатно <span>/ от 2 000 ₽</span></div>
+          <ul>
+            <li><span class="delivery-check">✓</span> Доставка в выбранный день</li>
+            <li><span class="delivery-check">✓</span> До 50 кг</li>
+            <li><span class="delivery-check">✓</span> Подъём на этаж</li>
+            <li><span class="delivery-check">✓</span> Сборка и распаковка</li>
+            <li><span class="delivery-check">✓</span> Вывоз упаковки</li>
+          </ul>
+          <button class="btn-primary" style="width:100%;justify-content:center;" onclick="showToast('Тариф выбран!', '✅')">Выбрать</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="delivery-zones">
+    <div class="container">
+      <div class="section-header fade-in">
+        <div class="section-tag">🗺️ Зоны доставки</div>
+        <h2 class="section-title">Зоны и время</h2>
+      </div>
+      <div class="zones-map fade-in">
+        <div class="zones-visual">🗺️</div>
+        <div class="zones-list">
+          <div class="zone-item">
+            <div><div class="zone-name">Зелёная зона</div><div class="zone-time">30 минут</div></div>
+            <div class="zone-price">от 99 ₽</div>
+          </div>
+          <div class="zone-item">
+            <div><div class="zone-name">Жёлтая зона</div><div class="zone-time">1 час</div></div>
+            <div class="zone-price">от 149 ₽</div>
+          </div>
+          <div class="zone-item">
+            <div><div class="zone-name">Оранжевая зона</div><div class="zone-time">2 часа</div></div>
+            <div class="zone-price">от 199 ₽</div>
+          </div>
+          <div class="zone-item">
+            <div><div class="zone-name">Красная зона</div><div class="zone-time">На следующий день</div></div>
+            <div class="zone-price">от 299 ₽</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ==================== CONTACTS PAGE ==================== -->
+<div class="page" id="page-contacts">
+  <section class="contacts-hero">
+    <div class="container">
+      <div class="section-tag">📞 Контакты</div>
+      <h1>Свяжитесь с нами</h1>
+      <p>Мы всегда рады помочь — напишите, позвоните или загляните в один из наших магазинов</p>
+    </div>
+  </section>
+
+  <section class="contacts-section">
+    <div class="container">
+      <div class="contacts-grid">
+        <div class="contact-form fade-in">
+          <h3>Напишите нам</h3>
+          <form onsubmit="handleSubmit(event)">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Имя</label>
+                <input type="text" placeholder="Ваше имя" required>
+              </div>
+              <div class="form-group">
+                <label>Телефон</label>
+                <input type="tel" placeholder="+7 (___) ___-__-__" required>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Email</label>
+              <input type="email" placeholder="your@email.com" required>
+            </div>
+            <div class="form-group">
+              <label>Тема обращения</label>
+              <select>
+                <option>Общий вопрос</option>
+                <option>Проблема с заказом</option>
+                <option>Сотрудничество</option>
+                <option>Вакансии</option>
+                <option>Жалоба</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Сообщение</label>
+              <textarea placeholder="Расскажите подробнее..."></textarea>
+            </div>
+            <button type="submit" class="btn-submit">Отправить сообщение</button>
+          </form>
+        </div>
+        <div class="contact-info-cards fade-in">
+          <div class="info-card">
+            <div class="info-card-icon">📞</div>
+            <div>
+              <h4>Горячая линия</h4>
+              <p><a href="tel:88001234567">8 (800) 123-45-67</a><br>Бесплатно по России, 24/7</p>
+            </div>
+          </div>
+          <div class="info-card">
+            <div class="info-card-icon">📧</div>
+            <div>
+              <h4>Email</h4>
+              <p><a href="mailto:hello@freshhub.ru">hello@freshhub.ru</a><br>Ответим в течение 2 часов</p>
+            </div>
+          </div>
+          <div class="info-card">
+            <div class="info-card-icon">💬</div>
+            <div>
+              <h4>Мессенджеры</h4>
+              <p>Telegram, WhatsApp<br><a href="#">@freshhub_support</a></p>
+            </div>
+          </div>
+          <div class="info-card">
+            <div class="info-card-icon">🏢</div>
+            <div>
+              <h4>Офис</h4>
+              <p>Москва, ул. Инновационная, 42<br>БЦ «Технопарк», 15 этаж</p>
+            </div>
+          </div>
+          <div class="info-card">
+            <div class="info-card-icon">🕐</div>
+            <div>
+              <h4>Режим работы</h4>
+              <p>Магазины: 8:00 — 23:00<br>Доставка: круглосуточно</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="stores-section">
+    <div class="container">
+      <div class="section-header fade-in">
+        <div class="section-tag">🏪 Магазины</div>
+        <h2 class="section-title">Наши магазины</h2>
+        <p class="section-desc">Найдите ближайший FreshHub на карте</p>
+      </div>
+      <div class="stores-grid">
+        <div class="store-card fade-in">
+          <div class="store-map">📍</div>
+          <div class="store-info">
+            <h4>FreshHub Арбат</h4>
+            <p>ул. Арбат, 24, стр. 1<br>Москва</p>
+            <div class="store-hours">🟢 8:00 — 23:00</div>
+          </div>
+        </div>
+        <div class="store-card fade-in">
+          <div class="store-map">📍</div>
+          <div class="store-info">
+            <h4>FreshHub Тверская</h4>
+            <p>Тверская ул., 15<br>Москва</p>
+            <div class="store-hours">🟢 8:00 — 23:00</div>
+          </div>
+        </div>
+        <div class="store-card fade-in">
+          <div class="store-map">📍</div>
+          <div class="store-info">
+            <h4>FreshHub Сити</h4>
+            <p>Пресненская наб., 8<br>Москва</p>
+            <div class="store-hours">🟢 Круглосуточно</div>
+          </div>
+        </div>
+        <div class="store-card fade-in">
+          <div class="store-map">📍</div>
+          <div class="store-info">
+            <h4>FreshHub Парк Культуры</h4>
+            <p>Зубовский бул., 5<br>Москва</p>
+            <div class="store-hours">🟢 8:00 — 23:00</div>
+          </div>
+        </div>
+        <div class="store-card fade-in">
+          <div class="store-map">📍</div>
+          <div class="store-info">
+            <h4>FreshHub Сокольники</h4>
+            <p>Русаковская ул., 12<br>Москва</p>
+            <div class="store-hours">🟢 8:00 — 23:00</div>
+          </div>
+        </div>
+        <div class="store-card fade-in">
+          <div class="store-map">📍</div>
+          <div class="store-info">
+            <h4>FreshHub Университет</h4>
+            <p>Ленинский пр., 78<br>Москва</p>
+            <div class="store-hours">🟢 8:00 — 23:00</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="logo">
+          <div class="logo-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10"/>
+              <path d="M12 2c3 3 4.5 6.5 4.5 10"/>
+              <path d="M12 2c-3 3-4.5 6.5-4.5 10S9 19 12 22"/>
+              <path d="M2 12h10"/>
+              <path d="M17 9l3 3-3 3"/>
+              <line x1="22" y1="12" x2="12" y2="12"/>
+            </svg>
+          </div>
+          Fresh<span>Hub</span>
+        </div>
+        <p>Умные продукты для вашего дома. Свежесть, качество и технологии в каждой покупке.</p>
+        <div class="footer-socials">
+          <a class="footer-social" href="#">📱</a>
+          <a class="footer-social" href="#">💬</a>
+          <a class="footer-social" href="#">📸</a>
+          <a class="footer-social" href="#">▶️</a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Покупателям</h4>
+        <a href="#" onclick="navigate('catalog'); return false;">Каталог</a>
+        <a href="#" onclick="navigate('delivery'); return false;">Доставка</a>
+        <a href="#">Акции</a>
+        <a href="#">Программа лояльности</a>
+        <a href="#">Возврат</a>
+      </div>
+      <div class="footer-col">
+        <h4>Компания</h4>
+        <a href="#" onclick="navigate('about'); return false;">О нас</a>
+        <a href="#">Вакансии</a>
+        <a href="#">Пресса</a>
+        <a href="#">Партнёрам</a>
+        <a href="#">Франшиза</a>
+      </div>
+      <div class="footer-col">
+        <h4>Поддержка</h4>
+        <a href="#" onclick="navigate('contacts'); return false;">Контакты</a>
+        <a href="#">FAQ</a>
+        <a href="#">Обратная связь</a>
+        <a href="#">Политика конфиденциальности</a>
+        <a href="#">Условия использования</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 FreshHub. Все права защищены.</span>
+      <span>Сделано с 💚 в Москве</span>
+    </div>
+  </div>
+</footer>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <span class="toast-icon" id="toastIcon">✅</span>
+  <span id="toastText">Товар доба��лен</span>
+</div>
+
+<!-- SCROLL TOP -->
+<button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+</button>
+
+<script>
+// ===== CATALOG DATA =====
+const catalogProducts = [
+  { name: 'Авокадо Хасс', cat: 'fruits', emoji: '🥑', weight: '1 шт, ~180 г', price: 149, badge: 'hit' },
+  { name: 'Бананы Эквадор', cat: 'fruits', emoji: '🍌', weight: '1 кг', price: 89, badge: null },
+  { name: 'Манго спелое', cat: 'fruits', emoji: '🥭', weight: '1 шт, ~300 г', price: 249, badge: 'new' },
+  { name: 'Яблоки Гала', cat: 'fruits', emoji: '🍎', weight: '1 кг', price: 129, badge: null },
+  { name: 'Виноград Кишмиш', cat: 'fruits', emoji: '🍇', weight: '500 г', price: 329, badge: 'sale', oldPrice: 429 },
+  { name: 'Апельсины Марокко', cat: 'fruits', emoji: '🍊', weight: '1 кг', price: 149, badge: null },
+  { name: 'Голубика', cat: 'fruits', emoji: '🫐', weight: '125 г', price: 289, badge: 'sale', oldPrice: 389 },
+  { name: 'Клубника', cat: 'fruits', emoji: '🍓', weight: '250 г', price: 349, badge: 'hit' },
+  { name: 'Помидоры черри', cat: 'vegetables', emoji: '🍅', weight: '250 г', price: 179, badge: null },
+  { name: 'Огурцы свежие', cat: 'vegetables', emoji: '🥒', weight: '500 г', price: 99, badge: null },
+  { name: 'Морковь молодая', cat: 'vegetables', emoji: '🥕', weight: '500 г', price: 79, badge: null },
+  { name: 'Брокколи', cat: 'vegetables', emoji: '🥦', weight: '400 г', price: 159, badge: 'new' },
+  { name: 'Перец болгарский', cat: 'vegetables', emoji: '🫑', weight: '1 шт', price: 69, badge: null },
+  { name: 'Картофель молодой', cat: 'vegetables', emoji: '🥔', weight: '1 кг', price: 89, badge: null },
+  { name: 'Микс салатов', cat: 'vegetables', emoji: '🥗', weight: '150 г', price: 169, badge: 'sale', oldPrice: 239 },
+  { name: 'Кукуруза сладкая', cat: 'vegetables', emoji: '🌽', weight: '2 шт', price: 119, badge: null },
+  { name: 'Стейк Рибай', cat: 'meat', emoji: '🥩', weight: '300 г', price: 1290, badge: 'new' },
+  { name: 'Куриная грудка', cat: 'meat', emoji: '🍗', weight: '500 г', price: 289, badge: null },
+  { name: 'Фарш говяжий', cat: 'meat', emoji: '🥩', weight: '400 г', price: 389, badge: 'hit' },
+  { name: 'Свинина шейка', cat: 'meat', emoji: '🥓', weight: '500 г', price: 449, badge: null },
+  { name: 'Индейка филе', cat: 'meat', emoji: '🍗', weight: '400 г', price: 359, badge: null },
+  { name: 'Пармезан', cat: 'dairy', emoji: '🧀', weight: '200 г', price: 459, badge: null },
+  { name: 'Молоко фермерское', cat: 'dairy', emoji: '🥛', weight: '1 л', price: 119, badge: 'hit' },
+  { name: 'Йогурт греческий', cat: 'dairy', emoji: '🥛', weight: '200 г', price: 89, badge: null },
+  { name: 'Масло сливочное', cat: 'dairy', emoji: '🧈', weight: '180 г', price: 199, badge: null },
+  { name: 'Творог 5%', cat: 'dairy', emoji: '🥛', weight: '250 г', price: 129, badge: 'sale', oldPrice: 169 },
+  { name: 'Сметана 20%', cat: 'dairy', emoji: '🥛', weight: '300 г', price: 99, badge: null },
+  { name: 'Круассан миндальный', cat: 'bakery', emoji: '🥐', weight: '85 г', price: 189, badge: 'new' },
+  { name: 'Хлеб ржаной', cat: 'bakery', emoji: '🍞', weight: '400 г', price: 79, badge: null },
+  { name: 'Багет французский', cat: 'bakery', emoji: '🥖', weight: '250 г', price: 109, badge: null },
+  { name: 'Булочка с корицей', cat: 'bakery', emoji: '🧁', weight: '90 г', price: 139, badge: 'hit' },
+  { name: 'Сок апельсиновый', cat: 'drinks', emoji: '🧃', weight: '1 л', price: 159, badge: null },
+  { name: 'Вода минеральная', cat: 'drinks', emoji: '💧', weight: '1.5 л', price: 69, badge: null },
+  { name: 'Смузи ягодный', cat: 'drinks', emoji: '🥤', weight: '300 мл', price: 249, badge: 'new' },
+  { name: 'Кофе зерновой', cat: 'drinks', emoji: '☕', weight: '250 г', price: 599, badge: 'hit' },
+  { name: 'Чай зелёный', cat: 'drinks', emoji: '🍵', weight: '100 г', price: 289, badge: null },
+];
+
+function renderCatalog(filter) {
+  const grid = document.getElementById('catalogGrid');
+  const items = filter === 'all' ? catalogProducts : catalogProducts.filter(p => p.cat === filter);
+  grid.innerHTML = items.map(p => {
+    let badgeHTML = '';
+    if (p.badge === 'hit') badgeHTML = '<span class="product-badge badge-hit">Хит</span>';
+    else if (p.badge === 'new') badgeHTML = '<span class="product-badge badge-new">Новинка</span>';
+    else if (p.badge === 'sale') badgeHTML = '<span class="product-badge badge-sale">-' + Math.round((1 - p.price / p.oldPrice) * 100) + '%</span>';
+    const oldPriceHTML = p.oldPrice ? ' <span class="old">' + p.oldPrice + ' ₽</span>' : '';
+    return `<div class="product-card">
+      ${badgeHTML}
+      <div class="product-img">${p.emoji}</div>
+      <div class="product-info">
+        <div class="product-category">${getCatName(p.cat)}</div>
+        <div class="product-name">${p.name}</div>
+        <div class="product-weight">${p.weight}</div>
+        <div class="product-bottom">
+          <div class="product-price">${p.price} ₽${oldPriceHTML}</div>
+          <button class="btn-add" onclick="addToCart()">+</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function getCatName(cat) {
+  const map = { fruits: 'Фрукты', vegetables: 'Овощи', meat: 'Мясо', dairy: 'Молочные', bakery: 'Выпечка', drinks: 'Напитки' };
+  return map[cat] || cat;
+}
+
+function filterProducts(cat, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderCatalog(cat);
+}
+
+// ===== NAVIGATION =====
+function navigate(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.querySelectorAll('.nav a, .mobile-menu a').forEach(a => {
+    a.classList.toggle('active', a.dataset.page === page);
+  });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (page === 'catalog') renderCatalog('all');
+  setTimeout(observeFadeIns, 100);
+}
+
+// ===== CART =====
+let cartCount = 0;
+function addToCart() {
+  cartCount++;
+  document.getElementById('cartBadge').textContent = cartCount;
+  showToast('Товар добавлен в корзину', '✅');
+}
+
+// ===== TOAST =====
+let toastTimeout;
+function showToast(text, icon) {
+  const toast = document.getElementById('toast');
+  document.getElementById('toastText').textContent = text;
+  document.getElementById('toastIcon').textContent = icon || '✅';
+  toast.classList.add('show');
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+// ===== MOBILE MENU =====
+function toggleMobile() {
+  document.getElementById('mobileMenu').classList.toggle('open');
+}
+function closeMobile() {
+  document.getElementById('mobileMenu').classList.remove('open');
+}
+
+// ===== FORM =====
+function handleSubmit(e) {
+  e.preventDefault();
+  showToast('Сообщение отправлено! Мы свяжемся с вами.', '📨');
+  e.target.reset();
+}
+
+// ===== HEADER SCROLL =====
+window.addEventListener('scroll', () => {
+  document.getElementById('header').classList.toggle('scrolled', window.scrollY > 20);
+  document.getElementById('scrollTop').classList.toggle('show', window.scrollY > 400);
+});
+
+// ===== FADE-IN OBSERVER =====
+function observeFadeIns() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.fade-in:not(.visible)').forEach(el => observer.observe(el));
+}
+
+// ===== INIT =====
+document.addEventListener('DOMContentLoaded', () => {
+  renderCatalog('all');
+  observeFadeIns();
+});
+</script>
+</body>
+</html>

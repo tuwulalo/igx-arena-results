@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="ru" class="scroll-smooth">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ГРОВ — продуктовая сеть нового поколения</title>
+<meta name="description" content="ГРОВ — сеть продуктовых магазинов. Свежесть, технологии и забота о людях в каждом районе." />
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['Manrope', 'system-ui', 'sans-serif'],
+          display: ['Sora', 'system-ui', 'sans-serif'],
+        },
+        colors: {
+          grov: {
+            50:'#f1fbf3',100:'#dcf5e1',200:'#bbe9c6',300:'#86d79b',
+            400:'#4cbd6c',500:'#27a14c',600:'#19813c',
+            700:'#166633',2:'#0d3d20',ink:'#0a1410',cream:'#f6f7f3'
+          }
+        },
+        boxShadow: {
+          soft: '0 1px 2px rgba(10,20,16,.04), 0 12px 32px -12px rgba(10,20,16,.18)',
+          glow: '0 18px 60px -18px rgba(39,161,76,.55)',
+        },
+        borderRadius: { '4xl': '2rem' }
+      }
+    }
+  }
+</script>
+<style>
+  html,body{background:#f6f7f3;color:#0a1410}
+  ::selection{background:#86d79b;color:#0d3d20}
+  .grain:before{content:"";position:absolute;inset:0;background-image:radial-gradient(circle at 1px 1px,rgba(13,61,32,.06) 1px,transparent 0);background-size:22px 22px;pointer-events:none}
+  .page{display:none;animation:fade .5s ease both}
+  .page.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  .nav-link.active{color:#19813c;background:#dcf5e1}
+  .reveal{opacity:0;transform:translateY(18px);transition:.7s cubic-bezier(.2,.7,.2,1)}
+  .reveal.in{opacity:1;transform:none}
+  .marquee{animation:scroll 30s linear infinite}
+  @keyframes scroll{to{transform:translateX(-50%)}}
+  .mesh{background:
+    radial-gradient(60% 80% at 15% 10%,rgba(76,189,108,.30),transparent 60%),
+    radial-gradient(50% 70% at 90% 20%,rgba(134,215,155,.35),transparent 60%),
+    radial-gradient(70% 90% at 70% 100%,rgba(25,129,60,.25),transparent 60%),#0a1410}
+  details summary::-webkit-details-marker{display:none}
+  details[open] .chev{transform:rotate(45deg)}
+</style>
+</head>
+<body class="font-sans antialiased text-grov-ink">
+
+<!-- ============ HEADER ============ -->
+<header class="sticky top-0 z-50 backdrop-blur-xl bg-grov-cream/80 border-b border-grov-100">
+  <nav class="max-w-7xl mx-auto px-5 lg:px-8 h-16 flex items-center justify-between gap-4">
+    <a href="#/" class="flex items-center gap-2.5 shrink-0" data-link>
+      <span class="relative inline-grid place-items-center w-9 h-9 rounded-xl bg-grov-600 shadow-glow">
+        <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none"><path d="M12 21c5-2.5 8-6 8-11V5l-8-2-8 2v5c0 5 3 8.5 8 11Z" fill="#fff" opacity=".18"/><path d="M12 4c0 6-4 7-4 11 0 0 4 1 4-3 0 4 4 3 4 3 0-4-4-5-4-11Z" fill="#fff"/></svg>
+      </span>
+      <span class="font-display font-extrabold text-xl tracking-tight">ГРОВ</span>
+    </a>
+
+    <div class="hidden md:flex items-center gap-1 text-sm font-semibold">
+      <a href="#/" data-link class="nav-link px-3.5 py-2 rounded-lg transition hover:bg-grov-100">Главная</a>
+      <a href="#/catalog" data-link class="nav-link px-3.5 py-2 rounded-lg transition hover:bg-grov-100">Каталог</a>
+      <a href="#/stores" data-link class="nav-link px-3.5 py-2 rounded-lg transition hover:bg-grov-100">Магазины</a>
+      <a href="#/about" data-link class="nav-link px-3.5 py-2 rounded-lg transition hover:bg-grov-100">О компании</a>
+      <a href="#/careers" data-link class="nav-link px-3.5 py-2 rounded-lg transition hover:bg-grov-100">Карьера</a>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <a href="#/contact" data-link class="hidden sm:inline-flex items-center gap-2 text-sm font-bold px-4 py-2 rounded-xl bg-grov-ink text-white hover:bg-grov-700 transition shadow-soft">
+        Связаться
+      </a>
+      <button id="burger" class="md:hidden inline-grid place-items-center w-10 h-10 rounded-xl border border-grov-200" aria-label="Меню">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+    </div>
+  </nav>
+  <div id="mobile" class="md:hidden hidden border-t border-grov-100 bg-grov-cream px-5 py-3 space-y-1 font-semibold">
+    <a href="#/" data-link class="block px-3 py-2.5 rounded-lg hover:bg-grov-100">Главная</a>
+    <a href="#/catalog" data-link class="block px-3 py-2.5 rounded-lg hover:bg-grov-100">Каталог</a>
+    <a href="#/stores" data-link class="block px-3 py-2.5 rounded-lg hover:bg-grov-100">Магазины</a>
+    <a href="#/about" data-link class="block px-3 py-2.5 rounded-lg hover:bg-grov-100">О компании</a>
+    <a href="#/careers" data-link class="block px-3 py-2.5 rounded-lg hover:bg-grov-100">Карьера</a>
+    <a href="#/contact" data-link class="block px-3 py-2.5 rounded-lg hover:bg-grov-100">Связаться</a>
+  </div>
+</header>
+
+<main id="app"></main>
+
+<!-- ============ TEMPLATES ============ -->
+
+<!-- HOME -->
+<template id="page-home">
+  <!-- HERO -->
+  <section class="relative overflow-hidden grain">
+    <div class="max-w-7xl mx-auto px-5 lg:px-8 pt-16 lg:pt-24 pb-20 grid lg:grid-cols-2 gap-12 items-center">
+      <div class="reveal">
+        <span class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-grov-700 bg-grov-100 px-3 py-1.5 rounded-full">
+          <span class="w-1.5 h-1.5 rounded-full bg-grov-500 animate-pulse"></span> 412 магазинов · 38 городов
+        </span>
+        <h1 class="font-display font-extrabold tracking-tight text-5xl lg:text-7xl leading-[0.95] mt-5">
+          Продукты,<br><span class="text-grov-600">которым</span><br>доверяют.
+        </h1>
+        <p class="mt-6 text-lg text-grov-2/70 max-w-md leading-relaxed">
+          ГРОВ — это сеть продуктовых магазинов нового поколения. Свежесть фермерских поставок, удобство технологий и честные цены — в твоём районе.
+        </p>
+        <div class="mt-8 flex flex-wrap gap-3">
+          <a href="#/catalog" data-link class="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-grov-600 text-white font-bold shadow-glow hover:bg-grov-700 transition">
+            Смотреть каталог
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </a>
+          <a href="#/stores" data-link class="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-white border border-grov-200 font-bold hover:border-grov-400 transition">
+            Найти магазин
+          </a>
+        </div>
+        <div class="mt-10 flex items-center gap-6 text-sm">
+          <div><div class="font-display font-extrabold text-2xl text-grov-ink">2.4 млн</div><div class="text-grov-2/60">покупателей в неделю</div></div>
+          <div class="w-px h-10 bg-grov-200"></div>
+          <div><div class="font-display font-extrabold text-2xl text-grov-ink">4.9 ★</div><div class="text-grov-2/60">средняя оценка</div></div>
+        </div>
+      </div>
+
+      <div class="reveal relative">
+        <div class="relative rounded-4xl overflow-hidden shadow-soft bg-white p-6 border border-grov-100">
+          <div class="aspect-[4/5] rounded-3xl mesh relative grid place-items-center">
+            <div class="absolute top-5 left-5 bg-white/95 rounded-2xl px-4 py-3 shadow-soft">
+              <div class="text-xs text-grov-2/60 font-semibold">Доставка за</div>
+              <div class="font-display font-extrabold text-2xl text-grov-700">15 мин</div>
+            </div>
+            <div class="absolute bottom-5 right-5 bg-white/95 rounded-2xl px-4 py-3 shadow-soft flex items-center gap-3">
+              <span class="w-9 h-9 grid place-items-center rounded-xl bg-grov-100 text-grov-600 text-lg">🥬</span>
+              <div><div class="text-xs text-grov-2/60 font-semibold">Свежесть</div><div class="font-bold text-sm">каждое утро</div></div>
+            </div>
+            <svg viewBox="0 0 24 24" class="w-28 h-28 opacity-90" fill="none"><path d="M12 4c0 6-4 7-4 11 0 0 4 1 4-3 0 4 4 3 4 3 0-4-4-5-4-11Z" fill="#fff"/></svg>
+          </div>
+        </div>
+        <div class="absolute -z-10 -inset-6 bg-grov-200/40 blur-3xl rounded-full"></div>
+      </div>
+    </div>
+
+    <!-- LOGO MARQUEE -->
+    <div class="border-y border-grov-100 bg-white/60 overflow-hidden py-5">
+      <div class="flex gap-16 marquee whitespace-nowrap text-grov-2/40 font-display font-bold text-lg w-max">
+        <span>🌾 Фермерский альянс</span><span>🚚 ГРОВ Express</span><span>♻️ Эко-упаковка 2026</span><span>🧊 Холодовая цепь</span><span>💳 ГРОВ Pay</span><span>🥖 Своя пекарня</span>
+        <span>🌾 Фермерский альянс</span><span>🚚 ГРОВ Express</span><span>♻️ Эко-упаковка 2026</span><span>🧊 Холодовая цепь</span><span>💳 ГРОВ Pay</span><span>🥖 Своя пекарня</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="max-w-7xl mx-auto px-5 lg:px-8 py-20 lg:py-28">
+    <div class="max-w-2xl reveal">
+      <span class="text-grov-600 font-bold text-sm uppercase tracking-wider">Почему ГРОВ</span>
+      <h2 class="font-display font-extrabold text-4xl lg:text-5xl mt-3 tracking-tight">Магазин, который работает на вас</h2>
+      <p class="mt-4 text-grov-2/70 text-lg">Мы соединили живую розницу с инженерной точностью. Каждый процесс — от поля до полки — измеряется и улучшается.</p>
+    </div>
+    <div class="grid md:grid-cols-3 gap-5 mt-12">
+      <div class="reveal group p-7 rounded-3xl bg-white border border-grov-100 shadow-soft hover:-translate-y-1 transition">
+        <div class="w-12 h-12 grid place-items-center rounded-2xl bg-grov-100 text-grov-600 text-2xl group-hover:scale-110 transition">🌱</div>
+        <h3 class="font-display font-bold text-xl mt-5">Прямо с фермы</h3>
+        <p class="mt-2 text-grov-2/70">280+ локальных хозяйств поставляют урожай напрямую. Средний путь от грядки до полки — 18 часов.</p>
+      </div>
+      <div class="reveal group p-7 rounded-3xl bg-grov-ink text-white shadow-soft hover:-translate-y-1 transition">
+        <div class="w-12 h-12 grid place-items-center rounded-2xl bg-grov-600 text-white text-2xl group-hover:scale-110 transition">⚡</div>
+        <h3 class="font-display font-bold text-xl mt-5">Умные цены</h3>
+        <p class="mt-2 text-white/70">Алгоритм ГРОВ Price снижает наценку на товары с коротким сроком — вы экономите, мы сокращаем отходы.</p>
+      </div>
+      <div class="reveal group p-7 rounded-3xl bg-white border border-grov-100 shadow-soft hover:-translate-y-1 transition">
+        <div class="w-12 h-12 grid place-items-center rounded-2xl bg-grov-100 text-grov-600 text-2xl group-hover:scale-110 transition">📍</div>
+        <h3 class="font-display font-bold text-xl mt-5">Всегда рядом</h3>
+        <p class="mt-2 text-grov-2/70">412 магазинов и 64 даркстора. 8 из 10 жителей наших городов живут в 7 минутах ходьбы от ГРОВ.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CATEGORIES STRIP -->
+  <section class="max-w-7xl mx-auto px-5 lg:px-8 pb-8">
+    <div class="flex items-end justify-between mb-7 reveal">
+      <h2 class="font-display font-extrabold text-3xl lg:text-4xl tracking-tight">Популярные категории</h2>
+      <a href="#/catalog" data-link class="text-grov-600 font-bold hover:text-grov-700 hidden sm:block">Весь каталог →</a>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4" id="home-cats"></div>
+  </section>
+
+  <!-- BIG CTA / APP -->
+  <section class="max-w-7xl mx-auto px-5 lg:px-8 py-20">
+    <div class="reveal relative overflow-hidden rounded-4xl mesh text-white p-10 lg:p-16 grain">
+      <div class="relative max-w-xl">
+        <h2 class="font-display font-extrabold text-4xl lg:text-5xl tracking-tight leading-tight">Приложение ГРОВ — магазин в кармане</h2>
+        <p class="mt-4 text-white/80 text-lg">Списки покупок, бонусы ГРОВ+, доставка за 15 минут и персональные скидки. Скачайте и получите 500 бонусов на первый заказ.</p>
+        <div class="mt-7 flex flex-wrap gap-3">
+          <a href="#/contact" data-link class="inline-flex items-center gap-3 bg-white text-grov-ink px-5 py-3 rounded-2xl font-bold hover:bg-grov-50 transition"> App Store</a>
+          <a href="#/contact" data-link class="inline-flex items-center gap-3 bg-white/10 border border-white/25 px-5 py-3 rounded-2xl font-bold hover:bg-white/20 transition"> Google Play</a>
+        </div>
+        <div class="mt-8 flex gap-8">
+          <div><div class="font-display font-extrabold text-3xl">3.1 млн</div><div class="text-white/60 text-sm">скачиваний</div></div>
+          <div><div class="font-display font-extrabold text-3xl">4.8 ★</div><div class="text-white/60 text-sm">в сторах</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS -->
+  <section class="max-w-7xl mx-auto px-5 lg:px-8 pb-24">
+    <h2 class="font-display font-extrabold text-3xl lg:text-4xl tracking-tight mb-10 reveal">Нас любят покупатели</h2>
+    <div class="grid md:grid-cols-3 gap-5" id="home-reviews"></div>
+  </section>
+</template>
+
+<!-- CATALOG -->
+<template id="page-catalog">
+  <section class="max-w-7xl mx-auto px-5 lg:px-8 pt-14 pb-6">
+    <span class="text-grov-600 font-bold text-sm uppercase tracking-wider reveal">Каталог</span>
+    <h1 class="font-display font-extrabold text-4xl lg:text-6xl tracking-tight mt-3 reveal">Более 14 000 товаров</h1>
+    <p class="mt-4 text-grov-2/70 text-lg max-w-2xl reveal">Свежие продукты, готовая еда и товары для дома. Фильтруйте по категориям и собирайте корзину.</p>
+  </section>
+  <section class="max-w-7xl mx-auto px-5 lg:px-8 pb-6">
+    <div id="cat-filters" class="flex flex-wrap gap-2"></div>
+  </section>
+  <section class="max-w-7xl mx-auto px-5 lg:px-8 pb-24">
+    <div id="cat-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+  </section>
+</template>
+
+<!-- STORES -->
+<template id="page-stores">
+  <section class="max-w-7xl mx-auto px-5 lg:px-8 pt-14 pb-10">
+    <span class="text-grov-600 font-bold text-sm uppercase tracking-wider reveal">Магазины</span>
+    <h1 class="font-display font-extrabold text-4xl lg:text-6xl tracking-tight mt-3 reveal">412 магазинов в 38 городах</h1>
+    <p class="mt-4 text-grov-2/70 text-lg max-w-2xl reveal">Форматы под любой ритм жизни: от районного «у дома» до гипермаркета и даркстора для доставки.</p>
+  </section>
+  <section class="max-w-7xl mx-auto px-5 lg:px-8 pb-6 grid lg:grid-cols-3 gap-5">
+    <div class="reveal p-7 rounded-3xl bg-white border border-grov-100 shadow-soft">
+      <div class="text-3xl">🏪</div><h3 class="font-display font-bold text-xl mt-4">ГРОВ Маркет</h3>
+      <p class="text-grov-2/70 mt-2">Магазин у дома до 400 м². Всё необходимое каждый день, свежая выпечка и кофе с собой.</p>
+      <div class="mt-4 font-bold text-grov-600">286 магазинов</div>
+    </div>
+    <div class="reveal p-7 rounded-3xl bg-grov-ink text-white shadow-soft">
+      <div class="text-3xl">🛒</div><h3 class="font-display font-bold text-xl mt-4">ГРОВ Гипер</h3>
+      <p class="text-white/70 mt-2">Большой формат до 4000 м². Тысячи позиций, фуд-корт, своя кулинария и рыбный лёд.</p>
+      <div class="mt-4 font-bold text-grov-300">62 гипермаркета</div>
+    </div>
+    <div class="reveal p-7 rounded-3xl bg-white border border-grov-100 shadow-soft">
+      <div class="text-3xl">📦</div><h3 class="font-display font-bold text-xl mt-4">ГРОВ Express</h3>
+      <p class="text-grov-2/70 mt-2">Даркстор для доставки за 15 минут. Работает только на сборку онлайн-заказов в вашем районе.</p>
+      <div class="mt-4 font-bold text-grov-600">64 даркстора</div>
+    </div>
+  </section>
+  <section class="max-w-7xl mx-auto px-5 lg:px-8 py-12">
+    <div class="reveal rounded-4xl overflow-hidden border border-grov-100 shadow-soft grid lg:grid-cols-5">
+      <div class="lg:col-span-3 mesh min-h-[340px] relative grain grid place-items-center">
+        <div class="text-white/80 text-center">
+          <svg viewBox="0 0 24 24" class="w-14 h-14 mx-auto mb-3 opacity-90" fill="none" stroke="#fff" stroke-width="1.6"><path d="M12 21s-7-6-7-11a7 7 0 1 1 14 0c0 5-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+          <div class="font-display font-bold text-xl">Интерактивная карта сети</div>
+          <div class="text-white/60 text-sm">38 городов · обновляется в реальном времени</div>
+        </div>
+        <span class="absolute top-[30%] left-[25%] w-3 h-3 rounded-full bg-white shadow-glow animate-ping"></span>
+        <span class="absolute top-[55%] left-[60%] w-3 h-3 rounded-full bg-white shadow-glow animate-ping"></span>
+        <span class="absolute top-[40%] left-[78%] w-3 h-3 rounded-full bg-white shadow-glow animate-ping"></span>
+      </div>
+      <div class="lg:col-span-2 bg-white p-7 lg:p-9">
+        <h3 class="font-display font-bold text-2xl">Ближайшие к вам</h3>
+        <div id="store-list" class="mt-5 space-y-3"></div>
+      </div>
+    </div>
+  </section>
+</template>
+
+<!-- ABOUT -->
+<template id="page-about">
+  <section class="max-w-7xl mx-auto px-5 lg:px-8 pt-14 pb-12">
+    <div class="max-w-3xl">
+      <span class="text-grov-600 font-bold text-sm uppercase tracking-wider reveal">О компании</span>
+      <h1 class="font-display font-extrabold text-4xl lg:text-6xl tracking-tight mt-3 reveal leading-[1.02]">Мы кормим города с 2014 года</h1>
+      <p class="mt-5 text-grov-2/70 text-xl reveal leading-relaxed">ГРОВ начинался с одного магазина в спальном районе. Сегодня это инженерно выстроенная сеть, где данные и забота о людях работают вместе — чтобы свежая еда была доступна каждому.</p>
+    </div>
+  </section>
+  <section class="max-w-7xl mx-auto px-5 lg:px-8 pb-12">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4" id="about-stats"></div>
+  </section>
+  <section class="max-w-7xl mx-auto px-5 lg:px-8 py-12 grid lg:grid-cols-2 gap-12 items-center">
+    <div class="reveal aspect-square rounded-4xl mesh grain"></div>
+    <div class="reveal">
+      <h2 class="font-display font-extrabold text-3xl lg:text-4xl tracking-tight">Наши принципы</h2>
+      <div class="mt-7 space-y-6">
+        <div class="flex gap-4"><span class="shrink-0 w-10 h-10 grid place-items-center rounded-xl bg-grov-100 text-grov-600 font-display font-bold">01</span><div><h3 class="font-bold text-lg">Свежесть как стандарт</h3><p class="text-grov-2/70">Никаких компромиссов: товар, не прошедший контроль качества, не попадает на полку.</p></div></div>
+        <div class="flex gap-4"><span class="shrink-0 w-10 h-10 grid place-items-center rounded-xl bg-grov-100 text-grov-600 font-display font-bold">02</span><div><h3 class="font-bold text-lg">Честные цены</h3><p class="text-grov-2/70">Мы зарабатываем на обороте и эффективности, а не на наценке. Прозрачность в каждом ценнике.</p></div></div>
+        <div class="flex gap-4"><span class="shrink-0 w-10 h-10 grid place-items-center rounded-xl bg-grov-100 text-grov-600 font-display font-bold">03</span><div><h3 class="font-bold text-lg">Ноль лишнего следа</h3><p class="text-grov-2/70">К 2027 году — 100% эко-упаковки и сокращение пищевых отходов на 80%.</p></div></div>
+      </div>
+    </div>
+  </section>
+  <section class="max-w-7xl mx-auto px-5 lg:px-8 py-12">
+    <h2 class="font-display font-extrabold text-3xl lg:text-4xl tracking-tight mb-8 reveal">Команда лидеров</h2>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5" id="about-team"></div>
+  </section>
+</template>
+
+<!-- CAREERS -->
+<template id="page-careers">
+  <section class="max-w-7xl mx-auto px-5 lg:px-8 pt-14 pb-12">
+    <span class="text-grov-600 font-bold text-sm uppercase tracking-wider reveal">Карьера</span>
+    <h1 class="font-display font-extrabold text-4xl lg:text-6xl tracking-tight mt-3 reveal">Стройте ГРОВ вместе с нами</h1>
+    <p class="mt-4 text-grov-2/70 text-lg max-w-2xl reveal">Розница, логистика, технологии и продукт. 11 400 сотрудников и десятки открытых ролей в 38 городах.</p>
+  </section>
+  <section class="max-w-7xl mx-auto px-5 lg:px-8 pb-12 grid md:grid-cols-3 gap-5">
+    <div class="reveal p-6 rounded-3xl bg-white border border-grov-100 shadow-soft"><div class="text-2xl">💚</div><h3 class="font-bold text-lg mt-3">Забота 360°</h3><p class="text-grov-2/70 mt-1">ДМС с первого дня, питание, скидка сотрудника 20% и поддержка ментального здоровья.</p></div>
+    <div class="reveal p-6 rounded-3xl bg-white border border-grov-100 shadow-soft"><div class="text-2xl">📈</div><h3 class="font-bold text-lg mt-3">Рост без потолка</h3><p class="text-grov-2/70 mt-1">68% руководителей выросли внутри. Своя ГРОВ Академия и индивидуальные планы развития.</p></div>
+    <div class="reveal p-6 rounded-3xl bg-white border border-grov-100 shadow-soft"><div class="text-2xl">⚖️</div><h3 class="font-bold text-lg mt-3">Гибкость</h3><p class="text-grov-2/70 mt-1">Гибридный формат для офиса, удобные смены и подработка для студентов.</p></div>
+  </section>
+  <section class="max-w-7xl mx-auto px-5 lg:px-8 pb-24">
+    <h2 class="font-display font-extrabold text-3xl lg:text-4xl tracking-tight mb-7 reveal">Открытые вакансии</h2>
+    <div id="jobs" class="space-y-3"></div>
+  </section>
+</template>
+
+<!-- CONTACT -->
+<template id="page-contact">
+  <section class="max-w-7xl mx-auto px-5 lg:px-8 pt-14 pb-20 grid lg:grid-cols-2 gap-12">
+    <div class="reveal">
+      <span class="text-grov-600 font-bold text-sm uppercase tracking-wider">Контакты</span>
+      <h1 class="font-display font-extrabold text-4xl lg:text-6xl tracking-tight mt-3">Давайте на связи</h1>
+      <p class="mt-4 text-grov-2/70 text-lg">Вопрос, сотрудничество или франшиза — напишите нам, и команда ГРОВ ответит в течение дня.</p>
+      <div class="mt-8 space-y-4">
+        <div class="flex items-center gap-4 p-4 rounded-2xl bg-white border border-grov-100"><span class="w-11 h-11 grid place-items-center rounded-xl bg-grov-100 text-grov-600 text-xl">📞</span><div><div class="text-sm text-grov-2/60">Горячая линия</div><div class="font-bold">8 800 555-47-09</div></div></div>
+        <div class="flex items-center gap-4 p-4 rounded-2xl bg-white border border-grov-100"><span class="w-11 h-11 grid place-items-center rounded-xl bg-grov-100 text-grov-600 text-xl">✉️</span><div><div class="text-sm text-grov-2/60">Почта</div><div class="font-bold">hello@grov.market</div></div></div>
+        <div class="flex items-center gap-4 p-4 rounded-2xl bg-white border border-grov-100"><span class="w-11 h-11 grid place-items-center rounded-xl bg-grov-100 text-grov-600 text-xl">🏢</span><div><div class="text-sm text-grov-2/60">Штаб-квартира</div><div class="font-bold">Москва, ул. Урожайная, 14</div></div></div>
+      </div>
+    </div>
+    <form id="contact-form" class="reveal p-7 lg:p-9 rounded-4xl bg-white border border-grov-100 shadow-soft">
+      <h3 class="font-display font-bold text-2xl">Написать нам</h3>
+      <div class="mt-6 space-y-4">
+        <div><label class="text-sm font-semibold">Имя</label><input required type="text" class="mt-1.5 w-full px-4 py-3 rounded-xl bg-grov-cream border border-grov-200 focus:border-grov-500 focus:ring-2 focus:ring-grov-200 outline-none transition" placeholder="Как к вам обращаться"></div>
+        <div><label class="text-sm font-semibold">E-mail</label><input required type="email" class="mt-1.5 w-full px-4 py-3 rounded-xl bg-grov-cream border border-grov-200 focus:border-grov-500 focus:ring-2 focus:ring-grov-200 outline-none transition" placeholder="you@email.com"></div>
+        <div><label class="text-sm font-semibold">Тема</label>
+          <select class="mt-1.5 w-full px-4 py-3 rounded-xl bg-grov-cream border border-grov-200 focus:border-grov-500 outline-none transition">
+            <option>Общий вопрос</option><option>Сотрудничество / поставки</option><option>Франшиза</option><option>Пресса</option>
+          </select>
+        </div>
+        <div><label class="text-sm font-semibold">Сообщение</label><textarea required rows="4" class="mt-1.5 w-full px-4 py-3 rounded-xl bg-grov-cream border border-grov-200 focus:border-grov-500 focus:ring-2 focus:ring-grov-200 outline-none transition resize-none" placeholder="Расскажите подробнее…"></textarea></div>
+        <button type="submit" class="w-full py-3.5 rounded-xl bg-grov-600 text-white font-bold shadow-glow hover:bg-grov-700 transition">Отправить</button>
+        <p id="form-ok" class="hidden text-center text-grov-600 font-semibold">✓ Спасибо! Мы свяжемся с вами в течение дня.</p>
+      </div>
+    </form>
+  </section>
+  <section class="max-w-7xl mx-auto px-5 lg:px-8 pb-24">
+    <h2 class="font-display font-extrabold text-3xl tracking-tight mb-6 reveal">Частые вопросы</h2>
+    <div class="space-y-3" id="faq"></div>
+  </section>
+</template>
+
+<!-- ============ FOOTER ============ -->
+<footer class="bg-grov-ink text-white/70">
+  <div class="max-w-7xl mx-auto px-5 lg:px-8 py-16 grid md:grid-cols-2 lg:grid-cols-5 gap-10">
+    <div class="lg:col-span-2">
+      <a href="#/" data-link class="flex items-center gap-2.5">
+        <span class="inline-grid place-items-center w-9 h-9 rounded-xl bg-grov-600"><svg viewBox="0 0 24 24" class="w-5 h-5"><path d="M12 4c0 6-4 7-4 11 0 0 4 1 4-3 0 4 4 3 4 3 0-4-4-5-4-11Z" fill="#fff"/></svg></span>
+        <span class="font-display font-extrabold text-xl text-white">ГРОВ</span>
+      </a>
+      <p class="mt-4 max-w-xs">Сеть продуктовых магазинов нового поколения. Свежесть, технологии и забота — рядом с вами.</p>
+      <div class="mt-5 flex gap-3">
+        <a href="#/" data-link class="w-9 h-9 grid place-items-center rounded-lg bg-white/10 hover:bg-grov-600 transition">in</a>
+        <a href="#/" data-link class="w-9 h-9 grid place-items-center rounded-lg bg-white/10 hover:bg-grov-600 transition">tg</a>
+        <a href="#/" data-link class="w-9 h-9 grid place-items-center rounded-lg bg-white/10 hover:bg-grov-600 transition">vk</a>
+      </div>
+    </div>
+    <div><div class="font-bold text-white mb-3">Покупателям</div><ul class="space-y-2 text-sm"><li><a href="#/catalog" data-link class="hover:text-white">Каталог</a></li><li><a href="#/stores" data-link class="hover:text-white">Магазины</a></li><li><a href="#/contact" data-link class="hover:text-white">Доставка</a></li><li><a href="#/contact" data-link class="hover:text-white">Бонусы ГРОВ+</a></li></ul></div>
+    <div><div class="font-bold text-white mb-3">Компания</div><ul class="space-y-2 text-sm"><li><a href="#/about" data-link class="hover:text-white">О нас</a></li><li><a href="#/careers" data-link class="hover:text-white">Карьера</a></li><li><a href="#/about" data-link class="hover:text-white">Устойчивость</a></li><li><a href="#/contact" data-link class="hover:text-white">Пресса</a></li></ul></div>
+    <div><div class="font-bold text-white mb-3">Партнёрам</div><ul class="space-y-2 text-sm"><li><a href="#/contact" data-link class="hover:text-white">Поставщикам</a></li><li><a href="#/contact" data-link class="hover:text-white">Франшиза</a></li><li><a href="#/contact" data-link class="hover:text-white">Аренда</a></li></ul></div>
+  </div>
+  <div class="border-t border-white/10">
+    <div class="max-w-7xl mx-auto px-5 lg:px-8 py-6 flex flex-col sm:flex-row justify-between gap-3 text-sm">
+      <span>© 2026 ГРОВ Маркет. Все права защищены.</span>
+      <div class="flex gap-5"><a href="#/" data-link class="hover:text-white">Конфиденциальность</a><a href="#/" data-link class="hover:text-white">Условия</a></div>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ---------------- DATA ---------------- */
+const CATS = [
+  {n:'Овощи и фрукты',e:'🥦',c:'bg-grov-100'},{n:'Молочное',e:'🥛',c:'bg-blue-50'},
+  {n:'Мясо и птица',e:'🍗',c:'bg-red-50'},{n:'Хлеб и выпечка',e:'🥐',c:'bg-amber-50'},
+  {n:'Напитки',e:'🧃',c:'bg-orange-50'},{n:'Заморозка',e:'🧊',c:'bg-cyan-50'},
+  {n:'Бакалея',e:'🌾',c:'bg-yellow-50'},{n:'Сладкое',e:'🍫',c:'bg-pink-50'},
+  {n:'Готовая еда',e:'🍱',c:'bg-emerald-50'},{n:'Рыба',e:'🐟',c:'bg-sky-50'},
+  {n:'Для дома',e:'🧼',c:'bg-violet-50'},{n:'Кофе и чай',e:'☕',c:'bg-stone-100'},
+];
+const PRODUCTS = [
+  ['Авокадо Хасс','Овощи и фрукты','🥑',189,'шт','Фрукты'],
+  ['Помидоры черри','Овощи и фрукты','🍅',149,'250 г','Фрукты'],
+  ['Банан Премиум','Овощи и фрукты','🍌',89,'кг','Фрукты'],
+  ['Молоко фермерское 3.2%','Молочное','🥛',94,'1 л','Молочное'],
+  ['Йогурт греческий','Молочное','🍶',79,'150 г','Молочное'],
+  ['Сыр Чеддер','Молочное','🧀',329,'200 г','Молочное'],
+  ['Куриное филе','Мясо и птица','🍗',279,'кг','Мясо'],
+  ['Стейк Рибай','Мясо и птица','🥩',899,'400 г','Мясо'],
+  ['Круассан масляный','Хлеб и выпечка','🥐',69,'шт','Выпечка'],
+  ['Багет на закваске','Хлеб и выпечка','🥖',79,'шт','Выпечка'],
+  ['Сок апельсиновый','Напитки','🧃',129,'1 л','Напитки'],
+  ['Вода минеральная','Напитки','💧',49,'0.5 л','Напитки'],
+  ['Пельмени домашние','Заморозка','🥟',259,'800 г','Заморозка'],
+  ['Ягодный микс','Заморозка','🫐',199,'300 ��','Заморозка'],
+  ['Паста Спагетти','Бакалея','🍝',99,'500 г','Бакалея'],
+  ['Оливковое масло','Бакалея','🫒',459,'500 мл','Бакалея'],
+  ['Шоколад тёмный 70%','Сладкое','🍫',149,'90 г','Сладкое'],
+  ['Печенье овсяное','Сладкое','🍪',89,'200 г','Сладкое'],
+  ['Боул с лососем','Готовая еда','🍣',349,'320 г','Готовое'],
+  ['Салат Цезарь','Готовая еда','🥗',229,'250 г','Готовое'],
+  ['Лосось филе','Рыба','🐟',649,'кг','Рыба'],
+  ['Кофе в зёрнах','Кофе и чай','☕',549,'250 г','Кофе'],
+  ['Чай зелёный','Кофе и чай','🍵',179,'100 г','Кофе'],
+  ['Эко-салфетки','Для дома','🧻',119,'упак','Дом'],
+];
+const REVIEWS = [
+  ['Марина К.','Беру овощи только тут — реально свежие, как с рынка. Доставка за 15 минут спасает по будням.','🧑‍🦰'],
+  ['Дмитрий О.','Цены адекватные, приложение удобное. Бонусами оплатил почти всю корзину на выходных.','🧔'],
+  ['Алёна В.','Своя пекарня — отдельная любовь. Круассаны как в Париже, а магазин у дома.','👩'],
+];
+const STORES = [
+  ['ГРОВ Маркет — Тверская','Тверская ул., 8','до 23:00','0.4 км'],
+  ['ГРОВ Гипер — Авиапарк','Ходынский б-р, 4','круглосуточно','2.1 км'],
+  ['ГРОВ Маркет — Пресня','Пресненская наб., 12','до 24:00','1.3 км'],
+  ['ГРОВ Express — Хамовники','Льва Толстого, 16','доставка','0.8 км'],
+];
+const STATS = [['2014','год основания'],['412','магазинов'],['11 400','сотрудников'],['38','городов']];
+const TEAM = [
+  ['Игорь Северов','CEO, сооснователь','🧑‍💼'],['Лена Зорина','COO','👩‍💼'],
+  ['Артём Власов','CTO','👨‍💻'],['Софья Гай','Директор по устойчивости','👩‍🔬'],
+];
+const JOBS = [
+  ['Директор магазина','Розница','Москва · Санкт-Петербург','от 140 000 ₽'],
+  ['Frontend-инженер (React)','Технологии','Гибрид · Москва','от 280 000 ₽'],
+  ['Категорийный менеджер','Закупки','Москва','от 160 000 ₽'],
+  ['Курьер ГРОВ Express','Логистика','38 городов','от 75 000 ₽'],
+  ['Data-аналитик','Технологии','Удалённо','от 220 000 ₽'],
+  ['Пекарь','Производство','Москва · Казань','от 90 000 ₽'],
+];
+const FAQ = [
+  ['Как работает доставка за 15 минут?','Заказы из даркстора ГРОВ Express собираются и доставляются курьером в радиусе вашего района. Среднее время — 14 минут.'],
+  ['Что даёт программа ГРОВ+?','Кешбэк бонусами до 10%, персональные скидки, ранний доступ к акциям и бесплатная доставка от 1500 ₽.'],
+  ['Откуда продукты?','Свежие категории поставляют 280+ локальных фермерских хозяйств напрямую, минуя посредников.'],
+  ['Можно ли вернуть товар?','Да. Если качество не устроило — вернём деньги или заменим товар без чека в течение 14 дней.'],
+];
+
+/* ---------------- HELPERS ---------------- */
+const $ = (s,r=document)=>r.querySelector(s);
+const el = (h)=>{const t=document.createElement('template');t.innerHTML=h.trim();return t.content.firstChild;};
+
+function productCard(p){
+  const [name,cat,emoji,price,unit]=p;
+  return `<div class="reveal group rounded-3xl bg-white border border-grov-100 shadow-soft overflow-hidden hover:-translate-y-1 transition">
+    <div class="aspect-square ${'bg-grov-50'} grid place-items-center text-5xl relative">
+      <span class="group-hover:scale-110 transition">${emoji}</span>
+      <span class="absolute top-3 left-3 text-[10px] font-bold uppercase tracking-wide bg-white/90 text-grov-700 px-2 py-1 rounded-full">${cat}</span>
+    </div>
+    <div class="p-4">
+      <h3 class="font-bold leading-snug">${name}</h3>
+      <div class="mt-3 flex items-center justify-between">
+        <div><span class="font-display font-extrabold text-lg">${price} ₽</span><span class="text-grov-2/50 text-sm">/${unit}</span></div>
+        <button class="addbtn w-9 h-9 grid place-items-center rounded-xl bg-grov-600 text-white hover:bg-grov-700 transition" aria-label="В корзину">+</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ---------------- PAGE BUILDERS ---------------- */
+function buildHome(root){
+  const cg=$('#home-cats',root);
+  CATS.slice(0,6).forEach(c=>cg.appendChild(el(
+    `<a href="#/catalog" data-link class="reveal group p-5 rounded-3xl ${c.c} border border-black/5 hover:-translate-y-1 transition text-center">
+      <div class="text-3xl group-hover:scale-110 transition">${c.e}</div>
+      <div class="font-bold text-sm mt-2">${c.n}</div></a>`)));
+  const rv=$('#home-reviews',root);
+  REVIEWS.forEach(r=>rv.appendChild(el(
+    `<div class="reveal p-6 rounded-3xl bg-white border border-grov-100 shadow-soft">
+      <div class="text-grov-500">★★★★★</div>
+      <p class="mt-3 text-grov-2/80 leading-relaxed">«${r[1]}»</p>
+      <div class="mt-5 flex items-center gap-3"><span class="w-10 h-10 grid place-items-center rounded-full bg-grov-100 text-xl">${r[2]}</span><span class="font-bold">${r[0]}</span></div>
+    </div>`)));
+}
+function buildCatalog(root){
+  const cats=['Все',...new Set(PRODUCTS.map(p=>p[5]))];
+  const fbox=$('#cat-filters',root), grid=$('#cat-grid',root);
+  function render(active){
+    grid.innerHTML='';
+    PRODUCTS.filter(p=>active==='Все'||p[5]===active).forEach(p=>grid.appendChild(el(productCard(p))));
+    observe(root);
+  }
+  cats.forEach((c,i)=>{
+    const b=el(`<button class="px-4 py-2 rounded-xl font-semibold text-sm border transition ${i===0?'bg-grov-ink text-white border-grov-ink':'bg-white border-grov-200 hover:border-grov-400'}">${c}</button>`);
+    b.onclick=()=>{[...fbox.children].forEach(x=>x.className='px-4 py-2 rounded-xl font-semibold text-sm border transition bg-white border-grov-200 hover:border-grov-400');b.className='px-4 py-2 rounded-xl font-semibold text-sm border transition bg-grov-ink text-white border-grov-ink';render(c);};
+    fbox.appendChild(b);
+  });
+  render('Все');
+}
+function buildStores(root){
+  const list=$('#store-list',root);
+  STORES.forEach(s=>list.appendChild(el(
+    `<div class="flex items-center gap-3 p-3 rounded-2xl hover:bg-grov-50 transition border border-transparent hover:border-grov-100">
+      <span class="w-10 h-10 grid place-items-center rounded-xl bg-grov-100 text-grov-600 shrink-0">📍</span>
+      <div class="min-w-0 flex-1"><div class="font-bold truncate">${s[0]}</div><div class="text-sm text-grov-2/60 truncate">${s[1]} · ${s[2]}</div></div>
+      <span class="text-grov-600 font-bold text-sm shrink-0">${s[3]}</span>
+    </div>`)));
+}
+function buildAbout(root){
+  const st=$('#about-stats',root);
+  STATS.forEach(s=>st.appendChild(el(
+    `<div class="reveal p-6 rounded-3xl bg-white border border-grov-100 shadow-soft text-center">
+      <div class="font-display font-extrabold text-4xl text-grov-600">${s[0]}</div>
+      <div class="text-grov-2/60 mt-1 text-sm font-semibold">${s[1]}</div></div>`)));
+  const tm=$('#about-team',root);
+  TEAM.forEach(t=>tm.appendChild(el(
+    `<div class="reveal rounded-3xl bg-white border border-grov-100 shadow-soft overflow-hidden">
+      <div class="aspect-[4/3] mesh grain grid place-items-center text-5xl">${t[2]}</div>
+      <div class="p-5"><div class="font-bold text-lg">${t[0]}</div><div class="text-grov-600 font-semibold text-sm">${t[1]}</div></div>
+    </div>`)));
+}
+function buildCareers(root){
+  const j=$('#jobs',root);
+  JOBS.forEach(job=>j.appendChild(el(
+    `<a href="#/contact" data-link class="reveal group flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 p-5 rounded-2xl bg-white border border-grov-100 shadow-soft hover:border-grov-400 transition">
+      <div class="flex-1"><div class="font-display font-bold text-lg">${job[0]}</div><div class="text-grov-2/60 text-sm mt-0.5">${job[2]}</div></div>
+      <span class="text-xs font-bold uppercase tracking-wide bg-grov-100 text-grov-700 px-3 py-1.5 rounded-full w-max">${job[1]}</span>
+      <div class="font-bold text-grov-ink">${job[3]}</div>
+      <span class="w-9 h-9 grid place-items-center rounded-xl bg-grov-50 text-grov-600 group-hover:bg-grov-600 group-hover:text-white transition shrink-0">→</span>
+    </a>`)));
+}
+function buildContact(root){
+  const f=$('#contact-form',root);
+  f.addEventListener('submit',e=>{e.preventDefault();$('#form-ok',root).classList.remove('hidden');f.reset();});
+  const fq=$('#faq',root);
+  FAQ.forEach(q=>fq.appendChild(el(
+    `<details class="reveal group rounded-2xl bg-white border border-grov-100 shadow-soft overflow-hidden">
+      <summary class="flex items-center justify-between gap-4 p-5 cursor-pointer font-bold list-none">${q[0]}<span class="chev w-6 h-6 grid place-items-center rounded-lg bg-grov-100 text-grov-600 transition shrink-0">+</span></summary>
+      <div class="px-5 pb-5 text-grov-2/70">${q[1]}</div>
+    </details>`)));
+}
+
+/* ---------------- ROUTER ---------------- */
+const ROUTES = {
+  '/':['page-home',buildHome,'ГРОВ — продуктовая сеть нового поколения'],
+  '/catalog':['page-catalog',buildCatalog,'Каталог · ГРОВ'],
+  '/stores':['page-stores',buildStores,'Магазины · ГРОВ'],
+  '/about':['page-about',buildAbout,'О компании · ГРОВ'],
+  '/careers':['page-careers',buildCareers,'Карьера · ГРОВ'],
+  '/contact':['page-contact',buildContact,'Контакты · ГРОВ'],
+};
+let io;
+function observe(scope=document){
+  if(!io) io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}}),{threshold:.08});
+  scope.querySelectorAll('.reveal:not(.in)').forEach(n=>io.observe(n));
+}
+function render(){
+  const path=(location.hash.replace('#','')||'/').split('?')[0];
+  const route=ROUTES[path]||ROUTES['/'];
+  const app=$('#app');
+  app.innerHTML='';
+  const node=$('#'+route[0]).content.cloneNode(true);
+  const wrap=el('<div class="page active"></div>');
+  wrap.appendChild(node);
+  app.appendChild(wrap);
+  route[1](wrap);
+  document.title=route[2];
+  // nav active state
+  document.querySelectorAll('.nav-link').forEach(a=>{
+    a.classList.toggle('active',a.getAttribute('href')==='#'+path);
+  });
+  $('#mobile').classList.add('hidden');
+  observe(wrap);
+  window.scrollTo({top:0,behavior:'instant'});
+}
+// delegate cart buttons & links
+document.addEventListener('click',e=>{
+  const add=e.target.closest('.addbtn');
+  if(add){add.textContent='✓';add.classList.add('bg-grov-700');setTimeout(()=>{add.textContent='+';add.classList.remove('bg-grov-700');},900);}
+});
+$('#burger').onclick=()=>$('#mobile').classList.toggle('hidden');
+window.addEventListener('hashchange',render);
+render();
+</script>
+</body>
+</html>

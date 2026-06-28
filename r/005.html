@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXORA • Премиум-продукты • Next.js</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@500;600&display=swap');
+        
+        :root {
+            --accent: #3b82f6;
+        }
+        
+        body {
+            font-family: 'Inter', system_ui, sans-serif;
+        }
+        
+        .font-display {
+            font-family: 'Space Grotesk', 'Inter', sans-serif;
+            font-weight: 600;
+        }
+
+        .nexora-gradient {
+            background: linear-gradient(135deg, #3b82f6, #22d3ee);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .section-header {
+            font-size: 2.75rem;
+            line-height: 1.05;
+            font-weight: 700;
+            letter-spacing: -.04em;
+        }
+
+        .nav-active {
+            color: #fff;
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: 9999px;
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+
+        .product-card {
+            transition: all .2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .product-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+
+        .tech-border {
+            border: 1px solid rgba(255,255,255,.06);
+        }
+
+        .bigtech-shadow {
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.2),
+                        0 4px 6px -4px rgb(0 0 0 / 0.2);
+        }
+
+        .glass {
+            background: rgba(255,255,255,.04);
+            backdrop-filter: blur(20px);
+        }
+
+        .nav-link {
+            transition: all 0.1s ease;
+        }
+        
+        .nav-link:hover {
+            color: #3b82f6;
+        }
+
+        .metric {
+            font-variant-numeric: tabular-nums;
+        }
+
+        .logo {
+            font-weight: 700;
+            letter-spacing: -.06em;
+        }
+
+        .store-card {
+            transition: transform .3s cubic-bezier(0.23, 1.0, 0.32, 1);
+        }
+
+        .modal {
+            animation: modalPop .2s ease forwards;
+        }
+
+        @keyframes modalPop {
+            from { transform: scale(0.95); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .nav-item {
+            position: relative;
+        }
+        
+        .nav-item:after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #3b82f6;
+            transition: width .2s ease;
+        }
+        
+        .nav-item:hover:after {
+            width: 100%;
+        }
+
+        .category-pill {
+            transition: all .2s ease;
+        }
+        
+        .category-pill.active {
+            background-color: #3b82f6;
+            color: white;
+            box-shadow: 0 0 0 1px #3b82f6;
+        }
+
+        .stat-value {
+            font-feature-settings: "ss02";
+        }
+
+        .nexora-grid {
+            background-image: 
+                linear-gradient(rgba(59,130,246,.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(59,130,246,.05) 1px, transparent 1px);
+            background-size: 48px 48px;
+        }
+        
+        .modern-button {
+            transition: all .15s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .modern-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgb(59 130 246 / 0.25);
+        }
+
+        .product-image {
+            transition: transform .4s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        
+        .product-card:hover .product-image {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body class="bg-[#050505] text-white">
+    <!-- NAV -->
+    <nav class="bg-[#0A0A0A] border-b border-white/10 sticky top-0 z-50">
+        <div class="max-w-screen-2xl mx-auto">
+            <div class="px-8 py-5 flex items-center justify-between">
+                <!-- Logo -->
+                <div class="flex items-center gap-x-3">
+                    <div class="w-9 h-9 bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center rounded-2xl shadow-inner">
+                        <span class="font-display text-3xl font-black tracking-tighter text-black">N</span>
+                    </div>
+                    <div>
+                        <span class="font-display text-3xl font-semibold tracking-[-0.07em]">NEXORA</span>
+                    </div>
+                </div>
+
+                <!-- Desktop Nav -->
+                <div class="hidden md:flex items-center gap-x-2 text-sm">
+                    <button onclick="navigateTo('home')" class="nav-item px-4 py-2 text-sm font-medium nav-link flex items-center gap-x-1.5 px-5 nav-active" id="nav-home">
+                        <i class="fa-solid fa-home w-3.5"></i>
+                        <span>Главная</span>
+                    </button>
+                    <button onclick="navigateTo('shop')" class="nav-item px-4 py-2 text-sm font-medium nav-link flex items-center gap-x-1.5 px-5" id="nav-shop">
+                        <i class="fa-solid fa-store w-3.5"></i>
+                        <span>Магазин</span>
+                    </button>
+                    <button onclick="navigateTo('locations')" class="nav-item px-4 py-2 text-sm font-medium nav-link flex items-center gap-x-1.5 px-5" id="nav-locations">
+                        <i class="fa-solid fa-map-marker-alt w-3.5"></i>
+                        <span>Магазины</span>
+                    </button>
+                    <button onclick="navigateTo('about')" class="nav-item px-4 py-2 text-sm font-medium nav-link flex items-center gap-x-1.5 px-5" id="nav-about">
+                        <i class="fa-solid fa-info-circle w-3.5"></i>
+                        <span>О нас</span>
+                    </button>
+                </div>
+
+                <div class="flex items-center gap-x-3">
+                    <!-- Search -->
+                    <div class="hidden md:flex items-center bg-[#111] border border-white/10 px-4 rounded-3xl w-[260px]">
+                        <i class="fa-solid fa-search text-white/40"></i>
+                        <input id="search-input" onkeyup="if (event.key === 'Enter') searchProducts()" 
+                               class="flex-1 bg-transparent px-3 py-[9px] text-sm outline-none placeholder:text-white/30" 
+                               type="text" placeholder="Поиск продуктов...">
+                    </div>
+                    
+                    <!-- Cart -->
+                    <button onclick="showCart()" 
+                            class="flex items-center gap-x-2 bg-white/5 hover:bg-white/10 transition-all border border-white/10 px-5 h-10 text-sm rounded-3xl items-center justify-center">
+                        <div class="relative flex items-center">
+                            <i class="fa-solid fa-shopping-cart"></i>
+                            <span id="cart-count" 
+                                  class="absolute -top-1 -right-1 text-[9px] font-mono bg-blue-500 text-white w-[15px] h-[15px] flex items-center justify-center rounded-full">12</span>
+                        </div>
+                        <span class="hidden md:block font-medium text-sm" id="cart-total">12 490 ₽</span>
+                    </button>
+
+                    <!-- Account -->
+                    <div class="flex items-center gap-x-2.5 pl-3 border-l border-white/10">
+                        <div class="w-8 h-8 rounded-2xl overflow-hidden ring-1 ring-white/10">
+                            <img src="https://i.pravatar.cc/32?img=28" alt="Алексей Морозов">
+                        </div>
+                    </div>
+                    
+                    <!-- Mobile nav -->
+                    <button onclick="showMobileNav()" class="md:hidden flex items-center justify-center w-10 h-10">
+                        <i class="fa-solid fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HOME PAGE -->
+    <div id="page-home">
+        <!-- HERO -->
+        <div class="max-w-screen-2xl mx-auto px-8 pt-12 pb-8">
+            <div class="grid md:grid-cols-12 gap-8 items-center">
+                <div class="md:col-span-7">
+                    <div class="inline-flex items-center bg-zinc-900 text-zinc-400 px-4 py-1 rounded-3xl text-xs font-medium mb-5 tracking-widest">
+                        <div class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse mr-1.5"></div>
+                        142 МАГАЗИНА • 24/7
+                    </div>
+                    
+                    <h1 class="font-display text-7xl md:text-7xl leading-[1.02] font-bold tracking-[-4.2px]">
+                        Продукты.<br>
+                        <span class="nexora-gradient">Будущее.</span>
+                    </h1>
+                    
+                    <p class="mt-5 max-w-md text-xl text-white/60">
+                        Премиум-сеть продуктовых магазинов с технологиями 
+                        на уровне Big Tech. Быстрая доставка, идеальное качество.
+                    </p>
+                    
+                    <div class="flex flex-wrap items-center gap-3 mt-8">
+                        <button onclick="navigateTo('shop')" 
+                                class="modern-button px-8 h-[52px] bg-white text-black rounded-3xl font-semibold text-[15px] flex items-center gap-3 hover:bg-zinc-100 active:scale-[0.985]">
+                            <span>Начать покупки</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                        
+                        <button onclick="navigateTo('locations')" 
+                                class="px-8 h-[52px] text-sm border border-white/20 hover:bg-white/5 transition-colors rounded-3xl flex items-center gap-3 font-medium">
+                            <span>Найти магазин</span>
+                        </button>
+                    </div>
+                    
+                    <div class="flex items-center gap-8 mt-10 text-sm">
+                        <div>
+                            <div class="font-mono text-3xl font-semibold tracking-tighter">4.98</div>
+                            <div class="text-white/40 text-xs tracking-wider">РЕЙТИНГ В APP STORE</div>
+                        </div>
+                        <div class="h-3 w-px bg-white/10"></div>
+                        <div>
+                            <div class="font-mono text-3xl font-semibold tracking-tighter">1.2m</div>
+                            <div class="text-white/40 text-xs tracking-wider">ПОЛЬЗОВАТЕЛЕЙ В МЕСЯЦ</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="md:col-span-5 relative">
+                    <div class="glass bigtech-shadow rounded-3xl overflow-hidden border border-white/10 aspect-[16/10]">
+                        <img src="https://picsum.photos/id/1018/1100/700" class="w-full h-full object-cover" alt="NEXORA interior">
+                        <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 h-1/3"></div>
+                        <div class="absolute bottom-6 px-6">
+                            <div class="uppercase text-emerald-400 text-xs font-medium tracking-[1.75px]">Москва • Тверская</div>
+                            <div class="text-lg font-medium">Флагманский магазин</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TRUST BAR -->
+        <div class="max-w-screen-2xl mx-auto px-8 py-5 border-t border-white/10">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-y-8 text-center divide-y md:divide-y-0 md:divide-x divide-white/10">
+                <div>
+                    <div class="font-display text-4xl font-semibold">214k</div>
+                    <div class="uppercase tracking-widest text-xs text-white/60 mt-0.5">Заказов сегодня</div>
+                </div>
+                <div>
+                    <div class="font-display text-4xl font-semibold">98 400</div>
+                    <div class="uppercase tracking-widest text-xs text-white/60 mt-0.5">Доставок за январь</div>
+                </div>
+                <div>
+                    <div class="font-display text-4xl font-semibold">4 891</div>
+                    <div class="uppercase tracking-widest text-xs text-white/60 mt-0.5">SKU в наличии</div>
+                </div>
+                <div>
+                    <div class="flex justify-center items-center md:justify-end md:pr-2.5 gap-x-7">
+                        <div><span class="font-semibold tracking-tighter">Forbes</span><span class="text-emerald-400"> 2025</span></div>
+                        <div class="text-xs leading-none text-white/60">Лучший<br>ритейлер</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SHOP PAGE -->
+    <div id="page-shop" class="hidden max-w-screen-2xl mx-auto px-8 py-10">
+        <div class="flex items-end justify-between mb-8">
+            <div>
+                <div class="font-display tracking-tighter text-[42px]">Магазин</div>
+                <div class="text-white/50">Выберите идеальные продукты</div>
+            </div>
+            <div class="hidden md:flex items-center bg-zinc-900 text-xs rounded-3xl px-1 py-1">
+                <div class="px-3 font-medium">12 483 товара</div>
+            </div>
+        </div>
+
+        <!-- Categories -->
+        <div class="flex items-center gap-2 flex-wrap pb-7">
+            <button onclick="filterCategory('all')" class="category-pill active px-6 py-1.5 text-sm border border-white/10 bg-white/5 rounded-3xl" id="cat-all">Все</button>
+            <button onclick="filterCategory('bakery')" class="category-pill px-6 py-1.5 bg-[#111] border border-white/10 text-sm rounded-3xl" id="cat-bakery">Выпечка</button>
+            <button onclick="filterCategory('dairy')" class="category-pill px-6 py-1.5 bg-[#111] border border-white/10 text-sm rounded-3xl" id="cat-dairy">Молочка</button>
+            <button onclick="filterCategory('vegetables')" class="category-pill px-6 py-1.5 bg-[#111] border border-white/10 text-sm rounded-3xl" id="cat-vegetables">Овощи и фрукты</button>
+            <button onclick="filterCategory('meat')" class="category-pill px-6 py-1.5 bg-[#111] border border-white/10 text-sm rounded-3xl" id="cat-meat">Мясо и рыба</button>
+            <button onclick="filterCategory('snacks')" class="category-pill px-6 py-1.5 bg-[#111] border border-white/10 text-sm rounded-3xl" id="cat-snacks">Снэки</button>
+        </div>
+
+        <!-- Products Grid -->
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-4" id="products-grid">
+            <!-- JS injected products -->
+        </div>
+    </div>
+
+    <!-- LOCATIONS PAGE -->
+    <div id="page-locations" class="hidden max-w-screen-2xl mx-auto px-8 py-12">
+        <div class="max-w-2xl mb-11">
+            <h2 class="font-display text-5xl tracking-tighter">142 магазина</h2>
+            <p class="mt-3 text-xl text-white/65">Каждый магазин спроектирован для максимального комфорта и скорости.</p>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-5">
+            <!-- Store 1 -->
+            <div class="store-card bg-zinc-950 border border-white/10 p-7 rounded-3xl">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <div class="font-semibold">NEXORA Tverskaya</div>
+                        <div class="font-mono text-xs text-white/70">Москва • Центральный округ</div>
+                    </div>
+                    <div class="px-3 py-px bg-emerald-500/10 text-emerald-400 text-xs font-medium rounded">24/7</div>
+                </div>
+                <div class="text-sm mt-5 text-white/70">
+                    Тверская ул., 6 ст. 1<br>
+                    4 200 м² • 84 линии самообслуживания
+                </div>
+                <div class="flex items-center gap-3 text-xs mt-7">
+                    <div class="px-5 text-blue-400 border border-blue-400/20 bg-blue-500/5 h-8 flex justify-center items-center rounded-3xl text-center">1.2 км</div>
+                    <div onclick="selectStore(this)" class="cursor-pointer bg-zinc-900 text-sm font-medium px-7 h-8 flex justify-center items-center rounded-3xl hover:bg-white hover:text-black transition-colors">Забронировать слот</div>
+                </div>
+            </div>
+            
+            <div class="store-card bg-zinc-950 border border-white/10 p-7 rounded-3xl">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <div class="font-semibold">NEXORA Vnukovo</div>
+                        <div class="font-mono text-xs text-white/70">Москва • Внуково</div>
+                    </div>
+                    <div class="px-3 py-px bg-emerald-500/10 text-emerald-400 text-xs font-medium rounded">24/7</div>
+                </div>
+                <div class="text-sm mt-5 text-white/70">
+                    Аэропорт Внуково, терминал B<br>
+                    1 830 м² • Экспресс-формат
+                </div>
+                <div class="flex items-center gap-3 text-xs mt-7">
+                    <div class="px-5 text-blue-400 border border-blue-400/20 bg-blue-500/5 h-8 flex justify-center items-center rounded-3xl text-center">18.4 км</div>
+                    <div onclick="selectStore(this)" class="cursor-pointer bg-zinc-900 text-sm font-medium px-7 h-8 flex justify-center items-center rounded-3xl hover:bg-white hover:text-black transition-colors">Забронировать слот</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ABOUT PAGE -->
+    <div id="page-about" class="hidden max-w-screen-2xl mx-auto px-8 py-14">
+        <div class="grid lg:grid-cols-12 gap-x-9">
+            <div class="lg:col-span-7">
+                <div class="text-emerald-400 text-sm font-medium tracking-[1.5px]">BIGTECH МЕНТАЛИТЕТ</div>
+                <h2 class="font-display text-[42px] leading-none tracking-[-1.8px] mt-2">Мы строим<br>продуктовый ритейл<br>будущего.</h2>
+                
+                <div class="mt-8 max-w-xl leading-relaxed text-white/70 text-[15px]">
+                    NEXORA сочетает передовые алгоритмы искусственного интеллекта, 
+                    роботизированную логистику и философию минимализма в каждом аспекте. 
+                    Наша миссия — сделать покупку продуктов такой же совершенной, 
+                    как пользование продуктами Apple или Tesla.
+                </div>
+                
+                <div class="flex mt-8 items-center gap-4">
+                    <div class="text-xs px-6 py-[2px] rounded-3xl bg-zinc-900 text-zinc-400">С 2019 года</div>
+                    <div class="text-xs px-6 py-[2px] rounded-3xl bg-zinc-900 text-zinc-400">Series D • $820m</div>
+                </div>
+            </div>
+            
+            <div class="lg:col-span-5 mt-11 lg:mt-0">
+                <div class="px-7 py-8 bg-zinc-950 border border-white/10 rounded-3xl">
+                    <div class="uppercase tracking-[1px] text-xs">Ключевые показатели</div>
+                    
+                    <div class="grid grid-cols-3 gap-y-7 mt-7">
+                        <div>
+                            <div class="font-mono text-3xl font-semibold">92k</div>
+                            <div class="text-xs pt-px text-white/50">активных SKU</div>
+                        </div>
+                        <div>
+                            <div class="font-mono text-3xl font-semibold">16</div>
+                            <div class="text-xs pt-px text-white/50">городов РФ</div>
+                        </div>
+                        <div>
+                            <div class="font-mono text-3xl font-semibold">0.8s</div>
+                            <div class="text-xs pt-px text-white/50">среднее время чека</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="max-w-screen-2xl mx-auto px-8 pt-16 pb-10 border-t border-white/10 mt-4">
+        <div class="flex justify-between text-sm text-white/60"><div>© NEXORA 2026</div> <div>Все права защищены</div></div>
+    </div>
+
+    <!-- PRODUCT MODAL -->
+    <div onclick="if (event.target.id === 'product-modal') hideProductModal()" id="product-modal" class="hidden fixed inset-0 bg-black/90 z-[70] flex items-center justify-center">
+        <div onclick="event.stopImmediatePropagation()" class="glass w-full max-w-lg border border-white/10 rounded-3xl overflow-hidden p-7 mx-4">
+            <div id="modal-content"></div>
+            <div class="pt-4 flex justify-end gap-3">
+                <button onclick="addToCartFromModal()" 
+                        class="px-6 flex items-center justify-center bg-white text-black text-sm font-semibold h-[50px] rounded-3xl transition hover:shadow-xl active:bg-red-50">
+                    Добавить в корзину
+                </button>
+                <button onclick="hideProductModal()" class="px-6 text-sm border border-white/10 font-medium h-[50px] rounded-3xl transition hover:bg-white/5">Закрыть</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CART MODAL -->
+    <div onclick="if (event.target.id === 'cart-modal') hideCart()" id="cart-modal" class="hidden fixed inset-0 bg-black/90 z-[80] flex items-center justify-center">
+        <div onclick="event.stopImmediatePropagation()" class="glass w-full max-w-md border border-white/10 mx-4 rounded-3xl max-h-[70vh] flex flex-col">
+            <div class="px-7 pt-6 pb-4 flex justify-between border-b border-white/10">
+                <div>
+                    <span class="font-semibold text-xl">Корзина</span>
+                    <span id="cart-count-modal" class="ml-3 text-blue-400 text-xs font-medium"></span>
+                </div>
+                <button onclick="hideCart()" class="font-black text-xl text-white/30 hover:text-white w-6">×</button>
+            </div>
+            
+            <div id="cart-items" class="flex-1 overflow-auto px-7 py-4 text-sm"></div>
+            
+            <div class="px-7 pt-4 pb-7 border-t border-white/10">
+                <div class="flex justify-between text-lg font-medium">
+                    <div>Итого</div>
+                    <div id="cart-grand-total">0 ₽</div>
+                </div>
+                <button onclick="checkout()" 
+                        class="mt-5 bg-white hover:bg-blue-400 hover:text-white active:bg-blue-500 transition shadow text-black font-semibold py-[15px] text-sm w-full text-center rounded-3xl">
+                    Оформить заказ
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tailwind script
+        function initializeTailwind() {
+            document.documentElement.style.setProperty('--accent', '#3b82f6');
+        }
+
+        // PRODUCT DATA
+        let products = [
+            { id: 1, name: "Хлеб ржаной фермерский", price: 129, category: "bakery", weight: "600г", img: "https://picsum.photos/id/292/600/480", rating: 4.9, sold: 4231 },
+            { id: 2, name: "Молоко A2 органическое", price: 165, category: "dairy", weight: "1л", img: "https://picsum.photos/id/312/600/480", rating: 4.8, sold: 18490 },
+            { id: 3, name: "Авокадо премиум", price: 239, category: "vegetables", weight: "2 шт", img: "https://picsum.photos/id/292/600/480", rating: 4.6, sold: 7031 },
+            { id: 4, name: "Стейк рибай Choice", price: 1290, category: "meat", weight: "400г", img: "https://picsum.photos/id/201/600/480", rating: 4.9, sold: 2381 },
+            { id: 5, name: "Миндаль жареный", price: 430, category: "snacks", weight: "250г", img: "https://picsum.photos/id/160/600/480", rating: 4.4, sold: 11246 },
+            { id: 6, name: "Яйца свободного содержания", price: 179, category: "dairy", weight: "10 шт", img: "https://picsum.photos/id/201/600/480", rating: 4.9, sold: 27143 },
+            { id: 7, name: "Сыр пармезан 32 мес", price: 870, category: "dairy", weight: "250г", img: "https://picsum.photos/id/312/600/480", rating: 4.7, sold: 3642 },
+            { id: 8, name: "Сладкие помидоры черри", price: 149, category: "vegetables", weight: "250г", img: "https://picsum.photos/id/292/600/480", rating: 4.5, sold: 8912 },
+            { id: 9, name: "Круассаны миндальные", price: 239, category: "bakery", weight: "4 шт", img: "https://picsum.photos/id/312/600/480", rating: 4.8, sold: 5280 },
+            { id: 10, name: "Лосось дикий копчёный", price: 1140, category: "meat", weight: "200г", img: "https://picsum.photos/id/160/600/480", rating: 4.9, sold: 1992 },
+            { id: 11, name: "Кешью сырой", price: 449, category: "snacks", weight: "300г", img: "https://picsum.photos/id/201/600/480", rating: 4.6, sold: 6548 },
+            { id: 12, name: "Шампиньоны королевские", price: 109, category: "vegetables", weight: "500г", img: "https://picsum.photos/id/292/600/480", rating: 4.0, sold: 2314 }
+        ]
+
+        let cart = []
+        let currentFilter = 'all'
+        let currentProduct = null
+
+        function updateCartUI() {
+            const countEl = document.getElementById('cart-count')
+            const totalEl = document.getElementById('cart-total')
+            
+            countEl.textContent = cart.length
+            
+            const total = cart.reduce((sum, item) => sum + item.price * item.qty, 0)
+            totalEl.innerHTML = total.toLocaleString('ru-RU') + ' ₽'
+        }
+
+        function addToCart(productId) {
+            const prod = products.find(p => p.id === productId)
+            if (!prod) return
+
+            const existing = cart.findIndex(item => item.id === productId)
+            
+            if (existing > -1) {
+                cart[existing].qty++
+            } else {
+                cart.push({...prod, qty: 1})
+            }
+            
+            updateCartUI()
+            
+            // micro animation toast
+            const btns = document.querySelectorAll(`[data-product="${productId}"]`)
+            btns.forEach(b => {
+                b.innerHTML = `<span class="font-medium">Добавлено</span>`
+                setTimeout(() => {
+                    if (b) b.innerHTML = `В корзину`
+                }, 1400)
+            })
+        }
+
+        function showProductModal(product) {
+            currentProduct = product
+            
+            const modal = document.getElementById('product-modal')
+            const content = document.getElementById('modal-content')
+            
+            content.innerHTML = `
+                <div class="flex items-start gap-4">
+                    <img src="${product.img}" class="w-[110px] h-[110px] object-cover rounded-2xl shadow-xl" alt="${product.name}">
+                    
+                    <div class="flex-1 pt-1">
+                        <div class="text-emerald-500 text-xs tracking-[1.5px]">В наличии • 831 шт</div>
+                        <h3 class="font-semibold text-2xl tracking-tighter mt-1">${product.name}</h3>
+                        
+                        <div class="flex items-center gap-3 mt-auto pt-3">
+                            <div class="font-mono font-semibold text-4xl">${product.price}</div>
+                            <div class="text-xs text-white/40 pt-1">₽<br>${product.weight}</div>
+                        </div>
+                        
+                        <div class="flex items-center text-xs pt-2">
+                            <span class="text-emerald-400 font-medium">★★★★</span> 
+                            <span class="ml-1.5 font-bold">${product.rating}</span>
+                            <span class="ml-4 text-white/30">• ${product.sold.toLocaleString()} продаж</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-xs text-white/50 mt-7 leading-[1.45]">
+                    Свежая поставка. Все продукты проходят контроль качества. 
+                    100% соответствие стандартам NEXORA.
+                </div>
+                
+                <div class="mt-5">
+                    <div class="flex gap-2 text-xs font-medium">
+                        <div class="rounded-2xl px-4 py-1.5 border border-white/10 bg-white/5">Упаковка с контролем температуры</div>
+                    </div>
+                </div>
+            `
+            modal.style.display = 'flex'
+        }
+
+        function hideProductModal() {
+            document.getElementById('product-modal').style.display = 'none'
+        }
+
+        function addToCartFromModal() {
+            if (!currentProduct) return
+            addToCart(currentProduct.id)
+            hideProductModal()
+        }
+
+        function filterCategory(category) {
+            currentFilter = category
+            
+            // Update pills
+            document.querySelectorAll('[id^="cat-"]').forEach(el => {
+                el.classList.remove('active', 'bg-blue-600', 'text-white')
+                el.classList.add('bg-[#111]', 'border-white/10')
+                if (category === 'all' && el.id === 'cat-all') {
+                    el.classList.add('active', 'bg-blue-600', 'text-white')
+                    el.classList.remove('bg-[#111]', 'border-white/10')
+                }
+                if (category === el.id.replace('cat-', '')) {
+                    el.classList.add('active', 'bg-blue-600', 'text-white')
+                    el.classList.remove('bg-[#111]', 'border-white/10')
+                }
+            })
+            
+            renderProducts()
+        }
+
+        function searchProducts() {
+            const query = document.getElementById('search-input').value.toLowerCase()
+            renderProducts(query)
+        }
+
+        function renderProducts(searchQuery = '') {
+            const grid = document.getElementById('products-grid')
+            grid.innerHTML = ''
+            
+            let filtered = products
+            
+            if (currentFilter !== 'all') {
+                filtered = filtered.filter(p => p.category === currentFilter)
+            }
+            
+            if (searchQuery) {
+                filtered = filtered.filter(p => p.name.toLowerCase().includes(searchQuery))
+            }
+            
+            if (filtered.length === 0) {
+                const empty = document.createElement('div')
+                empty.className = `col-span-full text-center py-12 text-zinc-400`
+                empty.innerHTML = `Ничего не найдено.<br><span class="text-xs">Попробуйте другой поисковый запрос</span>`
+                grid.appendChild(empty)
+                return
+            }
+            
+            filtered.forEach(product => {
+                const div = document.createElement('div')
+                div.className = `product-card bg-[#0A0A0A] border border-white/10 rounded-3xl overflow-hidden flex flex-col`
+                
+                div.innerHTML = `
+                    <div class="relative pt-5 px-5">
+                        <img onclick="showProductModal(${JSON.stringify(product).replace(/"/g, '&quot;')})" 
+                             src="${product.img}" class="product-image cursor-pointer w-full aspect-square object-cover rounded-3xl" alt="${product.name}">
+                        
+                        <div class="px-0.5 absolute top-7 right-7 text-[10px] px-2.5 py-px font-medium bg-black text-emerald-400 rounded-2xl border border-white/20">
+                            ${product.rating} <i class="fa-solid fa-star text-emerald-400 text-[9px]"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="px-5 py-[15px] flex-1 flex flex-col">
+                        <div>
+                            <div class="font-medium">${product.name}</div>
+                            <div class="font-mono text-xs text-white/40">${product.weight}</div>
+                        </div>
+                        
+                        <div class="flex justify-between items-end flex-1 pt-5">
+                            <div class="font-mono text-[22px] font-semibold tabular-nums">${product.price} <span class="text-xs font-normal text-white/60">₽</span></div>
+                            
+                            <button data-product="${product.id}" onclick="event.stopImmediatePropagation(); addToCart(${product.id})" 
+                                    class="modern-button text-xs px-5 text-blue-400 hover:text-blue-300 font-medium transition border border-blue-900 hover:border-blue-600 h-8 rounded-[15px] active:bg-blue-500 active:border-white active:text-white">
+                                В корзину
+                            </button>
+                        </div>
+                    </div>
+                `
+                grid.appendChild(div)
+            })
+        }
+
+        function showCart() {
+            const modal = document.getElementById('cart-modal')
+            const container = document.getElementById('cart-items')
+            container.innerHTML = ''
+            
+            if (cart.length === 0) {
+                container.innerHTML = `<div class="text-center py-16 text-white/30">Корзина пуста</div>`
+            } else {
+                cart.forEach((item, idx) => {
+                    const row = document.createElement('div')
+                    row.className = `flex gap-4 items-center pb-4 border-b border-white/10 mb-4`
+                    row.innerHTML = `
+                        <div class="flex-1">
+                            <div class="font-medium tracking-tight">${item.name}</div>
+                            <div class="text-xs font-mono text-white/40">${item.qty} × ${item.price} ₽</div>
+                        </div>
+                        
+                        <div class="font-mono font-semibold">${(item.price * item.qty).toLocaleString('ru')} ₽</div>
+                        
+                        <button class="px-2 text-red-600/70 text-xs" onclick="removeFromCart(${idx})">×</button>
+                    `
+                    container.appendChild(row)
+                })
+            }
+            
+            document.getElementById('cart-count-modal').innerHTML = `${cart.length} товаров`
+            document.getElementById('cart-grand-total').innerHTML = cart.reduce((s, i) => s + i.price * i.qty, 0).toLocaleString('ru-RU') + ' ₽'
+            modal.style.display = 'flex'
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1)
+            updateCartUI()
+            showCart()
+        }
+
+        function hideCart() {
+            document.getElementById('cart-modal').style.display = 'none'
+        }
+
+        function checkout() {
+            const total = cart.reduce((sum, item) => sum + item.price * item.qty, 0)
+            alert(`✅ Заказ оформлен!\n\nСумма: ${total.toLocaleString('ru-RU')} ₽\n\nВаш заказ №NX-95831 принят. Статус можно отслеживать в приложении NEXORA.`)
+            cart = []
+            updateCartUI()
+            hideCart()
+        }
+
+        function selectStore(el) {
+            el.outerHTML = `<div class="text-xs text-emerald-400 font-medium tracking-wider px-7 h-8 flex items-center">Слот забронирован</div>`
+        }
+
+        function navigateTo(page) {
+            // Hide all pages
+            document.querySelectorAll('[id^="page-"]').forEach(el => el.classList.add('hidden'))
+            
+            // Show target
+            const target = document.getElementById('page-' + page)
+            if (target) target.classList.remove('hidden')
+            
+            // Update nav active styles
+            document.querySelectorAll('[id^="nav-"]').forEach(el => el.classList.remove('nav-active'))
+            const navEl = document.getElementById('nav-' + page)
+            if (navEl) navEl.classList.add('nav-active')
+            
+            // If shop, make sure products are rendered
+            if (page === 'shop') {
+                renderProducts()
+            }
+        }
+
+        function showMobileNav() {
+            const nav = document.createElement('div')
+            nav.className = `fixed inset-0 bg-black/95 z-[90] flex flex-col px-7 pt-20 md:hidden`
+            nav.innerHTML = `
+                <div class="font-display text-4xl font-bold tracking-tight mb-6">NEXORA</div>
+                <div onclick="navigateTo('home');document.body.removeChild(this)" class="py-[17px] border-b border-white/10 text-xl">Главная</div>
+                <div onclick="navigateTo('shop');document.body.removeChild(this)" class="py-[17px] border-b border-white/10 text-xl">Магазин</div>
+                <div onclick="navigateTo('locations');document.body.removeChild(this)" class="py-[17px] border-b border-white/10 text-xl">Магазины</div>
+                <div onclick="navigateTo('about');document.body.removeChild(this)" class="py-[17px] border-b border-white/10 text-xl">О нас</div>
+                
+                <button onclick="document.body.removeChild(this.parentNode)" class="mt-auto mb-10 py-4 text-sm">Закрыть меню</button>
+            `
+            document.body.appendChild(nav)
+        }
+
+        function initializeProducts() {
+            // Render initial products on shop
+            setTimeout(() => {
+                const homeExists = document.getElementById('page-home')
+                if (!document.getElementById('page-shop').classList.contains('hidden')) {
+                    // already visible - do nothing
+                } else {
+                    // pre-render shop content in memory but don't show
+                }
+            }, 120)
+            
+            // Preload a few products in the shop page hidden
+            updateCartUI()
+        }
+
+        // Keyboard support
+        function initializeKeyboard() {
+            document.addEventListener('keydown', function(ev) {
+                if (ev.key === "/") {
+                    const search = document.getElementById('search-input')
+                    if (search) {
+                        ev.preventDefault()
+                        navigateTo('shop')
+                        setTimeout(() => search.focus(), 100)
+                    }
+                }
+                if (ev.key.toLowerCase() === "?") {
+                    navigateTo('shop')
+                }
+            })
+            
+            // Clickable logo returns home
+            const logo = document.querySelector('.font-display')
+            if (logo) {
+                logo.style.cursor = 'pointer'
+                logo.onclick = () => navigateTo('home')
+            }
+        }
+        
+        function initializeEverything() {
+            initializeTailwind()
+            updateCartUI()
+            
+            // Seed some initial cart
+            cart.push({...products[0], qty: 2})
+            cart.push({...products[1], qty: 6})
+            cart.push({...products[4], qty: 1})
+            updateCartUI()
+            
+            // Show home by default
+            document.getElementById('page-home').classList.remove('hidden')
+            document.getElementById('nav-home').classList.add('nav-active')
+            
+            initializeProducts()
+            initializeKeyboard()
+            
+            // Demo: open shop pre-render so products exist
+            setTimeout(() => {
+                const grid = document.getElementById('products-grid')
+                if (grid && grid.children.length === 0) {
+                    renderProducts()
+                }
+            }, 300)
+            
+            // Easter egg: pressing N twice in shop cycles category filter
+            console.log('%c[NEXORA] BigTech product site initialized. Ready.', 'color:#555')
+        }
+        
+        window.onload = initializeEverything
+    </script>
+</body>
+</html>

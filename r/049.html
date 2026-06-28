@@ -1,0 +1,1313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>MiniPlayStation 5 — Cloud Edition</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{width:100%;height:100%;overflow:hidden;background:#000;color:#fff;font-family:"Segoe UI",Roboto,Helvetica,Arial,sans-serif;user-select:none}
+  :root{
+    --ps-blue:#0070d1;
+    --ps-blue-2:#00a8ff;
+    --ps-bg:#0a0a14;
+    --ps-card:rgba(255,255,255,.06);
+    --ps-card-hi:rgba(255,255,.12);
+    --ps-line:rgba(255,255,255,.10);
+    --ps-text:#eaf2ff;
+    --ps-mute:#9fb0c9;
+    --ps-accent:#3eb6ff;
+  }
+  #stage{position:fixed;inset:0;overflow:hidden;background:radial-gradient(1200px 800px at 50% -10%,#1b2a4a 0%,#06080f 55%,#000 100%)}
+
+  /* ===== Boot ===== */
+  #boot{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;background:#000;z-index:50;transition:opacity .8s ease}
+  #boot.hide{opacity:0;pointer-events:none}
+  .boot-logo{display:flex;align-items:center;gap:14px;animation:pop .9s cubic-bezier(.2,.9,.3,1.2)}
+  .boot-mark{width:78px;height:78px;border-radius:18px;background:linear-gradient(140deg,#00a8ff 0%,#0066cc 60%,#003e8a 100%);display:flex;align-items:center;justify-content:center;box-shadow:0 0 60px rgba(0,140,255,.55),inset 0 0 30px rgba(255,255,255,.18)}
+  .boot-mark svg{width:46px;height:46px}
+  .boot-word{font-size:42px;font-weight:300;letter-spacing:6px;color:#fff;text-shadow:0 0 24px rgba(0,140,255,.5)}
+  .boot-word b{font-weight:600;color:#3eb6ff}
+  .boot-sub{margin-top:26px;color:#9fb0c9;font-size:13px;letter-spacing:3px;opacity:.8}
+  .boot-bar{position:absolute;bottom:80px;width:240px;height:3px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden}
+  .boot-bar::after{content:"";position:absolute;left:-40%;top:0;height:100%;width:40%;background:linear-gradient(90deg,transparent,#3eb6ff,transparent);animation:scan 1.4s infinite linear}
+  @keyframes scan{to{left:100%}}
+  @keyframes pop{0%{transform:scale(.6);opacity:0}60%{transform:scale(1.05);opacity:1}100%{transform:scale(1)}}
+
+  /* ===== Top bar ===== */
+  #topbar{position:absolute;top:0;left:0;right:0;height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 28px;z-index:30;background:linear-gradient(180deg,rgba(0,0,0,.55),transparent);pointer-events:none}
+  #clock{font-size:14px;letter-spacing:1px;color:#dde7fb}
+  #user{display:flex;align-items:center;gap:10px}
+  .avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#ff9a3c,#e94e77);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+  #battery{display:flex;align-items:center;gap:6px;font-size:12px;color:#9fb0c9}
+  #battery .ba{width:22px;height:11px;border:1px solid #9fb0c9;border-radius:2px;position:relative}
+  #battery .ba::before{content:"";position:absolute;left:1px;top:1px;bottom:1px;width:70%;background:#3eb6ff;border-radius:1px}
+  #battery .ba::after{content:"";position:absolute;right:-3px;top:3px;width:2px;height:5px;background:#9fb0c9}
+
+  /* ===== Dashboard ===== */
+  #dash{position:absolute;inset:0;display:flex;flex-direction:column;padding:54px 40px 30px;transition:transform .55s cubic-bezier(.2,.9,.3,1),opacity .55s ease}
+  #dash.hide{transform:translateY(-30px);opacity:0;pointer-events:none}
+  .row-title{font-size:13px;letter-spacing:3px;color:#9fb0c9;text-transform:uppercase;margin:8px 0 14px 6px;display:flex;justify-content:space-between;align-items:center}
+  .row-title .small{font-size:11px;color:#5d6e8a;letter-spacing:1px;text-transform:none}
+  .carousel{position:relative;height:340px;display:flex;align-items:center;overflow:hidden}
+  .track{display:flex;gap:24px;transition:transform .55s cubic-bezier(.2,.9,.3,1);will-change:transform;padding:0 60px}
+  .tile{flex:0 0 220px;height:300px;border-radius:18px;position:relative;cursor:pointer;overflow:hidden;background:#1a2238;transition:transform .35s ease,box-shadow .35s ease;box-shadow:0 18px 40px rgba(0,0,0,.45)}
+  .tile.active{transform:scale(1.18);box-shadow:0 30px 70px rgba(0,140,255,.45)}
+  .tile .cover{position:absolute;inset:0;background-size:cover;background-position:center}
+  .tile::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 50%,rgba(0,0,0,.85))}
+  .tile .meta{position:absolute;left:14px;right:14px;bottom:12px;z-index:2}
+  .tile .meta .t{font-size:16px;font-weight:600;letter-spacing:.3px}
+  .tile .meta .s{font-size:11px;color:#b9c8df;margin-top:3px;letter-spacing:1px}
+  .tile.active .meta .t{font-size:18px}
+  .tile .play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:60px;height:60px;border-radius:50%;background:rgba(0,0,0,.6);border:2px solid #fff;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;backdrop-filter:blur(4px)}
+  .tile.active .play{opacity:1;animation:pulse 1.4s infinite}
+  .tile .play::before{content:"";border-style:solid;border-width:11px 0 11px 17px;border-color:transparent transparent transparent #fff;margin-left:4px}
+  @keyframes pulse{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.1)}}
+  .nav-arrows{position:absolute;top:0;bottom:0;width:60px;display:flex;align-items:center;justify-content:center;z-index:5;color:#fff;font-size:38px;opacity:.6;cursor:pointer;transition:opacity .2s}
+  .nav-arrows:hover{opacity:1}
+  .nav-arrows.left{left:0}
+  .nav-arrows.right{right:0}
+
+  /* lower rows */
+  .lower{display:grid;grid-template-columns:1.4fr 1fr;gap:24px;margin-top:14px}
+  .panel{background:var(--ps-card);border:1px solid var(--ps-line);border-radius:16px;padding:18px}
+  .panel h3{font-size:12px;letter-spacing:2px;color:#9fb0c9;text-transform:uppercase;margin-bottom:12px}
+  .news{display:flex;gap:14px;overflow:hidden}
+  .news .card{flex:1;min-width:0;border-radius:12px;background:linear-gradient(135deg,#1c2748,#0e1326);padding:14px;border:1px solid rgba(255,255,255,.06)}
+  .news .card h4{font-size:14px;margin-bottom:6px}
+  .news .card p{font-size:12px;color:#9fb0c9;line-height:1.5}
+  .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+  .stat{background:rgba(255,255,255,.04);border:1px solid var(--ps-line);border-radius:10px;padding:10px}
+  .stat .k{font-size:11px;color:#9fb0c9;letter-spacing:1px;text-transform:uppercase}
+  .stat .v{font-size:20px;font-weight:600;margin-top:4px;color:#3eb6ff}
+
+  /* control hints */
+  .hints{position:absolute;left:0;right:0;bottom:14px;display:flex;gap:18px;justify-content:center;color:#9fb0c9;font-size:12px;letter-spacing:1px}
+  .hints span b{display:inline-block;padding:2px 8px;border:1px solid rgba(255,255,255,.2);border-radius:5px;margin-right:6px;color:#fff;font-weight:600}
+
+  /* ===== Game view ===== */
+  #gameview{position:absolute;inset:0;display:none;background:#000;z-index:40}
+  #gameview.show{display:block}
+  #gamecanvas{display:block;width:100%;height:100%;touch-action:none}
+  #hud{position:absolute;inset:0;pointer-events:none;font-family:"Segoe UI",sans-serif}
+  .hud-top{position:absolute;top:16px;left:18px;right:18px;display:flex;justify-content:space-between;align-items:flex-start}
+  .pill{background:rgba(0,0,0,.55);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.12);padding:8px 14px;border-radius:999px;font-size:13px;letter-spacing:.5px;display:flex;align-items:center;gap:10px}
+  .pill .dot{width:8px;height:8px;border-radius:50%;background:#3eff7a;box-shadow:0 0 8px #3eff7a}
+  .hpbar{width:200px;height:10px;background:rgba(255,255,255,.12);border-radius:5px;overflow:hidden;border:1px solid rgba(255,255,255,.18)}
+  .hpbar > i{display:block;height:100%;background:linear-gradient(90deg,#ff4655,#ff8a3c);transition:width .2s}
+  .crosshair{position:absolute;left:50%;top:50%;width:18px;height:18px;transform:translate(-50%,-50%);pointer-events:none}
+  .crosshair::before,.crosshair::after{content:"";position:absolute;background:#fff;mix-blend-mode:difference;opacity:.85}
+  .crosshair::before{left:50%;top:0;bottom:0;width:2px;transform:translateX(-50%)}
+  .crosshair::after{top:50%;left:0;right:0;height:2px;transform:translateY(-50%)}
+
+  #reticle-mini{position:absolute;bottom:18px;right:18px;width:160px;height:160px;border-radius:14px;background:rgba(0,0,0,.5);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.12);overflow:hidden}
+  #minimap{width:100%;height:100%;display:block}
+
+  .gameoverlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;background:radial-gradient(800px 500px at 50% 50%,rgba(0,0,0,.55),rgba(0,0,0,.85));z-index:8}
+  .gameoverlay.hide{display:none}
+  .gameoverlay .box{pointer-events:auto;background:rgba(8,12,24,.92);border:1px solid rgba(62,182,255,.4);padding:30px 42px;border-radius:18px;text-align:center;backdrop-filter:blur(10px);box-shadow:0 30px 80px rgba(0,0,0,.6);min-width:340px}
+  .gameoverlay h2{font-size:30px;margin-bottom:6px;letter-spacing:1px;color:#fff}
+  .gameoverlay h2 .a{color:#3eb6ff}
+  .gameoverlay p{color:#9fb0c9;margin-bottom:18px;font-size:13px;letter-spacing:1px}
+  .gameoverlay .controls{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:14px 0 22px;text-align:left}
+  .gameoverlay .controls .row{display:flex;align-items:center;gap:10px;font-size:12px;color:#cbd6ec;letter-spacing:.5px}
+  .gameoverlay .controls .row b{display:inline-block;min-width:34px;padding:4px 8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);border-radius:6px;color:#fff;font-weight:600;text-align:center;font-size:11px}
+  .gameoverlay button,.btn{display:inline-block;background:linear-gradient(180deg,#0e7be0,#0855a8);color:#fff;border:0;padding:12px 30px;border-radius:10px;font-size:14px;font-weight:600;letter-spacing:.5px;cursor:pointer;transition:transform .15s,box-shadow .15s;box-shadow:0 6px 18px rgba(8,118,224,.45);font-family:inherit}
+  .gameoverlay button:hover,.btn:hover{transform:translateY(-1px);box-shadow:0 10px 22px rgba(8,118,224,.55)}
+
+  #back-btn{position:absolute;top:14px;right:18px;z-index:20;background:rgba(0,0,0,.55);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.18);color:#fff;padding:8px 14px;border-radius:999px;cursor:pointer;font-size:13px;letter-spacing:.5px;font-family:inherit}
+  #back-btn:hover{background:rgba(255,255,255,.15)}
+
+  .hotbar{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);display:flex;gap:6px;background:rgba(0,0,0,.55);backdrop-filter:blur(8px);padding:6px;border-radius:10px;border:1px solid rgba(255,255,255,.14)}
+  .slot{width:46px;height:46px;border-radius:6px;background:rgba(255,255,255,.06);border:2px solid transparent;display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;transition:transform .15s}
+  .slot.active{border-color:#3eb6ff;background:rgba(62,182,255,.18);transform:translateY(-4px)}
+  .slot:hover{background:rgba(255,255,255,.12)}
+
+  .dpad{position:absolute;bottom:24px;left:24px;display:grid;grid-template-columns:repeat(3,46px);grid-template-rows:repeat(3,46px);gap:4px;z-index:6}
+  .dpad button{background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.18);border-radius:10px;color:#fff;font-size:18px;cursor:pointer;backdrop-filter:blur(8px);font-family:inherit}
+  .dpad button:active{background:rgba(62,182,255,.35)}
+  .actions{position:absolute;bottom:24px;right:24px;display:flex;gap:10px;z-index:6}
+  .actions button{width:64px;height:64px;border-radius:50%;background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.18);color:#fff;font-weight:700;font-size:11px;letter-spacing:1px;cursor:pointer;backdrop-filter:blur(8px);font-family:inherit}
+  .actions button.atk{background:rgba(255,70,85,.45);border-color:#ff4655}
+  .actions button.def{background:rgba(62,182,255,.4);border-color:#3eb6ff}
+
+  .speedometer{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.55);backdrop-filter:blur(8px);padding:10px 18px;border-radius:12px;border:1px solid rgba(255,255,255,.12);font-size:13px;letter-spacing:1px}
+  .speedometer b{color:#3eb6ff;font-size:18px;margin-right:4px}
+
+  .wanted{position:absolute;top:70px;left:50%;transform:translateX(-50%);display:flex;gap:6px}
+  .wanted i{width:20px;height:20px;background:#3eb6ff;clip-path:polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);opacity:.25}
+  .wanted i.on{opacity:1}
+
+  .toast{position:absolute;top:60px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.7);padding:8px 16px;border-radius:999px;font-size:13px;letter-spacing:.5px;border:1px solid rgba(255,255,255,.15);opacity:0;transition:opacity .3s;z-index:30}
+  .toast.show{opacity:1}
+
+  .errbox{position:absolute;bottom:80px;left:18px;background:rgba(255,40,40,.15);border:1px solid #ff4655;padding:10px 14px;border-radius:8px;font-size:11px;color:#ffcccc;max-width:380px;font-family:monospace;display:none;z-index:50;white-space:pre-wrap}
+
+  @media (max-width:780px){
+    .lower{grid-template-columns:1fr}
+    .news{flex-direction:column}
+    #dash{padding:54px 16px 30px}
+    .tile{flex:0 0 160px;height:230px}
+    .tile.active{transform:scale(1.08)}
+  }
+</style>
+</head>
+<body>
+<div id="stage">
+
+  <!-- BOOT -->
+  <div id="boot">
+    <div class="boot-logo">
+      <div class="boot-mark">
+        <svg viewBox="0 0 64 64" fill="none">
+          <path d="M10 50 L32 14 L54 50 Z" stroke="#fff" stroke-width="3" stroke-linejoin="round"/>
+          <circle cx="32" cy="36" r="6" fill="#fff"/>
+        </svg>
+      </div>
+      <div class="boot-word">Mini<b>PlayStation</b> 5</div>
+    </div>
+    <div class="boot-sub">CLOUD&nbsp;·&nbsp;3D&nbsp;·&nbsp;60FPS</div>
+    <div class="boot-bar"></div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="dash" class="hide">
+    <div id="topbar">
+      <div id="clock">--:--</div>
+      <div id="user">
+        <div id="battery"><div class="ba"></div><span>100%</span></div>
+        <div class="avatar">P</div>
+        <div style="font-size:13px">Player_One</div>
+      </div>
+    </div>
+
+    <div class="row-title">
+      <span>Continue Playing</span>
+      <span class="small">Click any tile or press X</span>
+    </div>
+    <div class="carousel" id="carousel">
+      <div class="nav-arrows left" data-dir="-1">&#10094;</div>
+      <div class="track" id="track"></div>
+      <div class="nav-arrows right" data-dir="1">&#10095;</div>
+    </div>
+
+    <div class="lower">
+      <div class="panel">
+        <h3>Latest from MiniPSN</h3>
+        <div class="news">
+          <div class="card">
+            <h4>Cubic Update 1.42</h4>
+            <p>Improved chunk streaming and dynamic fog in Minecraft Classic. New biome: cherry grove.</p>
+          </div>
+          <div class="card">
+            <h4>UFC: Title Fight</h4>
+            <p>Season 5 ladder reset. New combo system, 60Hz frame-perfect hit detection.</p>
+          </div>
+          <div class="card">
+            <h4>GTA: Vice Streets</h4>
+            <p>Traffic AI overhaul. New island district unlocked. Five-star mayhem system live.</p>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>System</h3>
+        <div class="stats">
+          <div class="stat"><div class="k">CPU</div><div class="v" id="stat-cpu">--</div></div>
+          <div class="stat"><div class="k">GPU</div><div class="v" id="stat-gpu">--</div></div>
+          <div class="stat"><div class="k">FPS</div><div class="v" id="stat-fps">60</div></div>
+          <div class="stat"><div class="k">Storage</div><div class="v">512 GB</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hints">
+      <span><b>← →</b>Navigate</span>
+      <span><b>X</b>Launch</span>
+      <span><b>O</b>Options</span>
+    </div>
+  </div>
+
+  <!-- GAME VIEW -->
+  <div id="gameview">
+    <canvas id="gamecanvas"></canvas>
+    <div id="hud"></div>
+    <button id="back-btn">✕ Back to Hub</button>
+  </div>
+
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
+  }
+}
+</script>
+<script type="module">
+import * as THREE from 'three';
+
+/* ============================================================
+   GLOBAL UTILS
+   ============================================================ */
+const $ = s => document.querySelector(s);
+const clamp = (v,a,b) => Math.max(a,Math.min(b,v));
+const lerp  = (a,b,t) => a + (b-a)*t;
+const rand  = (a,b) => a + Math.random()*(b-a);
+const choice = a => a[(Math.random()*a.length)|0];
+window.addEventListener('error', e => { try { showError(e.message + ' @ ' + e.filename + ':' + e.lineno); } catch(_){} });
+function showError(msg){
+  let el = document.querySelector('.errbox');
+  if(!el){ el = document.createElement('div'); el.className='errbox'; document.body.appendChild(el); }
+  el.style.display='block';
+  el.textContent = '⚠ ' + msg;
+}
+
+/* ============================================================
+   BOOT
+   ============================================================ */
+window.addEventListener('load', ()=>{
+  setTimeout(()=>{ $('#boot').classList.add('hide'); $('#dash').classList.remove('hide'); buildDashboard(); startSystemStats(); }, 1400);
+});
+
+/* ============================================================
+   CLOCK + SYSTEM STATS
+   ============================================================ */
+function tickClock(){
+  const d = new Date();
+  $('#clock').textContent = d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+}
+setInterval(tickClock, 1000); tickClock();
+
+let lastCpuText = '';
+function startSystemStats(){
+  setInterval(()=>{
+    const c = navigator.hardwareConcurrency || 8;
+    let g = 'GPU';
+    try{ const e=document.createElement('canvas').getContext('webgl2')||document.createElement('canvas').getContext('webgl'); if(e&&e.getParameter){ const r=e.getParameter(e.RENDERER)||''; if(r) g = (''+r).slice(0,18); } }catch(_){}
+    const cpu = $('#stat-cpu'); if(cpu) cpu.textContent = c + ' cores';
+    const gpu = $('#stat-gpu'); if(gpu) gpu.textContent = g;
+  }, 3000);
+}
+
+/* ============================================================
+   DASHBOARD
+   ============================================================ */
+const GAMES = [
+  { id:'mc',  title:'Minecraft Classic',  sub:'Sandbox · Voxel',       grad:['#3a8c5f','#1c4d33'], emoji:'⛏️' },
+  { id:'ufc', title:'UFC: Title Fight',   sub:'Fighting · 1v1',        grad:['#a8203a','#3a0e16'], emoji:'🥊' },
+  { id:'gta', title:'GTA: Vice Streets',  sub:'Open World · Driving',  grad:['#1f4fa2','#0a1d4a'], emoji:'🚗' },
+];
+
+function makeCover(g){
+  const c = document.createElement('canvas');
+  c.width = 440; c.height = 600;
+  const ctx = c.getContext('2d');
+  const grd = ctx.createLinearGradient(0,0,0,600);
+  grd.addColorStop(0, g.grad[0]); grd.addColorStop(1, g.grad[1]);
+  ctx.fillStyle = grd; ctx.fillRect(0,0,440,600);
+  ctx.globalAlpha = .14;
+  for(let i=0;i<26;i++){
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(rand(0,440), rand(0,600), rand(40,140), rand(4,10));
+  }
+  ctx.globalAlpha = 1;
+  ctx.font = '200px sans-serif';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(g.emoji, 220, 280);
+  ctx.fillStyle='rgba(0,0,0,.55)';
+  ctx.fillRect(0,500,440,100);
+  ctx.fillStyle='#fff';
+  ctx.font='600 36px Segoe UI, sans-serif';
+  ctx.textAlign='left';
+  ctx.fillText(g.title, 24, 552);
+  ctx.font='300 18px Segoe UI, sans-serif';
+  ctx.fillStyle='#cfd8eb';
+  ctx.fillText(g.sub.toUpperCase(), 24, 580);
+  return c.toDataURL();
+}
+
+let activeIdx = 0;
+function buildDashboard(){
+  const tr = $('#track');
+  tr.innerHTML = '';
+  GAMES.forEach((g,i)=>{
+    const t = document.createElement('div');
+    t.className = 'tile' + (i===0?' active':'');
+    t.dataset.idx = i;
+    t.dataset.id = g.id;
+    t.innerHTML = `<div class="cover" style="background-image:url('${makeCover(g)}')"></div>
+      <div class="play"></div>
+      <div class="meta"><div class="t">${g.title}</div><div class="s">${g.sub.toUpperCase()}</div></div>`;
+    t.addEventListener('click', ()=>{ setActive(i); launchGame(g.id); });
+    tr.appendChild(t);
+  });
+  updateTrack();
+  bindDashInput();
+}
+
+function setActive(i){
+  activeIdx = ((i%GAMES.length)+GAMES.length)%GAMES.length;
+  document.querySelectorAll('.tile').forEach((el,j)=>el.classList.toggle('active', j===activeIdx));
+  updateTrack();
+}
+
+function updateTrack(){
+  const tileW = 220 + 24;
+  const trackW = $('#track').parentElement.clientWidth;
+  const offset = trackW/2 - tileW/2 - activeIdx*tileW;
+  $('#track').style.transform = `translateX(${offset}px)`;
+}
+
+document.querySelectorAll('.nav-arrows').forEach(el=>{
+  el.addEventListener('click', e=>{ e.stopPropagation(); setActive(activeIdx + (+el.dataset.dir)); });
+});
+
+function bindDashInput(){
+  window.addEventListener('keydown', e=>{
+    if(!$('#dash').classList.contains('hide')){
+      if(e.key==='ArrowLeft')  { e.preventDefault(); setActive(activeIdx-1); }
+      else if(e.key==='ArrowRight') { e.preventDefault(); setActive(activeIdx+1); }
+      else if(e.key==='Enter' || e.key==='x' || e.key==='X' || e.key===' ') { e.preventDefault(); launchGame(GAMES[activeIdx].id); }
+    }
+  });
+}
+
+/* ============================================================
+   GAME LAUNCHER
+   ============================================================ */
+let currentGame = null;
+
+function launchGame(id){
+  if(!['mc','ufc','gta'].includes(id)){
+    showToast('Coming soon'); return;
+  }
+  try{
+    $('#dash').classList.add('hide');
+    $('#gameview').classList.add('show');
+    $('#hud').innerHTML = '';
+    if(currentGame && currentGame.dispose) currentGame.dispose();
+    currentGame = null;
+    if(id==='mc')  currentGame = new MinecraftGame();
+    if(id==='ufc') currentGame = new UFCGame();
+    if(id==='gta') currentGame = new GTAGame();
+    currentGame.showIntro();
+  }catch(err){
+    showError('Launch failed: '+err.message+' / '+err.stack);
+    console.error(err);
+  }
+}
+
+$('#back-btn').addEventListener('click', ()=>{
+  if(currentGame && currentGame.dispose) currentGame.dispose();
+  currentGame = null;
+  $('#gameview').classList.remove('show');
+  $('#dash').classList.remove('hide');
+  $('#hud').innerHTML = '';
+  setActive(activeIdx);
+});
+
+window.addEventListener('keydown', e=>{
+  if(e.key==='Escape' && !$('#gameview').classList.contains('show')===false){
+    $('#back-btn').click();
+  }
+});
+
+function showToast(t){
+  let el = document.querySelector('.toast');
+  if(!el){
+    el = document.createElement('div'); el.className='toast'; $('#hud').appendChild(el);
+  }
+  el.textContent = t;
+  el.classList.add('show');
+  clearTimeout(el._t); el._t = setTimeout(()=>el.classList.remove('show'), 1800);
+}
+
+/* ============================================================
+   SHARED 3D ENGINE
+   ============================================================ */
+class Engine {
+  constructor(){
+    this.canvas = $('#gamecanvas');
+    this.renderer = new THREE.WebGLRenderer({ canvas:this.canvas, antialias:false, powerPreference:'high-performance' });
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 1.25));
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.scene = new THREE.Scene();
+    this.camera = new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 0.1, 1500);
+    this.clock = new THREE.Clock();
+    this.keys = new Set();
+    this.keysOnce = new Set(); // edge-triggered
+    this.running = false;
+    this.fpsAcc = 0; this.fpsFrames = 0; this.fps = 60;
+    this._resize = ()=>this.onResize();
+    window.addEventListener('resize', this._resize);
+    this._kd = e=>{ this.keys.add(e.code); this.keysOnce.add(e.code); };
+    this._ku = e=>this.keys.delete(e.code);
+    window.addEventListener('keydown', this._kd);
+    window.addEventListener('keyup', this._ku);
+    this.start();
+  }
+  onResize(){
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.camera.aspect = window.innerWidth/window.innerHeight;
+    this.camera.updateProjectionMatrix();
+  }
+  start(){ this.running = true; this.clock.start(); this.loop(); }
+  stop(){ this.running = false; }
+  dispose(){
+    this.running = false;
+    window.removeEventListener('resize', this._resize);
+    window.removeEventListener('keydown', this._kd);
+    window.removeEventListener('keyup', this._ku);
+    this.scene.traverse(o=>{
+      if(o.geometry) o.geometry.dispose?.();
+      if(o.material){
+        const m = o.material;
+        if(Array.isArray(m)) m.forEach(x=>x.dispose?.());
+        else m.dispose?.();
+      }
+    });
+    try{ this.renderer.dispose(); }catch(_){}
+  }
+  loop(){
+    const tick = ()=>{
+      if(!this.running) return;
+      const dt = Math.min(0.05, this.clock.getDelta());
+      this.update(dt);
+      this.renderer.render(this.scene, this.camera);
+      this.fpsAcc += dt; this.fpsFrames++;
+      if(this.fpsAcc >= 0.5){
+        this.fps = Math.round(this.fpsFrames / this.fpsAcc);
+        this.fpsFrames = 0; this.fpsAcc = 0;
+        const f = $('#stat-fps'); if(f) f.textContent = this.fps;
+      }
+      this.keysOnce.clear();
+      requestAnimationFrame(tick);
+    };
+    tick();
+  }
+  update(){}
+  showIntro(){ /* override per game */ }
+}
+
+/* ============================================================
+   MINECRAFT CLASSIC
+   ============================================================ */
+class MinecraftGame extends Engine {
+  constructor(){
+    super();
+    this.scene.background = new THREE.Color(0x88c8ff);
+    this.scene.fog = new THREE.Fog(0x88c8ff, 50, 140);
+
+    const amb = new THREE.AmbientLight(0xffffff, 0.55);
+    const sun = new THREE.DirectionalLight(0xffffff, 1.05);
+    sun.position.set(40,80,20);
+    this.scene.add(amb, sun);
+
+    this.SIZE = 48; this.H = 18;
+    this.blocks = new Map();
+    this.generate();
+
+    // color-only material (no texture) for max FPS
+    this.mat = new THREE.MeshLambertMaterial({ vertexColors:false });
+    this.geo = new THREE.BoxGeometry(1,1,1);
+    this.MAX_INST = 9000;
+    this.instanced = new THREE.InstancedMesh(this.geo, this.mat, this.MAX_INST);
+    this.instanced.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(this.MAX_INST*3), 3);
+    this.scene.add(this.instanced);
+    this.tmpObj = new THREE.Object3D();
+    this.tmpCol = new THREE.Color();
+    this.colCache = {
+      grass:new THREE.Color(0x5fb04a),
+      dirt:new THREE.Color(0xa07050),
+      stone:new THREE.Color(0xa8aeb6),
+      wood:new THREE.Color(0x8a5a30),
+      sand:new THREE.Color(0xe7d090),
+      brick:new THREE.Color(0xc0665a),
+    };
+    this.visibleKeys = []; // parallel to instance arrays
+    this.rebuildInstances();
+
+    // camera
+    this.camera.rotation.order = 'YXZ';
+    this.yaw = 0; this.pitch = -0.2;
+    this.camera.rotation.set(this.pitch, this.yaw, 0);
+    this.camera.position.set(24, 14, 24);
+
+    // movement
+    this.vel = new THREE.Vector3();
+    this.onGround = false;
+
+    // controls — drag look via right mouse button (no pointer-lock needed)
+    this.drag = { active:false, startX:0, startY:0, lastX:0, lastY:0, moved:false };
+    this._cm = e=>e.preventDefault();
+    this._md = e=>{
+      if(e.target !== this.canvas) return;
+      if(e.button === 0) { this.tryBreak(); }
+      else if(e.button === 2) {
+        this.drag.active = true;
+        this.drag.startX = this.drag.lastX = e.clientX;
+        this.drag.startY = this.drag.lastY = e.clientY;
+        this.drag.moved = false;
+        e.preventDefault();
+      }
+    };
+    this._mm = e=>{
+      if(!this.drag.active) return;
+      const dx = e.clientX - this.drag.lastX;
+      const dy = e.clientY - this.drag.lastY;
+      this.drag.lastX = e.clientX; this.drag.lastY = e.clientY;
+      if(Math.hypot(e.clientX - this.drag.startX, e.clientY - this.drag.startY) > 4) this.drag.moved = true;
+      this.yaw   -= dx * 0.0035;
+      this.pitch -= dy * 0.0035;
+      this.pitch = clamp(this.pitch, -1.4, 1.4);
+      this.camera.rotation.set(this.pitch, this.yaw, 0);
+    };
+    this._mu = e=>{
+      if(e.button === 2 && this.drag.active){
+        if(!this.drag.moved){ this.tryPlace(); }
+        this.drag.active = false;
+      }
+    };
+    this.canvas.addEventListener('mousedown', this._md);
+    this.canvas.addEventListener('contextmenu', this._cm);
+    window.addEventListener('mousemove', this._mm);
+    window.addEventListener('mouseup', this._mu);
+
+    // touch
+    this.touchLookId = null;
+    this._ts = e=>{
+      if(this.touchLookId !== null) return;
+      for(const t of e.changedTouches){
+        if(t.clientX > window.innerWidth*0.35){ this.touchLookId = t.identifier; this.drag.lastX=t.clientX; this.drag.lastY=t.clientY; break; }
+      }
+    };
+    this._tm = e=>{
+      for(const t of e.changedTouches){
+        if(t.identifier === this.touchLookId){
+          const dx = t.clientX - this.drag.lastX;
+          const dy = t.clientY - this.drag.lastY;
+          this.drag.lastX=t.clientX; this.drag.lastY=t.clientY;
+          this.yaw -= dx*0.005; this.pitch -= dy*0.005;
+          this.pitch = clamp(this.pitch, -1.4, 1.4);
+          this.camera.rotation.set(this.pitch, this.yaw, 0);
+        }
+      }
+    };
+    this._te = e=>{ for(const t of e.changedTouches){ if(t.identifier === this.touchLookId){ this.touchLookId = null; } } };
+    this.canvas.addEventListener('touchstart', this._ts, {passive:true});
+    this.canvas.addEventListener('touchmove', this._tm, {passive:true});
+    this.canvas.addEventListener('touchend', this._te, {passive:true});
+
+    this.buildHUD();
+  }
+  buildHUD(){
+    this.hud = $('#hud');
+    this.hud.innerHTML = `
+      <div class="hud-top">
+        <div class="pill"><span class="dot"></span>MINECRAFT · <span id="mc-pos">0,0,0</span></div>
+        <div class="pill">FPS <b id="mc-fps">60</b> · BLOCKS <b id="mc-blocks">0</b></div>
+      </div>
+      <div class="crosshair"></div>
+      <div class="hotbar" id="mc-hotbar"></div>`;
+    this.hotbar = $('#mc-hotbar');
+    const blocks = ['grass','dirt','stone','wood','sand','brick'];
+    blocks.forEach((b,i)=>{
+      const el = document.createElement('div');
+      el.className = 'slot' + (i===0?' active':'');
+      el.dataset.i = i;
+      el.style.background = '#' + this.colCache[b].getHexString();
+      el.style.borderColor = 'rgba(255,255,255,.2)';
+      el.innerHTML = `<span style="font-size:0">·</span>`;
+      el.addEventListener('click', ()=>{ this.selected = i; document.querySelectorAll('.slot').forEach(s=>s.classList.remove('active')); el.classList.add('active'); });
+      this.hotbar.appendChild(el);
+    });
+    this.selected = 0;
+  }
+  showIntro(){
+    const ov = document.createElement('div');
+    ov.className = 'gameoverlay';
+    ov.innerHTML = `
+      <div class="box">
+        <h2>⛏️ <span class="a">Minecraft Classic</span></h2>
+        <p>Voxel sandbox · procedurally generated</p>
+        <div class="controls">
+          <div class="row"><b>WASD</b> Move</div>
+          <div class="row"><b>Space</b> Jump</div>
+          <div class="row"><b>Shift</b> Sneak</div>
+          <div class="row"><b>RMB</b> Look around</div>
+          <div class="row"><b>LMB</b> Break block</div>
+          <div class="row"><b>RMB&nbsp;click</b> Place block</div>
+          <div class="row"><b>1-6</b> Select block</div>
+          <div class="row"><b>Esc</b> Back to hub</div>
+        </div>
+        <button id="mc-go">Start Playing</button>
+      </div>`;
+    this.hud.appendChild(ov);
+    ov.querySelector('#mc-go').addEventListener('click', ()=>{ ov.classList.add('hide'); this.started = true; });
+    this.started = false;
+  }
+  generate(){
+    const h = new Array(this.SIZE);
+    for(let x=0;x<this.SIZE;x++){
+      h[x] = new Array(this.SIZE);
+      for(let z=0;z<this.SIZE;z++){
+        const v = Math.floor(7 + Math.sin(x*0.27)*1.8 + Math.cos(z*0.21)*1.8 + Math.sin((x+z)*0.13)*1.2);
+        h[x][z] = v;
+        for(let y=0;y<v;y++){
+          let type = 'dirt';
+          if(y<2) type = 'stone';
+          else if(y===v-1) type = (v<8?'sand':'grass');
+          this.blocks.set(`${x},${y},${z}`, type);
+        }
+      }
+    }
+    // trees
+    for(let i=0;i<14;i++){
+      const tx = (rand(4,this.SIZE-4))|0, tz = (rand(4,this.SIZE-4))|0;
+      const ty = h[tx][tz];
+      if(ty<8) continue;
+      for(let y=ty;y<ty+4;y++) this.blocks.set(`${tx},${y},${tz}`,'wood');
+      for(let dx=-2;dx<=2;dx++)for(let dz=-2;dz<=2;dz++)for(let dy=0;dy<=1;dy++){
+        if(Math.abs(dx)+Math.abs(dz)<=3) this.blocks.set(`${tx+dx},${ty+4+dy},${tz+dz}`,'grass');
+      }
+    }
+  }
+  isHidden(x,y,z){
+    return this.blocks.has(`${x},${y+1},${z}`) &&
+           this.blocks.has(`${x},${y-1},${z}`) &&
+           this.blocks.has(`${x+1},${y},${z}`) &&
+           this.blocks.has(`${x-1},${y},${z}`) &&
+           this.blocks.has(`${x},${y},${z+1}`) &&
+           this.blocks.has(`${x},${y},${z-1}`);
+  }
+  rebuildInstances(){
+    let i = 0;
+    const obj = this.tmpObj;
+    const col = this.tmpCol;
+    this.visibleKeys = [];
+    for(const [key, type] of this.blocks){
+      const [x,y,z] = key.split(',').map(Number);
+      if(this.isHidden(x,y,z)) continue;
+      if(i>=this.MAX_INST) break;
+      obj.position.set(x+0.5, y+0.5, z+0.5);
+      obj.rotation.set(0,0,0); obj.scale.set(1,1,1);
+      obj.updateMatrix();
+      this.instanced.setMatrixAt(i, obj.matrix);
+      col.copy(this.colCache[type] || this.colCache.dirt);
+      this.instanced.setColorAt(i, col);
+      this.visibleKeys.push(key);
+      i++;
+    }
+    this.instanced.count = i;
+    this.instanced.instanceMatrix.needsUpdate = true;
+    if(this.instanced.instanceColor) this.instanced.instanceColor.needsUpdate = true;
+    const bc = $('#mc-blocks'); if(bc) bc.textContent = i;
+    this.visibleIndex = new Map();
+    for(let k=0;k<this.visibleKeys.length;k++) this.visibleIndex.set(this.visibleKeys[k], k);
+  }
+  // incremental update of one instance
+  updateInstance(key, type){
+    const idx = this.visibleIndex.get(key);
+    if(type){
+      // should be visible (caller ensures)
+      if(idx !== undefined){
+        this.tmpCol.copy(this.colCache[type]);
+        this.instanced.setColorAt(idx, this.tmpCol);
+        this.instanced.instanceColor.needsUpdate = true;
+      } else {
+        // need to add — just rebuild (rare)
+        this.rebuildInstances();
+      }
+    } else {
+      // remove
+      if(idx !== undefined){
+        // swap with last
+        const last = this.instanced.count - 1;
+        if(idx !== last){
+          this.instanced.getMatrixAt(last, this.tmpObj.matrix);
+          this.instanced.setMatrixAt(idx, this.tmpObj.matrix);
+          this.instanced.getColorAt?.(last, this.tmpCol);
+          this.instanced.setColorAt(idx, this.tmpCol);
+          // update visibleKeys and visibleIndex
+          const lastKey = this.visibleKeys[last];
+          this.visibleKeys[idx] = lastKey;
+          this.visibleIndex.set(lastKey, idx);
+        }
+        this.visibleKeys.pop();
+        this.visibleIndex.delete(key);
+        this.instanced.count = last;
+        this.instanced.instanceMatrix.needsUpdate = true;
+        if(this.instanced.instanceColor) this.instanced.instanceColor.needsUpdate = true;
+      }
+    }
+  }
+  getBlock(x,y,z){
+    if(x<0||y<0||z<0||x>=this.SIZE||y>=this.H||z>=this.SIZE) return null;
+    return this.blocks.get(`${x},${y},${z}`);
+  }
+  setBlock(x,y,z,type){
+    const k = `${x},${y},${z}`;
+    const had = this.blocks.get(k);
+    if(type){
+      this.blocks.set(k, type);
+      if(!this.isHidden(x,y,z)) this.updateInstance(k, type);
+      // neighbors may become visible now
+      for(const [nx,ny,nz] of [[x+1,y,z],[x-1,y,z],[x,y+1,z],[x,y-1,z],[x,y,z+1],[x,y,z-1]]){
+        const nk = `${nx},${ny},${nz}`;
+        if(this.blocks.has(nk) && this.isHidden(nx,ny,nz)===false){
+          // could be newly visible — just rebuild to be safe
+        }
+      }
+      // do a full pass for neighbors — simplest is to rebuild (cheap-ish)
+      this.rebuildInstances();
+    } else {
+      this.blocks.delete(k);
+      // neighbors may become hidden
+      this.rebuildInstances();
+    }
+  }
+  doRay(){
+    const origin = this.camera.position;
+    const dir = new THREE.Vector3();
+    this.camera.getWorldDirection(dir);
+    let x = Math.floor(origin.x), y = Math.floor(origin.y), z = Math.floor(origin.z);
+    const stepX = dir.x>0?1:-1, stepY = dir.y>0?1:-1, stepZ = dir.z>0?1:-1;
+    const tDX = dir.x!==0?Math.abs(1/dir.x):1e9;
+    const tDY = dir.y!==0?Math.abs(1/dir.y):1e9;
+    const tDZ = dir.z!==0?Math.abs(1/dir.z):1e9;
+    let tMX = dir.x!==0?((stepX>0?Math.ceil(origin.x):Math.floor(origin.x)) - origin.x)/dir.x:1e9;
+    let tMY = dir.y!==0?((stepY>0?Math.ceil(origin.y):Math.floor(origin.y)) - origin.y)/dir.y:1e9;
+    let tMZ = dir.z!==0?((stepZ>0?Math.ceil(origin.z):Math.floor(origin.z)) - origin.z)/dir.z:1e9;
+    let face = {x:0,y:0,z:0};
+    for(let i=0;i<80;i++){
+      if(this.getBlock(x,y,z)) return { x,y,z, face };
+      if(tMX < tMY){
+        if(tMX < tMZ){ x += stepX; tMX += tDX; face = {x:-stepX, y:0, z:0}; }
+        else         { z += stepZ; tMZ += tDZ; face = {x:0, y:0, z:-stepZ}; }
+      } else {
+        if(tMY < tMZ){ y += stepY; tMY += tDY; face = {x:0, y:-stepY, z:0}; }
+        else         { z += stepZ; tMZ += tDZ; face = {x:0, y:0, z:-stepZ}; }
+      }
+    }
+    return null;
+  }
+  tryBreak(){
+    const r = this.doRay();
+    if(!r) return;
+    if(Math.hypot(this.camera.position.x-(r.x+.5), this.camera.position.y-(r.y+.5), this.camera.position.z-(r.z+.5)) > 6) return;
+    this.setBlock(r.x, r.y, r.z, null);
+  }
+  tryPlace(){
+    const r = this.doRay();
+    if(!r) return;
+    const px = r.x + r.face.x, py = r.y + r.face.y, pz = r.z + r.face.z;
+    if(this.getBlock(px,py,pz)) return;
+    const pp = this.camera.position;
+    if(Math.hypot(pp.x-(px+.5), pp.y-(py+.5), pp.z-(pz+.5)) < 1.4) return;
+    const types = ['grass','dirt','stone','wood','sand','brick'];
+    this.setBlock(px, py, pz, types[this.selected] || 'dirt');
+  }
+  update(dt){
+    if(!this.started) return;
+    // hotbar keys
+    for(let i=1;i<=6;i++){ if(this.keysOnce.has('Digit'+i)){ this.selected = i-1; document.querySelectorAll('.slot').forEach((s,j)=>s.classList.toggle('active', j===this.selected)); } }
+
+    const sneak = this.keys.has('ShiftLeft');
+    const speed = sneak ? 2.5 : 5.0;
+    const fwd = new THREE.Vector3();
+    this.camera.getWorldDirection(fwd); fwd.y = 0; fwd.normalize();
+    const right = new THREE.Vector3().crossVectors(fwd, new THREE.Vector3(0,1,0)).normalize();
+    let mvX = 0, mvZ = 0;
+    if(this.keys.has('KeyW')||this.keys.has('ArrowUp'))    mvZ += 1;
+    if(this.keys.has('KeyS')||this.keys.has('ArrowDown'))  mvZ -= 1;
+    if(this.keys.has('KeyA')||this.keys.has('ArrowLeft'))  mvX -= 1;
+    if(this.keys.has('KeyD')||this.keys.has('ArrowRight')) mvX += 1;
+    const m = Math.hypot(mvX, mvZ); if(m){ mvX/=m; mvZ/=m; }
+    const dx = (fwd.x*mvZ + right.x*mvX) * speed * dt;
+    const dz = (fwd.z*mvZ + right.z*mvX) * speed * dt;
+    const p = this.camera.position;
+    const r = 0.28;
+    const feetY = Math.floor(p.y - 1.6);
+    const headY = Math.floor(p.y);
+    if(!this.getBlock(Math.floor(p.x+dx+r), feetY, Math.floor(p.z)) &&
+       !this.getBlock(Math.floor(p.x+dx+r), headY, Math.floor(p.z))) p.x += dx;
+    if(!this.getBlock(Math.floor(p.x), feetY, Math.floor(p.z+dz+r)) &&
+       !this.getBlock(Math.floor(p.x), headY, Math.floor(p.z+dz+r))) p.z += dz;
+
+    this.vel.y -= 22 * dt;
+    p.y += this.vel.y * dt;
+    const gy = Math.floor(p.y - 1.7);
+    if(this.getBlock(Math.floor(p.x), gy, Math.floor(p.z))){
+      if(this.vel.y < 0){
+        p.y = gy + 1 + 1.7;
+        this.vel.y = 0;
+        this.onGround = true;
+      }
+    } else this.onGround = false;
+    if(this.vel.y > 0 && this.getBlock(Math.floor(p.x), Math.floor(p.y+0.2), Math.floor(p.z))){
+      this.vel.y = 0;
+    }
+    if(this.keys.has('Space') && this.onGround){ this.vel.y = 8.2; this.onGround = false; }
+
+    const pd = $('#mc-pos'); if(pd) pd.textContent = `${p.x.toFixed(1)}, ${p.y.toFixed(1)}, ${p.z.toFixed(1)}`;
+    const fp = $('#mc-fps'); if(fp) fp.textContent = this.fps;
+  }
+  dispose(){
+    super.dispose();
+    this.canvas.removeEventListener('mousedown', this._md);
+    this.canvas.removeEventListener('contextmenu', this._cm);
+    window.removeEventListener('mousemove', this._mm);
+    window.removeEventListener('mouseup', this._mu);
+    this.canvas.removeEventListener('touchstart', this._ts);
+    this.canvas.removeEventListener('touchmove', this._tm);
+    this.canvas.removeEventListener('touchend', this._te);
+  }
+}
+
+/* ============================================================
+   UFC — 1v1 fighting
+   ============================================================ */
+class UFCGame extends Engine {
+  constructor(){
+    super();
+    this.scene.background = new THREE.Color(0x140a18);
+    this.scene.fog = new THREE.Fog(0x140a18, 24, 70);
+    this.camera.position.set(0, 5, 12);
+    this.camera.lookAt(0,1.5,0);
+
+    this.scene.add(new THREE.AmbientLight(0xffffff, 0.35));
+    const key = new THREE.DirectionalLight(0xffffff, 1.0); key.position.set(5,12,8); this.scene.add(key);
+    const rim = new THREE.DirectionalLight(0xff5577, 0.7); rim.position.set(-6,4,-6); this.scene.add(rim);
+
+    const ring = new THREE.Mesh(new THREE.CylinderGeometry(9,9,0.4,32), new THREE.MeshStandardMaterial({color:0xeaeaea, roughness:0.5}));
+    ring.position.y = -0.2; this.scene.add(ring);
+    const border = new THREE.Mesh(new THREE.CylinderGeometry(9.2,9.2,0.05,32,1,true), new THREE.MeshStandardMaterial({color:0xc82828, side:THREE.DoubleSide}));
+    border.position.y = 0.025; this.scene.add(border);
+    for(let i=0;i<4;i++){
+      const a = i*Math.PI/2 + Math.PI/4;
+      const p = new THREE.Mesh(new THREE.CylinderGeometry(0.18,0.18,4,12), new THREE.MeshStandardMaterial({color:0xcccccc, metalness:0.6, roughness:0.3}));
+      p.position.set(Math.cos(a)*9.2, 2, Math.sin(a)*9.2); this.scene.add(p);
+    }
+    // crowd
+    const crowdGeo = new THREE.CylinderGeometry(0.35,0.4,1.2,6);
+    const crowdMat = new THREE.MeshStandardMaterial({color:0x2a3d8a});
+    const crowd = new THREE.InstancedMesh(crowdGeo, crowdMat, 240);
+    const m4 = new THREE.Matrix4();
+    let idx = 0;
+    for(let r=10; r<24; r+=1.4){
+      for(let a=0;a<Math.PI*2; a+=0.35){
+        m4.makeTranslation(Math.cos(a)*r, 0.6, Math.sin(a)*r);
+        crowd.setMatrixAt(idx++, m4);
+      }
+    }
+    crowd.count = idx;
+    this.scene.add(crowd);
+
+    this.player = this.makeFighter(0x3eb6ff);
+    this.enemy  = this.makeFighter(0xff4655);
+    this.player.group.position.set(-3, 0, 0);
+    this.enemy.group.position.set(3, 0, 0);
+    this.scene.add(this.player.group, this.enemy.group);
+
+    this.player.hp = 100; this.enemy.hp = 100;
+    this.player.cool = 0; this.enemy.cool = 0;
+    this.enemyAI = 0; this.roundOver = false;
+    this.time = 60;
+    this.buildHUD();
+    this.updateHP();
+  }
+  makeFighter(color){
+    const g = new THREE.Group();
+    const mat = new THREE.MeshStandardMaterial({ color, roughness:0.5 });
+    const matD = new THREE.MeshStandardMaterial({ color:0xeac9a6, roughness:0.6 });
+    const matS = new THREE.MeshStandardMaterial({ color:0x111111, roughness:0.6 });
+    const torso = new THREE.Mesh(new THREE.BoxGeometry(1.1, 1.3, 0.6), mat); torso.position.y = 1.6; g.add(torso);
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.35, 16, 12), matD); head.position.y = 2.55; g.add(head);
+    const helmet = new THREE.Mesh(new THREE.SphereGeometry(0.4, 16, 12, 0, Math.PI*2, 0, Math.PI/2), new THREE.MeshStandardMaterial({color:0xcc0000, roughness:0.3}));
+    helmet.position.y = 2.55; g.add(helmet);
+    const armL = new THREE.Mesh(new THREE.BoxGeometry(0.3, 1.1, 0.3), matD); armL.position.set(-0.75, 1.7, 0); armL.name='armL'; g.add(armL);
+    const armR = new THREE.Mesh(new THREE.BoxGeometry(0.3, 1.1, 0.3), matD); armR.position.set( 0.75, 1.7, 0); armR.name='armR'; g.add(armR);
+    const gloveGeo = new THREE.SphereGeometry(0.22, 12, 10);
+    const gloveMat = new THREE.MeshStandardMaterial({ color:0xff0000, roughness:0.3 });
+    const gloveL = new THREE.Mesh(gloveGeo, gloveMat); gloveL.position.set(-0.75, 1.05, 0); gloveL.name='gloveL'; g.add(gloveL);
+    const gloveR = new THREE.Mesh(gloveGeo, gloveMat); gloveR.position.set( 0.75, 1.05, 0); gloveR.name='gloveR'; g.add(gloveR);
+    const legL = new THREE.Mesh(new THREE.BoxGeometry(0.35, 1.0, 0.4), matS); legL.position.set(-0.25, 0.5, 0); legL.name='legL'; g.add(legL);
+    const legR = new THREE.Mesh(new THREE.BoxGeometry(0.35, 1.0, 0.4), matS); legR.position.set( 0.25, 0.5, 0); legR.name='legR'; g.add(legR);
+    const shoeGeo = new THREE.BoxGeometry(0.4,0.18,0.7);
+    const shoeL = new THREE.Mesh(shoeGeo, new THREE.MeshStandardMaterial({color:0x222222})); shoeL.position.set(-0.25, 0.05, 0.1); g.add(shoeL);
+    const shoeR = new THREE.Mesh(shoeGeo, new THREE.MeshStandardMaterial({color:0x222222})); shoeR.position.set( 0.25, 0.05, 0.1); g.add(shoeR);
+    return { group:g, parts:{ torso, head, armL, armR, gloveL, gloveR, legL, legR } };
+  }
+  buildHUD(){
+    this.hud = $('#hud');
+    this.hud.innerHTML = `
+      <div class="hud-top" style="align-items:center">
+        <div class="pill" style="flex-direction:column;align-items:flex-start;gap:4px">
+          <div style="font-size:11px;letter-spacing:2px;color:#9fb0c9">YOU</div>
+          <div class="hpbar"><i id="ufc-hp-p" style="width:100%"></i></div>
+        </div>
+        <div class="pill" style="font-size:14px">ROUND <b id="ufc-time">60</b></div>
+        <div class="pill" style="flex-direction:column;align-items:flex-end;gap:4px">
+          <div style="font-size:11px;letter-spacing:2px;color:#9fb0c9">CPU</div>
+          <div class="hpbar"><i id="ufc-hp-e" style="width:100%;background:linear-gradient(90deg,#3eb6ff,#a8203a)"></i></div>
+        </div>
+      </div>
+      <div class="dpad" id="ufc-dpad">
+        <div></div><button data-k="w">▲</button><div></div>
+        <button data-k="a">◀</button><div></div><button data-k="d">▶</button>
+        <div></div><button data-k="s">▼</button><div></div>
+      </div>
+      <div class="actions">
+        <button class="atk" id="ufc-punch">PUNCH</button>
+        <button class="def" id="ufc-kick">KICK</button>
+      </div>`;
+    $('#ufc-punch').addEventListener('pointerdown', e=>{ e.preventDefault(); this.keys.add('KeyJ'); });
+    $('#ufc-punch').addEventListener('pointerup',   e=>{ e.preventDefault(); this.keys.delete('KeyJ'); });
+    $('#ufc-punch').addEventListener('pointerleave',e=>{ this.keys.delete('KeyJ'); });
+    $('#ufc-kick').addEventListener('pointerdown', e=>{ e.preventDefault(); this.keys.add('KeyK'); });
+    $('#ufc-kick').addEventListener('pointerup',   e=>{ e.preventDefault(); this.keys.delete('KeyK'); });
+    $('#ufc-kick').addEventListener('pointerleave',e=>{ this.keys.delete('KeyK'); });
+    document.querySelectorAll('#ufc-dpad button').forEach(b=>{
+      const code = 'Arrow' + b.dataset.k.toUpperCase();
+      b.addEventListener('pointerdown', e=>{ e.preventDefault(); this.keys.add(code); });
+      b.addEventListener('pointerup',   e=>{ e.preventDefault(); this.keys.delete(code); });
+      b.addEventListener('pointerleave',e=>{ this.keys.delete(code); });
+    });
+  }
+  showIntro(){
+    const ov = document.createElement('div');
+    ov.className = 'gameoverlay';
+    ov.innerHTML = `
+      <div class="box">
+        <h2>🥊 <span class="a">UFC: Title Fight</span></h2>
+        <p>Move in the ring · deplete opponent's HP</p>
+        <div class="controls">
+          <div class="row"><b>WASD</b> Move</div>
+          <div class="row"><b>J / Space</b> Punch</div>
+          <div class="row"><b>K</b> Kick</div>
+          <div class="row"><b>Esc</b> Back to hub</div>
+        </div>
+        <button id="ufc-go">Enter the Ring</button>
+      </div>`;
+    this.hud.appendChild(ov);
+    ov.querySelector('#ufc-go').addEventListener('click', ()=>{ ov.classList.add('hide'); this.started = true; });
+    this.started = false;
+  }
+  updateHP(){ $('#ufc-hp-p').style.width = clamp(this.player.hp,0,100)+'%'; $('#ufc-hp-e').style.width = clamp(this.enemy.hp,0,100)+'%'; }
+  punch(who, kick){
+    const f = who, t = (who===this.player? this.enemy : this.player);
+    const d = f.group.position.distanceTo(t.group.position);
+    if(d > 2.2) return false;
+    const limb = kick ? who.parts.legL : who.parts.armL;
+    const start = limb.rotation.x;
+    limb.rotation.x = -1.4;
+    setTimeout(()=>{ limb.rotation.x = start; }, 200);
+    t.hp -= kick ? 10 : 6;
+    const mat = t.parts.torso.material;
+    const oc = mat.color.getHex();
+    mat.color.set(0xffffff);
+    setTimeout(()=>mat.color.set(oc), 100);
+    this.updateHP();
+    return true;
+  }
+  update(dt){
+    if(!this.started){ $('#ufc-time').textContent = Math.ceil(this.time); return; }
+    if(this.roundOver){ return; }
+    const sp = 4.4;
+    let dx=0, dz=0;
+    if(this.keys.has('KeyW')||this.keys.has('ArrowUp'))    dz -= 1;
+    if(this.keys.has('KeyS')||this.keys.has('ArrowDown'))  dz += 1;
+    if(this.keys.has('KeyA')||this.keys.has('ArrowLeft'))  dx -= 1;
+    if(this.keys.has('KeyD')||this.keys.has('ArrowRight')) dx += 1;
+    const len = Math.hypot(dx,dz); if(len){ dx/=len; dz/=len; }
+    const p = this.player.group.position, e = this.enemy.group.position;
+    let nx = p.x + dx*sp*dt, nz = p.z + dz*sp*dt;
+    if(Math.hypot(nx,nz) < 8.5){ p.x = nx; p.z = nz; }
+    this.player.group.lookAt(e.x, p.y, e.z);
+    this.enemy.group.lookAt(p.x, e.y, p.z);
+
+    if(this.keys.has('KeyJ') || this.keys.has('Space')){
+      if(this.player.cool<=0){ this.punch(this.player, false); this.player.cool=0.32; }
+    }
+    if(this.keys.has('KeyK')){
+      if(this.player.cool<=0){ this.punch(this.player, true); this.player.cool=0.45; }
+    }
+    this.player.cool -= dt;
+
+    this.enemyAI -= dt;
+    if(this.enemyAI <= 0){
+      const d = e.distanceTo(p);
+      if(d > 2.2){
+        const dir = new THREE.Vector3().subVectors(p,e).setY(0).normalize();
+        const ex = e.x + dir.x * sp * dt * 1.05;
+        const ez = e.z + dir.z * sp * dt * 1.05;
+        if(Math.hypot(ex,ez) < 8.5){ e.x = ex; e.z = ez; }
+        this.enemyAI = 0.2;
+      } else {
+        if(this.enemy.cool<=0){
+          const kick = Math.random()<0.35;
+          this.punch(this.enemy, kick);
+          this.enemy.cool = kick?0.55:0.4;
+          this.enemyAI = kick?0.7:0.4;
+        }
+      }
+    }
+    this.enemy.cool -= dt;
+
+    this.time -= dt;
+    if(this.time<=0) this.time = 0;
+    $('#ufc-time').textContent = Math.ceil(this.time);
+
+    const t2 = performance.now()*0.00018;
+    this.camera.position.x = Math.sin(t2)*0.5;
+    this.camera.position.z = 13 + Math.cos(t2)*0.3;
+    this.camera.position.y = 5.5;
+    this.camera.lookAt(0, 1.5, 0);
+
+    if(!this.roundOver && (this.player.hp<=0 || this.enemy.hp<=0)){
+      this.roundOver = true;
+      const won = this.enemy.hp<=0;
+      setTimeout(()=>{
+        const ov = document.createElement('div');
+        ov.className='gameoverlay';
+        ov.innerHTML = `<div class="box"><h2>${won?'🏆 KNOCKOUT!':'💀 YOU LOSE'}</h2><p>${won?'You won the title fight!':'Get back in the ring.'}</p><button id="ufc-restart">Rematch</button></div>`;
+        this.hud.appendChild(ov);
+        ov.querySelector('#ufc-restart').addEventListener('click', ()=>{ ov.remove(); this.player.hp=100; this.enemy.hp=100; this.time=60; this.roundOver=false; this.updateHP(); });
+      }, 700);
+    }
+  }
+}
+
+/* ============================================================
+   GTA — top-down driving
+   ============================================================ */
+class GTAGame extends Engine {
+  constructor(){
+    super();
+    this.scene.background = new THREE.Color(0x88aabb);
+    this.scene.fog = new THREE.Fog(0x88aabb, 80, 240);
+    this.scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+    const sun = new THREE.DirectionalLight(0xffffff, 0.9); sun.position.set(60,80,40); this.scene.add(sun);
+
+    const ground = new THREE.Mesh(new THREE.PlaneGeometry(440,440), new THREE.MeshLambertMaterial({color:0x222933}));
+    ground.rotation.x = -Math.PI/2; this.scene.add(ground);
+
+    const roadMat = new THREE.MeshLambertMaterial({color:0x2c333d});
+    for(let i=-200;i<=200;i+=40){
+      const h = new THREE.Mesh(new THREE.PlaneGeometry(440,10), roadMat); h.rotation.x=-Math.PI/2; h.position.set(0,0.01,i); this.scene.add(h);
+      const v = new THREE.Mesh(new THREE.PlaneGeometry(10,440), roadMat); v.rotation.x=-Math.PI/2; v.position.set(i,0.01,0); this.scene.add(v);
+      const stripeMat = new THREE.MeshBasicMaterial({color:0xfff7a8});
+      for(let s=-200;s<200;s+=4){
+        const sh = new THREE.Mesh(new THREE.PlaneGeometry(1.2,2), stripeMat); sh.rotation.x=-Math.PI/2; sh.position.set(s,0.02,i+5); this.scene.add(sh);
+        const sv = new THREE.Mesh(new THREE.PlaneGeometry(2,1.2), stripeMat); sv.rotation.x=-Math.PI/2; sv.position.set(i+5,0.02,s); this.scene.add(sv);
+      }
+    }
+
+    const bGeo = new THREE.BoxGeometry(1,1,1);
+    const bMat = new THREE.MeshLambertMaterial({color:0xaebbd1});
+    const buildings = new THREE.InstancedMesh(bGeo, bMat, 800);
+    const m4 = new THREE.Matrix4();
+    let bi = 0;
+    this.buildingBoxes = [];
+    for(let x=-180;x<=180;x+=40){
+      for(let z=-180;z<=180;z+=40){
+        if(Math.abs(x)<6||Math.abs(z)<6) continue;
+        for(let bx=-14;bx<=14;bx+=10){
+          for(let bz=-14;bz<=14;bz+=10){
+            if(Math.abs(bx)<5 && Math.abs(bz)<5) continue;
+            const w = rand(6,12), d = rand(6,12), h = rand(10,40);
+            m4.makeScale(w,h,d);
+            m4.setPosition(x+bx+rand(-2,2), h/2, z+bz+rand(-2,2));
+            buildings.setMatrixAt(bi++, m4);
+            this.buildingBoxes.push({ x:x+bx, z:z+bz, w, d });
+          }
+        }
+      }
+    }
+    buildings.count = bi;
+    this.scene.add(buildings);
+
+    this.car = new THREE.Group();
+    const body = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.7, 4), new THREE.MeshStandardMaterial({color:0xff3344, metalness:0.6, roughness:0.3}));
+    body.position.y = 0.6; this.car.add(body);
+    const cabin = new THREE.Mesh(new THREE.BoxGeometry(1.9,0.6,2), new THREE.MeshStandardMaterial({color:0x111a22, metalness:0.4, roughness:0.2}));
+    cabin.position.set(0, 1.15, -0.2); this.car.add(cabin);
+    const wheelGeo = new THREE.CylinderGeometry(0.35,0.35,0.3,12);
+    const wheelMat = new THREE.MeshStandardMaterial({color:0x111});
+    [[-1.1,0.35,-1.3],[1.1,0.35,-1.3],[-1.1,0.35,1.3],[1.1,0.35,1.3]].forEach(p=>{
+      const w = new THREE.Mesh(wheelGeo, wheelMat);
+      w.rotation.z = Math.PI/2;
+      w.position.set(...p);
+      w.userData.wheel = true;
+      this.car.add(w);
+    });
+    const headMat = new THREE.MeshBasicMaterial({color:0xffffaa});
+    const headL = new THREE.Mesh(new THREE.BoxGeometry(0.3,0.2,0.05), headMat); headL.position.set(-0.7, 0.6, -2.05); this.car.add(headL);
+    const headR = headL.clone(); headR.position.x = 0.7; this.car.add(headR);
+    this.car.position.set(0,0,0);
+    this.scene.add(this.car);
+
+    this.traffic = [];
+    const tcols = [0x3366cc,0xddcc22,0x22aa66,0xeeeeee,0x222222,0xcc22aa];
+    for(let i=0;i<24;i++){
+      const tcar = new THREE.Group();
+      const cb = new THREE.Mesh(new THREE.BoxGeometry(2,0.7,3.8), new THREE.MeshStandardMaterial({color:choice(tcols), metalness:0.5, roughness:0.4}));
+      cb.position.y = 0.6; tcar.add(cb);
+      const cc = new THREE.Mesh(new THREE.BoxGeometry(1.7,0.5,1.6), new THREE.MeshStandardMaterial({color:0x222a33}));
+      cc.position.set(0,1.05,-0.1); tcar.add(cc);
+      const laneAxis = Math.random()<0.5 ? 'x' : 'z';
+      const road = ((Math.random()*10|0)*40 - 200);
+      tcar.position.set(laneAxis==='x' ? road : rand(-180,180), 0, laneAxis==='z' ? road : rand(-180,180));
+      tcar.userData = { speed: rand(4,11), axis: laneAxis, dir: Math.random()<0.5?1:-1 };
+      this.scene.add(tcar);
+      this.traffic.push(tcar);
+    }
+
+    this.carState = { speed:0, heading:0, steer:0 };
+    this.buildHUD();
+    this.wanted = 0; this.money = 0;
+  }
+  buildHUD(){
+    this.hud = $('#hud');
+    this.hud.innerHTML = `
+      <div class="hud-top">
+        <div class="pill"><span class="dot" id="gta-dot"></span>VICE STREETS · <span id="gta-money">$0</span></div>
+        <div class="wanted" id="gta-wanted"></div>
+        <div class="pill">FPS <b id="gta-fps">60</b></div>
+      </div>
+      <div id="reticle-mini"><canvas id="minimap" width="160" height="160"></canvas></div>
+      <div class="speedometer"><b id="gta-speed">0</b> KM/H</div>`;
+    const w = $('#gta-wanted');
+    for(let i=0;i<5;i++){ const s=document.createElement('i'); w.appendChild(s); }
+    this.mini = $('#minimap').getContext('2d');
+  }
+  showIntro(){
+    const ov = document.createElement('div');
+    ov.className = 'gameoverlay';
+    ov.innerHTML = `
+      <div class="box">
+        <h2>🚗 <span class="a">GTA: Vice Streets</span></h2>
+        <p>Top-down driving · avoid traffic · earn cash</p>
+        <div class="controls">
+          <div class="row"><b>W / S</b> Accelerate / Brake</div>
+          <div class="row"><b>A / D</b> Steer</div>
+          <div class="row"><b>Shift</b> Handbrake</div>
+          <div class="row"><b>Esc</b> Back to hub</div>
+        </div>
+        <button id="gta-go">Hit the Road</button>
+      </div>`;
+    this.hud.appendChild(ov);
+    ov.querySelector('#gta-go').addEventListener('click', ()=>{ ov.classList.add('hide'); this.started = true; });
+    this.started = false;
+  }
+  setWanted(n){
+    this.wanted = clamp(n,0,5);
+    document.querySelectorAll('#gta-wanted i').forEach((el,i)=>el.classList.toggle('on', i<this.wanted));
+    const d = $('#gta-dot'); if(d) d.style.background = this.wanted>=3?'#ff4655':(this.wanted>=1?'#ffaa3c':'#3eff7a');
+  }
+  update(dt){
+    if(!this.started){ return; }
+    let acc=0, brake=0;
+    if(this.keys.has('KeyW')||this.keys.has('ArrowUp'))    acc = 1;
+    if(this.keys.has('KeyS')||this.keys.has('ArrowDown'))  brake = 1;
+    let steer=0;
+    if(this.keys.has('KeyA')||this.keys.has('ArrowLeft'))  steer = 1;
+    if(this.keys.has('KeyD')||this.keys.has('ArrowRight')) steer = -1;
+    if(this.keys.has('ShiftLeft')) brake = Math.max(brake, 0.5);
+
+    this.carState.speed += (acc*22 - brake*34) * dt;
+    this.carState.speed = clamp(this.carState.speed, -22, 42);
+    this.carState.steer = lerp(this.carState.steer, steer*1.6, dt*8);
+    this.carState.heading += this.carState.steer * dt * (this.carState.speed/14);
+    const c = this.car;
+    c.rotation.y = this.carState.heading;
+    const fx = -Math.sin(this.carState.heading);
+    const fz = -Math.cos(this.carState.heading);
+    c.position.x += fx * this.carState.speed * dt;
+    c.position.z += fz * this.carState.speed * dt;
+    c.position.x = clamp(c.position.x, -210, 210);
+    c.position.z = clamp(c.position.z, -210, 210);
+
+    for(const m of c.children){ if(m.userData && m.userData.wheel) m.rotation.x -= this.carState.speed*dt*2; }
+
+    // collisions with buildings
+    for(const b of this.buildingBoxes){
+      const dx = c.position.x - b.x, dz = c.position.z - b.z;
+      if(Math.abs(dx) < b.w/2 + 1.2 && Math.abs(dz) < b.d/2 + 1.2){
+        const nx = dx>0?1:-1, nz = dz>0?1:-1;
+        c.position.x += nx*0.4; c.position.z += nz*0.4;
+        this.carState.speed *= 0.1;
+        this.money = Math.max(0, this.money - 50);
+        this.setWanted(Math.min(5, this.wanted+1));
+      }
+    }
+
+    for(const t of this.traffic){
+      if(t.userData.axis==='x'){
+        t.position.x += t.userData.dir * t.userData.speed * dt;
+        if(t.position.x > 210) t.position.x = -210;
+        if(t.position.x < -210) t.position.x = 210;
+      } else {
+        t.position.z += t.userData.dir * t.userData.speed * dt;
+        if(t.position.z > 210) t.position.z = -210;
+        if(t.position.z < -210) t.position.z = 210;
+      }
+      const dx = t.position.x - c.position.x, dz = t.position.z - c.position.z;
+      if(dx*dx+dz*dz < 6){
+        this.carState.speed *= 0.2;
+        this.setWanted(Math.min(5, this.wanted+1));
+        this.money = Math.max(0, this.money - 100);
+      }
+    }
+
+    this.money += Math.floor(Math.abs(this.carState.speed)*dt*0.6);
+    $('#gta-money').textContent = '$'+this.money.toLocaleString();
+    $('#gta-speed').textContent = Math.abs(this.carState.speed*5).toFixed(0);
+    $('#gta-fps').textContent = this.fps;
+    if(this.wanted>0 && Math.random()<dt*0.05) this.setWanted(this.wanted-1);
+
+    const camDist = 11, camHeight = 7;
+    const cx = c.position.x + Math.sin(this.carState.heading) * camDist;
+    const cz = c.position.z + Math.cos(this.carState.heading) * camDist;
+    this.camera.position.lerp(new THREE.Vector3(cx, camHeight, cz), dt*6);
+    this.camera.lookAt(c.position.x, 1.5, c.position.z);
+
+    this.drawMinimap();
+  }
+  drawMinimap(){
+    const ctx = this.mini; const W=160, H=160;
+    ctx.fillStyle = '#0e1320'; ctx.fillRect(0,0,W,H);
+    ctx.strokeStyle = '#1c2748'; ctx.lineWidth = 1;
+    for(let i=0;i<W;i+=16){ ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,H); ctx.stroke(); }
+    for(let i=0;i<H;i+=16){ ctx.beginPath(); ctx.moveTo(0,i); ctx.lineTo(W,i); ctx.stroke(); }
+    ctx.fillStyle = '#334';
+    for(let i=0;i<W;i+=16){ ctx.fillRect(i, H/2-1, 16, 2); }
+    for(let i=0;i<H;i+=16){ ctx.fillRect(W/2-1, i, 2, 16); }
+    ctx.fillStyle = '#779';
+    for(const b of this.buildingBoxes){
+      const x = W/2 + (b.x - this.car.position.x)*0.7;
+      const z = H/2 + (b.z - this.car.position.z)*0.7;
+      if(x>0&&x<W&&z>0&&z<H) ctx.fillRect(x-1, z-1, 2, 2);
+    }
+    ctx.fillStyle = '#aac6ff';
+    for(const t of this.traffic){
+      const x = W/2 + (t.position.x - this.car.position.x)*0.7;
+      const z = H/2 + (t.position.z - this.car.position.z)*0.7;
+      if(x>0&&x<W&&z>0&&z<H) ctx.fillRect(x-1, z-1, 3, 3);
+    }
+    ctx.fillStyle = '#ff3344';
+    ctx.save(); ctx.translate(W/2, H/2); ctx.rotate(-this.carState.heading);
+    ctx.beginPath(); ctx.moveTo(0,-5); ctx.lineTo(-3,3); ctx.lineTo(0,1); ctx.lineTo(3,3); ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
+}
+
+window.addEventListener('keydown', e=>{
+  if(e.key==='Escape'){
+    if(!$('#gameview').classList.contains('show')) return;
+    if(!$('#back-btn').contains(document.activeElement)) $('#back-btn').click();
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="ru" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FreshByte — Экосистема Умной Еды будущего</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eefcf4',
+                            100: '#d7f7e4',
+                            200: '#b2edd0',
+                            300: '#7cdcb3',
+                            400: '#43c292',
+                            500: '#10b981', // Emerald
+                            600: '#059669',
+                            700: '#047857',
+                            800: '#065f46',
+                            900: '#064e3b',
+                            950: '#022c22',
+                        },
+                        dark: {
+                            900: '#090d16',
+                            800: '#111827',
+                            700: '#1f2937',
+                            600: '#374151',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts & Lucide Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .glassmorphism {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .dark .glassmorphism {
+            background: rgba(15, 23, 42, 0.75);
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .dark ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #334155;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #10b981;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-dark-900 text-slate-800 dark:text-slate-100 transition-colors duration-300 min-h-screen flex flex-col">
+
+    <!-- HEADER / NAVIGATION -->
+    <header class="sticky top-0 z-40 w-full border-b border-slate-200/80 dark:border-slate-800/80 glassmorphism transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo -->
+                <div class="flex items-center gap-3 cursor-pointer" onclick="navigateTo('home')">
+                    <div class="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-500 to-cyan-400 text-white shadow-lg shadow-brand-500/20">
+                        <i data-lucide="cpu" class="w-5 h-5 animate-pulse-slow"></i>
+                        <span class="absolute -top-1 -right-1 flex h-3 w-3">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-3 w-3 bg-brand-500"></span>
+                        </span>
+                    </div>
+                    <div>
+                        <span class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-brand-600 to-cyan-500 dark:from-brand-400 dark:to-cyan-400 bg-clip-text text-transparent">FreshByte</span>
+                        <span class="block text-[9px] text-slate-400 dark:text-slate-500 tracking-widest uppercase font-bold">Smart Grocery</span>
+                    </div>
+                </div>
+
+                <!-- Desktop Nav -->
+                <nav class="hidden md:flex items-center gap-1">
+                    <button onclick="navigateTo('home')" data-nav="home" class="nav-link px-4 py-2 rounded-lg text-sm font-medium transition-all text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-950/50">Главная</button>
+                    <button onclick="navigateTo('catalog')" data-nav="catalog" class="nav-link px-4 py-2 rounded-lg text-sm font-medium transition-all text-slate-600 dark:text-slate-300 hover:text-brand-500 dark:hover:text-brand-400">Каталог</button>
+                    <button onclick="navigateTo('nutri-ai')" data-nav="nutri-ai" class="nav-link px-4 py-2 rounded-lg text-sm font-medium transition-all text-slate-600 dark:text-slate-300 hover:text-brand-500 dark:hover:text-brand-400 flex items-center gap-1.5">
+                        <i data-lucide="sparkles" class="w-4 h-4 text-cyan-500"></i> Nutri-AI
+                    </button>
+                    <button onclick="navigateTo('loyalty')" data-nav="loyalty" class="nav-link px-4 py-2 rounded-lg text-sm font-medium transition-all text-slate-600 dark:text-slate-300 hover:text-brand-500 dark:hover:text-brand-400">Лояльность</button>
+                    <button onclick="navigateTo('about')" data-nav="about" class="nav-link px-4 py-2 rounded-lg text-sm font-medium transition-all text-slate-600 dark:text-slate-300 hover:text-brand-500 dark:hover:text-brand-400">О технологиях</button>
+                </nav>
+
+                <!-- Actions -->
+                <div class="flex items-center gap-3">
+                    <!-- Theme Toggle -->
+                    <button onclick="toggleTheme()" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors" aria-label="Toggle Theme">
+                        <i data-lucide="sun" class="w-5 h-5 hidden dark:block"></i>
+                        <i data-lucide="moon" class="w-5 h-5 block dark:hidden"></i>
+                    </button>
+
+                    <!-- Cart Trigger -->
+                    <button onclick="toggleCart()" class="relative p-2.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                        <i data-lucide="shopping-bag" class="w-5 h-5"></i>
+                        <span id="cart-badge" class="absolute -top-1 -right-1 bg-brand-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center scale-0 transition-transform duration-300">0</span>
+                    </button>
+
+                    <!-- Mobile Menu Trigger -->
+                    <button onclick="toggleMobileMenu()" class="md:hidden p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                        <i data-lucide="menu" id="menu-icon-open" class="w-5 h-5"></i>
+                        <i data-lucide="x" id="menu-icon-close" class="w-5 h-5 hidden"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Nav Menu -->
+        <div id="mobile-menu" class="hidden md:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-dark-800 px-4 py-3 space-y-1">
+            <button onclick="navigateTo('home'); toggleMobileMenu()" class="w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium text-brand-500 bg-brand-50/50 dark:bg-brand-950/30">Главная</button>
+            <button onclick="navigateTo('catalog'); toggleMobileMenu()" class="w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-300">Каталог</button>
+            <button onclick="navigateTo('nutri-ai'); toggleMobileMenu()" class="w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-300 flex items-center gap-2">
+                <i data-lucide="sparkles" class="w-4 h-4 text-cyan-500"></i> Nutri-AI
+            </button>
+            <button onclick="navigateTo('loyalty'); toggleMobileMenu()" class="w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-300">Лояльность</button>
+            <button onclick="navigateTo('about'); toggleMobileMenu()" class="w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-300">О технологиях</button>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="flex-grow">
+
+        <!-- PAGE: HOME -->
+        <section id="page-home" class="page-view">
+            <!-- Hero Section -->
+            <div class="relative overflow-hidden py-20 lg:py-32">
+                <div class="absolute inset-0 bg-gradient-to-b from-brand-50/50 to-transparent dark:from-brand-950/10 pointer-events-none"></div>
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                    <div class="grid lg:grid-cols-12 gap-12 items-center">
+                        <div class="lg:col-span-7 space-y-6 text-center lg:text-left">
+                            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-100 dark:bg-brand-950/80 text-brand-700 dark:text-brand-300 text-xs font-semibold tracking-wide">
+                                <span class="flex h-2 w-2 rounded-full bg-brand-500 animate-pulse"></span>
+                                Доставка дронами за 15 минут в Москве и СПб
+                            </div>
+                            <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-[1.1]">
+                                Еда будущего, <br>
+                                <span class="bg-gradient-to-r from-brand-500 to-cyan-400 bg-clip-text text-transparent">доставленная сегодня</span>
+                            </h1>
+                            <p class="text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto lg:mx-0">
+                                FreshByte объединяет вертикальное фермерство, молекулярный контроль качества и искусственный интеллект, чтобы вы получали самые свежие продукты без пестицидов и ГМО.
+                            </p>
+                            <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
+                                <button onclick="navigateTo('catalog')" class="w-full sm:w-auto px-8 py-4 bg-brand-500 hover:bg-brand-600 text-white font-semibold rounded-xl shadow-lg shadow-brand-500/25 transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2">
+                                    <i data-lucide="shopping-cart" class="w-5 h-5"></i> Перейти в каталог
+                                </button>
+                                <button onclick="navigateTo('nutri-ai')" class="w-full sm:w-auto px-8 py-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold rounded-xl transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2">
+                                    <i data-lucide="sparkles" class="w-5 h-5 text-cyan-500"></i> Составить AI-рацион
+                                </button>
+                            </div>
+                        </div>
+                        <!-- High Tech Mockup -->
+                        <div class="lg:col-span-5 relative">
+                            <div class="absolute -inset-4 bg-gradient-to-tr from-brand-500 to-cyan-400 rounded-3xl opacity-20 blur-2xl animate-pulse-slow"></div>
+                            <div class="relative bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 shadow-2xl">
+                                <div class="flex items-center justify-between mb-6">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-3 h-3 rounded-full bg-red-400"></div>
+                                        <div class="w-3 h-3 rounded-full bg-yellow-400"></div>
+                                        <div class="w-3 h-3 rounded-full bg-green-400"></div>
+                                    </div>
+                                    <div class="text-xs font-mono text-slate-400 dark:text-slate-500">FRESHBYTE-OS v2.4</div>
+                                </div>
+                                <div class="space-y-4">
+                                    <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 flex items-center gap-4">
+                                        <div class="p-3 bg-brand-100 dark:bg-brand-950/50 rounded-lg text-brand-500">
+                                            <i data-lucide="activity" class="w-6 h-6"></i>
+                                        </div>
+                                        <div class="flex-1">
+                                            <div class="text-xs text-slate-400">Молекулярный тест</div>
+                                            <div class="text-sm font-semibold text-slate-800 dark:text-slate-200">Чистота продукта: 99.8%</div>
+                                        </div>
+                                    </div>
+                                    <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 flex items-center gap-4">
+                                        <div class="p-3 bg-cyan-100 dark:bg-cyan-950/50 rounded-lg text-cyan-500">
+                                            <i data-lucide="navigation" class="w-6 h-6"></i>
+                                        </div>
+                                        <div class="flex-1">
+                                            <div class="text-xs text-slate-400">Автономный дрон</div>
+                                            <div class="text-sm font-semibold text-slate-800 dark:text-slate-200">В пути: 4.2 км до вас</div>
+                                        </div>
+                                    </div>
+                                    <div class="p-4 rounded-xl bg-brand-500 text-white flex items-center justify-between shadow-lg shadow-brand-500/20">
+                                        <div class="flex items-center gap-3">
+                                            <i data-lucide="zap" class="w-5 h-5 animate-bounce"></i>
+                                            <div>
+                                                <div class="text-[10px] uppercase tracking-wider opacity-85">Smart-Подписка</div>
+                                                <div class="text-sm font-bold">Скидка 15% на био-зелень</div>
+                                            </div>
+                                        </div>
+                                        <button onclick="navigateTo('loyalty')" class="px-3 py-1.5 bg-white/20 hover:bg-white/30 rounded-lg text-xs font-semibold transition-colors">Активировать</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Features Grid -->
+            <div class="py-16 bg-white dark:bg-slate-900 border-y border-slate-200 dark:border-slate-800">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center max-w-3xl mx-auto mb-16">
+                        <h2 class="text-3xl font-bold text-slate-900 dark:text-white">Почему выбирают FreshByte?</h2>
+                        <p class="mt-4 text-slate-600 dark:text-slate-400">Мы переосмыслили процесс покупки еды. От выращивания на умных фермах до мгновенной доставки к вашему столу.</p>
+                    </div>
+                    <div class="grid md:grid-cols-3 gap-8">
+                        <!-- Card 1 -->
+                        <div class="p-8 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 hover:shadow-xl transition-all duration-300 group">
+                            <div class="w-12 h-12 rounded-xl bg-brand-100 dark:bg-brand-950/50 text-brand-500 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                                <i data-lucide="leaf" class="w-6 h-6"></i>
+                            </div>
+                            <h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">100% Локальный Organic</h3>
+                            <p class="text-slate-600 dark:text-slate-400">Все овощи и зелень выращиваются на наших вертикальных сити-фермах прямо в черте города без использования химикатов.</p>
+                        </div>
+                        <!-- Card 2 -->
+                        <div class="p-8 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 hover:shadow-xl transition-all duration-300 group">
+                            <div class="w-12 h-12 rounded-xl bg-cyan-100 dark:bg-cyan-950/50 text-cyan-500 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                                <i data-lucide="shield-check" class="w-6 h-6"></i>
+                            </div>
+                            <h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">Молекулярный Контроль</h3>
+                            <p class="text-slate-600 dark:text-slate-400">Каждая партия продуктов проходит экспресс-анализ на нитраты, свежесть и содержание полезных веществ.</p>
+                        </div>
+                        <!-- Card 3 -->
+                        <div class="p-8 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 hover:shadow-xl transition-all duration-300 group">
+                            <div class="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-950/50 text-purple-500 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                                <i data-lucide="sparkles" class="w-6 h-6"></i>
+                            </div>
+                            <h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">Персональный AI-шеф</h3>
+                            <p class="text-slate-600 dark:text-slate-400">Интегрированная нейросеть Nutri-AI анализирует ваши цели и автоматически составляет корзину идеального питания.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Promo Banner -->
+            <div class="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="relative rounded-3xl overflow-hidden bg-gradient-to-r from-brand-600 to-cyan-600 text-white p-8 md:p-16 shadow-2xl">
+                    <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]"></div>
+                    <div class="relative z-10 max-w-2xl space-y-6">
+                        <span class="px-3 py-1 bg-white/20 rounded-full text-xs font-semibold uppercase tracking-wider">Спецпредложение</span>
+                        <h2 class="text-3xl md:text-5xl font-extrabold tracking-tight">Попробуйте первый Smart-Бокс бесплатно!</h2>
+                        <p class="text-lg text-brand-50">Зарегистрируйтесь в программе лояльности, получите 500 приветственных байт-поинтов и обменяйте их на набор свежей микрозелени.</p>
+                        <div class="flex flex-wrap gap-4 pt-2">
+                            <button onclick="navigateTo('loyalty')" class="px-6 py-3 bg-white text-brand-600 font-bold rounded-xl shadow-lg hover:bg-brand-50 transition-all">Получить 500 поинтов</button>
+                            <button onclick="navigateTo('catalog')" class="px-6 py-3 bg-brand-700/50 hover:bg-brand-700/70 border border-brand-400/30 font-bold rounded-xl transition-all">Смотреть боксы</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE: CATALOG -->
+        <section id="page-catalog" class="page-view hidden py-12">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <!-- Header & Search -->
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+                    <div>
+                        <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">Каталог Продуктов</h1>
+                        <p class="text-slate-500 dark:text-slate-400 mt-1">Выращено с любовью и технологиями</p>
+                    </div>
+                    <!-- Search & Filter Controls -->
+                    <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                        <div class="relative flex-1 sm:w-80">
+                            <i data-lucide="search" class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5"></i>
+                            <input type="text" id="search-input" oninput="filterProducts()" placeholder="Поиск умных продуктов..." class="w-full pl-11 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all">
+                        </div>
+                        <select id="sort-select" onchange="filterProducts()" class="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all">
+                            <option value="popular">По популярности</option>
+                            <option value="price-asc">Сначала дешевле</option>
+                            <option value="price-desc">Сначала дороже</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Category Pills -->
+                <div class="flex items-center gap-2 overflow-x-auto pb-4 mb-8 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-none">
+                    <button onclick="selectCategory('all')" data-cat="all" class="cat-pill px-5 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all bg-brand-500 text-white shadow-md shadow-brand-500/10">Все товары</button>
+                    <button onclick="selectCategory('greens')" data-cat="greens" class="cat-pill px-5 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700">Био-Зелень</button>
+                    <button onclick="selectCategory('drinks')" data-cat="drinks" class="cat-pill px-5 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700">Напитки & Эликсиры</button>
+                    <button onclick="selectCategory('snacks')" data-cat="snacks" class="cat-pill px-5 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700">Умные Снеки</button>
+                    <button onclick="selectCategory('meals')" data-cat="meals" class="cat-pill px-5 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700">Готовые AI-рационы</button>
+                </div>
+
+                <!-- Product Grid -->
+                <div id="product-grid" class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Dynamic Products injected here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE: NUTRI-AI -->
+        <section id="page-nutri-ai" class="page-view hidden py-12">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center space-y-4 mb-12">
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan-100 dark:bg-cyan-950/80 text-cyan-700 dark:text-cyan-300 text-xs font-semibold">
+                        <i data-lucide="sparkles" class="w-4 h-4 animate-spin-slow text-cyan-500"></i> AI-Powered Nutrition
+                    </div>
+                    <h1 class="text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white">Персональный AI-Диетолог</h1>
+                    <p class="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">Ответьте на несколько вопросов, и наша нейросеть подберет идеальный набор продуктов для ваших целей.</p>
+                </div>
+
+                <!-- AI Form Card -->
+                <div id="ai-form-card" class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl p-8 shadow-xl space-y-8">
+                    <!-- Step 1: Goal -->
+                    <div class="space-y-4">
+                        <label class="block text-lg font-bold text-slate-900 dark:text-white">1. Какова ваша главная цель?</label>
+                        <div class="grid sm:grid-cols-3 gap-4">
+                            <label class="relative flex flex-col p-5 rounded-2xl border-2 border-slate-200 dark:border-slate-700 hover:border-brand-500 dark:hover:border-brand-500 cursor-pointer transition-all">
+                                <input type="radio" name="ai-goal" value="focus" checked class="sr-only peer">
+                                <div class="peer-checked:border-brand-500 absolute inset-0 rounded-2xl border-2 border-transparent transition-all pointer-events-none"></div>
+                                <i data-lucide="brain" class="w-8 h-8 text-cyan-500 mb-3"></i>
+                                <span class="font-bold text-slate-900 dark:text-white">Фокус и Энергия</span>
+                                <span class="text-xs text-slate-400 mt-1">Повышение продуктивности и умственной активности</span>
+                            </label>
+                            <label class="relative flex flex-col p-5 rounded-2xl border-2 border-slate-200 dark:border-slate-700 hover:border-brand-500 dark:hover:border-brand-500 cursor-pointer transition-all">
+                                <input type="radio" name="ai-goal" value="sport" class="sr-only peer">
+                                <div class="peer-checked:border-brand-500 absolute inset-0 rounded-2xl border-2 border-transparent transition-all pointer-events-none"></div>
+                                <i data-lucide="dumbbell" class="w-8 h-8 text-emerald-500 mb-3"></i>
+                                <span class="font-bold text-slate-900 dark:text-white">Спорт и Тонус</span>
+                                <span class="text-xs text-slate-400 mt-1">Набор мышечной массы и быстрое восстановление</span>
+                            </label>
+                            <label class="relative flex flex-col p-5 rounded-2xl border-2 border-slate-200 dark:border-slate-700 hover:border-brand-500 dark:hover:border-brand-500 cursor-pointer transition-all">
+                                <input type="radio" name="ai-goal" value="detox" class="sr-only peer">
+                                <div class="peer-checked:border-brand-500 absolute inset-0 rounded-2xl border-2 border-transparent transition-all pointer-events-none"></div>
+                                <i data-lucide="shield" class="w-8 h-8 text-purple-500 mb-3"></i>
+                                <span class="font-bold text-slate-900 dark:text-white">Детокс и Баланс</span>
+                                <span class="text-xs text-slate-400 mt-1">Очищение организма и укрепление иммунитета</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Diet Preferences -->
+                    <div class="space-y-4">
+                        <label class="block text-lg font-bold text-slate-900 dark:text-white">2. Тип питания</label>
+                        <div class="grid sm:grid-cols-2 gap-4">
+                            <label class="relative flex items-center gap-4 p-4 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-brand-500 dark:hover:border-brand-500 cursor-pointer transition-all">
+                                <input type="radio" name="ai-diet" value="vegan" checked class="sr-only peer">
+                                <div class="peer-checked:border-brand-500 absolute inset-0 rounded-xl border-2 border-transparent transition-all pointer-events-none"></div>
+                                <div class="w-5 h-5 rounded-full border border-slate-300 dark:border-slate-600 flex items-center justify-center peer-checked:bg-brand-500 peer-checked:border-brand-500">
+                                    <div class="w-2.5 h-2.5 rounded-full bg-white"></div>
+                                </div>
+                                <span class="font-semibold text-slate-800 dark:text-slate-200">Веганское / Вегетарианское</span>
+                            </label>
+                            <label class="relative flex items-center gap-4 p-4 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-brand-500 dark:hover:border-brand-500 cursor-pointer transition-all">
+                                <input type="radio" name="ai-diet" value="keto" class="sr-only peer">
+                                <div class="peer-checked:border-brand-500 absolute inset-0 rounded-xl border-2 border-transparent transition-all pointer-events-none"></div>
+                                <div class="w-5 h-5 rounded-full border border-slate-300 dark:border-slate-600 flex items-center justify-center peer-checked:bg-brand-500 peer-checked:border-brand-500">
+                                    <div class="w-2.5 h-2.5 rounded-full bg-white"></div>
+                                </div>
+                                <span class="font-semibold text-slate-800 dark:text-slate-200">Кето / Низкоуглеводное</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Submit -->
+                    <button onclick="generateAIPlan()" class="w-full py-4 bg-gradient-to-r from-brand-500 to-cyan-500 hover:from-brand-600 hover:to-cyan-600 text-white font-bold rounded-2xl shadow-lg shadow-brand-500/20 transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2">
+                        <i data-lucide="cpu" class="w-5 h-5 animate-spin-slow"></i> Сгенерировать рацион нейросетью
+                    </button>
+                </div>
+
+                <!-- AI Loading State (Hidden by default) -->
+                <div id="ai-loading" class="hidden bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl p-12 shadow-xl text-center space-y-6">
+                    <div class="relative w-20 h-20 mx-auto">
+                        <div class="absolute inset-0 rounded-full border-4 border-slate-100 dark:border-slate-700"></div>
+                        <div class="absolute inset-0 rounded-full border-4 border-brand-500 border-t-transparent animate-spin"></div>
+                        <div class="absolute inset-2.5 rounded-full border-4 border-cyan-400 border-b-transparent animate-spin" style="animation-direction: reverse; animation-duration: 1.5s;"></div>
+                    </div>
+                    <div class="space-y-2">
+                        <h3 class="text-xl font-bold text-slate-900 dark:text-white">Анализируем нутриентный профиль...</h3>
+                        <p class="text-slate-500 dark:text-slate-400 text-sm">Нейросеть FreshByte подбирает оптимальные продукты на основе ваших био-маркеров.</p>
+                    </div>
+                </div>
+
+                <!-- AI Results (Hidden by default) -->
+                <div id="ai-results" class="hidden space-y-6">
+                    <div class="bg-gradient-to-r from-emerald-500 to-cyan-500 text-white rounded-3xl p-8 shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
+                        <div class="space-y-2">
+                            <span class="px-2.5 py-1 bg-white/20 rounded-full text-xs font-bold uppercase tracking-wider">Ваш персональный план готов!</span>
+                            <h2 class="text-3xl font-extrabold" id="ai-result-title">Заголовок рациона</h2>
+                            <p class="text-brand-50 text-sm max-w-lg" id="ai-result-desc">Описание рациона на основе выбранных целей.</p>
+                        </div>
+                        <button onclick="addAllAIToCart()" class="px-6 py-3.5 bg-white text-brand-600 font-bold rounded-xl shadow-lg hover:bg-brand-50 transition-all flex items-center gap-2 whitespace-nowrap">
+                            <i data-lucide="shopping-cart" class="w-5 h-5"></i> Добавить всё в корзину
+                        </button>
+                    </div>
+
+                    <div class="grid sm:grid-cols-3 gap-6" id="ai-products-container">
+                        <!-- AI recommended products will go here -->
+                    </div>
+
+                    <div class="flex justify-center">
+                        <button onclick="resetAIForm()" class="text-sm font-semibold text-slate-500 hover:text-brand-500 transition-colors flex items-center gap-1">
+                            <i data-lucide="arrow-left" class="w-4 h-4"></i> Начать сначала
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE: LOYALTY -->
+        <section id="page-loyalty" class="page-view hidden py-12">
+            <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid lg:grid-cols-12 gap-8 items-start">
+                    <!-- Left: Card & Status -->
+                    <div class="lg:col-span-5 space-y-6">
+                        <div class="relative overflow-hidden rounded-3xl bg-gradient-to-tr from-slate-900 via-slate-800 to-slate-950 text-white p-6 shadow-2xl border border-slate-800">
+                            <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-brand-500/10 rounded-full blur-2xl"></div>
+                            <div class="flex justify-between items-start mb-12">
+                                <div>
+                                    <span class="block text-xs text-slate-400 uppercase tracking-widest font-bold">Byte Loyalty Card</span>
+                                    <span class="text-lg font-bold text-brand-400">FreshByte Platinum</span>
+                                </div>
+                                <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
+                                    <i data-lucide="cpu" class="w-6 h-6 text-brand-400"></i>
+                                </div>
+                            </div>
+                            <div class="space-y-4">
+                                <div class="text-2xl font-mono tracking-widest">**** **** **** 4829</div>
+                                <div class="flex justify-between items-end">
+                                    <div>
+                                        <div class="text-[10px] text-slate-400 uppercase">Владелец</div>
+                                        <div class="text-sm font-semibold">Алексей Иванов</div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="text-[10px] text-slate-400 uppercase">Баланс</div>
+                                        <div class="text-xl font-extrabold text-brand-400" id="loyalty-points-display">1,250 B</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Progress to next tier -->
+                        <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 shadow-lg space-y-4">
+                            <div class="flex justify-between text-sm">
+                                <span class="font-semibold text-slate-600 dark:text-slate-300">До статуса "Cyber-Elite"</span>
+                                <span class="font-bold text-slate-900 dark:text-white">750 B</span>
+                            </div>
+                            <div class="w-full bg-slate-100 dark:bg-slate-700 h-2.5 rounded-full overflow-hidden">
+                                <div class="bg-gradient-to-r from-brand-500 to-cyan-400 h-full rounded-full" style="width: 62.5%"></div>
+                            </div>
+                            <p class="text-xs text-slate-400">Статус Cyber-Elite дает бесплатную доставку дронами без ограничений по сумме заказа.</p>
+                        </div>
+                    </div>
+
+                    <!-- Right: Rewards & Tasks -->
+                    <div class="lg:col-span-7 space-y-6">
+                        <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl p-8 shadow-lg">
+                            <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-6">Доступные награды</h2>
+                            <div class="space-y-4">
+                                <!-- Reward Item -->
+                                <div class="flex items-center justify-between p-4 rounded-xl border border-slate-100 dark:border-slate-700 hover:border-brand-500 transition-colors">
+                                    <div class="flex items-center gap-4">
+                                        <div class="p-3 bg-brand-50 dark:bg-brand-950/50 text-brand-500 rounded-lg">
+                                            <i data-lucide="percent" class="w-6 h-6"></i>
+                                        </div>
+                                        <div>
+                                            <h3 class="font-bold text-slate-800 dark:text-slate-200">Скидка 15% на весь заказ</h3>
+                                            <p class="text-xs text-slate-400">Одноразовый промокод на любую покупку</p>
+                                        </div>
+                                    </div>
+                                    <button onclick="claimReward(500, 'Скидка 15%')" class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold rounded-lg transition-colors">500 B</button>
+                                </div>
+                                <!-- Reward Item -->
+                                <div class="flex items-center justify-between p-4 rounded-xl border border-slate-100 dark:border-slate-700 hover:border-brand-500 transition-colors">
+                                    <div class="flex items-center gap-4">
+                                        <div class="p-3 bg-cyan-50 dark:bg-cyan-950/50 text-cyan-500 rounded-lg">
+                                            <i data-lucide="navigation" class="w-6 h-6"></i>
+                                        </div>
+                                        <div>
+                                            <h3 class="font-bold text-slate-800 dark:text-slate-200">Бесплатная экспресс-доставка</h3>
+                                            <p class="text-xs text-slate-400">Доставка дроном за 10 минут</p>
+                                        </div>
+                                    </div>
+                                    <button onclick="claimReward(300, 'Бесплатная доставка')" class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold rounded-lg transition-colors">300 B</button>
+                                </div>
+                                <!-- Reward Item -->
+                                <div class="flex items-center justify-between p-4 rounded-xl border border-slate-100 dark:border-slate-700 hover:border-brand-500 transition-colors">
+                                    <div class="flex items-center gap-4">
+                                        <div class="p-3 bg-purple-50 dark:bg-purple-950/50 text-purple-500 rounded-lg">
+                                            <i data-lucide="gift" class="w-6 h-6"></i>
+                                        </div>
+                                        <div>
+                                            <h3 class="font-bold text-slate-800 dark:text-slate-200">Фирменный Шейкер FreshByte</h3>
+                                            <p class="text-xs text-slate-400">Стильный металлический шейкер для смузи</p>
+                                        </div>
+                                    </div>
+                                    <button onclick="claimReward(1000, 'Шейкер')" class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold rounded-lg transition-colors">1000 B</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Daily Tasks / Points Claimer -->
+                        <div class="bg-gradient-to-r from-brand-500 to-cyan-500 text-white rounded-3xl p-6 shadow-xl flex items-center justify-between">
+                            <div>
+                                <h3 class="font-bold text-lg">Ежедневный бонус</h3>
+                                <p class="text-xs text-brand-50">Получайте поинты каждый день за активность в приложении!</p>
+                            </div>
+                            <button onclick="claimDailyPoints()" id="daily-btn" class="px-5 py-2.5 bg-white text-brand-600 font-bold rounded-xl shadow-lg hover:bg-brand-50 transition-all text-sm">Забрать 50 B</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE: ABOUT -->
+        <section id="page-about" class="page-view hidden py-12">
+            <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
+                <!-- Hero -->
+                <div class="text-center space-y-4">
+                    <h1 class="text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white">Технологии FreshByte</h1>
+                    <p class="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">Как мы создаем идеальные продукты питания с помощью науки и автоматизации.</p>
+                </div>
+
+                <!-- Tech Grid -->
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl p-8 shadow-lg space-y-4">
+                        <div class="w-12 h-12 rounded-2xl bg-brand-100 dark:bg-brand-950/50 text-brand-500 flex items-center justify-center">
+                            <i data-lucide="home" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-slate-900 dark:text-white">Аэропонные Вертикальные Фермы</h3>
+                        <p class="text-slate-600 dark:text-slate-400">
+                            Наши растения растут без почвы. Корни питаются обогащенным аэрозолем, что позволяет экономить до 95% воды по сравнению с традиционным сельским хозяйством и полностью исключает сорняки и вредителей.
+                        </p>
+                    </div>
+                    <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl p-8 shadow-lg space-y-4">
+                        <div class="w-12 h-12 rounded-2xl bg-cyan-100 dark:bg-cyan-950/50 text-cyan-500 flex items-center justify-center">
+                            <i data-lucide="navigation" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-slate-900 dark:text-white">Беспилотная Доставка</h3>
+                        <p class="text-slate-600 dark:text-slate-400">
+                            Собственный флот автономных дронов и роверов доставляет заказы в радиусе 10 км от ��аших распределительных центров. Никаких пробок — только чистая скорость и экологичность.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Interactive Tech Stack Showcase -->
+                <div class="bg-slate-100 dark:bg-slate-800/50 rounded-3xl p-8 border border-slate-200/50 dark:border-slate-700">
+                    <h3 class="text-2xl font-bold text-center text-slate-900 dark:text-white mb-8">Наш IT-Стек</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                        <div class="p-4 bg-white dark:bg-slate-850 rounded-2xl border border-slate-200 dark:border-slate-700">
+                            <div class="text-brand-500 font-bold text-lg mb-1">React / Next.js</div>
+                            <div class="text-xs text-slate-400">Интерфейс</div>
+                        </div>
+                        <div class="p-4 bg-white dark:bg-slate-850 rounded-2xl border border-slate-200 dark:border-slate-700">
+                            <div class="text-cyan-500 font-bold text-lg mb-1">Python / PyTorch</div>
+                            <div class="text-xs text-slate-400">AI-Диетолог</div>
+                        </div>
+                        <div class="p-4 bg-white dark:bg-slate-850 rounded-2xl border border-slate-200 dark:border-slate-700">
+                            <div class="text-purple-500 font-bold text-lg mb-1">Rust / ROS</div>
+                            <div class="text-xs text-slate-400">Управление дронами</div>
+                        </div>
+                        <div class="p-4 bg-white dark:bg-slate-850 rounded-2xl border border-slate-200 dark:border-slate-700">
+                            <div class="text-emerald-500 font-bold text-lg mb-1">Solidity / Web3</div>
+                            <div class="text-xs text-slate-400">Смарт-контракты лояльности</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <!-- Brand Info -->
+                <div class="space-y-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-brand-500 text-white flex items-center justify-center">
+                            <i data-lucide="cpu" class="w-4 h-4"></i>
+                        </div>
+                        <span class="text-lg font-bold text-slate-900 dark:text-white">FreshByte</span>
+                    </div>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">Будущее ритейла и здорового питания. Доставка за 15 минут.</p>
+                </div>
+                <!-- Links -->
+                <div>
+                    <h4 class="font-bold text-sm text-slate-900 dark:text-white mb-4">Навигация</h4>
+                    <ul class="space-y-2 text-sm text-slate-500 dark:text-slate-400">
+                        <li><button onclick="navigateTo('home')" class="hover:text-brand-500">Главная</button></li>
+                        <li><button onclick="navigateTo('catalog')" class="hover:text-brand-500">Каталог</button></li>
+                        <li><button onclick="navigateTo('nutri-ai')" class="hover:text-brand-500">Nutri-AI</button></li>
+                        <li><button onclick="navigateTo('loyalty')" class="hover:text-brand-500">Лояльность</button></li>
+                    </ul>
+                </div>
+                <!-- Tech Stack -->
+                <div>
+                    <h4 class="font-bold text-sm text-slate-900 dark:text-white mb-4">Технологии</h4>
+                    <ul class="space-y-2 text-sm text-slate-500 dark:text-slate-400">
+                        <li><a href="#" class="hover:text-brand-500">Вертикальные фермы</a></li>
+                        <li><a href="#" class="hover:text-brand-500">Дроны-доставщики</a></li>
+                        <li><a href="#" class="hover:text-brand-500">Молекулярный контроль</a></li>
+                    </ul>
+                </div>
+                <!-- Contact / Social -->
+                <div>
+                    <h4 class="font-bold text-sm text-slate-900 dark:text-white mb-4">Контакты</h4>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">support@freshbyte.tech</p>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">8 (800) 555-35-35</p>
+                    <div class="flex gap-4 mt-4">
+                        <a href="#" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-brand-500"><i data-lucide="github" class="w-5 h-5"></i></a>
+                        <a href="#" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-brand-500"><i data-lucide="twitter" class="w-5 h-5"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-slate-200 dark:border-slate-800 mt-12 pt-6 text-center text-xs text-slate-400">
+                &copy; <span id="current-year"></span> FreshByte Inc. Все права защищены. Разработано на стеке Next.js + Tailwind.
+            </div>
+        </div>
+    </footer>
+
+    <!-- CART SIDE-DRAWER -->
+    <div id="cart-drawer" class="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-white dark:bg-slate-900 shadow-2xl border-l border-slate-200 dark:border-slate-800 transform translate-x-full transition-transform duration-300 flex flex-col">
+        <!-- Cart Header -->
+        <div class="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <i data-lucide="shopping-bag" class="w-5 h-5 text-brand-500"></i>
+                <h2 class="text-xl font-bold text-slate-900 dark:text-white">Ваша корзина</h2>
+            </div>
+            <button onclick="toggleCart()" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+
+        <!-- Cart Items List -->
+        <div id="cart-items" class="flex-1 overflow-y-auto p-6 space-y-4">
+            <!-- Empty State -->
+            <div id="cart-empty-state" class="flex flex-col items-center justify-center h-full text-center space-y-4">
+                <div class="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400">
+                    <i data-lucide="shopping-

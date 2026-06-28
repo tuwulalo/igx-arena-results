@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ember & Brew — Кофейня</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --clr-bg:#faf6f1;
+  --clr-cream:#f5ebe0;
+  --clr-warm:#d5a67e;
+  --clr-copper:#b07d56;
+  --clr-espresso:#3e2723;
+  --clr-dark:#2c1810;
+  --clr-accent:#e07b39;
+  --clr-gold:#c9943e;
+  --clr-sage:#8a9a7b;
+  --clr-white:#fffaf5;
+  --clr-text:#4a3728;
+  --clr-text-light:#7a6555;
+  --clr-error:#c0392b;
+  --clr-success:#27ae60;
+  --shadow-sm:0 2px 8px rgba(62,39,35,.08);
+  --shadow-md:0 4px 20px rgba(62,39,35,.12);
+  --shadow-lg:0 8px 40px rgba(62,39,35,.18);
+  --shadow-card:0 6px 24px rgba(62,39,35,.10);
+  --radius:16px;
+  --radius-sm:10px;
+  --radius-lg:24px;
+  --font-display:'Playfair Display',Georgia,serif;
+  --font-body:'Inter',system-ui,sans-serif;
+  --transition:all .3s cubic-bezier(.4,0,.2,1);
+}
+html{scroll-behavior:smooth;font-size:16px}
+body{
+  font-family:var(--font-body);
+  color:var(--clr-text);
+  background:var(--clr-bg);
+  line-height:1.7;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+img{max-width:100%;display:block}
+a{color:inherit;text-decoration:none}
+ul{list-style:none}
+.container{max-width:1200px;margin:0 auto;padding:0 24px}
+
+/* ═══ NAV ═══ */
+.nav{
+  position:fixed;top:0;left:0;width:100%;z-index:1000;
+  padding:18px 0;
+  transition:var(--transition);
+  background:transparent;
+}
+.nav.scrolled{
+  background:rgba(250,246,241,.92);
+  backdrop-filter:blur(16px);
+  box-shadow:var(--shadow-sm);
+  padding:12px 0;
+}
+.nav .container{display:flex;align-items:center;justify-content:space-between}
+.nav-logo{
+  font-family:var(--font-display);
+  font-size:1.6rem;font-weight:700;
+  color:var(--clr-white);
+  transition:var(--transition);
+}
+.nav.scrolled .nav-logo{color:var(--clr-espresso)}
+.nav-logo span{color:var(--clr-warm)}
+.nav-links{display:flex;gap:32px;align-items:center}
+.nav-links a{
+  font-size:.92rem;font-weight:500;
+  color:rgba(255,255,255,.85);
+  position:relative;
+  transition:var(--transition);
+}
+.nav.scrolled .nav-links a{color:var(--clr-text)}
+.nav-links a::after{
+  content:'';position:absolute;bottom:-4px;left:0;width:0;height:2px;
+  background:var(--clr-warm);transition:var(--transition);border-radius:2px;
+}
+.nav-links a:hover::after{width:100%}
+.nav-links a:hover{color:var(--clr-white)}
+.nav.scrolled .nav-links a:hover{color:var(--clr-copper)}
+.nav-cta{
+  padding:10px 24px!important;
+  background:var(--clr-accent)!important;
+  color:var(--clr-white)!important;
+  border-radius:50px;font-weight:600!important;
+  box-shadow:0 4px 16px rgba(224,123,57,.35);
+  transition:var(--transition);
+}
+.nav-cta:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(224,123,57,.45)}
+.nav-burger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px}
+.nav-burger span{
+  width:26px;height:2.5px;background:var(--clr-white);
+  border-radius:4px;transition:var(--transition);
+}
+.nav.scrolled .nav-burger span{background:var(--clr-espresso)}
+
+/* ═══ HERO ═══ */
+.hero{
+  position:relative;min-height:100vh;display:flex;align-items:center;
+  background:linear-gradient(135deg,#2c1810 0%,#5a3425 30%,#7a4a35 50%,#b07d56 75%,#d5a67e 100%);
+  overflow:hidden;
+}
+.hero::before{
+  content:'';position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 80%,rgba(224,123,57,.25) 0%,transparent 60%),
+    radial-gradient(ellipse 60% 50% at 80% 20%,rgba(201,148,62,.2) 0%,transparent 50%),
+    radial-gradient(circle at 50% 50%,rgba(0,0,0,.15) 0%,transparent 70%);
+  z-index:1;
+}
+.hero::after{
+  content:'';position:absolute;inset:0;
+  background:url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+  opacity:.5;z-index:1;pointer-events:none;
+}
+.hero-content{
+  position:relative;z-index:2;
+  max-width:680px;padding:120px 0 80px;
+}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:8px 20px;border-radius:50px;
+  background:rgba(255,255,255,.12);backdrop-filter:blur(8px);
+  color:var(--clr-warm);font-size:.82rem;font-weight:500;
+  letter-spacing:.08em;text-transform:uppercase;
+  margin-bottom:28px;
+  border:1px solid rgba(255,255,255,.1);
+}
+.hero-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--clr-accent);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.5)}}
+.hero h1{
+  font-family:var(--font-display);
+  font-size:clamp(2.8rem,6vw,4.5rem);
+  font-weight:700;line-height:1.1;
+  color:var(--clr-white);
+  margin-bottom:24px;
+}
+.hero h1 em{font-style:normal;color:var(--clr-warm)}
+.hero-desc{
+  font-size:1.15rem;line-height:1.8;
+  color:rgba(255,255,255,.75);
+  margin-bottom:40px;max-width:520px;
+}
+.hero-btns{display:flex;gap:16px;flex-wrap:wrap}
+.btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:16px 36px;border-radius:50px;
+  font-family:var(--font-body);font-size:.95rem;font-weight:600;
+  cursor:pointer;border:none;transition:var(--transition);
+}
+.btn-primary{
+  background:var(--clr-accent);color:var(--clr-white);
+  box-shadow:0 4px 20px rgba(224,123,57,.4);
+}
+.btn-primary:hover{transform:translateY(-3px);box-shadow:0 8px 32px rgba(224,123,57,.5)}
+.btn-outline{
+  background:transparent;color:var(--clr-white);
+  border:2px solid rgba(255,255,255,.3);
+}
+.btn-outline:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.5)}
+.hero-stats{
+  display:flex;gap:48px;margin-top:64px;
+  padding-top:40px;border-top:1px solid rgba(255,255,255,.12);
+}
+.hero-stat-num{
+  font-family:var(--font-display);font-size:2.2rem;font-weight:700;
+  color:var(--clr-warm);
+}
+.hero-stat-label{font-size:.82rem;color:rgba(255,255,255,.55);margin-top:2px}
+.hero-visual{
+  position:absolute;right:0;top:50%;transform:translateY(-50%);
+  width:45%;max-width:600px;z-index:2;
+  display:flex;align-items:center;justify-content:center;
+}
+.hero-cup{
+  width:340px;height:340px;border-radius:50%;
+  background:radial-gradient(circle at 40% 35%,rgba(255,255,255,.15),transparent 60%),
+    linear-gradient(135deg,rgba(176,125,86,.3),rgba(58,34,26,.6));
+  backdrop-filter:blur(20px);
+  border:1px solid rgba(255,255,255,.1);
+  display:flex;align-items:center;justify-content:center;
+  animation:float 6s ease-in-out infinite;
+  box-shadow:0 20px 60px rgba(0,0,0,.3);
+}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-20px)}}
+.hero-cup-inner{
+  text-align:center;
+  font-family:var(--font-display);
+  color:var(--clr-white);
+}
+.hero-cup-icon{font-size:5rem;margin-bottom:12px;display:block}
+.hero-cup-text{font-size:1.1rem;opacity:.8}
+
+/* ═══ SECTION COMMON ═══ */
+.section{padding:100px 0}
+.section-label{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:.78rem;font-weight:600;
+  letter-spacing:.12em;text-transform:uppercase;
+  color:var(--clr-accent);margin-bottom:12px;
+}
+.section-label::before{content:'';width:24px;height:2px;background:var(--clr-accent);border-radius:2px}
+.section-title{
+  font-family:var(--font-display);
+  font-size:clamp(2rem,4vw,3rem);
+  font-weight:700;color:var(--clr-espresso);
+  line-height:1.2;margin-bottom:16px;
+}
+.section-desc{
+  font-size:1.05rem;color:var(--clr-text-light);
+  max-width:560px;line-height:1.8;
+}
+
+/* ═══ MENU ═══ */
+.menu{background:var(--clr-cream)}
+.menu-header{text-align:center;margin-bottom:60px}
+.menu-header .section-desc{margin:12px auto 0}
+.menu-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(340px,1fr));
+  gap:28px;
+}
+.menu-card{
+  background:var(--clr-white);
+  border-radius:var(--radius);
+  padding:32px;
+  box-shadow:var(--shadow-card);
+  transition:var(--transition);
+  position:relative;overflow:hidden;
+  display:flex;gap:20px;
+  border:1px solid rgba(213,166,126,.1);
+}
+.menu-card:hover{transform:translateY(-6px);box-shadow:var(--shadow-lg)}
+.menu-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:4px;
+  background:linear-gradient(90deg,var(--clr-warm),var(--clr-accent));
+  opacity:0;transition:var(--transition);
+}
+.menu-card:hover::before{opacity:1}
+.menu-card-img{
+  flex-shrink:0;width:90px;height:90px;
+  border-radius:var(--radius-sm);
+  display:flex;align-items:center;justify-content:center;
+  font-size:2.4rem;
+}
+.menu-card:nth-child(1) .menu-card-img{background:linear-gradient(135deg,#f8e8d0,#f0d4b0)}
+.menu-card:nth-child(2) .menu-card-img{background:linear-gradient(135deg,#e8d5c4,#d4bba4)}
+.menu-card:nth-child(3) .menu-card-img{background:linear-gradient(135deg,#f0e0d0,#e8d0b8)}
+.menu-card:nth-child(4) .menu-card-img{background:linear-gradient(135deg,#d4e8d0,#b8d8b0)}
+.menu-card:nth-child(5) .menu-card-img{background:linear-gradient(135deg,#f8e0d8,#f0ccc0)}
+.menu-card:nth-child(6) .menu-card-img{background:linear-gradient(135deg,#e0d8e8,#d0c4d8)}
+.menu-card-body{flex:1}
+.menu-card-top{display:flex;align-items:start;justify-content:space-between;gap:12px;margin-bottom:8px}
+.menu-card-name{
+  font-family:var(--font-display);
+  font-size:1.2rem;font-weight:600;
+  color:var(--clr-espresso);
+}
+.menu-card-price{
+  flex-shrink:0;
+  font-family:var(--font-display);
+  font-size:1.15rem;font-weight:700;
+  color:var(--clr-accent);
+  white-space:nowrap;
+}
+.menu-card-desc{font-size:.88rem;color:var(--clr-text-light);line-height:1.6}
+.menu-card-tags{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap}
+.menu-tag{
+  font-size:.72rem;font-weight:500;
+  padding:4px 10px;border-radius:50px;
+  background:var(--clr-cream);color:var(--clr-copper);
+}
+
+/* ═══ ABOUT ═══ */
+.about{background:var(--clr-bg)}
+.about-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:60px;align-items:center;
+}
+.about-img{
+  border-radius:var(--radius-lg);
+  overflow:hidden;
+  aspect-ratio:4/3;
+  background:linear-gradient(135deg,#d5a67e,#b07d56);
+  position:relative;
+  box-shadow:var(--shadow-lg);
+}
+.about-img-inner{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  color:var(--clr-white);
+  font-family:var(--font-display);
+}
+.about-img-icon{font-size:4rem;margin-bottom:16px;opacity:.9}
+.about-img-text{font-size:1.3rem;opacity:.7;text-align:center;padding:0 20px}
+.about-content .section-desc{margin-bottom:32px}
+.about-features{display:flex;flex-direction:column;gap:20px;margin-bottom:36px}
+.about-feat{
+  display:flex;gap:16px;align-items:flex-start;
+}
+.about-feat-icon{
+  flex-shrink:0;width:48px;height:48px;
+  border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.3rem;
+}
+.about-feat:nth-child(1) .about-feat-icon{background:#f8e8d0}
+.about-feat:nth-child(2) .about-feat-icon{background:#e8f0d8}
+.about-feat:nth-child(3) .about-feat-icon{background:#f0e0d8}
+.about-feat-title{font-weight:600;color:var(--clr-espresso);margin-bottom:2px}
+.about-feat-desc{font-size:.88rem;color:var(--clr-text-light)}
+.about-quote{
+  padding:24px 28px;
+  background:var(--clr-cream);
+  border-radius:var(--radius);
+  border-left:4px solid var(--clr-warm);
+  font-style:italic;color:var(--clr-text-light);
+  font-size:.95rem;line-height:1.7;
+}
+.about-quote cite{
+  display:block;margin-top:12px;
+  font-style:normal;font-weight:600;
+  color:var(--clr-espresso);font-size:.88rem;
+}
+
+/* ═══ GALLERY ═══ */
+.gallery{background:var(--clr-cream)}
+.gallery-header{text-align:center;margin-bottom:48px}
+.gallery-header .section-desc{margin:12px auto 0}
+.gallery-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  grid-template-rows:repeat(2,240px);
+  gap:16px;
+}
+.gallery-item{
+  border-radius:var(--radius);
+  overflow:hidden;position:relative;
+  cursor:pointer;
+}
+.gallery-item::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(44,24,16,.6),transparent 60%);
+  opacity:0;transition:var(--transition);
+}
+.gallery-item:hover::after{opacity:1}
+.gallery-item:nth-child(1){grid-column:1/3;grid-row:1/3}
+.gallery-item:nth-child(4){grid-column:3/5}
+.gallery-item-bg{
+  width:100%;height:100%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:3rem;
+  transition:transform .6s cubic-bezier(.4,0,.2,1);
+}
+.gallery-item:hover .gallery-item-bg{transform:scale(1.08)}
+.gallery-item:nth-child(1) .gallery-item-bg{background:linear-gradient(135deg,#c9943e,#b07d56);font-size:5rem}
+.gallery-item:nth-child(2) .gallery-item-bg{background:linear-gradient(135deg,#d5a67e,#c08050)}
+.gallery-item:nth-child(3) .gallery-item-bg{background:linear-gradient(135deg,#8a9a7b,#6a7a5b)}
+.gallery-item:nth-child(4) .gallery-item-bg{background:linear-gradient(135deg,#b07d56,#8a5a36)}
+.gallery-item:nth-child(5) .gallery-item-bg{background:linear-gradient(135deg,#e07b39,#c06030)}
+.gallery-item:nth-child(6) .gallery-item-bg{background:linear-gradient(135deg,#d5a67e,#b88a60)}
+.gallery-caption{
+  position:absolute;bottom:16px;left:16px;right:16px;
+  color:var(--clr-white);z-index:2;
+  opacity:0;transform:translateY(12px);
+  transition:var(--transition);
+}
+.gallery-item:hover .gallery-caption{opacity:1;transform:translateY(0)}
+.gallery-caption h4{font-family:var(--font-display);font-size:1.1rem;margin-bottom:2px}
+.gallery-caption p{font-size:.8rem;opacity:.75}
+
+/* ═══ BOOKING ═══ */
+.booking{background:var(--clr-bg)}
+.booking-grid{
+  display:grid;
+  grid-template-columns:1fr 1.1fr;
+  gap:60px;align-items:start;
+}
+.booking-info{padding-top:12px}
+.booking-info .section-desc{margin-bottom:36px}
+.booking-details{display:flex;flex-direction:column;gap:24px;margin-bottom:36px}
+.booking-detail{display:flex;gap:16px;align-items:flex-start}
+.booking-detail-icon{
+  flex-shrink:0;width:50px;height:50px;
+  border-radius:14px;background:var(--clr-cream);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.3rem;
+}
+.booking-detail-title{font-weight:600;color:var(--clr-espresso);margin-bottom:2px;font-size:.95rem}
+.booking-detail-text{font-size:.88rem;color:var(--clr-text-light);line-height:1.6}
+.booking-hours{
+  background:var(--clr-cream);
+  border-radius:var(--radius);
+  padding:24px 28px;
+}
+.booking-hours h4{
+  font-family:var(--font-display);
+  font-size:1.1rem;color:var(--clr-espresso);
+  margin-bottom:16px;
+}
+.booking-hours-row{
+  display:flex;justify-content:space-between;
+  padding:8px 0;
+  font-size:.9rem;
+  border-bottom:1px solid rgba(213,166,126,.15);
+}
+.booking-hours-row:last-child{border:none}
+.booking-hours-day{font-weight:500;color:var(--clr-espresso)}
+.booking-hours-time{color:var(--clr-text-light)}
+.booking-hours-row.today .booking-hours-day{color:var(--clr-accent);font-weight:600}
+.booking-hours-row.today .booking-hours-time{color:var(--clr-accent);font-weight:500}
+
+/* ═══ FORM ═══ */
+.booking-form-card{
+  background:var(--clr-white);
+  border-radius:var(--radius-lg);
+  padding:44px;
+  box-shadow:var(--shadow-lg);
+  border:1px solid rgba(213,166,126,.12);
+}
+.booking-form-title{
+  font-family:var(--font-display);
+  font-size:1.5rem;font-weight:700;
+  color:var(--clr-espresso);
+  margin-bottom:8px;
+}
+.booking-form-subtitle{
+  font-size:.9rem;color:var(--clr-text-light);
+  margin-bottom:32px;
+}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.form-group{display:flex;flex-direction:column}
+.form-group.full{grid-column:1/-1}
+.form-group label{
+  font-size:.82rem;font-weight:600;
+  color:var(--clr-espresso);margin-bottom:6px;
+  display:flex;align-items:center;gap:4px;
+}
+.form-group label .req{color:var(--clr-error)}
+.form-group input,
+.form-group select,
+.form-group textarea{
+  padding:14px 16px;
+  border:2px solid rgba(213,166,126,.2);
+  border-radius:var(--radius-sm);
+  font-family:var(--font-body);font-size:.92rem;
+  color:var(--clr-text);background:var(--clr-bg);
+  transition:var(--transition);
+  outline:none;
+}
+.form-group textarea{resize:vertical;min-height:100px}
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus{
+  border-color:var(--clr-warm);
+  box-shadow:0 0 0 4px rgba(213,166,126,.15);
+  background:var(--clr-white);
+}
+.form-group input.error,
+.form-group select.error,
+.form-group textarea.error{
+  border-color:var(--clr-error);
+  box-shadow:0 0 0 4px rgba(192,57,43,.1);
+}
+.form-group input.success,
+.form-group select.success,
+.form-group textarea.success{
+  border-color:var(--clr-success);
+}
+.form-error{
+  font-size:.76rem;color:var(--clr-error);
+  margin-top:4px;min-height:18px;
+  opacity:0;transition:var(--transition);
+}
+.form-error.visible{opacity:1}
+.form-submit{
+  width:100%;margin-top:8px;
+  padding:18px;
+  background:linear-gradient(135deg,var(--clr-accent),var(--clr-copper));
+  color:var(--clr-white);
+  border:none;border-radius:50px;
+  font-family:var(--font-body);font-size:1rem;font-weight:600;
+  cursor:pointer;
+  box-shadow:0 4px 20px rgba(224,123,57,.35);
+  transition:var(--transition);
+  position:relative;overflow:hidden;
+}
+.form-submit:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(224,123,57,.45)}
+.form-submit:active{transform:translateY(0)}
+.form-submit::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent);
+  transform:translateX(-100%);
+  transition:transform .6s;
+}
+.form-submit:hover::after{transform:translateX(100%)}
+.form-submit:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.form-success{
+  display:none;text-align:center;
+  padding:40px 20px;
+}
+.form-success.show{display:block}
+.form-success-icon{
+  width:80px;height:80px;border-radius:50%;
+  background:linear-gradient(135deg,var(--clr-success),#2ecc71);
+  display:flex;align-items:center;justify-content:center;
+  font-size:2.2rem;margin:0 auto 20px;
+  color:var(--clr-white);
+  animation:scaleIn .5s cubic-bezier(.4,0,.2,1);
+}
+@keyframes scaleIn{0%{transform:scale(0)}100%{transform:scale(1)}}
+.form-success h3{
+  font-family:var(--font-display);
+  font-size:1.5rem;color:var(--clr-espresso);
+  margin-bottom:8px;
+}
+.form-success p{color:var(--clr-text-light);font-size:.95rem}
+
+/* ═══ FOOTER ═══ */
+.footer{
+  background:var(--clr-dark);color:rgba(255,255,255,.7);
+  padding:60px 0 30px;
+}
+.footer-grid{
+  display:grid;
+  grid-template-columns:1.5fr 1fr 1fr 1fr;
+  gap:40px;
+  margin-bottom:40px;
+}
+.footer-brand .nav-logo{margin-bottom:16px;display:inline-block}
+.footer-brand p{font-size:.88rem;line-height:1.7;max-width:280px}
+.footer h4{
+  font-family:var(--font-display);
+  font-size:1rem;color:var(--clr-white);
+  margin-bottom:20px;
+}
+.footer-links li{margin-bottom:10px}
+.footer-links a{font-size:.88rem;transition:var(--transition)}
+.footer-links a:hover{color:var(--clr-warm)}
+.footer-socials{display:flex;gap:12px;margin-top:8px}
+.footer-social{
+  width:40px;height:40px;border-radius:10px;
+  background:rgba(255,255,255,.08);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1rem;transition:var(--transition);
+}
+.footer-social:hover{background:var(--clr-accent);color:var(--clr-white)}
+.footer-bottom{
+  padding-top:28px;
+  border-top:1px solid rgba(255,255,255,.08);
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:.82rem;
+}
+
+/* ═══ SCROLL ANIM ═══ */
+.reveal{
+  opacity:0;transform:translateY(40px);
+  transition:opacity .7s cubic-bezier(.4,0,.2,1),transform .7s cubic-bezier(.4,0,.2,1);
+}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-delay-1{transition-delay:.1s}
+.reveal-delay-2{transition-delay:.2s}
+.reveal-delay-3{transition-delay:.3s}
+.reveal-delay-4{transition-delay:.4s}
+.reveal-delay-5{transition-delay:.5s}
+
+/* ═══ RESPONSIVE ═══ */
+@media(max-width:1024px){
+  .hero-visual{display:none}
+  .about-grid{grid-template-columns:1fr;gap:40px}
+  .about-img{max-height:360px}
+  .booking-grid{grid-template-columns:1fr;gap:40px}
+  .gallery-grid{grid-template-columns:repeat(2,1fr);grid-template-rows:auto}
+  .gallery-item:nth-child(1){grid-column:1/2;grid-row:auto}
+  .gallery-item:nth-child(4){grid-column:auto}
+  .footer-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:768px){
+  .nav-links{display:none}
+  .nav-burger{display:flex}
+  .nav-links.open{
+    display:flex;flex-direction:column;
+    position:absolute;top:100%;left:0;right:0;
+    background:rgba(250,246,241,.98);
+    backdrop-filter:blur(16px);
+    padding:24px;gap:16px;
+    box-shadow:var(--shadow-md);
+  }
+  .nav.scrolled .nav-links.open a{color:var(--clr-text)}
+  .nav-links.open a{color:var(--clr-espresso)}
+  .hero-content{padding:100px 0 60px}
+  .hero-stats{gap:28px;flex-wrap:wrap}
+  .menu-grid{grid-template-columns:1fr}
+  .menu-card{flex-direction:column;align-items:center;text-align:center}
+  .menu-card-top{justify-content:center}
+  .form-row{grid-template-columns:1fr}
+  .booking-form-card{padding:28px}
+  .gallery-grid{grid-template-columns:1fr 1fr;grid-template-rows:auto}
+  .footer-grid{grid-template-columns:1fr}
+  .footer-bottom{flex-direction:column;gap:12px;text-align:center}
+}
+@media(max-width:480px){
+  .gallery-grid{grid-template-columns:1fr}
+  .hero-btns{flex-direction:column}
+  .btn{justify-content:center}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav" id="nav">
+  <div class="container">
+    <a href="#" class="nav-logo">Ember<span>&</span>Brew</a>
+    <div class="nav-links" id="navLinks">
+      <a href="#menu">Меню</a>
+      <a href="#about">О нас</a>
+      <a href="#gallery">Галерея</a>
+      <a href="#booking" class="nav-cta">Забронировать</a>
+    </div>
+    <div class="nav-burger" id="burger" aria-label="Меню">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="hero">
+  <div class="container hero-content">
+    <div class="hero-badge">
+      <span>Открыты с 2018 года</span>
+    </div>
+    <h1>Кофе, рождённый из <em>страсти</em> и огня</h1>
+    <p class="hero-desc">
+      Авторские зёрна, обжаренные вручную каждое утро. Уютное пространство,
+      где каждая чашка — маленький ритуал. Добро пожаловать в Ember&nbsp;&amp;&nbsp;Brew.
+    </p>
+    <div class="hero-btns">
+      <a href="#menu" class="btn btn-primary">Смотреть меню</a>
+      <a href="#booking" class="btn btn-outline">Забронировать столик</a>
+    </div>
+    <div class="hero-stats">
+      <div>
+        <div class="hero-stat-num">12+</div>
+        <div class="hero-stat-label">сортов зёрен</div>
+      </div>
+      <div>
+        <div class="hero-stat-num">8K</div>
+        <div class="hero-stat-label">чашек в месяц</div>
+      </div>
+      <div>
+        <div class="hero-stat-num">4.9</div>
+        <div class="hero-stat-label">рейтинг</div>
+      </div>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <div class="hero-cup">
+      <div class="hero-cup-inner">
+        <span class="hero-cup-icon">☕</span>
+        <span class="hero-cup-text">Crafted<br>with Love</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MENU -->
+<section class="menu section" id="menu">
+  <div class="container">
+    <div class="menu-header reveal">
+      <div class="section-label">Меню</div>
+      <h2 class="section-title">Наши фирменные напитки</h2>
+      <p class="section-desc">Каждый напиток — результат экспериментов, отборных зёрен и мастерства наших бариста</p>
+    </div>
+    <div class="menu-grid">
+      <div class="menu-card reveal reveal-delay-1">
+        <div class="menu-card-img">☕</div>
+        <div class="menu-card-body">
+          <div class="menu-card-top">
+            <div class="menu-card-name">Эспрессо Классико</div>
+            <div class="menu-card-price">220 ₽</div>
+          </div>
+          <p class="menu-card-desc">Насыщенный двойной эспрессо из смеси эфиопских и колумбийских зёрен. Плотная крема, шоколадные ноты.</p>
+          <div class="menu-card-tags">
+            <span class="menu-tag">Классика</span>
+            <span class="menu-tag">Крепкий</span>
+          </div>
+        </div>
+      </div>
+      <div class="menu-card reveal reveal-delay-2">
+        <div class="menu-card-img">🥛</div>
+        <div class="menu-card-body">
+          <div class="menu-card-top">
+            <div class="menu-card-name">Капучино Вельвет</div>
+            <div class="menu-card-price">320 ₽</div>
+          </div>
+          <p class="menu-card-desc">Бархатный капучино с молочной пеной микротекстуры. Ванильный акцент и лёгкая сладость.</p>
+          <div class="menu-card-tags">
+            <span class="menu-tag">Молочный</span>
+            <span class="menu-tag">Хит</span>
+          </div>
+        </div>
+      </div>
+      <div class="menu-card reveal reveal-delay-3">
+        <div class="menu-card-img">🧊</div>
+        <div class="menu-card-body">
+          <div class="menu-card-top">
+            <div class="menu-card-name">Колд Брю Цитрус</div>
+            <div class="menu-card-price">350 ₽</div>
+          </div>
+          <p class="menu-card-desc">Холодная заварка 18 часов с апельсиновым зестом и тоником. Освежающий и бодрящий.</p>
+          <div class="menu-card-tags">
+            <span class="menu-tag">Холодный</span>
+            <span class="menu-tag">Лето</span>
+          </div>
+        </div>
+      </div>
+      <div class="menu-card reveal reveal-delay-1">
+        <div class="menu-card-img">🍵</div>
+        <div class="menu-card-body">
+          <div class="menu-card-top">
+            <div class="menu-card-name">Матча Латте</div>
+            <div class="menu-card-price">340 ₽</div>
+          </div>
+          <p class="menu-card-desc">Японская церемониальная матча на овсяном молоке. Умами, кремовая текстура, без кофеина.</p>
+          <div class="menu-card-tags">
+            <span class="menu-tag">Без кофеина</span>
+            <span class="menu-tag">Веган</span>
+          </div>
+        </div>
+      </div>
+      <div class="menu-card reveal reveal-delay-2">
+        <div class="menu-card-img">🍫</div>
+        <div class="menu-card-body">
+          <div class="menu-card-top">
+            <div class="menu-card-name">Раф Солёная Карамель</div>
+            <div class="menu-card-price">380 ₽</div>
+          </div>
+          <p class="menu-card-desc">Нежный раф-кофе с солёной карамелью и щепоткой морской соли. Десерт в чашке.</p>
+          <div class="menu-card-tags">
+            <span class="menu-tag">Десертный</span>
+            <span class="menu-tag">Сладкий</span>
+          </div>
+        </div>
+      </div>
+      <div class="menu-card reveal reveal-delay-3">
+        <div class="menu-card-img">🫐</div>
+        <div class="menu-card-body">
+          <div class="menu-card-top">
+            <div class="menu-card-name">Смузи Лесные Ягоды</div>
+            <div class="menu-card-price">360 ₽</div>
+          </div>
+          <p class="menu-card-desc">Густой смузи из черники, малины и ежевики с бананом и мёдом. Витаминный заряд на весь день.</p>
+          <div class="menu-card-tags">
+            <span class="menu-tag">Без кофеина</span>
+            <span class="menu-tag">Здоровье</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="about section" id="about">
+  <div class="container">
+    <div class="about-grid">
+      <div class="about-img reveal">
+        <div class="about-img-inner">
+          <span class="about-img-icon">🔥</span>
+          <span class="about-img-text">Обжарка каждое утро в 6:00</span>
+        </div>
+      </div>
+      <div class="about-content">
+        <div class="section-label reveal">О нас</div>
+        <h2 class="section-title reveal reveal-delay-1">Мы верим, что кофе — это больше, чем напиток</h2>
+        <p class="section-desc reveal reveal-delay-2">
+          Ember & Brew — это семейная кофейня в сердце города. Мы лично отбираем зёрна
+          на фермах Эфиопии, Колумбии и Гватемалы, обжариваем их каждое утро
+          и подаём с теплом, которое невозможно подделать.
+        </p>
+        <div class="about-features">
+          <div class="about-feat reveal reveal-delay-2">
+            <div class="about-feat-icon">🌱</div>
+            <div>
+              <div class="about-feat-title">Прямые поставки</div>
+              <div class="about-feat-desc">Работаем напрямую с фермерами без посредников. Справедливая цена для каждого.</div>
+            </div>
+          </div>
+          <div class="about-feat reveal reveal-delay-3">
+            <div class="about-feat-icon">🔥</div>
+            <div>
+              <div class="about-feat-title">Свежая обжарка</div>
+              <div class="about-feat-desc">Probat L25 в нашем зале. Каждое зерно обжарено не более 24 часов назад.</div>
+            </div>
+          </div>
+          <div class="about-feat reveal reveal-delay-4">
+            <div class="about-feat-icon">💚</div>
+            <div>
+              <div class="about-feat-title">Эко-подход</div>
+              <div class="about-feat-desc">Одноразовая посуда из кукурузного крахмала. Жмых идёт на компост для городских садов.</div>
+            </div>
+          </div>
+        </div>
+        <div class="about-quote reveal reveal-delay-5">
+          «Кофе — это момент тишины в шумном дне. Мы хотим, чтобы каждый гость
+          почувствовал это, даже если за окном суета мегаполиса.»
+          <cite>— Алексей и Мария, основатели Ember & Brew</cite>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GALLERY -->
+<section class="gallery section" id="gallery">
+  <div class="container">
+    <div class="gallery-header reveal">
+      <div class="section-label">Галерея</div>
+      <h2 class="section-title">Атмосфера нашего пространства</h2>
+      <p class="section-desc">Тёплое дерево, кирпичные стены и запах свежей обжарки — каждый уголок создан для уюта</p>
+    </div>
+    <div class="gallery-grid">
+      <div class="gallery-item reveal">
+        <div class="gallery-item-bg">🏠</div>
+        <div class="gallery-caption">
+          <h4>Основной зал</h4>
+          <p>Кирпичные стены, мягкий свет и винтажная мебель</p>
+        </div>
+      </div>
+      <div class="gallery-item reveal reveal-delay-1">
+        <div class="gallery-item-bg">☕</div>
+        <div class="gallery-caption">
+          <h4>Бариста-бар</h4>
+          <p>Процесс приготовления на ваших глазах</p>
+        </div>
+      </div>
+      <div class="gallery-item reveal reveal-delay-2">
+        <div class="gallery-item-bg">🌿</div>
+        <div class="gallery-caption">
+          <h4>Летняя терраса</h4>
+          <p>Зелень, свежий воздух и утреннее солнце</p>
+        </div>
+      </div>
+      <div class="gallery-item reveal reveal-delay-2">
+        <div class="gallery-item-bg">🔥</div>
+        <div class="gallery-caption">
+          <h4>Обжарочный цех</h4>
+          <p>Probat L25 — сердце нашей кофейни</p>
+        </div>
+      </div>
+      <div class="gallery-item reveal reveal-delay-3">
+        <div class="gallery-item-bg">🥐</div>
+        <div class="gallery-caption">
+          <h4>Свежая выпечка</h4>
+          <p>Печём каждый день с 5 утра</p>
+        </div>
+      </div>
+      <div class="gallery-item reveal reveal-delay-4">
+        <div class="gallery-item-bg">📚</div>
+        <div class="gallery-caption">
+          <h4>Книжная зона</h4>
+          <p>Библиотека с книгами на любой вкус</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BOOKING -->
+<section class="booking section" id="booking">
+  <div class="container">
+    <div class="booking-grid">
+      <div class="booking-info">
+        <div class="section-label reveal">Бронирование</div>
+        <h2 class="section-title reveal reveal-delay-1">Забронируйте столик</h2>
+        <p class="section-desc reveal reveal-delay-2">
+          Зарезервируйте место заранее, чтобы быть уверенными в уютном вечер.
+          Мы подберём лучший столик для вашего визита.
+        </p>
+        <div class="booking-details reveal reveal-delay-3">
+          <div class="booking-detail">
+            <div class="booking-detail-icon">📍</div>
+            <div>
+              <div class="booking-detail-title">Адрес</div>
+              <div class="booking-detail-text">ул. Кофейная, 42<br>Москва, 101000</div>
+            </div>
+          </div>
+          <div class="booking-detail">
+            <div class="booking-detail-icon">📞</div>
+            <div>
+              <div class="booking-detail-title">Телефон</div>
+              <div class="booking-detail-text">+7 (495) 123-45-67<br>+7 (903) 765-43-21</div>
+            </div>
+          </div>
+          <div class="booking-detail">
+            <div class="booking-detail-icon">✉️</div>
+            <div>
+              <div class="booking-detail-title">Email</div>
+              <div class="booking-detail-text">hello@emberbrew.ru<br>booking@emberbrew.ru</div>
+            </div>
+          </div>
+        </div>
+        <div class="booking-hours reveal reveal-delay-4" id="bookingHours">
+          <h4>Часы работы</h4>
+          <div class="booking-hours-row" data-day="1">
+            <span class="booking-hours-day">Понедельник</span>
+            <span class="booking-hours-time">08:00 — 22:00</span>
+          </div>
+          <div class="booking-hours-row" data-day="2">
+            <span class="booking-hours-day">Вторник</span>
+            <span class="booking-hours-time">08:00 — 22:00</span>
+          </div>
+          <div class="booking-hours-row" data-day="3">
+            <span class="booking-hours-day">Среда</span>
+            <span class="booking-hours-time">08:00 — 22:00</span>
+          </div>
+          <div class="booking-hours-row" data-day="4">
+            <span class="booking-hours-day">Четверг</span>
+            <span class="booking-hours-time">08:00 — 22:00</span>
+          </div>
+          <div class="booking-hours-row" data-day="5">
+            <span class="booking-hours-day">Пятница</span>
+            <span class="booking-hours-time">08:00 — 00:00</span>
+          </div>
+          <div class="booking-hours-row" data-day="6">
+            <span class="booking-hours-day">Суббота</span>
+            <span class="booking-hours-time">09:00 — 00:00</span>
+          </div>
+          <div class="booking-hours-row" data-day="0">
+            <span class="booking-hours-day">Воскресенье</span>
+            <span class="booking-hours-time">09:00 — 21:00</span>
+          </div>
+        </div>
+      </div>
+      <div class="booking-form-card reveal reveal-delay-2">
+        <div id="formContainer">
+          <h3 class="booking-form-title">Заполните форму</h3>
+          <p class="booking-form-subtitle">Мы подтвердим бронирование в течение 30 минут</p>
+          <form id="bookingForm" novalidate>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="name">Имя <span class="req">*</span></label>
+                <input type="text" id="name" name="name" placeholder="Ваше имя" autocomplete="name">
+                <div class="form-error" id="nameError"></div>
+              </div>
+              <div class="form-group">
+                <label for="phone">Телефон <span class="req">*</span></label>
+                <input type="tel" id="phone" name="phone" placeholder="+7 (___) ___-__-__" autocomplete="tel">
+                <div class="form-error" id="phoneError"></div>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="date">Дата <span class="req">*</span></label>
+                <input type="date" id="date" name="date">
+                <div class="form-error" id="dateError"></div>
+              </div>
+              <div class="form-group">
+                <label for="time">Время <span class="req">*</span></label>
+                <select id="time" name="time">
+                  <option value="">Выберите время</option>
+                  <option value="08:00">08:00</option>
+                  <option value="09:00">09:00</option>
+                  <option value="10:00">10:00</option>
+                  <option value="11:00">11:00</option>
+                  <option value="12:00">12:00</option>
+                  <option value="13:00">13:00</option>
+                  <option value="14:00">14:00</option>
+                  <option value="15:00">15:00</option>
+                  <option value="16:00">16:00</option>
+                  <option value="17:00">17:00</option>
+                  <option value="18:00">18:00</option>
+                  <option value="19:00">19:00</option>
+                  <option value="20:00">20:00</option>
+                  <option value="21:00">21:00</option>
+                </select>
+                <div class="form-error" id="timeError"></div>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="guests">Гости <span class="req">*</span></label>
+                <select id="guests" name="guests">
+                  <option value="">Количество</option>
+                  <option value="1">1 гость</option>
+                  <option value="2">2 гостя</option>
+                  <option value="3">3 гостя</option>
+                  <option value="4">4 гостя</option>
+                  <option value="5">5 гостей</option>
+                  <option value="6">6 гостей</option>
+                  <option value="7">7 гостей</option>
+                  <option value="8">8+ гостей</option>
+                </select>
+                <div class="form-error" id="guestsError"></div>
+              </div>
+              <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" placeholder="email@example.com" autocomplete="email">
+                <div class="form-error" id="emailError"></div>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group full">
+                <label for="wishes">Пожелания</label>
+                <textarea id="wishes" name="wishes" placeholder="Особые пожелания, аллергии, повод для визита..."></textarea>
+              </div>
+            </div>
+            <button type="submit" class="form-submit" id="submitBtn">
+              Забронировать столик
+            </button>
+          </form>
+        </div>
+        <div class="form-success" id="formSuccess">
+          <div class="form-success-icon">✓</div>
+          <h3>Столик забронирован!</h3>
+          <p>Мы отправим подтверждение на ваш email в течение 30 минут. Спасибо, что выбрали Ember & Brew!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="#" class="nav-logo">Ember<span>&</span>Brew</a>
+        <p>Кофейня, где каждая чашка — это история. Обжарка, уют и люди, которые любят своё дело.</p>
+        <div class="footer-socials">
+          <a href="#" class="footer-social" aria-label="Telegram">✈️</a>
+          <a href="#" class="footer-social" aria-label="VK">💬</a>
+          <a href="#" class="footer-social" aria-label="Instagram">📷</a>
+        </div>
+      </div>
+      <div>
+        <h4>Навигация</h4>
+        <ul class="footer-links">
+          <li><a href="#menu">Меню</a></li>
+          <li><a href="#about">О нас</a></li>
+          <li><a href="#gallery">Галерея</a></li>
+          <li><a href="#booking">Бронирование</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Информация</h4>
+        <ul class="footer-links">
+          <li><a href="#">Доставка</a></li>
+          <li><a href="#">Франшиза</a></li>
+          <li><a href="#">Вакансии</a></li>
+          <li><a href="#">Для прессы</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Контакты</h4>
+        <ul class="footer-links">
+          <li>ул. Кофейная, 42</li>
+          <li>Москва, 101000</li>
+          <li><a href="tel:+74951234567">+7 (495) 123-45-67</a></li>
+          <li><a href="mailto:hello@emberbrew.ru">hello@emberbrew.ru</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2018–2026 Ember & Brew. Все права защищены.</span>
+      <span>Разработка с ❤️ и кофе</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  'use strict';
+
+  /* ── NAV SCROLL ── */
+  const nav=document.getElementById('nav');
+  const burger=document.getElementById('burger');
+  const navLinks=document.getElementById('navLinks');
+  let lastScroll=0;
+
+  window.addEventListener('scroll',function(){
+    nav.classList.toggle('scrolled',window.scrollY>60);
+  },{passive:true});
+
+  burger.addEventListener('click',function(){
+    navLinks.classList.toggle('open');
+  });
+
+  navLinks.querySelectorAll('a').forEach(function(a){
+    a.addEventListener('click',function(){
+      navLinks.classList.remove('open');
+    });
+  });
+
+  /* ── SMOOTH SCROLL ── */
+  document.querySelectorAll('a[href^="#"]').forEach(function(a){
+    a.addEventListener('click',function(e){
+      var target=document.querySelector(this.getAttribute('href'));
+      if(target){e.preventDefault();target.scrollIntoView({behavior:'smooth',block:'start'})}
+    });
+  });
+
+  /* ── REVEAL ON SCROLL ── */
+  var reveals=document.querySelectorAll('.reveal');
+  var revealObserver=new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(entry.isIntersecting){
+        entry.target.classList.add('visible');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  },{threshold:0.15,rootMargin:'0px 0px -40px 0px'});
+
+  reveals.forEach(function(el){revealObserver.observe(el)});
+
+  /* ── TODAY HIGHLIGHT ── */
+  var today=new Date().getDay();
+  document.querySelectorAll('.booking-hours-row').forEach(function(row){
+    if(parseInt(row.dataset.day)===today){row.classList.add('today')}
+  });
+
+  /* ── DATE MIN ── */
+  var dateInput=document.getElementById('date');
+  var now=new Date();
+  var minDate=now.toISOString().split('T')[0];
+  dateInput.setAttribute('min',minDate);
+
+  /* ── PHONE MASK ── */
+  var phoneInput=document.getElementById('phone');
+  phoneInput.addEventListener('input',function(e){
+    var v=e.target.value.replace(/\D/g,'');
+    if(v.length>0&&v[0]==='8'){v='7'+v.substring(1)}
+    if(v.length>0&&v[0]!=='7'){v='7'+v}
+    var formatted='';
+    if(v.length>1)formatted+='+'+v[0]+' ';
+    if(v.length>2)formatted+='('+v.substring(1,4)+') ';
+    else if(v.length>1)formatted+=v.substring(1);
+    if(v.length>5)formatted+=v.substring(4,7)+'-';
+    else if(v.length>4)formatted+=v.substring(4);
+    if(v.length>8)formatted+=v.substring(7,9)+'-';
+    else if(v.length>7)formatted+=v.substring(7);
+    if(v.length>10)formatted+=v.substring(9,11);
+    else if(v.length>9)formatted+=v.substring(9);
+    e.target.value=formatted;
+  });
+
+  /* ── VALIDATION ── */
+  var form=document.getElementById('bookingForm');
+  var submitBtn=document.getElementById('submitBtn');
+  var formContainer=document.getElementById('formContainer');
+  var formSuccess=document.getElementById('formSuccess');
+
+  var rules={
+    name:{
+      validate:function(v){return v.trim().length>=2},
+      msg:'Введите имя (минимум 2 символа)'
+    },
+    phone:{
+      validate:function(v){return v.replace(/\D/g,'').length>=11},
+      msg:'Введите полный номер телефона'
+    },
+    date:{
+      validate:function(v){
+        if(!v)return false;
+        var d=new Date(v);
+        var today=new Date();today.setHours(0,0,0,0);
+        return d>=today;
+      },
+      msg:'Выберите дату (не в прошлом)'
+    },
+    time:{
+      validate:function(v){return v!==''},
+      msg:'Выберите время'
+    },
+    guests:{
+      validate:function(v){return v!==''},
+      msg:'Укажите количество гостей'
+    },
+    email:{
+      validate:function(v){
+        if(v.trim()==='')return true;
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+      },
+      msg:'Введите корректный email'
+    }
+  };
+
+  function validateField(name){
+    var input=document.getElementById(name);
+    var error=document.getElementById(nameError);
+    var rule=rules[name];
+    if(!rule)return true;
+    var valid=rule.validate(input.value);
+    if(!valid){
+      input.classList.add('error');
+      input.classList.remove('success');
+      error.textContent=rule.msg;
+      error.classList.add('visible');
+    }else{
+      input.classList.remove('error');
+      if(input.value.trim()!=='')input.classList.add('success');
+      error.textContent='';
+      error.classList.remove('visible');
+    }
+    return valid;
+  }
+
+  /* Live validation on blur */
+  Object.keys(rules).forEach(function(name){
+    var input=document.getElementById(name);
+    if(input){
+      input.addEventListener('blur',function(){validateField(name)});
+      input.addEventListener('input',function(){
+        if(input.classList.contains('error'))validateField(name);
+      });
+    }
+  });
+
+  form.addEventListener('submit',function(e){
+    e.preventDefault();
+    var allValid=true;
+    Object.keys(rules).forEach(function(name){
+      if(!validateField(name))allValid=false;
+    });
+    if(!allValid){
+      var firstError=form.querySelector('.error');
+      if(firstError)firstError.focus();
+      return;
+    }
+    submitBtn.disabled=true;
+    submitBtn.textContent='Отправка...';
+
+    /* Simulate submission */
+    setTimeout(function(){
+      formContainer.style.display='none';
+      formSuccess.classList.add('show');
+    },1200);
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Мои задачи — To-Do List</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f0f1a;
+  --surface:#1a1a2e;
+  --surface2:#222240;
+  --surface3:#2a2a4a;
+  --primary:#6c63ff;
+  --primary-light:#8b83ff;
+  --primary-glow:rgba(108,99,255,.25);
+  --accent:#ff6b9d;
+  --accent-light:#ff8bb5;
+  --success:#2ed573;
+  --success-glow:rgba(46,213,115,.2);
+  --warning:#ffa502;
+  --danger:#ff4757;
+  --danger-glow:rgba(255,71,87,.15);
+  --text:#e8e8f0;
+  --text-muted:#8888a8;
+  --text-dim:#5a5a7a;
+  --border:#333355;
+  --radius:14px;
+  --radius-sm:10px;
+  --shadow:0 8px 32px rgba(0,0,0,.35);
+  --shadow-sm:0 4px 16px rgba(0,0,0,.25);
+  --transition:all .25s cubic-bezier(.4,0,.2,1);
+}
+html{font-size:16px;scroll-behavior:smooth}
+body{
+  font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Oxygen,Ubuntu,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:40px 16px 80px;
+  line-height:1.6;
+  overflow-x:hidden;
+}
+body::before{
+  content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%;
+  background:radial-gradient(ellipse at 30% 20%,rgba(108,99,255,.08) 0%,transparent 50%),
+             radial-gradient(ellipse at 70% 80%,rgba(255,107,157,.06) 0%,transparent 50%);
+  pointer-events:none;z-index:0;
+}
+
+.app{width:100%;max-width:620px;position:relative;z-index:1}
+
+/* Header */
+.header{text-align:center;margin-bottom:36px;animation:fadeDown .6s ease}
+.header h1{
+  font-size:2.4rem;font-weight:800;letter-spacing:-.02em;
+  background:linear-gradient(135deg,var(--primary-light),var(--accent));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+  margin-bottom:6px;
+}
+.header p{color:var(--text-muted);font-size:.95rem;font-weight:400}
+
+/* Stats bar */
+.stats{
+  display:flex;gap:12px;margin-bottom:24px;
+  animation:fadeDown .6s ease .1s both;
+}
+.stat-card{
+  flex:1;background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:14px 16px;
+  text-align:center;transition:var(--transition);
+}
+.stat-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-sm)}
+.stat-card .stat-num{
+  font-size:1.6rem;font-weight:800;
+  line-height:1.2;margin-bottom:2px;
+}
+.stat-card .stat-label{font-size:.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.stat-card.total .stat-num{color:var(--primary-light)}
+.stat-card.active .stat-num{color:var(--warning)}
+.stat-card.done .stat-num{color:var(--success)}
+
+/* Input area */
+.input-area{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:20px;
+  margin-bottom:20px;box-shadow:var(--shadow-sm);
+  animation:fadeDown .6s ease .15s both;
+}
+.input-row{display:flex;gap:10px}
+.input-row input[type="text"]{
+  flex:1;background:var(--surface2);border:1.5px solid var(--border);
+  border-radius:var(--radius-sm);padding:14px 18px;
+  color:var(--text);font-size:1rem;font-weight:500;
+  outline:none;transition:var(--transition);
+}
+.input-row input[type="text"]::placeholder{color:var(--text-dim);font-weight:400}
+.input-row input[type="text"]:focus{
+  border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-glow);
+}
+.btn-add{
+  background:linear-gradient(135deg,var(--primary),#7c6aff);
+  color:#fff;border:none;border-radius:var(--radius-sm);
+  padding:14px 24px;font-size:1rem;font-weight:700;
+  cursor:pointer;transition:var(--transition);white-space:nowrap;
+  display:flex;align-items:center;gap:6px;
+}
+.btn-add:hover{transform:translateY(-1px);box-shadow:0 6px 20px var(--primary-glow)}
+.btn-add:active{transform:translateY(0)}
+.btn-add svg{width:18px;height:18px;stroke:currentColor;stroke-width:2.5;fill:none}
+
+/* Priority selector */
+.priority-row{
+  display:flex;gap:8px;margin-top:14px;align-items:center;
+}
+.priority-row label{font-size:.82rem;color:var(--text-muted);font-weight:600;margin-right:4px}
+.priority-btn{
+  width:28px;height:28px;border-radius:50%;border:2px solid transparent;
+  cursor:pointer;transition:var(--transition);position:relative;
+}
+.priority-btn.low{background:#2ed573}
+.priority-btn.medium{background:#ffa502}
+.priority-btn.high{background:#ff4757}
+.priority-btn.selected{border-color:#fff;box-shadow:0 0 0 3px rgba(255,255,255,.15)}
+.priority-btn:hover{transform:scale(1.15)}
+.priority-hint{font-size:.78rem;color:var(--text-dim);margin-left:auto}
+
+/* Filters */
+.filters{
+  display:flex;gap:6px;margin-bottom:20px;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:6px;
+  animation:fadeDown .6s ease .2s both;
+}
+.filter-btn{
+  flex:1;background:transparent;border:none;color:var(--text-muted);
+  padding:10px 12px;border-radius:8px;font-size:.88rem;font-weight:600;
+  cursor:pointer;transition:var(--transition);
+  display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.filter-btn:hover{color:var(--text);background:var(--surface2)}
+.filter-btn.active{
+  background:var(--primary);color:#fff;
+  box-shadow:0 4px 14px var(--primary-glow);
+}
+.filter-btn .count{
+  font-size:.72rem;background:rgba(255,255,255,.15);
+  padding:2px 7px;border-radius:10px;font-weight:700;
+}
+.filter-btn.active .count{background:rgba(255,255,255,.25)}
+
+/* Search */
+.search-bar{
+  position:relative;margin-bottom:20px;
+  animation:fadeDown .6s ease .25s both;
+}
+.search-bar input{
+  width:100%;background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:12px 16px 12px 44px;
+  color:var(--text);font-size:.92rem;outline:none;transition:var(--transition);
+}
+.search-bar input:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-glow)}
+.search-bar input::placeholder{color:var(--text-dim)}
+.search-bar svg{
+  position:absolute;left:14px;top:50%;transform:translateY(-50%);
+  width:18px;height:18px;stroke:var(--text-dim);fill:none;stroke-width:2;
+}
+
+/* Todo list */
+.todo-list{
+  display:flex;flex-direction:column;gap:10px;
+  min-height:80px;position:relative;
+}
+
+.todo-item{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:16px 18px;
+  display:flex;align-items:flex-start;gap:14px;
+  transition:var(--transition);position:relative;overflow:hidden;
+  animation:slideIn .35s ease both;
+}
+.todo-item::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:4px;
+  border-radius:4px 0 0 4px;
+}
+.todo-item.priority-low::before{background:var(--success)}
+.todo-item.priority-medium::before{background:var(--warning)}
+.todo-item.priority-high::before{background:var(--danger)}
+
+.todo-item:hover{
+  border-color:var(--primary);transform:translateX(4px);
+  box-shadow:var(--shadow-sm);
+}
+.todo-item.completed{opacity:.55}
+.todo-item.completed .todo-text{text-decoration:line-through;color:var(--text-dim)}
+
+.todo-check{
+  width:24px;height:24px;border-radius:50%;flex-shrink:0;
+  border:2px solid var(--border);background:transparent;
+  cursor:pointer;transition:var(--transition);
+  display:flex;align-items:center;justify-content:center;
+  margin-top:1px;
+}
+.todo-check:hover{border-color:var(--success);background:var(--success-glow)}
+.todo-check svg{width:14px;height:14px;stroke:var(--success);fill:none;stroke-width:3;opacity:0;transition:var(--transition)}
+.todo-item.completed .todo-check{
+  background:var(--success);border-color:var(--success);
+}
+.todo-item.completed .todo-check svg{opacity:1;stroke:#fff}
+
+.todo-content{flex:1;min-width:0}
+.todo-text{
+  font-size:.98rem;font-weight:500;word-break:break-word;
+  transition:var(--transition);
+}
+.todo-meta{
+  display:flex;align-items:center;gap:10px;margin-top:6px;
+  flex-wrap:wrap;
+}
+.todo-date{font-size:.75rem;color:var(--text-dim)}
+.todo-priority-tag{
+  font-size:.68rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:.06em;padding:2px 8px;border-radius:6px;
+}
+.todo-priority-tag.low{background:rgba(46,213,115,.15);color:var(--success)}
+.todo-priority-tag.medium{background:rgba(255,165,2,.15);color:var(--warning)}
+.todo-priority-tag.high{background:rgba(255,71,87,.15);color:var(--danger)}
+
+.todo-actions{display:flex;gap:6px;flex-shrink:0;margin-top:1px}
+.btn-icon{
+  width:32px;height:32px;border-radius:8px;border:none;
+  background:var(--surface2);color:var(--text-muted);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:var(--transition);
+}
+.btn-icon:hover{background:var(--surface3);color:var(--text)}
+.btn-icon.delete:hover{background:var(--danger-glow);color:var(--danger)}
+.btn-icon svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2}
+
+/* Edit mode */
+.todo-item.editing{border-color:var(--warning)}
+.edit-input{
+  width:100%;background:var(--surface2);border:1.5px solid var(--warning);
+  border-radius:8px;padding:8px 12px;color:var(--text);font-size:.98rem;
+  outline:none;font-family:inherit;
+}
+
+/* Empty state */
+.empty-state{
+  text-align:center;padding:48px 20px;color:var(--text-muted);
+  animation:fadeDown .4s ease;
+}
+.empty-state svg{width:64px;height:64px;stroke:var(--text-dim);fill:none;stroke-width:1.2;margin-bottom:16px}
+.empty-state h3{font-size:1.1rem;color:var(--text-muted);margin-bottom:6px}
+.empty-state p{font-size:.88rem;color:var(--text-dim)}
+
+/* Bulk actions */
+.bulk-actions{
+  display:flex;gap:8px;margin-bottom:20px;justify-content:flex-end;
+  animation:fadeDown .6s ease .3s both;
+}
+.btn-sm{
+  background:var(--surface);border:1px solid var(--border);
+  color:var(--text-muted);padding:8px 14px;border-radius:8px;
+  font-size:.8rem;font-weight:600;cursor:pointer;transition:var(--transition);
+}
+.btn-sm:hover{border-color:var(--primary);color:var(--text)}
+.btn-sm.danger:hover{border-color:var(--danger);color:var(--danger)}
+
+/* Footer */
+.footer{
+  margin-top:32px;text-align:center;color:var(--text-dim);
+  font-size:.78rem;animation:fadeDown .6s ease .35s both;
+}
+.footer kbd{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:4px;padding:1px 6px;font-size:.72rem;font-family:inherit;
+}
+
+/* Animations */
+@keyframes fadeDown{
+  from{opacity:0;transform:translateY(-12px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@keyframes slideIn{
+  from{opacity:0;transform:translateX(-20px)}
+  to{opacity:1;transform:translateX(0)}
+}
+@keyframes shake{
+  0%,100%{transform:translateX(0)}
+  20%,60%{transform:translateX(-6px)}
+  40%,80%{transform:translateX(6px)}
+}
+.shake{animation:shake .4s ease}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--surface3);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--text-dim)}
+
+/* Responsive */
+@media(max-width:480px){
+  body{padding:20px 12px 60px}
+  .header h1{font-size:1.8rem}
+  .stats{flex-direction:column;gap:8px}
+  .input-row{flex-direction:column}
+  .btn-add{justify-content:center}
+  .filters{flex-wrap:wrap}
+  .todo-actions{flex-direction:column}
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- Header -->
+  <div class="header">
+    <h1>📋 Мои задачи</h1>
+    <p>Управляйте задачами легко и продуктивно</p>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat-card total">
+      <div class="stat-num" id="statTotal">0</div>
+      <div class="stat-label">Всего</div>
+    </div>
+    <div class="stat-card active">
+      <div class="stat-num" id="statActive">0</div>
+      <div class="stat-label">Активных</div>
+    </div>
+    <div class="stat-card done">
+      <div class="stat-num" id="statDone">0</div>
+      <div class="stat-label">Готово</div>
+    </div>
+  </div>
+
+  <!-- Input -->
+  <div class="input-area">
+    <div class="input-row">
+      <input type="text" id="todoInput" placeholder="Новая задача…" maxlength="200" autocomplete="off">
+      <button class="btn-add" id="addBtn">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Добавить
+      </button>
+    </div>
+    <div class="priority-row">
+      <label>Приоритет:</label>
+      <button class="priority-btn low selected" data-priority="low" title="Низкий"></button>
+      <button class="priority-btn medium" data-priority="medium" title="Средний"></button>
+      <button class="priority-btn high" data-priority="high" title="Высокий"></button>
+      <span class="priority-hint">Выберите приоритет задачи</span>
+    </div>
+  </div>
+
+  <!-- Search -->
+  <div class="search-bar">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" id="searchInput" placeholder="Поиск задач…" autocomplete="off">
+  </div>
+
+  <!-- Filters -->
+  <div class="filters">
+    <button class="filter-btn active" data-filter="all">Все <span class="count" id="countAll">0</span></button>
+    <button class="filter-btn" data-filter="active">Активные <span class="count" id="countActive">0</span></button>
+    <button class="filter-btn" data-filter="completed">Выполненные <span class="count" id="countCompleted">0</span></button>
+  </div>
+
+  <!-- Bulk actions -->
+  <div class="bulk-actions">
+    <button class="btn-sm" id="btnCompleteAll">✓ Выполнить все</button>
+    <button class="btn-sm danger" id="btnClearDone">✕ Удалить выполненные</button>
+  </div>
+
+  <!-- Todo list -->
+  <div class="todo-list" id="todoList"></div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <kbd>Enter</kbd> — добавить &nbsp;|&nbsp; <kbd>Esc</kbd> — отменить редактирование &nbsp;|&nbsp; Данные сохраняются автоматически
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  // ==================== State ====================
+  const STORAGE_KEY = 'todo_app_data_v2';
+  let todos = [];
+  let currentFilter = 'all';
+  let searchQuery = '';
+  let selectedPriority = 'low';
+
+  // ==================== DOM refs ====================
+  const $input = document.getElementById('todoInput');
+  const $addBtn = document.getElementById('addBtn');
+  const $list = document.getElementById('todoList');
+  const $search = document.getElementById('searchInput');
+  const $statTotal = document.getElementById('statTotal');
+  const $statActive = document.getElementById('statActive');
+  const $statDone = document.getElementById('statDone');
+  const $countAll = document.getElementById('countAll');
+  const $countActive = document.getElementById('countActive');
+  const $countCompleted = document.getElementById('countCompleted');
+  const $btnCompleteAll = document.getElementById('btnCompleteAll');
+  const $btnClearDone = document.getElementById('btnClearDone');
+  const $filterBtns = document.querySelectorAll('.filter-btn');
+  const $priorityBtns = document.querySelectorAll('.priority-btn');
+
+  // ==================== Persistence ====================
+  function loadTodos() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        todos = JSON.parse(raw);
+        // migrate old items missing priority
+        todos.forEach(t => {
+          if (!t.priority) t.priority = 'low';
+          if (!t.createdAt) t.createdAt = Date.now();
+        });
+      }
+    } catch (e) {
+      todos = [];
+    }
+  }
+
+  function saveTodos() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
+    } catch (e) {
+      console.warn('localStorage save failed', e);
+    }
+  }
+
+  // ==================== Helpers ====================
+  function genId() {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function formatDate(ts) {
+    const d = new Date(ts);
+    const now = new Date();
+    const diff = now - d;
+    if (diff < 60000) return 'только что';
+    if (diff < 3600000) return Math.floor(diff / 60000) + ' мин назад';
+    if (diff < 86400000) return Math.floor(diff / 3600000) + ' ч назад';
+    const day = d.getDate().toString().padStart(2, '0');
+    const month = (d.getMonth() + 1).toString().padStart(2, '0');
+    const year = d.getFullYear() === now.getFullYear() ? '' : '.' + d.getFullYear();
+    return day + '.' + month + year;
+  }
+
+  function priorityLabel(p) {
+    return { low: 'Низкий', medium: 'Средний', high: 'Высокий' }[p] || 'Низкий';
+  }
+
+  // ==================== Filtering ====================
+  function getFiltered() {
+    let result = todos;
+    if (currentFilter === 'active') result = result.filter(t => !t.completed);
+    if (currentFilter === 'completed') result = result.filter(t => t.completed);
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      result = result.filter(t => t.text.toLowerCase().includes(q));
+    }
+    // sort: incomplete first (by priority desc, then date), then completed
+    const priorityOrder = { high: 3, medium: 2, low: 1 };
+    result.sort((a, b) => {
+      if (a.completed !== b.completed) return a.completed ? 1 : -1;
+      if (!a.completed && !b.completed) {
+        const pd = priorityOrder[b.priority] - priorityOrder[a.priority];
+        if (pd !== 0) return pd;
+      }
+      return b.createdAt - a.createdAt;
+    });
+    return result;
+  }
+
+  // ==================== Rendering ====================
+  function render() {
+    const filtered = getFiltered();
+    const total = todos.length;
+    const active = todos.filter(t => !t.completed).length;
+    const done = total - active;
+
+    // Stats
+    $statTotal.textContent = total;
+    $statActive.textContent = active;
+    $statDone.textContent = done;
+
+    // Filter counts
+    $countAll.textContent = total;
+    $countActive.textContent = active;
+    $countCompleted.textContent = done;
+
+    // List
+    if (filtered.length === 0) {
+      const msg = searchQuery ? 'Ничего не найдено' :
+                  currentFilter === 'active' ? 'Все задачи выполнены! 🎉' :
+                  currentFilter === 'completed' ? 'Пока нет выполненных задач' :
+                  'Добавьте первую задачу';
+      const sub = searchQuery ? 'Попробуйте изменить запрос' : 'Начните вводить текст выше';
+      $list.innerHTML = `
+        <div class="empty-state">
+          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
+            <rect x="9" y="3" width="6" height="4" rx="1"/>
+            <line x1="9" y1="12" x2="15" y2="12"/>
+            <line x1="9" y1="16" x2="13" y2="16"/>
+          </svg>
+          <h3>${msg}</h3>
+          <p>${sub}</p>
+        </div>`;
+      return;
+    }
+
+    $list.innerHTML = filtered.map((t, i) => `
+      <div class="todo-item ${t.completed ? 'completed' : ''} priority-${t.priority}" 
+           data-id="${t.id}" style="animation-delay:${i * 30}ms">
+        <button class="todo-check" data-action="toggle" title="${t.completed ? 'Отметить как активную' : 'Выполнено'}">
+          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </button>
+        <div class="todo-content">
+          <div class="todo-text">${escapeHtml(t.text)}</div>
+          <div class="todo-meta">
+            <span class="todo-date">${formatDate(t.createdAt)}</span>
+            <span class="todo-priority-tag ${t.priority}">${priorityLabel(t.priority)}</span>
+          </div>
+        </div>
+        <div class="todo-actions">
+          <button class="btn-icon" data-action="edit" title="Редактировать">
+            <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+              <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            </svg>
+          </button>
+          <button class="btn-icon delete" data-action="delete" title="Удалить">
+            <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3 6 5 6 21 6"/>
+              <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
+              <path d="M10 11v6"/><path d="M14 11v6"/>
+              <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // ==================== Actions ====================
+  function addTodo() {
+    const text = $input.value.trim();
+    if (!text) {
+      $input.classList.add('shake');
+      setTimeout(() => $input.classList.remove('shake'), 400);
+      $input.focus();
+      return;
+    }
+    todos.unshift({
+      id: genId(),
+      text: text,
+      completed: false,
+      priority: selectedPriority,
+      createdAt: Date.now()
+    });
+    $input.value = '';
+    saveTodos();
+    render();
+    $input.focus();
+  }
+
+  function toggleTodo(id) {
+    const t = todos.find(x => x.id === id);
+    if (t) {
+      t.completed = !t.completed;
+      saveTodos();
+      render();
+    }
+  }
+
+  function deleteTodo(id) {
+    const idx = todos.findIndex(x => x.id === id);
+    if (idx !== -1) {
+      const el = $list.querySelector(`[data-id="${id}"]`);
+      if (el) {
+        el.style.transition = 'all .3s ease';
+        el.style.opacity = '0';
+        el.style.transform = 'translateX(40px)';
+        el.style.maxHeight = el.offsetHeight + 'px';
+        setTimeout(() => {
+          el.style.maxHeight = '0';
+          el.style.padding = '0';
+          el.style.margin = '0';
+        }, 150);
+        setTimeout(() => {
+          todos.splice(idx, 1);
+          saveTodos();
+          render();
+        }, 350);
+      } else {
+        todos.splice(idx, 1);
+        saveTodos();
+        render();
+      }
+    }
+  }
+
+  function startEdit(id) {
+    const t = todos.find(x => x.id === id);
+    if (!t) return;
+    const el = $list.querySelector(`[data-id="${id}"]`);
+    if (!el) return;
+    const contentEl = el.querySelector('.todo-content');
+    const actionsEl = el.querySelector('.todo-actions');
+    el.classList.add('editing');
+
+    contentEl.innerHTML = `<input class="edit-input" type="text" value="${escapeHtml(t.text)}" maxlength="200">`;
+    const inp = contentEl.querySelector('.edit-input');
+    inp.focus();
+    inp.setSelectionRange(inp.value.length, inp.value.length);
+
+    actionsEl.innerHTML = `
+      <button class="btn-icon" data-action="save-edit" title="Сохранить">
+        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </button>
+      <button class="btn-icon delete" data-action="cancel-edit" title="Отмена">
+        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>`;
+
+    function saveEdit() {
+      const newText = inp.value.trim();
+      if (newText) {
+        t.text = newText;
+        saveTodos();
+      }
+      render();
+    }
+
+    function cancelEdit() {
+      render();
+    }
+
+    inp.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') { e.preventDefault(); saveEdit(); }
+      if (e.key === 'Escape') { e.preventDefault(); cancelEdit(); }
+    });
+
+    // Re-bind action buttons via delegation — but we need direct binding here
+    actionsEl.querySelector('[data-action="save-edit"]').addEventListener('click', saveEdit);
+    actionsEl.querySelector('[data-action="cancel-edit"]').addEventListener('click', cancelEdit);
+  }
+
+  function completeAll() {
+    const hasActive = todos.some(t => !t.completed);
+    todos.forEach(t => t.completed = hasActive);
+    saveTodos();
+    render();
+  }
+
+  function clearCompleted() {
+    todos = todos.filter(t => !t.completed);
+    saveTodos();
+    render();
+  }
+
+  // ==================== Event delegation ====================
+  $list.addEventListener('click', function(e) {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    const item = btn.closest('.todo-item');
+    if (!item) return;
+    const id = item.dataset.id;
+    const action = btn.dataset.action;
+
+    if (action === 'toggle') toggleTodo(id);
+    else if (action === 'delete') deleteTodo(id);
+    else if (action === 'edit') startEdit(id);
+  });
+
+  // ==================== Global events ====================
+  $addBtn.addEventListener('click', addTodo);
+
+  $input.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { e.preventDefault(); addTodo(); }
+  });
+
+  $search.addEventListener('input', function() {
+    searchQuery = this.value;
+    render();
+  });
+
+  $filterBtns.forEach(btn => {
+    btn.addEventListener('click', function() {
+      $filterBtns.forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      currentFilter = this.dataset.filter;
+      render();
+    });
+  });
+
+  $priorityBtns.forEach(btn => {
+    btn.addEventListener('click', function() {
+      $priorityBtns.forEach(b => b.classList.remove('selected'));
+      this.classList.add('selected');
+      selectedPriority = this.dataset.priority;
+    });
+  });
+
+  $btnCompleteAll.addEventListener('click', completeAll);
+  $btnClearDone.addEventListener('click', clearCompleted);
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      const editing = $list.querySelector('.editing');
+      if (editing) {
+        render();
+      }
+    }
+    // Ctrl+Enter to add from anywhere
+    if (e.key === 'Enter' && e.ctrlKey) {
+      e.preventDefault();
+      addTodo();
+    }
+  });
+
+  // ==================== Init ====================
+  loadTodos();
+  render();
+
+  // Auto-update relative times every minute
+  setInterval(render, 60000);
+
+})();
+</script>
+</body>
+</html>

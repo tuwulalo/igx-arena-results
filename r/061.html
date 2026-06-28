@@ -1,0 +1,1317 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>To-do список</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --page: #f4f7fb;
+      --panel: #ffffff;
+      --panel-soft: #f8fafc;
+      --ink: #172033;
+      --muted: #657189;
+      --muted-strong: #475569;
+      --line: #dce3ee;
+      --line-strong: #c5cedd;
+      --primary: #2367c7;
+      --primary-dark: #184f9f;
+      --primary-soft: #e8f1ff;
+      --green: #168653;
+      --green-soft: #e7f7ef;
+      --red: #c53a3a;
+      --red-soft: #fff0f0;
+      --amber: #a56511;
+      --amber-soft: #fff5dd;
+      --shadow: 0 24px 70px rgba(36, 50, 79, 0.16);
+      --shadow-soft: 0 14px 34px rgba(36, 50, 79, 0.10);
+      --radius-lg: 8px;
+      --radius-md: 8px;
+      --radius-sm: 7px;
+      --focus: 0 0 0 4px rgba(35, 103, 199, 0.17);
+      --font: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      min-height: 100%;
+      background: var(--page);
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      font-family: var(--font);
+      color: var(--ink);
+      background:
+        linear-gradient(180deg, rgba(245, 248, 252, 0.96), rgba(237, 242, 249, 0.98)),
+        radial-gradient(circle at 16% 12%, rgba(35, 103, 199, 0.10), transparent 34%),
+        radial-gradient(circle at 82% 8%, rgba(22, 134, 83, 0.10), transparent 31%);
+      letter-spacing: 0;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+    }
+
+    .app-shell {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 32px 0 42px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 22px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      width: 46px;
+      height: 46px;
+      flex: 0 0 auto;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      color: #fff;
+      background: linear-gradient(135deg, #2367c7, #168653);
+      box-shadow: 0 12px 24px rgba(35, 103, 199, 0.22);
+    }
+
+    .brand-mark svg {
+      width: 25px;
+      height: 25px;
+      stroke-width: 2.5;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.65rem, 3vw, 2.55rem);
+      line-height: 1.05;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 0.98rem;
+      line-height: 1.45;
+    }
+
+    .storage-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      color: var(--muted-strong);
+      background: rgba(255, 255, 255, 0.72);
+      box-shadow: 0 8px 22px rgba(36, 50, 79, 0.06);
+      white-space: nowrap;
+      font-size: 0.92rem;
+    }
+
+    .storage-indicator span:first-child {
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      background: var(--green);
+      box-shadow: 0 0 0 4px rgba(22, 134, 83, 0.12);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 310px;
+      gap: 22px;
+      align-items: start;
+    }
+
+    .todo-panel,
+    .summary-panel {
+      border: 1px solid rgba(197, 206, 221, 0.74);
+      border-radius: var(--radius-lg);
+      background: rgba(255, 255, 255, 0.92);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .composer {
+      padding: 20px;
+      border-bottom: 1px solid var(--line);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.98));
+    }
+
+    .input-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .task-input-wrap {
+      position: relative;
+      min-width: 0;
+    }
+
+    .task-input-wrap svg {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      width: 19px;
+      height: 19px;
+      transform: translateY(-50%);
+      color: #6e7c92;
+      pointer-events: none;
+    }
+
+    #taskInput {
+      width: 100%;
+      height: 48px;
+      padding: 0 15px 0 46px;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius-md);
+      outline: none;
+      color: var(--ink);
+      background: #fff;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+    #taskInput::placeholder {
+      color: #8a95a8;
+    }
+
+    #taskInput:focus {
+      border-color: var(--primary);
+      box-shadow: var(--focus);
+    }
+
+    .add-button {
+      height: 48px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 0 18px;
+      border-radius: var(--radius-md);
+      color: #fff;
+      background: var(--primary);
+      box-shadow: 0 12px 24px rgba(35, 103, 199, 0.25);
+      font-weight: 700;
+      transition: transform 0.16s ease, background 0.2s ease, box-shadow 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .add-button:hover {
+      background: var(--primary-dark);
+      box-shadow: 0 16px 30px rgba(35, 103, 199, 0.28);
+      transform: translateY(-1px);
+    }
+
+    .add-button:active {
+      transform: translateY(0);
+    }
+
+    .add-button svg,
+    .icon-button svg,
+    .filter-button svg,
+    .clear-button svg {
+      width: 18px;
+      height: 18px;
+      flex: 0 0 auto;
+    }
+
+    .validation {
+      min-height: 22px;
+      margin-top: 10px;
+      color: var(--red);
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .filters {
+      display: inline-flex;
+      padding: 4px;
+      gap: 4px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: var(--panel-soft);
+    }
+
+    .filter-button {
+      min-height: 36px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 0 12px;
+      border-radius: var(--radius-sm);
+      color: var(--muted-strong);
+      background: transparent;
+      font-weight: 650;
+      transition: color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .filter-button[aria-pressed="true"] {
+      color: var(--primary-dark);
+      background: #fff;
+      box-shadow: 0 5px 14px rgba(36, 50, 79, 0.10);
+    }
+
+    .toolbar-actions {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .clear-button {
+      min-height: 40px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      color: var(--red);
+      background: var(--red-soft);
+      font-weight: 700;
+      transition: border-color 0.2s ease, background 0.2s ease, transform 0.16s ease;
+      white-space: nowrap;
+    }
+
+    .clear-button:not(:disabled):hover {
+      border-color: rgba(197, 58, 58, 0.4);
+      background: #ffe6e6;
+      transform: translateY(-1px);
+    }
+
+    .counter-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 40px;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      color: var(--muted-strong);
+      background: var(--panel-soft);
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .counter-chip strong {
+      color: var(--ink);
+    }
+
+    .list-region {
+      min-height: 420px;
+      background: #fff;
+    }
+
+    .todo-list {
+      list-style: none;
+      margin: 0;
+      padding: 8px 0;
+    }
+
+    .todo-item {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      gap: 13px;
+      align-items: center;
+      margin: 0 12px;
+      padding: 13px 8px 13px 10px;
+      border-bottom: 1px solid #eef2f7;
+      border-radius: var(--radius-sm);
+      transition: background 0.2s ease, transform 0.16s ease, box-shadow 0.2s ease;
+    }
+
+    .todo-item:last-child {
+      border-bottom-color: transparent;
+    }
+
+    .todo-item:hover {
+      background: #f8fbff;
+      box-shadow: 0 9px 24px rgba(36, 50, 79, 0.07);
+      transform: translateY(-1px);
+    }
+
+    .todo-item.completed .task-title {
+      color: #8994a7;
+      text-decoration: line-through;
+      text-decoration-thickness: 2px;
+      text-decoration-color: rgba(101, 113, 137, 0.55);
+    }
+
+    .todo-item.completed .task-meta {
+      color: #9aa4b4;
+    }
+
+    .check-button {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--line-strong);
+      border-radius: 8px;
+      color: transparent;
+      background: #fff;
+      transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .check-button:hover {
+      border-color: var(--green);
+      box-shadow: 0 0 0 4px rgba(22, 134, 83, 0.10);
+    }
+
+    .todo-item.completed .check-button {
+      border-color: var(--green);
+      color: #fff;
+      background: var(--green);
+      box-shadow: 0 8px 18px rgba(22, 134, 83, 0.22);
+    }
+
+    .check-button svg {
+      width: 20px;
+      height: 20px;
+      stroke-width: 3;
+    }
+
+    .task-content {
+      min-width: 0;
+      display: grid;
+      gap: 5px;
+    }
+
+    .task-title {
+      min-width: 0;
+      overflow-wrap: anywhere;
+      color: var(--ink);
+      font-size: 1rem;
+      line-height: 1.35;
+      font-weight: 720;
+      transition: color 0.2s ease;
+    }
+
+    .task-meta {
+      color: var(--muted);
+      font-size: 0.84rem;
+      line-height: 1.35;
+    }
+
+    .item-actions {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .icon-button {
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      border: 1px solid transparent;
+      border-radius: var(--radius-sm);
+      color: var(--muted-strong);
+      background: transparent;
+      transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+    }
+
+    .icon-button:hover {
+      color: var(--red);
+      border-color: rgba(197, 58, 58, 0.24);
+      background: var(--red-soft);
+    }
+
+    .empty-state {
+      display: none;
+      min-height: 420px;
+      padding: 42px 26px;
+      place-items: center;
+      text-align: center;
+    }
+
+    .empty-state.is-visible {
+      display: grid;
+    }
+
+    .empty-card {
+      width: min(390px, 100%);
+      display: grid;
+      justify-items: center;
+      gap: 12px;
+    }
+
+    .empty-icon {
+      width: 72px;
+      height: 72px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      color: var(--primary);
+      background: var(--primary-soft);
+      box-shadow: inset 0 0 0 1px rgba(35, 103, 199, 0.12);
+    }
+
+    .empty-icon svg {
+      width: 37px;
+      height: 37px;
+    }
+
+    .empty-title {
+      margin: 2px 0 0;
+      font-size: 1.22rem;
+      line-height: 1.25;
+      font-weight: 800;
+    }
+
+    .empty-text {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .summary-panel {
+      position: sticky;
+      top: 22px;
+      padding: 18px;
+    }
+
+    .summary-title {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin: 0 0 14px;
+      font-size: 1.03rem;
+      line-height: 1.3;
+      font-weight: 800;
+    }
+
+    .summary-title svg {
+      width: 20px;
+      height: 20px;
+      color: var(--primary);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .stat-card {
+      min-height: 86px;
+      display: grid;
+      align-content: space-between;
+      gap: 8px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: var(--panel-soft);
+    }
+
+    .stat-card.full {
+      grid-column: 1 / -1;
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 0.83rem;
+      line-height: 1.35;
+      font-weight: 650;
+    }
+
+    .stat-value {
+      color: var(--ink);
+      font-size: 1.7rem;
+      line-height: 1;
+      font-weight: 850;
+    }
+
+    .progress-wrap {
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: #fff;
+    }
+
+    .progress-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+      color: var(--muted-strong);
+      font-size: 0.9rem;
+      font-weight: 750;
+    }
+
+    .progress-track {
+      height: 10px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: #e6ebf3;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--primary), var(--green));
+      transition: width 0.32s ease;
+    }
+
+    .hint-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .hint {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 9px;
+      align-items: start;
+      padding: 11px 12px;
+      border-radius: var(--radius-md);
+      color: var(--muted-strong);
+      background: var(--panel-soft);
+      border: 1px solid var(--line);
+      font-size: 0.9rem;
+      line-height: 1.45;
+    }
+
+    .hint svg {
+      width: 18px;
+      height: 18px;
+      margin-top: 1px;
+      color: var(--amber);
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 22px;
+      z-index: 10;
+      max-width: min(420px, calc(100% - 28px));
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      border: 1px solid rgba(22, 134, 83, 0.24);
+      border-radius: var(--radius-md);
+      color: #0f5e3a;
+      background: rgba(245, 253, 249, 0.96);
+      box-shadow: var(--shadow-soft);
+      opacity: 0;
+      pointer-events: none;
+      transform: translate(-50%, 14px);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      font-weight: 700;
+    }
+
+    .toast.is-visible {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+
+    .toast svg {
+      width: 19px;
+      height: 19px;
+      flex: 0 0 auto;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @media (max-width: 900px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .summary-panel {
+        position: static;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .app-shell {
+        width: min(100% - 24px, 1120px);
+        padding-top: 20px;
+      }
+
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .storage-indicator {
+        white-space: normal;
+      }
+
+      .input-row {
+        grid-template-columns: 1fr;
+      }
+
+      .add-button {
+        width: 100%;
+      }
+
+      .toolbar {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .filters {
+        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .filter-button {
+        padding: 0 8px;
+      }
+
+      .toolbar-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .counter-chip,
+      .clear-button {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .brand-mark {
+        width: 42px;
+        height: 42px;
+      }
+
+      .composer,
+      .toolbar {
+        padding-left: 14px;
+        padding-right: 14px;
+      }
+
+      .todo-item {
+        grid-template-columns: auto minmax(0, 1fr);
+        align-items: start;
+      }
+
+      .item-actions {
+        grid-column: 2;
+        justify-self: end;
+      }
+
+      .filters {
+        grid-template-columns: 1fr;
+      }
+
+      .toolbar-actions {
+        grid-template-columns: 1fr;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 11l3 3L22 4"></path>
+            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+          </svg>
+        </div>
+        <div>
+          <h1>To-do список</h1>
+          <p class="subtitle">Планируйте дела, отмечайте выполненное и возвращайтесь к списку в любой момент.</p>
+        </div>
+      </div>
+      <div class="storage-indicator" title="Данные автоматически сохраняются в браузере">
+        <span aria-hidden="true"></span>
+        <span>Автосохранение включено</span>
+      </div>
+    </header>
+
+    <section class="layout" aria-label="Рабочая область списка дел">
+      <article class="todo-panel">
+        <form class="composer" id="taskForm" autocomplete="off">
+          <label class="sr-only" for="taskInput">Новая задача</label>
+          <div class="input-row">
+            <div class="task-input-wrap">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M12 5v14"></path>
+                <path d="M5 12h14"></path>
+              </svg>
+              <input id="taskInput" type="text" maxlength="120" placeholder="Например: подготовить отчет к пятнице" aria-describedby="validationMessage">
+            </div>
+            <button class="add-button" type="submit">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M12 5v14"></path>
+                <path d="M5 12h14"></path>
+              </svg>
+              Добавить
+            </button>
+          </div>
+          <div class="validation" id="validationMessage" aria-live="polite"></div>
+        </form>
+
+        <div class="toolbar">
+          <div class="filters" role="group" aria-label="Фильтры задач">
+            <button class="filter-button" type="button" data-filter="all" aria-pressed="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M8 6h13"></path>
+                <path d="M8 12h13"></path>
+                <path d="M8 18h13"></path>
+                <path d="M3 6h.01"></path>
+                <path d="M3 12h.01"></path>
+                <path d="M3 18h.01"></path>
+              </svg>
+              Все
+            </button>
+            <button class="filter-button" type="button" data-filter="active" aria-pressed="false">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="9"></circle>
+                <path d="M12 7v5l3 2"></path>
+              </svg>
+              Активные
+            </button>
+            <button class="filter-button" type="button" data-filter="completed" aria-pressed="false">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M20 6 9 17l-5-5"></path>
+              </svg>
+              Выполненные
+            </button>
+          </div>
+          <div class="toolbar-actions">
+            <div class="counter-chip" aria-live="polite"><strong id="leftCount">0</strong> активно</div>
+            <button class="clear-button" id="clearCompleted" type="button" disabled>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M3 6h18"></path>
+                <path d="M8 6V4h8v2"></path>
+                <path d="M19 6l-1 14H6L5 6"></path>
+                <path d="M10 11v5"></path>
+                <path d="M14 11v5"></path>
+              </svg>
+              Очистить
+            </button>
+          </div>
+        </div>
+
+        <div class="list-region">
+          <ul class="todo-list" id="todoList" aria-label="Список задач"></ul>
+          <div class="empty-state" id="emptyState">
+            <div class="empty-card">
+              <div class="empty-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M9 11l3 3L22 4"></path>
+                  <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                </svg>
+              </div>
+              <h2 class="empty-title" id="emptyTitle">Список пока пуст</h2>
+              <p class="empty-text" id="emptyText">Добавьте первую задачу через поле выше. Она сохранится в браузере автоматически.</p>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <aside class="summary-panel" aria-label="Сводка">
+        <h2 class="summary-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 3v18h18"></path>
+            <path d="M7 14l4-4 3 3 5-6"></path>
+          </svg>
+          Состояние списка
+        </h2>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="stat-label">Всего</span>
+            <strong class="stat-value" id="totalStat">0</strong>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Активно</span>
+            <strong class="stat-value" id="activeStat">0</strong>
+          </div>
+          <div class="stat-card full">
+            <span class="stat-label">Выполнено</span>
+            <strong class="stat-value" id="completedStat">0</strong>
+          </div>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-row">
+            <span>Прогресс</span>
+            <span id="progressText">0%</span>
+          </div>
+          <div class="progress-track" aria-hidden="true">
+            <div class="progress-bar" id="progressBar"></div>
+          </div>
+        </div>
+        <div class="hint-list" aria-label="Подсказки">
+          <div class="hint">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 2v4"></path>
+              <path d="M12 18v4"></path>
+              <path d="M4.93 4.93l2.83 2.83"></path>
+              <path d="M16.24 16.24l2.83 2.83"></path>
+              <path d="M2 12h4"></path>
+              <path d="M18 12h4"></path>
+              <path d="M4.93 19.07l2.83-2.83"></path>
+              <path d="M16.24 7.76l2.83-2.83"></path>
+            </svg>
+            <span>Нажмите Enter в поле ввода, чтобы быстро добавить новую задачу.</span>
+          </div>
+          <div class="hint">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 20h9"></path>
+              <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
+            </svg>
+            <span>Фильтры не удаляют задачи: они только меняют текущий вид списка.</span>
+          </div>
+          <div class="hint">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M20 6 9 17l-5-5"></path>
+            </svg>
+            <span>Выполненные задачи можно убрать одной кнопкой, если список стал слишком длинным.</span>
+          </div>
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M20 6 9 17l-5-5"></path>
+    </svg>
+    <span id="toastText">Сохранено</span>
+  </div>
+
+  <script>
+    (function () {
+      "use strict";
+
+      var STORAGE_KEY = "productionTodoList:v1";
+      var state = {
+        tasks: [],
+        filter: "all",
+        toastTimer: null
+      };
+
+      var form = document.getElementById("taskForm");
+      var input = document.getElementById("taskInput");
+      var validation = document.getElementById("validationMessage");
+      var list = document.getElementById("todoList");
+      var emptyState = document.getElementById("emptyState");
+      var emptyTitle = document.getElementById("emptyTitle");
+      var emptyText = document.getElementById("emptyText");
+      var filterButtons = Array.prototype.slice.call(document.querySelectorAll(".filter-button"));
+      var leftCount = document.getElementById("leftCount");
+      var clearCompleted = document.getElementById("clearCompleted");
+      var totalStat = document.getElementById("totalStat");
+      var activeStat = document.getElementById("activeStat");
+      var completedStat = document.getElementById("completedStat");
+      var progressText = document.getElementById("progressText");
+      var progressBar = document.getElementById("progressBar");
+      var toast = document.getElementById("toast");
+      var toastText = document.getElementById("toastText");
+
+      function uid() {
+        if (window.crypto && typeof window.crypto.randomUUID === "function") {
+          return window.crypto.randomUUID();
+        }
+        return "task-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2);
+      }
+
+      function escapeHtml(value) {
+        return String(value)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      function formatDate(timestamp) {
+        try {
+          return new Intl.DateTimeFormat("ru-RU", {
+            day: "2-digit",
+            month: "long",
+            hour: "2-digit",
+            minute: "2-digit"
+          }).format(new Date(timestamp));
+        } catch (error) {
+          return new Date(timestamp).toLocaleString();
+        }
+      }
+
+      function pluralizeTasks(count) {
+        var mod10 = count % 10;
+        var mod100 = count % 100;
+        if (mod10 === 1 && mod100 !== 11) return "задача";
+        if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return "задачи";
+        return "задач";
+      }
+
+      function load() {
+        try {
+          var raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) {
+            state.tasks = createStarterTasks();
+            save(false);
+            return;
+          }
+          var parsed = JSON.parse(raw);
+          if (!Array.isArray(parsed)) {
+            state.tasks = createStarterTasks();
+            save(false);
+            return;
+          }
+          state.tasks = parsed
+            .filter(function (task) {
+              return task && typeof task.title === "string";
+            })
+            .map(function (task) {
+              return {
+                id: String(task.id || uid()),
+                title: task.title.trim().slice(0, 120),
+                completed: Boolean(task.completed),
+                createdAt: Number(task.createdAt) || Date.now()
+              };
+            })
+            .filter(function (task) {
+              return task.title.length > 0;
+            });
+        } catch (error) {
+          state.tasks = createStarterTasks();
+          save(false);
+        }
+      }
+
+      function createStarterTasks() {
+        var now = Date.now();
+        return [
+          {
+            id: uid(),
+            title: "Добавить первую собственную задачу",
+            completed: false,
+            createdAt: now - 1000 * 60 * 24
+          },
+          {
+            id: uid(),
+            title: "Отметить выполненное кликом по чекбоксу",
+            completed: true,
+            createdAt: now - 1000 * 60 * 12
+          },
+          {
+            id: uid(),
+            title: "Проверить фильтры: все, активные, выполненные",
+            completed: false,
+            createdAt: now - 1000 * 60 * 5
+          }
+        ];
+      }
+
+      function save(showNotification) {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state.tasks));
+          if (showNotification) {
+            showToast("Список сохранен");
+          }
+        } catch (error) {
+          showToast("Не удалось сохранить список");
+        }
+      }
+
+      function showToast(message) {
+        toastText.textContent = message;
+        toast.classList.add("is-visible");
+        if (state.toastTimer) {
+          clearTimeout(state.toastTimer);
+        }
+        state.toastTimer = setTimeout(function () {
+          toast.classList.remove("is-visible");
+        }, 1550);
+      }
+
+      function getStats() {
+        var total = state.tasks.length;
+        var completed = state.tasks.filter(function (task) {
+          return task.completed;
+        }).length;
+        return {
+          total: total,
+          completed: completed,
+          active: total - completed,
+          progress: total ? Math.round((completed / total) * 100) : 0
+        };
+      }
+
+      function visibleTasks() {
+        if (state.filter === "active") {
+          return state.tasks.filter(function (task) {
+            return !task.completed;
+          });
+        }
+        if (state.filter === "completed") {
+          return state.tasks.filter(function (task) {
+            return task.completed;
+          });
+        }
+        return state.tasks.slice();
+      }
+
+      function render() {
+        renderFilters();
+        renderList();
+        renderStats();
+      }
+
+      function renderFilters() {
+        filterButtons.forEach(function (button) {
+          button.setAttribute("aria-pressed", String(button.dataset.filter === state.filter));
+        });
+      }
+
+      function renderList() {
+        var tasks = visibleTasks();
+        list.innerHTML = tasks.map(taskTemplate).join("");
+        emptyState.classList.toggle("is-visible", tasks.length === 0);
+        list.hidden = tasks.length === 0;
+        updateEmptyCopy(tasks.length);
+      }
+
+      function taskTemplate(task) {
+        var completedClass = task.completed ? " completed" : "";
+        var checkedLabel = task.completed ? "Вернуть в активные" : "Отметить выполненной";
+        var statusText = task.completed ? "Выполнено" : "Активно";
+        return [
+          '<li class="todo-item' + completedClass + '" data-id="' + escapeHtml(task.id) + '">',
+          '  <button class="check-button" type="button" data-action="toggle" aria-label="' + checkedLabel + '">',
+          '    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">',
+          '      <path d="M20 6 9 17l-5-5"></path>',
+          '    </svg>',
+          '  </button>',
+          '  <div class="task-content">',
+          '    <div class="task-title">' + escapeHtml(task.title) + '</div>',
+          '    <div class="task-meta">' + statusText + " · создано " + escapeHtml(formatDate(task.createdAt)) + '</div>',
+          '  </div>',
+          '  <div class="item-actions">',
+          '    <button class="icon-button" type="button" data-action="delete" aria-label="Удалить задачу">',
+          '      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">',
+          '        <path d="M3 6h18"></path>',
+          '        <path d="M8 6V4h8v2"></path>',
+          '        <path d="M19 6l-1 14H6L5 6"></path>',
+          '        <path d="M10 11v5"></path>',
+          '        <path d="M14 11v5"></path>',
+          '      </svg>',
+          '    </button>',
+          '  </div>',
+          '</li>'
+        ].join("");
+      }
+
+      function updateEmptyCopy(count) {
+        var stats = getStats();
+        if (state.tasks.length === 0) {
+          emptyTitle.textContent = "Список пока пуст";
+          emptyText.textContent = "Добавьте первую задачу через поле выше. Она сохранится в браузере автоматически.";
+          return;
+        }
+        if (state.filter === "active" && stats.active === 0) {
+          emptyTitle.textContent = "Активных задач нет";
+          emptyText.textContent = "Все текущие дела выполнены. Можно добавить новую задачу или посмотреть выполненные.";
+          return;
+        }
+        if (state.filter === "completed" && stats.completed === 0) {
+          emptyTitle.textContent = "Выполненных задач нет";
+          emptyText.textContent = "Отметьте задачу галочкой, и она появится в этом разделе.";
+          return;
+        }
+        emptyTitle.textContent = count === 0 ? "Ничего не найдено" : "Список готов";
+        emptyText.textContent = "Смените фильтр или добавьте новую задачу.";
+      }
+
+      function renderStats() {
+        var stats = getStats();
+        leftCount.textContent = String(stats.active);
+        totalStat.textContent = String(stats.total);
+        activeStat.textContent = String(stats.active);
+        completedStat.textContent = String(stats.completed);
+        progressText.textContent = stats.progress + "%";
+        progressBar.style.width = stats.progress + "%";
+        clearCompleted.disabled = stats.completed === 0;
+        clearCompleted.title = stats.completed === 0 ? "Нет выполненных задач" : "Удалить " + stats.completed + " " + pluralizeTasks(stats.completed);
+      }
+
+      function addTask(title) {
+        state.tasks.unshift({
+          id: uid(),
+          title: title,
+          completed: false,
+          createdAt: Date.now()
+        });
+        save(true);
+        render();
+      }
+
+      function toggleTask(id) {
+        state.tasks = state.tasks.map(function (task) {
+          if (task.id !== id) return task;
+          return Object.assign({}, task, { completed: !task.completed });
+        });
+        save(true);
+        render();
+      }
+
+      function deleteTask(id) {
+        state.tasks = state.tasks.filter(function (task) {
+          return task.id !== id;
+        });
+        save(true);
+        render();
+      }
+
+      function clearCompletedTasks() {
+        var before = state.tasks.length;
+        state.tasks = state.tasks.filter(function (task) {
+          return !task.completed;
+        });
+        if (before !== state.tasks.length) {
+          save(true);
+          render();
+        }
+      }
+
+      function setValidation(message) {
+        validation.textContent = message || "";
+        input.setAttribute("aria-invalid", message ? "true" : "false");
+      }
+
+      form.addEventListener("submit", function (event) {
+        event.preventDefault();
+        var title = input.value.trim().replace(/\s+/g, " ");
+        if (title.length === 0) {
+          setValidation("Введите текст задачи.");
+          input.focus();
+          return;
+        }
+        if (title.length > 120) {
+          setValidation("Задача слишком длинная. Максимум 120 символов.");
+          input.focus();
+          return;
+        }
+        setValidation("");
+        addTask(title);
+        input.value = "";
+        input.focus();
+      });
+
+      input.addEventListener("input", function () {
+        if (validation.textContent) {
+          setValidation("");
+        }
+      });
+
+      list.addEventListener("click", function (event) {
+        var button = event.target.closest("button[data-action]");
+        if (!button) return;
+        var item = button.closest(".todo-item");
+        if (!item) return;
+        var id = item.dataset.id;
+        if (button.dataset.action === "toggle") {
+          toggleTask(id);
+        }
+        if (button.dataset.action === "delete") {
+          deleteTask(id);
+        }
+      });
+
+      filterButtons.forEach(function (button) {
+        button.addEventListener("click", function () {
+          state.filter = button.dataset.filter;
+          render();
+        });
+      });
+
+      clearCompleted.addEventListener("click", clearCompletedTasks);
+
+      window.addEventListener("storage", function (event) {
+        if (event.key === STORAGE_KEY) {
+          load();
+          render();
+        }
+      });
+
+      load();
+      render();
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,1282 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Тарифы WorkPulse</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #17201b;
+      --muted: #64706a;
+      --soft: #f6f4ef;
+      --paper: #fffdf8;
+      --line: #e5dfd2;
+      --line-strong: #d7ccb9;
+      --accent: #0f766e;
+      --accent-dark: #0a5f59;
+      --accent-soft: #dff5ef;
+      --gold: #b7791f;
+      --gold-soft: #fff1cd;
+      --coral: #c24d2c;
+      --shadow: 0 18px 48px rgba(42, 33, 18, .12);
+      --shadow-tight: 0 10px 28px rgba(42, 33, 18, .11);
+      --radius: 8px;
+      --radius-sm: 6px;
+      --max: 1180px;
+      --focus: 0 0 0 4px rgba(15, 118, 110, .18);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      min-width: 320px;
+      background: #fbf8f1;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        linear-gradient(180deg, rgba(223, 245, 239, .78) 0, rgba(251, 248, 241, 0) 420px),
+        radial-gradient(circle at top left, rgba(194, 77, 44, .11), transparent 300px),
+        #fbf8f1;
+      min-height: 100vh;
+    }
+
+    button,
+    a {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .page {
+      width: min(100% - 32px, var(--max));
+      margin: 0 auto;
+      padding: 28px 0 48px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 10px 0 34px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+      color: var(--ink);
+      text-decoration: none;
+      font-weight: 800;
+      letter-spacing: 0;
+      font-size: 18px;
+    }
+
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      border-radius: var(--radius);
+      display: grid;
+      place-items: center;
+      background: var(--accent);
+      box-shadow: 0 8px 22px rgba(15, 118, 110, .24);
+      color: white;
+      flex: 0 0 auto;
+    }
+
+    .brand-mark svg {
+      width: 23px;
+      height: 23px;
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 650;
+    }
+
+    .nav a {
+      color: inherit;
+      text-decoration: none;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      transition: color .18s ease, background .18s ease;
+    }
+
+    .nav a:hover {
+      color: var(--accent-dark);
+      background: rgba(15, 118, 110, .08);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 380px;
+      gap: 36px;
+      align-items: end;
+      padding: 18px 0 38px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 16px;
+      padding: 8px 10px;
+      border: 1px solid rgba(15, 118, 110, .2);
+      border-radius: 999px;
+      background: rgba(255, 253, 248, .75);
+      color: var(--accent-dark);
+      font-size: 13px;
+      font-weight: 760;
+      box-shadow: 0 10px 24px rgba(42, 33, 18, .05);
+    }
+
+    .eyebrow-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--coral);
+      box-shadow: 0 0 0 4px rgba(194, 77, 44, .12);
+    }
+
+    h1 {
+      margin: 0;
+      max-width: 780px;
+      font-size: clamp(38px, 6vw, 72px);
+      line-height: .96;
+      letter-spacing: 0;
+    }
+
+    .lead {
+      max-width: 680px;
+      margin: 20px 0 0;
+      color: #4f5b55;
+      font-size: clamp(17px, 2vw, 20px);
+      line-height: 1.55;
+    }
+
+    .trust-panel {
+      padding: 22px;
+      border-radius: var(--radius);
+      border: 1px solid rgba(215, 204, 185, .8);
+      background: rgba(255, 253, 248, .78);
+      box-shadow: var(--shadow-tight);
+      backdrop-filter: blur(14px);
+    }
+
+    .trust-panel strong {
+      display: block;
+      margin-bottom: 14px;
+      font-size: 15px;
+      letter-spacing: 0;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .metric {
+      padding: 14px;
+      border-radius: var(--radius-sm);
+      background: #f8f2e6;
+      border: 1px solid #eadfcb;
+    }
+
+    .metric b {
+      display: block;
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .metric span {
+      display: block;
+      margin-top: 7px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.3;
+    }
+
+    .billing-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      margin: 8px 0 22px;
+      padding: 18px;
+      border-radius: var(--radius);
+      background: var(--paper);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow-tight);
+    }
+
+    .billing-copy {
+      min-width: 0;
+    }
+
+    .billing-copy h2 {
+      margin: 0 0 6px;
+      font-size: 24px;
+      letter-spacing: 0;
+    }
+
+    .billing-copy p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .billing-toggle {
+      display: inline-grid;
+      grid-template-columns: 1fr 1fr;
+      position: relative;
+      padding: 4px;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius);
+      background: #f3ede0;
+      min-width: 294px;
+      isolation: isolate;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .65);
+    }
+
+    .billing-toggle::before {
+      content: "";
+      position: absolute;
+      inset: 4px auto 4px 4px;
+      width: calc(50% - 4px);
+      border-radius: 6px;
+      background: #ffffff;
+      box-shadow: 0 8px 18px rgba(42, 33, 18, .12);
+      transform: translateX(var(--toggle-x, 0));
+      transition: transform .24s ease;
+      z-index: -1;
+    }
+
+    .billing-toggle.is-yearly {
+      --toggle-x: 100%;
+    }
+
+    .billing-button {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      border-radius: 6px;
+      padding: 11px 14px;
+      min-height: 44px;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 780;
+      cursor: pointer;
+      transition: color .2s ease;
+      white-space: nowrap;
+    }
+
+    .billing-button[aria-pressed="true"] {
+      color: var(--ink);
+    }
+
+    .billing-button:focus-visible,
+    .plan-button:focus-visible,
+    .mini-link:focus-visible {
+      outline: none;
+      box-shadow: var(--focus);
+    }
+
+    .pricing-shell {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--paper);
+      box-shadow: var(--shadow);
+    }
+
+    .plans {
+      display: grid;
+      grid-template-columns: 1.1fr repeat(3, minmax(0, 1fr));
+      align-items: stretch;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, #fffdf8, #faf5ea);
+    }
+
+    .plans-intro {
+      padding: 26px;
+      border-right: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 26px;
+      min-height: 290px;
+    }
+
+    .plans-intro h2 {
+      margin: 0;
+      font-size: 30px;
+      line-height: 1.08;
+      letter-spacing: 0;
+    }
+
+    .plans-intro p {
+      margin: 10px 0 0;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .guarantee {
+      display: grid;
+      gap: 10px;
+      padding: 14px;
+      border-radius: var(--radius-sm);
+      background: var(--accent-soft);
+      color: #155c55;
+      font-size: 13px;
+      line-height: 1.4;
+      border: 1px solid rgba(15, 118, 110, .16);
+    }
+
+    .guarantee svg {
+      width: 20px;
+      height: 20px;
+      color: var(--accent);
+    }
+
+    .plan-card {
+      position: relative;
+      padding: 26px;
+      border-right: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      min-height: 290px;
+      transition: background .2s ease;
+    }
+
+    .plan-card:last-child {
+      border-right: 0;
+    }
+
+    .plan-card.popular {
+      background:
+        linear-gradient(180deg, rgba(15, 118, 110, .1), rgba(255, 253, 248, 0) 150px),
+        #fffdf8;
+      box-shadow: inset 0 0 0 2px rgba(15, 118, 110, .35);
+    }
+
+    .badge {
+      align-self: flex-start;
+      margin-bottom: 12px;
+      padding: 6px 9px;
+      border-radius: 999px;
+      background: var(--gold-soft);
+      color: #7a4b08;
+      font-size: 12px;
+      line-height: 1;
+      font-weight: 820;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+
+    .plan-name {
+      margin: 0;
+      font-size: 22px;
+      letter-spacing: 0;
+    }
+
+    .plan-desc {
+      min-height: 46px;
+      margin: 9px 0 18px;
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: 14px;
+    }
+
+    .price-line {
+      display: flex;
+      align-items: flex-end;
+      gap: 7px;
+      margin-top: auto;
+      min-height: 52px;
+    }
+
+    .currency {
+      align-self: flex-start;
+      padding-top: 8px;
+      color: var(--muted);
+      font-size: 18px;
+      font-weight: 760;
+    }
+
+    .price {
+      font-size: 48px;
+      line-height: .9;
+      font-weight: 860;
+      letter-spacing: 0;
+    }
+
+    .period {
+      padding-bottom: 4px;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 650;
+    }
+
+    .year-note {
+      min-height: 22px;
+      margin: 10px 0 18px;
+      color: var(--accent-dark);
+      font-size: 13px;
+      font-weight: 760;
+      opacity: 0;
+      transform: translateY(-2px);
+      transition: opacity .2s ease, transform .2s ease;
+    }
+
+    .year-note.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .plan-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      min-height: 46px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--line-strong);
+      background: #fffdf8;
+      color: var(--ink);
+      text-decoration: none;
+      font-weight: 820;
+      font-size: 14px;
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease;
+    }
+
+    .plan-button:hover {
+      transform: translateY(-1px);
+      border-color: #c9baa1;
+      box-shadow: 0 10px 22px rgba(42, 33, 18, .1);
+    }
+
+    .popular .plan-button {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+      box-shadow: 0 12px 28px rgba(15, 118, 110, .24);
+    }
+
+    .popular .plan-button:hover {
+      background: var(--accent-dark);
+      border-color: var(--accent-dark);
+    }
+
+    .comparison {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      table-layout: fixed;
+    }
+
+    .comparison col:first-child {
+      width: 27.5%;
+    }
+
+    .comparison th,
+    .comparison td {
+      padding: 17px 22px;
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      vertical-align: middle;
+    }
+
+    .comparison th:last-child,
+    .comparison td:last-child {
+      border-right: 0;
+    }
+
+    .comparison tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .group-row th {
+      padding-top: 22px;
+      padding-bottom: 10px;
+      background: #f5efe3;
+      color: #6f5941;
+      text-align: left;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      font-size: 12px;
+      font-weight: 860;
+      border-bottom: 1px solid var(--line-strong);
+    }
+
+    .feature-row {
+      transition: background .16s ease;
+    }
+
+    .feature-row:hover {
+      background: rgba(223, 245, 239, .38);
+    }
+
+    .feature-title {
+      display: block;
+      color: var(--ink);
+      font-weight: 760;
+      line-height: 1.25;
+    }
+
+    .feature-hint {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .feature-value {
+      text-align: center;
+      color: var(--ink);
+      font-size: 14px;
+      font-weight: 690;
+      line-height: 1.35;
+    }
+
+    .feature-value.popular-cell {
+      background: rgba(15, 118, 110, .045);
+    }
+
+    .check,
+    .dash {
+      display: inline-grid;
+      place-items: center;
+      width: 27px;
+      height: 27px;
+      border-radius: 999px;
+      font-size: 0;
+      line-height: 1;
+    }
+
+    .check {
+      background: var(--accent-soft);
+      color: var(--accent-dark);
+      border: 1px solid rgba(15, 118, 110, .18);
+    }
+
+    .check::before {
+      content: "";
+      width: 12px;
+      height: 7px;
+      border-left: 2px solid currentColor;
+      border-bottom: 2px solid currentColor;
+      transform: rotate(-45deg) translateY(-1px);
+    }
+
+    .dash {
+      background: #f2eadc;
+      color: #9a8971;
+      border: 1px solid #e6dac7;
+    }
+
+    .dash::before {
+      content: "";
+      width: 11px;
+      height: 2px;
+      border-radius: 2px;
+      background: currentColor;
+    }
+
+    .below {
+      display: grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 22px;
+      margin-top: 22px;
+    }
+
+    .faq,
+    .quote {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--paper);
+      box-shadow: var(--shadow-tight);
+      padding: 24px;
+    }
+
+    .faq h2,
+    .quote h2 {
+      margin: 0 0 16px;
+      font-size: 22px;
+      letter-spacing: 0;
+    }
+
+    .faq-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    details {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      background: #fbf7ee;
+      transition: border-color .18s ease, background .18s ease;
+    }
+
+    details[open] {
+      border-color: rgba(15, 118, 110, .28);
+      background: #ffffff;
+    }
+
+    summary {
+      cursor: pointer;
+      padding: 15px 16px;
+      font-weight: 780;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    summary::-webkit-details-marker {
+      display: none;
+    }
+
+    summary::after {
+      content: "+";
+      color: var(--accent);
+      font-size: 20px;
+      line-height: 1;
+      font-weight: 760;
+    }
+
+    details[open] summary::after {
+      content: "-";
+    }
+
+    details p {
+      margin: 0;
+      padding: 0 16px 16px;
+      color: var(--muted);
+      line-height: 1.52;
+    }
+
+    .quote {
+      background:
+        linear-gradient(135deg, rgba(15, 118, 110, .1), rgba(183, 121, 31, .12)),
+        var(--paper);
+    }
+
+    .quote blockquote {
+      margin: 0;
+      font-size: 20px;
+      line-height: 1.45;
+      font-weight: 760;
+      letter-spacing: 0;
+    }
+
+    .quote footer {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 20px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .avatar {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: white;
+      font-weight: 820;
+      flex: 0 0 auto;
+    }
+
+    .mini-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 20px;
+      padding: 11px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(15, 118, 110, .2);
+      color: var(--accent-dark);
+      background: rgba(255, 253, 248, .68);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 820;
+    }
+
+    .microbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 10px 18px;
+      margin-top: 24px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 680;
+    }
+
+    .microbar span {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .microbar span::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    @media (max-width: 980px) {
+      .hero {
+        grid-template-columns: 1fr;
+      }
+
+      .trust-panel {
+        max-width: 620px;
+      }
+
+      .billing-wrap {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .billing-toggle {
+        width: 100%;
+        min-width: 0;
+      }
+
+      .plans {
+        grid-template-columns: 1fr;
+      }
+
+      .plans-intro,
+      .plan-card {
+        min-height: 0;
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .plan-card {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 8px 22px;
+        align-items: end;
+      }
+
+      .badge,
+      .plan-name,
+      .plan-desc,
+      .year-note {
+        grid-column: 1;
+      }
+
+      .price-line,
+      .plan-button {
+        grid-column: 2;
+      }
+
+      .price-line {
+        justify-content: flex-end;
+      }
+
+      .year-note {
+        margin-bottom: 0;
+      }
+
+      .plan-button {
+        align-self: start;
+        min-width: 170px;
+      }
+
+      .comparison {
+        table-layout: auto;
+      }
+
+      .comparison col:first-child {
+        width: auto;
+      }
+
+      .comparison th,
+      .comparison td {
+        padding: 15px 14px;
+      }
+
+      .below {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .page {
+        width: min(100% - 20px, var(--max));
+        padding-top: 18px;
+      }
+
+      .topbar {
+        align-items: flex-start;
+        padding-bottom: 24px;
+      }
+
+      .nav {
+        display: none;
+      }
+
+      .hero {
+        gap: 20px;
+        padding-bottom: 26px;
+      }
+
+      .metric-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .billing-copy h2 {
+        font-size: 21px;
+      }
+
+      .plan-card {
+        display: flex;
+        align-items: stretch;
+        gap: 0;
+      }
+
+      .price-line {
+        justify-content: flex-start;
+      }
+
+      .plan-button {
+        min-width: 0;
+      }
+
+      .pricing-shell {
+        overflow-x: auto;
+      }
+
+      .comparison {
+        min-width: 720px;
+      }
+
+      .plans {
+        min-width: 0;
+      }
+
+      .plans-intro,
+      .plan-card {
+        padding: 21px;
+      }
+
+      .faq,
+      .quote {
+        padding: 20px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        transition-duration: .001ms !important;
+        animation-duration: .001ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="topbar" aria-label="Верхняя навигация">
+      <a class="brand" href="#" aria-label="WorkPulse">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M4 13.2 8.5 8l4 4.4L19.8 5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M4 19h16" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <span>WorkPulse</span>
+      </a>
+      <nav class="nav" aria-label="Разделы">
+        <a href="#compare">Сравнение</a>
+        <a href="#faq">Вопросы</a>
+        <a href="#contact">Демо</a>
+      </nav>
+    </header>
+
+    <section class="hero" aria-labelledby="page-title">
+      <div>
+        <p class="eyebrow"><span class="eyebrow-dot" aria-hidden="true"></span>Тарифы для команд, которые растут без хаоса</p>
+        <h1 id="page-title">Выберите план WorkPulse</h1>
+        <p class="lead">Прозрачное сравнение возможностей: автоматизация задач, аналитика, права доступа и поддержка. Переключайте оплату по месяцам или за год, чтобы сразу увидеть итоговую стоимость.</p>
+      </div>
+      <aside class="trust-panel" aria-label="Показатели сервиса">
+        <strong>Что уже включено во все тарифы</strong>
+        <div class="metric-grid">
+          <div class="metric">
+            <b>99.95%</b>
+            <span>доступность платформы по SLA</span>
+          </div>
+          <div class="metric">
+            <b>24/7</b>
+            <span>мониторинг очередей и интеграций</span>
+          </div>
+          <div class="metric">
+            <b>12 мин</b>
+            <span>среднее время запуска первой команды</span>
+          </div>
+          <div class="metric">
+            <b>ISO</b>
+            <span>практики безопасности и аудит действий</span>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="billing-wrap" aria-label="Переключатель периода оплаты">
+      <div class="billing-copy">
+        <h2>Оплата без скрытых условий</h2>
+        <p id="billing-caption">Сейчас показана помесячная оплата. Можно перейти на годовой счет и сэкономить 20%.</p>
+      </div>
+      <div class="billing-toggle" id="billingToggle" role="group" aria-label="Период оплаты">
+        <button class="billing-button" type="button" data-billing="monthly" aria-pressed="true">Месяц</button>
+        <button class="billing-button" type="button" data-billing="yearly" aria-pressed="false">Год -20%</button>
+      </div>
+    </section>
+
+    <section class="pricing-shell" id="compare" aria-label="Таблица сравнения тарифов">
+      <div class="plans">
+        <div class="plans-intro">
+          <div>
+            <h2>Фичи × 3 плана</h2>
+            <p>Все ключевые отличия собраны в одной таблице. План Team отмечен как популярный: он закрывает регулярную работу отдела без корпоративной сложности.</p>
+          </div>
+          <div class="guarantee">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M12 3 19 6v5c0 4.6-2.9 8.6-7 10-4.1-1.4-7-5.4-7-10V6l7-3Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+              <path d="m8.5 12 2.2 2.2 4.8-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>14 дней бесплатного доступа, перенос данных и отмена в любой момент до следующего расчетного периода.</span>
+          </div>
+        </div>
+
+        <article class="plan-card" data-plan="starter">
+          <h3 class="plan-name">Starter</h3>
+          <p class="plan-desc">Для небольшой команды, которая переводит задачи и статусы в единый ритм.</p>
+          <div class="price-line" aria-live="polite">
+            <span class="currency">$</span>
+            <span class="price" data-monthly="19" data-yearly="15">19</span>
+            <span class="period">/ пользователь</span>
+          </div>
+          <div class="year-note" data-note>При годовой оплате: $180 за пользователя</div>
+          <a class="plan-button" href="#contact">Начать</a>
+        </article>
+
+        <article class="plan-card popular" data-plan="team" aria-label="Популярный план Team">
+          <span class="badge">Популярный</span>
+          <h3 class="plan-name">Team</h3>
+          <p class="plan-desc">Для отделов, которым нужны автоматизация, роли и понятная аналитика.</p>
+          <div class="price-line" aria-live="polite">
+            <span class="currency">$</span>
+            <span class="price" data-monthly="39" data-yearly="31">39</span>
+            <span class="period">/ пользователь</span>
+          </div>
+          <div class="year-note" data-note>При годовой оплате: $372 за пользователя</div>
+          <a class="plan-button" href="#contact">Выбрать Team</a>
+        </article>
+
+        <article class="plan-card" data-plan="scale">
+          <h3 class="plan-name">Scale</h3>
+          <p class="plan-desc">Для нескольких подразделений, где важны контроль, безопасность и SLA.</p>
+          <div class="price-line" aria-live="polite">
+            <span class="currency">$</span>
+            <span class="price" data-monthly="79" data-yearly="63">79</span>
+            <span class="period">/ пользователь</span>
+          </div>
+          <div class="year-note" data-note>При годовой оплате: $756 за пользователя</div>
+          <a class="plan-button" href="#contact">Связаться</a>
+        </article>
+      </div>
+
+      <table class="comparison">
+        <colgroup>
+          <col>
+          <col>
+          <col>
+          <col>
+        </colgroup>
+        <tbody>
+          <tr class="group-row">
+            <th colspan="4" scope="colgroup">Рабочее пространство</th>
+          </tr>
+          <tr class="feature-row">
+            <td>
+              <span class="feature-title">Пользователи в команде</span>
+              <span class="feature-hint">Активные участники, включая менеджеров и исполнителей.</span>
+            </td>
+            <td class="feature-value">до 8</td>
+            <td class="feature-value popular-cell">до 40</td>
+            <td class="feature-value">без лимита</td>
+          </tr>
+          <tr class="feature-row">
+            <td>
+              <span class="feature-title">Проекты и доски</span>
+              <span class="feature-hint">Отдельные потоки работ с шаблонами статусов.</span>
+            </td>
+            <td class="feature-value">5 проектов</td>
+            <td class="feature-value popular-cell">50 проектов</td>
+            <td class="feature-value">без лимита</td>
+          </tr>
+          <tr class="feature-row">
+            <td>
+              <span class="feature-title">Гостевой доступ</span>
+              <span class="feature-hint">Безопасные ссылки для подрядчиков и клиентов.</span>
+            </td>
+            <td class="feature-value"><span class="dash">Нет</span></td>
+            <td class="feature-value popular-cell"><span class="check">Да</span></td>
+            <td class="feature-value"><span class="check">Да</span></td>
+          </tr>
+
+          <tr class="group-row">
+            <th colspan="4" scope="colgroup">Автоматизация</th>
+          </tr>
+          <tr class="feature-row">
+            <td>
+              <span class="feature-title">Автоматические правила</span>
+              <span class="feature-hint">Триггеры по статусу, срокам, тегам и ответственным.</span>
+            </td>
+            <td class="feature-value">10 правил</td>
+            <td class="feature-value popular-cell">250 правил</td>
+            <td class="feature-value">без лимита</td>
+          </tr>
+          <tr class="feature-row">
+            <td>
+              <span class="feature-title">Маршруты согласования</span>
+              <span class="feature-hint">Последовательные и параллельные этапы с SLA.</span>
+            </td>
+            <td class="feature-value"><span class="dash">Нет</span></td>
+            <td class="feature-value popular-cell"><span class="check">Да</span></td>
+            <td class="feature-value"><span class="check">Да</span></td>
+          </tr>
+          <tr class="feature-row">
+            <td>
+              <span class="feature-title">Пакетные операции</span>
+              <span class="feature-hint">Массовое обновление задач, владельцев и дедлайнов.</span>
+            </td>
+            <td class="feature-value"><span class="check">Да</span></td>
+            <td class="feature-value popular-cell"><span class="check">Да</span></td>
+            <td class="feature-value"><span class="check">Да</span></td>
+          </tr>
+
+          <tr class="group-row">
+            <th colspan="4" scope="colgroup">Аналитика и отчетность</th>
+          </tr>
+          <tr class="feature-row">
+            <td>
+              <span class="feature-title">Дашборды эффективности</span>
+              <span class="feature-hint">Скорость выполнения, загрузка людей, просрочки.</span>
+            </td>
+            <td class="feature-value">базовые</td>
+            <td class="feature-value popular-cell">расширенные</td>
+            <td class="feature-value">кастомные</td>
+          </tr>
+          <tr class="feature-row">
+            <td>
+              <span class="feature-title">Экспорт отчетов</span>
+              <span class="feature-hint">PDF, CSV и автоматическая отправка по расписанию.</span>
+            </td>
+            <td class="feature-value">CSV</td>
+            <td class="feature-value popular-cell">CSV, PDF</td>
+            <td class="feature-value">CSV, PDF, API</td>
+          </tr>
+          <tr class="feature-row">
+            <td>
+              <span class="feature-title">Прогноз сроков</span>
+              <span class="feature-hint">Оценка риска задержек по историческим данным команды.</span>
+            </td>
+            <td class="feature-value"><span class="dash">Нет</span></td>
+            <td class="feature-value popular-cell"><span class="check">Да</span></td>
+            <td class="feature-value"><span class="check">Да</span></td>
+          </tr>
+
+          <tr class="group-row">
+            <th colspan="4" scope="colgroup">Безопасность и администрирование</th>
+          </tr>
+          <tr class="feature-row">
+            <td>
+              <span class="feature-title">Роли и права</span>
+              <span class="feature-hint">Настройка доступа к проектам, полям и финансовым данным.</span>
+            </td>
+            <td class="feature-value">3 роли</td>
+            <td class="feature-value popular-cell">12 ролей</td>
+            <td class="feature-value">кастомные роли</td>
+          </tr>
+          <tr class="feature-row">
+            <td>
+              <span class="feature-title">Единый вход SSO</span>
+              <span class="feature-hint">SAML/OIDC, принудительная двухфакторная аутентификация.</span>
+            </td>
+            <td class="feature-value"><span class="dash">Нет</span></td>
+            <td class="feature-value popular-cell"><span class="dash">Нет</span></td>
+            <td class="feature-value"><span class="check">Да</span></td>
+          </tr>
+          <tr class="feature-row">
+            <td>
+              <span class="feature-title">Журнал аудита</span>
+              <span class="feature-hint">История входов, изменений, экспорта и действий админов.</span>
+            </td>
+            <td class="feature-value">7 дней</td>
+            <td class="feature-value popular-cell">180 дней</td>
+            <td class="feature-value">3 года</td>
+          </tr>
+
+          <tr class="group-row">
+            <th colspan="4" scope="colgroup">Поддержка</th>
+          </tr>
+          <tr class="feature-row">
+            <td>
+              <span class="feature-title">Канал поддержки</span>
+              <span class="feature-hint">Помощь при настройке процессов и интеграций.</span>
+            </td>
+            <td class="feature-value">email</td>
+            <td class="feature-value popular-cell">чат и email</td>
+            <td class="feature-value">выделенный менеджер</td>
+          </tr>
+          <tr class="feature-row">
+            <td>
+              <span class="feature-title">Время ответа</span>
+              <span class="feature-hint">Среднее целевое время пер��ого ответа в рабочие дни.</span>
+            </td>
+            <td class="feature-value">24 часа</td>
+            <td class="feature-value popular-cell">4 часа</td>
+            <td class="feature-value">1 час</td>
+          </tr>
+          <tr class="feature-row">
+            <td>
+              <span class="feature-title">Внедрение с экспертом</span>
+              <span class="feature-hint">Разбор процессов, импорт данных и обучение команды.</span>
+            </td>
+            <td class="feature-value"><span class="dash">Нет</span></td>
+            <td class="feature-value popular-cell">2 сессии</td>
+            <td class="feature-value">персональный план</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <div class="below">
+      <section class="faq" id="faq" aria-labelledby="faq-title">
+        <h2 id="faq-title">Частые вопросы</h2>
+        <div class="faq-list">
+          <details open>
+            <summary>Можно ли перейти между тарифами позже?</summary>
+            <p>Да. Переход на более высокий тариф применяется сразу, а остаток текущего периода автоматически учитывается в следующем счете.</p>
+          </details>
+          <details>
+            <summary>Что происходит после пробного периода?</summary>
+            <p>Данные остаются в рабочем пространстве. Вы выбираете тариф, подключаете оплату или экспортируете проекты без обращения в поддержку.</p>
+          </details>
+          <details>
+            <summary>Есть ли скидка для годовой оплаты?</summary>
+            <p>Да, при выборе годового периода цена в интерфейсе пересчитывается с учетом 20% экономии и фиксируется на весь оплаченный год.</p>
+          </details>
+        </div>
+      </section>
+
+      <aside class="quote" id="contact" aria-labelledby="quote-title">
+        <h2 id="quote-title">Почему команды выбирают Team</h2>
+        <blockquote>«Мы заменили три разрозненных инструмента одной системой: заявки, согласования и отчеты теперь видны руководителям без ручной сборки таблиц».</blockquote>
+        <footer>
+          <span class="avatar" aria-hidden="true">АК</span>
+          <span><strong>Анна Котова</strong><br>Операционный директор, Northline</span>
+        </footer>
+        <a class="mini-link" href="mailto:sales@workpulse.example">Запросить демо</a>
+      </aside>
+    </div>
+
+    <div class="microbar" aria-label="Дополнительные условия">
+      <span>Банковские карты и счет для юрлиц</span>
+      <span>Импорт из Trello, Jira и Asana</span>
+      <span>Резервные копии каждый день</span>
+      <span>Все цены без НДС</span>
+    </div>
+  </main>
+
+  <script>
+    (function () {
+      const toggle = document.getElementById('billingToggle');
+      const buttons = Array.from(document.querySelectorAll('[data-billing]'));
+      const prices = Array.from(document.querySelectorAll('.price'));
+      const notes = Array.from(document.querySelectorAll('[data-note]'));
+      const caption = document.getElementById('billing-caption');
+      const periodLabels = Array.from(document.querySelectorAll('.period'));
+      let billing = 'monthly';
+
+      function formatNumber(value) {
+        return new Intl.NumberFormat('ru-RU').format(Number(value));
+      }
+
+      function updateBilling(nextBilling) {
+        billing = nextBilling;
+        const yearly = billing === 'yearly';
+
+        toggle.classList.toggle('is-yearly', yearly);
+        buttons.forEach((button) => {
+          const active = button.dataset.billing === billing;
+          button.setAttribute('aria-pressed', String(active));
+        });
+
+        prices.forEach((price) => {
+          const target = yearly ? price.dataset.yearly : price.dataset.monthly;
+          price.textContent = formatNumber(target);
+        });
+
+        notes.forEach((note) => {
+          note.classList.toggle('visible', yearly);
+        });
+
+        periodLabels.forEach((label) => {
+          label.textContent = yearly ? '/ пользователь в месяц' : '/ пользователь';
+        });
+
+        caption.textContent = yearly
+          ? 'Сейчас показана годовая оплата: цена ниже на 20%, счет выставляется один раз в год.'
+          : 'Сейчас показана помесячная оплата. Можно перейти на годовой счет и сэкономить 20%.';
+      }
+
+      buttons.forEach((button) => {
+        button.addEventListener('click', () => updateBilling(button.dataset.billing));
+      });
+
+      document.querySelectorAll('a[href^="#"]').forEach((link) => {
+        link.addEventListener('click', (event) => {
+          const id = link.getAttribute('href');
+          if (!id || id === '#') return;
+          const target = document.querySelector(id);
+          if (!target) return;
+          event.preventDefault();
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+      });
+
+      updateBilling(billing);
+    })();
+  </script>
+</body>
+</html>

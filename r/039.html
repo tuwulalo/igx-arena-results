@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no" />
+<title>Flappy Bird 3D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sky-top:#7ec8ff;
+    --sky-bot:#bff1ff;
+    --ink:#1f2a44;
+    --accent:#ffce3a;
+    --accent-2:#ff9f1c;
+    --danger:#ff5269;
+    --good:#3dd68c;
+    --panel:rgba(255,255,255,.86);
+    --shadow:0 14px 32px rgba(20,40,80,.28),0 2px 6px rgba(20,40,80,.18);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  html,body{
+    width:100%;height:100%;overflow:hidden;
+    font-family:'Fredoka',system-ui,sans-serif;color:var(--ink);
+    background:linear-gradient(180deg,var(--sky-top) 0%,var(--sky-bot) 100%);
+    user-select:none;-webkit-user-select:none;touch-action:none;
+  }
+  #game{
+    position:fixed;inset:0;
+    width:100vw;height:100vh;
+    display:block;
+  }
+  /* === HUD === */
+  .hud{
+    position:fixed;inset:0;pointer-events:none;
+    z-index:10;
+  }
+  .score{
+    position:absolute;top:24px;left:50%;transform:translateX(-50%);
+    font-family:'Press Start 2P',monospace;
+    font-size:42px;color:#fff;
+    text-shadow:0 4px 0 rgba(0,0,0,.25),0 6px 18px rgba(0,0,0,.35);
+    letter-spacing:2px;
+    transition:transform .15s cubic-bezier(.34,1.56,.64,1);
+  }
+  .score.pulse{transform:translateX(-50%) scale(1.35);}
+  .score small{display:block;font-size:11px;color:#fff8;margin-top:6px;letter-spacing:3px;}
+
+  .top-right{
+    position:absolute;top:18px;right:18px;
+    display:flex;flex-direction:column;align-items:flex-end;gap:8px;
+    pointer-events:auto;
+  }
+  .pill{
+    background:var(--panel);backdrop-filter:blur(10px);
+    border-radius:999px;padding:8px 14px;
+    box-shadow:var(--shadow);
+    font-weight:600;font-size:14px;color:var(--ink);
+    display:flex;align-items:center;gap:8px;
+  }
+  .pill .ico{width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;color:var(--accent-2);}
+  .iconbtn{
+    width:42px;height:42px;border-radius:50%;
+    background:var(--panel);backdrop-filter:blur(10px);
+    box-shadow:var(--shadow);
+    border:none;cursor:pointer;color:var(--ink);
+    display:flex;align-items:center;justify-content:center;
+    transition:transform .15s ease,background .15s ease;
+  }
+  .iconbtn:hover{transform:scale(1.08);}
+  .iconbtn:active{transform:scale(.95);}
+  .iconbtn svg{width:20px;height:20px;}
+
+  /* === Overlays === */
+  .overlay{
+    position:fixed;inset:0;z-index:20;
+    display:flex;align-items:center;justify-content:center;
+    background:radial-gradient(ellipse at center,rgba(10,30,60,.15) 0%,rgba(10,30,60,.55) 100%);
+    pointer-events:auto;
+    opacity:1;transition:opacity .35s ease;
+  }
+  .overlay.hide{opacity:0;pointer-events:none;}
+  .card{
+    background:var(--panel);backdrop-filter:blur(14px);
+    border-radius:24px;padding:32px 36px;
+    box-shadow:var(--shadow);
+    text-align:center;max-width:380px;width:calc(100% - 40px);
+    animation:pop .45s cubic-bezier(.34,1.56,.64,1);
+  }
+  @keyframes pop{
+    0%{transform:scale(.6);opacity:0;}
+    100%{transform:scale(1);opacity:1;}
+  }
+  .title{
+    font-family:'Press Start 2P',monospace;
+    font-size:26px;line-height:1.2;
+    background:linear-gradient(180deg,var(--accent) 0%,var(--accent-2) 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    text-shadow:0 4px 0 rgba(0,0,0,.08);
+    margin-bottom:8px;
+  }
+  .subtitle{font-size:15px;color:#5a6680;margin-bottom:22px;}
+  .bird-preview{
+    width:120px;height:120px;margin:0 auto 14px;
+    display:flex;align-items:center;justify-content:center;
+    position:relative;
+  }
+  .bird-preview .ring{
+    position:absolute;inset:0;
+    border:3px dashed #ffd76e;border-radius:50%;
+    animation:spin 8s linear infinite;
+    opacity:.5;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .bird-preview .body{
+    width:72px;height:60px;background:linear-gradient(180deg,#ffd23f 0%,#f4a724 100%);
+    border-radius:60% 60% 50% 50% / 70% 70% 40% 40%;
+    position:relative;box-shadow:inset 0 -8px 0 rgba(0,0,0,.12),0 6px 14px rgba(0,0,0,.18);
+  }
+  .bird-preview .body::before{
+    content:'';position:absolute;width:64px;height:24px;background:#fff;
+    border-radius:60% 60% 50% 50% / 80% 80% 40% 40%;
+    bottom:6px;left:4px;
+  }
+  .bird-preview .body::after{
+    content:'';position:absolute;width:14px;height:14px;background:#fff;
+    border:3px solid #1f2a44;border-radius:50%;
+    top:18px;right:10px;
+    box-shadow:inset -3px -3px 0 rgba(0,0,0,.15);
+  }
+  .bird-preview .beak{
+    position:absolute;width:26px;height:18px;background:#ff7d3a;
+    top:32px;right:-10px;
+    clip-path:polygon(0 50%,100% 0,100% 100%);
+    transform:rotate(20deg);
+  }
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    padding:14px 28px;border:none;border-radius:14px;
+    font-family:inherit;font-weight:700;font-size:16px;
+    cursor:pointer;color:#fff;
+    background:linear-gradient(180deg,#5dd39e 0%,#2fae6f 100%);
+    box-shadow:0 6px 0 #1e7d4d,0 12px 22px rgba(20,80,40,.25);
+    transition:transform .1s ease,box-shadow .1s ease;
+    margin:6px;
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 8px 0 #1e7d4d,0 14px 26px rgba(20,80,40,.3);}
+  .btn:active{transform:translateY(4px);box-shadow:0 2px 0 #1e7d4d,0 6px 10px rgba(20,80,40,.2);}
+  .btn.alt{
+    background:linear-gradient(180deg,#7eb6ff 0%,#3d7fe0 100%);
+    box-shadow:0 6px 0 #205cb3,0 12px 22px rgba(30,80,160,.25);
+  }
+  .btn.alt:hover{box-shadow:0 8px 0 #205cb3,0 14px 26px rgba(30,80,160,.3);}
+  .btn.alt:active{box-shadow:0 2px 0 #205cb3,0 6px 10px rgba(30,80,160,.2);}
+  .stats{
+    display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:18px 0;
+  }
+  .stat{
+    background:#f4f7ff;border-radius:14px;padding:12px 8px;
+    border:2px solid #e2e9ff;
+  }
+  .stat .lbl{font-size:11px;color:#6e7a99;letter-spacing:1.5px;text-transform:uppercase;}
+  .stat .val{font-family:'Press Start 2P',monospace;font-size:22px;color:var(--ink);margin-top:4px;}
+  .stat.gold .val{color:var(--accent-2);}
+  .medal{
+    display:inline-flex;align-items:center;gap:10px;
+    padding:10px 18px;border-radius:999px;margin:8px 0 14px;
+    font-weight:700;font-size:14px;
+    background:linear-gradient(180deg,#fff7d6,#ffe89c);
+    color:#7a4d00;box-shadow:0 4px 0 #c79c2b;
+  }
+  .medal svg{width:22px;height:22px;}
+  .help{
+    font-size:13px;color:#5a6680;margin-top:14px;
+    display:flex;justify-content:center;gap:10px;flex-wrap:wrap;
+  }
+  .key{
+    display:inline-block;padding:4px 10px;border-radius:8px;
+    background:#fff;border:2px solid #d4dcef;
+    font-family:'Press Start 2P',monospace;font-size:10px;color:var(--ink);
+    box-shadow:0 3px 0 #c5cee5;
+  }
+  .tap-icon{
+    display:inline-flex;align-items:center;gap:4px;color:#3d7fe0;font-weight:700;
+  }
+
+  /* === Flash === */
+  .flash{
+    position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:30;
+  }
+  .flash.on{animation:flash .35s ease;}
+  @keyframes flash{
+    0%{opacity:0;}
+    20%{opacity:.85;}
+    100%{opacity:0;}
+  }
+
+  /* === Loader === */
+  #loader{
+    position:fixed;inset:0;z-index:40;
+    background:linear-gradient(180deg,#7ec8ff 0%,#bff1ff 100%);
+    display:flex;align-items:center;justify-content:center;flex-direction:column;gap:18px;
+    transition:opacity .4s ease;
+  }
+  #loader.hide{opacity:0;pointer-events:none;}
+  .loader-title{
+    font-family:'Press Start 2P',monospace;font-size:22px;color:#fff;
+    text-shadow:0 4px 0 rgba(0,0,0,.2);
+  }
+  .loader-bar{width:200px;height:10px;background:rgba(255,255,255,.5);border-radius:999px;overflow:hidden;}
+  .loader-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ffce3a,#ff9f1c);border-radius:999px;animation:load 1.4s ease forwards;}
+  @keyframes load{to{width:100%;}}
+
+  @media (max-width:520px){
+    .score{font-size:32px;top:16px;}
+    .score small{font-size:9px;}
+    .card{padding:24px 22px;}
+    .title{font-size:20px;}
+    .bird-preview{width:100px;height:100px;}
+    .bird-preview .body{width:60px;height:50px;}
+    .top-right{top:10px;right:10px;}
+    .iconbtn{width:38px;height:38px;}
+  }
+</style>
+</head>
+<body>
+
+<canvas id="game"></canvas>
+
+<div class="hud">
+  <div class="score" id="score">0<small>SCORE</small></div>
+  <div class="top-right">
+    <button class="iconbtn" id="soundBtn" title="Toggle sound" aria-label="Toggle sound">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+    </button>
+    <button class="iconbtn" id="pauseBtn" title="Pause" aria-label="Pause">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- Menu overlay -->
+<div class="overlay" id="menuOverlay">
+  <div class="card">
+    <div class="bird-preview">
+      <div class="ring"></div>
+      <div class="body"></div>
+      <div class="beak"></div>
+    </div>
+    <h1 class="title">FLAPPY 3D</h1>
+    <p class="subtitle">Navigate the pipes. Don't crash. Get the high score.</p>
+    <button class="btn" id="startBtn">START FLAPPING</button>
+    <div class="help">
+      <span class="key">SPACE</span>
+      <span>or</span>
+      <span class="tap-icon">TAP</span>
+    </div>
+  </div>
+</div>
+
+<!-- Game over overlay -->
+<div class="overlay hide" id="overOverlay">
+  <div class="card">
+    <h2 class="title" style="font-size:22px;margin-bottom:14px;">GAME OVER</h2>
+    <div class="medal" id="medal">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+      <span id="medalText">FLEDGLING</span>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="lbl">Score</div><div class="val" id="finalScore">0</div></div>
+      <div class="stat gold"><div class="lbl">Best</div><div class="val" id="bestScore">0</div></div>
+    </div>
+    <button class="btn" id="retryBtn">PLAY AGAIN</button>
+    <button class="btn alt" id="menuBtn">MENU</button>
+  </div>
+</div>
+
+<!-- Pause overlay -->
+<div class="overlay hide" id="pauseOverlay">
+  <div class="card">
+    <h2 class="title" style="font-size:24px;margin-bottom:14px;">PAUSED</h2>
+    <p class="subtitle">Take a breath. The pipes will wait.</p>
+    <button class="btn" id="resumeBtn">RESUME</button>
+    <button class="btn alt" id="quitBtn">QUIT</button>
+  </div>
+</div>
+
+<div class="flash" id="flash"></div>
+
+<div id="loader">
+  <div class="loader-title">LOADING…</div>
+  <div class="loader-bar"><i></i></div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+
+// ===================== AUDIO =====================
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let actx = null;
+let soundOn = true;
+function ensureAudio(){
+  if(!actx){ actx = new AudioCtx(); }
+  if(actx.state === 'suspended'){ actx.resume(); }
+  return actx;
+}
+function beep(freq, dur, type='sine', vol=0.18, slide=0){
+  const a = ensureAudio(); if(!soundOn) return;
+  const o = a.createOscillator(), g = a.createGain();
+  o.type = type; o.frequency.setValueAtTime(freq, a.currentTime);
+  if(slide){ o.frequency.exponentialRampToValueAtTime(Math.max(20,freq+slide), a.currentTime + dur); }
+  g.gain.setValueAtTime(0.0001, a.currentTime);
+  g.gain.exponentialRampToValueAtTime(vol, a.currentTime + 0.01);
+  g.gain.exponentialRampToValueAtTime(0.0001, a.currentTime + dur);
+  o.connect(g); g.connect(a.destination);
+  o.start(); o.stop(a.currentTime + dur + 0.02);
+}
+const sfx = {
+  flap: ()=> beep(560, 0.08, 'square', 0.10, -80),
+  score: ()=>{ beep(880, 0.07, 'triangle', 0.12, 200); setTimeout(()=>beep(1320, 0.09, 'triangle', 0.10, 100), 60); },
+  hit: ()=>{ beep(140, 0.18, 'sawtooth', 0.18, -80); setTimeout(()=>beep(70, 0.25, 'sawtooth', 0.16, -30), 90); },
+  die: ()=>{ beep(300, 0.18, 'square', 0.12, -250); },
+  swoosh: ()=> beep(220, 0.12, 'sine', 0.08, 80),
+};
+
+// ===================== STATE =====================
+const STATE = { MENU:'menu', PLAY:'play', OVER:'over', PAUSE:'pause' };
+let state = STATE.MENU;
+let score = 0;
+let best = parseInt(localStorage.getItem('fb3d_best') || '0', 10);
+let shake = 0;
+let slowMo = 1;
+
+// ===================== DOM =====================
+const $ = (s)=>document.querySelector(s);
+const canvas = $('#game');
+const scoreEl = $('#score');
+const menuOverlay = $('#menuOverlay');
+const overOverlay = $('#overOverlay');
+const pauseOverlay = $('#pauseOverlay');
+const finalScoreEl = $('#finalScore');
+const bestScoreEl = $('#bestScore');
+const medalEl = $('#medal');
+const medalTextEl = $('#medalText');
+const flashEl = $('#flash');
+const loaderEl = $('#loader');
+
+$('#soundBtn').addEventListener('click', ()=>{
+  soundOn = !soundOn;
+  $('#soundBtn').innerHTML = soundOn
+    ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>'
+    : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>';
+  if(soundOn) sfx.swoosh();
+});
+
+function setScore(v){
+  score = v;
+  scoreEl.firstChild.nodeValue = String(v);
+  scoreEl.classList.remove('pulse');
+  void scoreEl.offsetWidth;
+  scoreEl.classList.add('pulse');
+  setTimeout(()=>scoreEl.classList.remove('pulse'), 180);
+  sfx.score();
+}
+
+function medalFor(s){
+  if(s >= 50) return ['LEGEND','#ff7d3a'];
+  if(s >= 30) return ['MASTER','#c084fc'];
+  if(s >= 20) return ['PRO','#5dd39e'];
+  if(s >= 10) return ['ACE','#3d7fe0'];
+  if(s >= 5)  return ['GOOD','#ffce3a'];
+  return ['FLEDGLING','#9aa6c2'];
+}
+function showOver(){
+  finalScoreEl.textContent = String(score);
+  if(score > best){
+    best = score;
+    localStorage.setItem('fb3d_best', String(best));
+    bestScoreEl.parentElement.classList.add('gold');
+  }
+  bestScoreEl.textContent = String(best);
+  const [name, color] = medalFor(score);
+  medalTextEl.textContent = name;
+  medalEl.style.background = `linear-gradient(180deg,#fff, ${color}33)`;
+  medalEl.style.color = color === '#9aa6c2' ? '#3a4866' : color;
+  medalEl.style.boxShadow = `0 4px 0 ${color}99`;
+  overOverlay.classList.remove('hide');
+}
+function hideOver(){ overOverlay.classList.add('hide'); }
+function hideMenu(){ menuOverlay.classList.add('hide'); }
+function showMenu(){ menuOverlay.classList.remove('hide'); }
+
+function flash(){
+  flashEl.classList.remove('on');
+  void flashEl.offsetWidth;
+  flashEl.classList.add('on');
+}
+
+// ===================== THREE.JS SETUP =====================
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x9ed8ff);
+scene.fog = new THREE.Fog(0xbfe7ff, 60, 180);
+
+const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 500);
+camera.position.set(0, 6, 14);
+camera.lookAt(0, 4, 0);
+
+function resize(){
+  const w = window.innerWidth, h = window.innerHeight;
+  renderer.setSize(w, h, false);
+  camera.aspect = w/h;
+  camera.updateProjectionMatrix();
+}
+window.addEventListener('resize', resize);
+resize();
+
+// Lighting
+const hemi = new THREE.HemisphereLight(0xffffff, 0x4a5b7a, 0.95);
+scene.add(hemi);
+const sun = new THREE.DirectionalLight(0xfff2c8, 1.2);
+sun.position.set(20, 35, 15);
+sun.castShadow = true;
+sun.shadow.mapSize.set(1024, 1024);
+sun.shadow.camera.left = -30;
+sun.shadow.camera.right = 30;
+sun.shadow.camera.top = 30;
+sun.shadow.camera.bottom = -30;
+sun.shadow.camera.near = 1;
+sun.shadow.camera.far = 80;
+scene.add(sun);
+
+// Ground
+const groundGeo = new THREE.PlaneGeometry(400, 400, 1, 1);
+const groundMat = new THREE.MeshStandardMaterial({ color: 0x7bc25a, roughness: 0.95, metalness: 0.0 });
+const ground = new THREE.Mesh(groundGeo, groundMat);
+ground.rotation.x = -Math.PI/2;
+ground.position.y = 0;
+ground.receiveShadow = true;
+scene.add(ground);
+
+// Grass blades pattern (decorative stripes via tiled plane texture? we use vertex color strip)
+const stripeGeo = new THREE.PlaneGeometry(400, 6);
+const stripeMat = new THREE.MeshStandardMaterial({ color: 0x5fa845, roughness: 0.95 });
+for(let i=-6;i<=6;i++){
+  const s = new THREE.Mesh(stripeGeo, stripeMat);
+  s.rotation.x = -Math.PI/2;
+  s.position.set(0, 0.01, i*12);
+  s.receiveShadow = true;
+  scene.add(s);
+}
+
+// ===================== BIRD =====================
+function makeBird(){
+  const g = new THREE.Group();
+
+  const bodyMat = new THREE.MeshStandardMaterial({ color: 0xffd23f, roughness: 0.55, metalness: 0.05 });
+  const bellyMat = new THREE.MeshStandardMaterial({ color: 0xfff4d6, roughness: 0.7 });
+  const beakMat = new THREE.MeshStandardMaterial({ color: 0xff7d3a, roughness: 0.5 });
+  const eyeWhite = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3 });
+  const eyePupil = new THREE.MeshStandardMaterial({ color: 0x1f2a44, roughness: 0.2 });
+  const wingMat = new THREE.MeshStandardMaterial({ color: 0xf4a724, roughness: 0.5 });
+
+  // Body - egg shape via sphere + scaling
+  const body = new THREE.Mesh(new THREE.SphereGeometry(0.55, 24, 18), bodyMat);
+  body.scale.set(1, 0.95, 1.2);
+  body.castShadow = true;
+  g.add(body);
+
+  // Belly
+  const belly = new THREE.Mesh(new THREE.SphereGeometry(0.45, 24, 16), bellyMat);
+  belly.scale.set(0.85, 0.8, 1.1);
+  belly.position.set(0, -0.1, 0.05);
+  g.add(belly);
+
+  // Beak (cone)
+  const beak = new THREE.Mesh(new THREE.ConeGeometry(0.18, 0.4, 12), beakMat);
+  beak.rotation.z = -Math.PI/2;
+  beak.position.set(0.5, 0.05, 0);
+  beak.castShadow = true;
+  g.add(beak);
+  const beakLow = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.06, 0.32), new THREE.MeshStandardMaterial({color:0xd9592a}));
+  beakLow.position.set(0.5, -0.08, 0);
+  g.add(beakLow);
+
+  // Eyes
+  const ew = new THREE.Mesh(new THREE.SphereGeometry(0.14, 16, 12), eyeWhite);
+  ew.position.set(0.3, 0.18, 0.32);
+  g.add(ew);
+  const ew2 = ew.clone(); ew2.position.z = -0.32; g.add(ew2);
+  const ep = new THREE.Mesh(new THREE.SphereGeometry(0.07, 12, 10), eyePupil);
+  ep.position.set(0.36, 0.18, 0.4); g.add(ep);
+  const ep2 = ep.clone(); ep2.position.z = -0.4; g.add(ep2);
+
+  // Wings - pivoted on side
+  const wingGeo = new THREE.BoxGeometry(0.5, 0.1, 0.7);
+  const wingL = new THREE.Mesh(wingGeo, wingMat);
+  wingL.castShadow = true;
+  wingL.position.set(0, 0.1, 0.45);
+  const pivotL = new THREE.Group();
+  pivotL.add(wingL);
+  pivotL.position.set(0, 0.05, 0.55);
+  g.add(pivotL);
+
+  const wingR = wingL.clone(); wingR.position.z = -0.45;
+  const pivotR = new THREE.Group();
+  pivotR.add(wingR);
+  pivotR.position.set(0, 0.05, -0.55);
+  g.add(pivotR);
+
+  // Tail
+  const tail = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.08, 0.5), new THREE.MeshStandardMaterial({color:0xf4a724}));
+  tail.position.set(-0.55, -0.05, 0);
+  tail.rotation.z = 0.2;
+  g.add(tail);
+
+  // Head tuft
+  const tuft = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.25, 8), new THREE.MeshStandardMaterial({color:0xff9f1c}));
+  tuft.position.set(-0.05, 0.55, 0);
+  tuft.rotation.z = -0.3;
+  g.add(tuft);
+
+  g.userData = { pivotL, pivotR, body, beak };
+  return g;
+}
+
+const bird = makeBird();
+bird.position.set(0, 6, 0);
+bird.scale.setScalar(1.1);
+scene.add(bird);
+
+let birdVel = 0;
+const GRAVITY = -22;
+const FLAP = 9.2;
+let wingTime = 0;
+let wingFlapping = false;
+
+// ===================== PIPES =====================
+const PIPE_GAP = 4.2;
+const PIPE_SPACING = 9;
+const PIPE_SPEED = 6;
+const pipes = [];
+
+function makePipe(topHeight){
+  // topHeight: height of upper pipe (extends from this down to top of gap)
+  const pipeGroup = new THREE.Group();
+
+  const pipeMat = new THREE.MeshStandardMaterial({ color: 0x5dd39e, roughness: 0.6, metalness: 0.05 });
+  const lipMat = new THREE.MeshStandardMaterial({ color: 0x3da872, roughness: 0.55 });
+
+  // Upper pipe
+  const upperGeo = new THREE.CylinderGeometry(1.2, 1.2, topHeight, 18);
+  const upper = new THREE.Mesh(upperGeo, pipeMat);
+  upper.castShadow = true;
+  upper.receiveShadow = true;
+  upper.position.y = topHeight/2 + 10; // top of upper pipe at y = 10 + topHeight, bottom at y=10
+  pipeGroup.add(upper);
+  const upperLip = new THREE.Mesh(new THREE.TorusGeometry(1.35, 0.18, 10, 24), lipMat);
+  upperLip.rotation.x = Math.PI/2;
+  upperLip.position.y = 10; // bottom of upper pipe
+  pipeGroup.add(upperLip);
+  const upperCap = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 1.4, 0.7, 18), lipMat);
+  upperCap.position.y = 10 + 0.35;
+  pipeGroup.add(upperCap);
+
+  // Lower pipe
+  const lowerHeight = 20 - (10 + topHeight + PIPE_GAP);
+  const lowerGeo = new THREE.CylinderGeometry(1.2, 1.2, lowerHeight, 18);
+  const lower = new THREE.Mesh(lowerGeo, pipeMat);
+  lower.castShadow = true;
+  lower.receiveShadow = true;
+  lower.position.y = (10 + PIPE_GAP) - lowerHeight/2;
+  pipeGroup.add(lower);
+  const lowerLip = new THREE.Mesh(new THREE.TorusGeometry(1.35, 0.18, 10, 24), lipMat);
+  lowerLip.rotation.x = Math.PI/2;
+  lowerLip.position.y = 10 + PIPE_GAP;
+  pipeGroup.add(lowerLip);
+  const lowerCap = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 1.4, 0.7, 18), lipMat);
+  lowerCap.position.y = 10 + PIPE_GAP - 0.35;
+  pipeGroup.add(lowerCap);
+
+  // Decorator stripes
+  for(let i=0;i<3;i++){
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(1.22, 0.04, 6, 18), new THREE.MeshStandardMaterial({color:0x3da872}));
+    ring.rotation.x = Math.PI/2;
+    ring.position.y = 10 + i * (topHeight/4);
+    pipeGroup.add(ring);
+  }
+
+  pipeGroup.userData = { scored: false, topHeight };
+  return pipeGroup;
+}
+
+function spawnPipe(x){
+  const topHeight = 3 + Math.random() * 6; // 3..9, gap centered around y=10
+  const p = makePipe(topHeight);
+  p.position.x = x;
+  scene.add(p);
+  pipes.push(p);
+}
+
+function resetPipes(){
+  pipes.forEach(p=>scene.remove(p));
+  pipes.length = 0;
+  for(let i=0;i<6;i++) spawnPipe(15 + i*PIPE_SPACING);
+}
+
+// ===================== PARTICLES =====================
+const particles = [];
+const particleGeo = new THREE.SphereGeometry(0.08, 6, 5);
+const particleMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent:true, opacity:0.9 });
+
+function spawnParticles(x, y, z, count=6, color=0xffffff, spread=2){
+  for(let i=0;i<count;i++){
+    const m = new THREE.Mesh(particleGeo, new THREE.MeshBasicMaterial({color, transparent:true, opacity:0.95}));
+    m.position.set(x, y, z);
+    const v = new THREE.Vector3((Math.random()-0.5)*spread, (Math.random()-0.5)*spread, (Math.random()-0.5)*spread);
+    scene.add(m);
+    particles.push({ mesh:m, vel:v, life:0, max: 0.6 + Math.random()*0.4 });
+  }
+}
+
+function updateParticles(dt){
+  for(let i=particles.length-1;i>=0;i--){
+    const p = particles[i];
+    p.life += dt;
+    p.mesh.position.addScaledVector(p.vel, dt);
+    p.vel.y -= 4*dt;
+    p.mesh.material.opacity = 1 - p.life / p.max;
+    p.mesh.scale.setScalar(1 - p.life/p.max*0.5);
+    if(p.life >= p.max){
+      scene.remove(p.mesh);
+      p.mesh.material.dispose();
+      particles.splice(i, 1);
+    }
+  }
+}
+
+// ===================== CLOUDS =====================
+const clouds = [];
+function makeCloud(){
+  const g = new THREE.Group();
+  const mat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 1, metalness: 0 });
+  const positions = [
+    [0,0,0,1.4],[1.1,0.2,0.1,1.0],[-1.0,0.1,-0.1,1.1],[0.4,0.5,0.2,0.8],[-0.5,0.4,-0.1,0.9]
+  ];
+  positions.forEach(p=>{
+    const s = new THREE.Mesh(new THREE.SphereGeometry(p[3], 12, 10), mat);
+    s.position.set(p[0],p[1],p[2]);
+    g.add(s);
+  });
+  return g;
+}
+for(let i=0;i<14;i++){
+  const c = makeCloud();
+  c.position.set((Math.random()-0.5)*200, 16 + Math.random()*10, -30 - Math.random()*60);
+  c.scale.setScalar(0.8 + Math.random()*0.8);
+  scene.add(c);
+  clouds.push(c);
+}
+
+// Hills in background
+const hillMat = new THREE.MeshStandardMaterial({ color: 0x6db34e, roughness: 1 });
+for(let i=0;i<10;i++){
+  const h = new THREE.Mesh(new THREE.SphereGeometry(8, 16, 12), hillMat);
+  const x = -60 + i*14 + (Math.random()-0.5)*4;
+  h.position.set(x, -3, -40 - Math.random()*10);
+  h.scale.set(2 + Math.random(), 0.6 + Math.random()*0.4, 1.5);
+  scene.add(h);
+}
+
+// ===================== GAME LOGIC =====================
+function startGame(){
+  resetPipes();
+  bird.position.set(0, 6, 0);
+  birdVel = 0;
+  bird.rotation.set(0, 0, 0);
+  score = 0;
+  scoreEl.firstChild.nodeValue = '0';
+  state = STATE.PLAY;
+  hideMenu();
+  hideOver();
+  pauseOverlay.classList.add('hide');
+  sfx.swoosh();
+}
+
+function gameOver(){
+  if(state === STATE.OVER) return;
+  state = STATE.OVER;
+  sfx.hit();
+  setTimeout(()=>sfx.die(), 220);
+  shake = 0.8;
+  slowMo = 0.4;
+  flash();
+  spawnParticles(bird.position.x, bird.position.y, bird.position.z, 30, 0xffd23f, 4);
+  spawnParticles(bird.position.x, bird.position.y, bird.position.z, 20, 0xffffff, 3);
+  setTimeout(()=>{ slowMo = 1; showOver(); }, 700);
+}
+
+function flap(){
+  if(state === STATE.PLAY){
+    birdVel = FLAP;
+    wingFlapping = true;
+    wingTime = 0;
+    sfx.flap();
+    spawnParticles(bird.position.x - 0.4, bird.position.y - 0.1, 0, 4, 0xffffff, 1.5);
+  } else if(state === STATE.MENU){
+    startGame();
+  } else if(state === STATE.OVER){
+    // nothing
+  }
+}
+
+function togglePause(){
+  if(state === STATE.PLAY){
+    state = STATE.PAUSE;
+    pauseOverlay.classList.remove('hide');
+  } else if(state === STATE.PAUSE){
+    state = STATE.PLAY;
+    pauseOverlay.classList.add('hide');
+  }
+}
+
+// Controls
+window.addEventListener('keydown', (e)=>{
+  if(e.code === 'Space' || e.code === 'ArrowUp' || e.key === 'w' || e.key === 'W'){
+    e.preventDefault();
+    if(state === STATE.OVER) return;
+    if(state === STATE.PAUSE) return;
+    flap();
+  } else if(e.code === 'Escape' || e.key === 'p' || e.key === 'P'){
+    if(state === STATE.PLAY || state === STATE.PAUSE) togglePause();
+  }
+});
+window.addEventListener('pointerdown', (e)=>{
+  if(state === STATE.PAUSE) return;
+  if(state === STATE.OVER) return;
+  flap();
+});
+
+$('#startBtn').addEventListener('click', startGame);
+$('#retryBtn').addEventListener('click', startGame);
+$('#menuBtn').addEventListener('click', ()=>{
+  state = STATE.MENU;
+  hideOver();
+  showMenu();
+});
+$('#pauseBtn').addEventListener('click', togglePause);
+$('#resumeBtn').addEventListener('click', togglePause);
+$('#quitBtn').addEventListener('click', ()=>{
+  state = STATE.MENU;
+  pauseOverlay.classList.add('hide');
+  showMenu();
+  bird.position.set(0, 6, 0);
+  bird.rotation.set(0,0,0);
+});
+
+// ===================== COLLISION =====================
+const birdBox = new THREE.Box3();
+function checkCollision(){
+  birdBox.setFromCenterAndSize(bird.position, new THREE.Vector3(0.9, 0.9, 0.9));
+  // Ground
+  if(bird.position.y <= 0.6){ return true; }
+  if(bird.position.y >= 22){ return true; }
+  // Pipes (cylinders approximated by distance from axis)
+  for(const p of pipes){
+    const dx = bird.position.x - p.position.x;
+    if(Math.abs(dx) > 1.5) continue;
+    if(bird.position.y < (10 + p.userData.topHeight) + 0.2 && bird.position.y > (10 + p.userData.topHeight) - 0.7){
+      return true;
+    }
+    if(bird.position.y > (10 + p.userData.topHeight + PIPE_GAP) - 0.7 && bird.position.y < (10 + p.userData.topHeight + PIPE_GAP) + 0.2){
+      return true;
+    }
+  }
+  return false;
+}
+
+// ===================== LOOP =====================
+const clock = new THREE.Clock();
+let acc = 0;
+let menuBirdPhase = 0;
+
+function update(dt){
+  // Clouds drift
+  clouds.forEach(c=>{
+    c.position.x += dt * 0.4;
+    if(c.position.x > 120) c.position.x = -120;
+  });
+
+  if(state === STATE.MENU){
+    menuBirdPhase += dt;
+    bird.position.y = 6 + Math.sin(menuBirdPhase*2.2)*0.6;
+    bird.position.x = Math.sin(menuBirdPhase*1.4)*0.8;
+    bird.rotation.z = Math.sin(menuBirdPhase*2.2)*0.1;
+    bird.rotation.y = Math.sin(menuBirdPhase*0.7)*0.4;
+    // gentle wing
+    bird.userData.pivotL.rotation.x = Math.sin(menuBirdPhase*8)*0.3;
+    bird.userData.pivotR.rotation.x = Math.sin(menuBirdPhase*8 + Math.PI)*0.3;
+  }
+
+  if(state === STATE.PLAY){
+    birdVel += GRAVITY * dt * slowMo;
+    bird.position.y += birdVel * dt * slowMo;
+
+    // Tilt based on velocity
+    const targetTilt = Math.max(-0.6, Math.min(1.2, birdVel * 0.09));
+    bird.rotation.z += (targetTilt - bird.rotation.z) * Math.min(1, dt*8);
+
+    // Wings flapping
+    wingTime += dt;
+    if(wingFlapping){
+      bird.userData.pivotL.rotation.x = -0.8 + Math.abs(Math.sin(wingTime*22))*1.0;
+      bird.userData.pivotR.rotation.x = -0.8 + Math.abs(Math.sin(wingTime*22))*1.0;
+      if(wingTime > 0.28) wingFlapping = false;
+    } else {
+      bird.userData.pivotL.rotation.x += (-0.05 - bird.userData.pivotL.rotation.x) * Math.min(1, dt*6);
+      bird.userData.pivotR.rotation.x += (-0.05 - bird.userData.pivotR.rotation.x) * Math.min(1, dt*6);
+    }
+
+    // Move pipes
+    for(let i=pipes.length-1;i>=0;i--){
+      pipes[i].position.x -= PIPE_SPEED * dt * slowMo;
+      if(!pipes[i].userData.scored && pipes[i].position.x < bird.position.x){
+        pipes[i].userData.scored = true;
+        setScore(score + 1);
+      }
+      if(pipes[i].position.x < -20){
+        scene.remove(pipes[i]);
+        pipes.splice(i, 1);
+        spawnPipe(pipes[pipes.length-1] ? pipes[pipes.length-1].position.x + PIPE_SPACING : 25);
+      }
+    }
+
+    if(checkCollision()){
+      gameOver();
+    }
+  }
+
+  if(state === STATE.OVER){
+    birdVel += GRAVITY * dt * slowMo;
+    bird.position.y += birdVel * dt * slowMo;
+    bird.rotation.z += dt * 4;
+    if(bird.position.y <= 0.6){
+      bird.position.y = 0.6;
+      birdVel = 0;
+    }
+    // Wings limp
+    bird.userData.pivotL.rotation.x += (-1.2 - bird.userData.pivotL.rotation.x) * Math.min(1, dt*3);
+    bird.userData.pivotR.rotation.x += (-1.2 - bird.userData.pivotR.rotation.x) * Math.min(1, dt*3);
+  }
+
+  if(state === STATE.PAUSE){
+    // freeze world
+  }
+
+  // Camera follow (gentle)
+  const targetY = bird.position.y * 0.5 + 3;
+  camera.position.y += (targetY - camera.position.y) * Math.min(1, dt*3);
+  camera.position.x += (bird.position.x * 0.2 - camera.position.x) * Math.min(1, dt*3);
+  camera.lookAt(bird.position.x * 0.4, bird.position.y * 0.7 + 1.5, 0);
+
+  // Shake
+  if(shake > 0){
+    shake = Math.max(0, shake - dt*2);
+    camera.position.x += (Math.random()-0.5) * shake * 0.6;
+    camera.position.y += (Math.random()-0.5) * shake * 0.6;
+  }
+
+  updateParticles(dt);
+}
+
+function animate(){
+  requestAnimationFrame(animate);
+  const dt = Math.min(0.05, clock.getDelta());
+  update(dt);
+  renderer.render(scene, camera);
+}
+
+// ===================== START =====================
+bestScoreEl.textContent = String(best);
+window.addEventListener('load', ()=>{
+  setTimeout(()=>{
+    loaderEl.classList.add('hide');
+    animate();
+  }, 1200);
+});
+// Fallback if load already fired
+setTimeout(()=>{
+  if(!loaderEl.classList.contains('hide')){
+    loaderEl.classList.add('hide');
+    animate();
+  }
+}, 2500);
+
+</script>
+</body>
+</html>

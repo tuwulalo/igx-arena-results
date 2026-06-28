@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Grocerly — умная сеть продуктовых магазинов</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
+          colors: {
+            brand: { 50: '#ecfdf5', 100: '#d1fae5', 500: '#10b981', 600: '#059669', 700: '#047857', 900: '#064e3b' },
+            accent: { 500: '#f97316', 600: '#ea580c' },
+            night: '#0b1220'
+          },
+          boxShadow: {
+            soft: '0 20px 40px -12px rgba(16,185,129,0.18)',
+            glow: '0 0 40px rgba(16,185,129,0.25)'
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    :root { --brand: #10b981; --accent: #f97316; --night: #0b1220; }
+    * { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #0f172a; overflow-x: hidden; }
+    .glass { background: rgba(255,255,255,0.82); backdrop-filter: blur(14px); border: 1px solid rgba(255,255,255,0.5); }
+    .page { display: none; animation: fadeIn 0.45s ease; }
+    .page.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    .blob { position: absolute; border-radius: 50%; filter: blur(70px); opacity: .45; z-index: -1; pointer-events: none; }
+    .card-hover { transition: all .25s ease; }
+    .card-hover:hover { transform: translateY(-6px); box-shadow: 0 24px 48px -12px rgba(15,23,42,0.14); }
+    .gradient-text { background: linear-gradient(135deg, #059669 0%, #f97316 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .btn-primary { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; transition: all .2s ease; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 24px -6px rgba(16,185,129,0.45); }
+    .btn-accent { background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white; transition: all .2s ease; }
+    .btn-accent:hover { transform: translateY(-2px); box-shadow: 0 12px 24px -6px rgba(249,115,22,0.45); }
+    .nav-link { position: relative; }
+    .nav-link::after { content: ''; position: absolute; left: 0; bottom: -4px; width: 0; height: 2px; background: var(--brand); transition: width .25s ease; border-radius: 2px; }
+    .nav-link.active::after, .nav-link:hover::after { width: 100%; }
+    .product-emoji { font-size: 4rem; line-height: 1; filter: drop-shadow(0 8px 16px rgba(0,0,0,0.08)); }
+    .counter { min-width: 28px; text-align: center; }
+    .toast { position: fixed; bottom: 24px; right: 24px; background: #0b1220; color: #fff; padding: 14px 22px; border-radius: 14px; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.25); transform: translateY(120%); transition: transform .35s cubic-bezier(.34,1.56,.64,1); z-index: 60; }
+    .toast.show { transform: translateY(0); }
+    input, textarea, select { transition: all .2s ease; }
+    input:focus, textarea:focus, select:focus { outline: none; ring: 0; border-color: #10b981; box-shadow: 0 0 0 4px rgba(16,185,129,0.15); }
+  </style>
+</head>
+<body class="antialiased">
+
+  <header class="fixed top-0 inset-x-0 z-50 glass">
+    <div class="max-w-7xl mx-auto px-6 h-18 flex items-center justify-between">
+      <a href="#/" class="flex items-center gap-2 group" onclick="navigate('/')">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center text-white text-xl font-bold shadow-lg group-hover:shadow-glow transition">G</div>
+        <span class="text-xl font-bold tracking-tight text-night">Grocerly</span>
+      </a>
+
+      <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
+        <a href="#/" class="nav-link active" data-nav="/" onclick="navigate('/')">Главная</a>
+        <a href="#/catalog" class="nav-link" data-nav="/catalog" onclick="navigate('/catalog')">Каталог</a>
+        <a href="#/stores" class="nav-link" data-nav="/stores" onclick="navigate('/stores')">Магазины</a>
+        <a href="#/delivery" class="nav-link" data-nav="/delivery" onclick="navigate('/delivery')">Доставка</a>
+        <a href="#/about" class="nav-link" data-nav="/about" onclick="navigate('/about')">О нас</a>
+        <a href="#/careers" class="nav-link" data-nav="/careers" onclick="navigate('/careers')">Вакансии</a>
+        <a href="#/contacts" class="nav-link" data-nav="/contacts" onclick="navigate('/contacts')">Контакты</a>
+      </nav>
+
+      <div class="flex items-center gap-3">
+        <button onclick="navigate('/cart')" class="relative p-2.5 rounded-full hover:bg-slate-100 transition" aria-label="Корзина">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-700"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          <span id="cart-badge" class="absolute -top-1 -right-1 w-5 h-5 bg-accent-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center opacity-0 transition">0</span>
+        </button>
+        <button class="md:hidden p-2.5 rounded-full hover:bg-slate-100" onclick="document.getElementById('mobile-menu').classList.toggle('hidden')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-700"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+    <div id="mobile-menu" class="hidden md:hidden border-t border-slate-100 bg-white/95 backdrop-blur px-6 py-4 space-y-3 text-sm font-medium text-slate-700">
+      <a href="#/" onclick="navigate('/'); document.getElementById('mobile-menu').classList.add('hidden')" class="block">Главная</a>
+      <a href="#/catalog" onclick="navigate('/catalog'); document.getElementById('mobile-menu').classList.add('hidden')" class="block">Каталог</a>
+      <a href="#/stores" onclick="navigate('/stores'); document.getElementById('mobile-menu').classList.add('hidden')" class="block">Магазины</a>
+      <a href="#/delivery" onclick="navigate('/delivery'); document.getElementById('mobile-menu').classList.add('hidden')" class="block">Доставка</a>
+      <a href="#/about" onclick="navigate('/about'); document.getElementById('mobile-menu').classList.add('hidden')" class="block">О нас</a>
+      <a href="#/careers" onclick="navigate('/careers'); document.getElementById('mobile-menu').classList.add('hidden')" class="block">Вакансии</a>
+      <a href="#/contacts" onclick="navigate('/contacts'); document.getElementById('mobile-menu').classList.add('hidden')" class="block">Контакты</a>
+    </div>
+  </header>
+
+  <main class="pt-18">
+
+    <section id="page-home" class="page active">
+      <div class="relative overflow-hidden bg-white">
+        <div class="blob w-96 h-96 bg-brand-400 top-0 left-0"></div>
+        <div class="blob w-[30rem] h-[30rem] bg-accent-400 bottom-0 right-0"></div>
+        <div class="max-w-7xl mx-auto px-6 py-24 lg:py-32 grid lg:grid-cols-2 gap-14 items-center">
+          <div>
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-50 text-brand-700 text-sm font-semibold mb-6 border border-brand-100">
+              <span class="w-2 h-2 rounded-full bg-brand-500 animate-pulse"></span>
+              Уже работаем в 14 городах
+            </div>
+            <h1 class="text-5xl lg:text-7xl font-extrabold tracking-tight leading-[1.05] text-night mb-6">
+              Продукты, которые <span class="gradient-text">выбирают сами</span>
+            </h1>
+            <p class="text-lg text-slate-600 mb-8 max-w-lg leading-relaxed">
+              Grocerly объединяет фермерское качество и технологии большого ритейла: умные полки, доставку за 30 минут и персональные рекомендации.
+            </p>
+            <div class="flex flex-wrap gap-4">
+              <button onclick="navigate('/catalog')" class="btn-primary px-8 py-4 rounded-2xl font-semibold text-base">Заказать продукты</button>
+              <button onclick="navigate('/stores')" class="px-8 py-4 rounded-2xl font-semibold text-base bg-white border border-slate-200 text-slate-700 hover:border-brand-500 hover:text-brand-700 transition">Найти магазин</button>
+            </div>
+            <div class="mt-10 flex items-center gap-6 text-sm text-slate-500">
+              <div class="flex -space-x-3">
+                <img src="https://i.pravatar.cc/150?img=32" alt="" class="w-10 h-10 rounded-full border-2 border-white">
+                <img src="https://i.pravatar.cc/150?img=12" alt="" class="w-10 h-10 rounded-full border-2 border-white">
+                <img src="https://i.pravatar.cc/150?img=5" alt="" class="w-10 h-10 rounded-full border-2 border-white">
+                <div class="w-10 h-10 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-600">+2k</div>
+              </div>
+              <p>Более 2 000 заказов каждый день</p>
+            </div>
+          </div>
+          <div class="relative">
+            <div class="relative rounded-[2.5rem] bg-gradient-to-br from-brand-50 to-white p-8 shadow-soft border border-slate-100">
+              <div class="grid grid-cols-2 gap-5">
+                <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 card-hover">
+                  <div class="product-emoji mb-4">🍎</div>
+                  <h3 class="font-bold text-night">Яблоки Гала</h3>
+                  <p class="text-sm text-slate-500 mb-3">1 кг • Россия</p>
+                  <div class="flex items-center justify-between">
+                    <span class="font-bold text-brand-700">149 ₽</span>
+                    <button class="w-8 h-8 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center hover:bg-brand-500 hover:text-white transition">+</button>
+                  </div>
+                </div>
+                <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 card-hover mt-8">
+                  <div class="product-emoji mb-4">🥑</div>
+                  <h3 class="font-bold text-night">Авокадо Хасс</h3>
+                  <p class="text-sm text-slate-500 mb-3">2 шт • Мексика</p>
+                  <div class="flex items-center justify-between">
+                    <span class="font-bold text-brand-700">279 ₽</span>
+                    <button class="w-8 h-8 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center hover:bg-brand-500 hover:text-white transition">+</button>
+                  </div>
+                </div>
+                <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 card-hover">
+                  <div class="product-emoji mb-4">🥖</div>
+                  <h3 class="font-bold text-night">Багет французский</h3>
+                  <p class="text-sm text-slate-500 mb-3">250 г • наша пекарня</p>
+                  <div class="flex items-center justify-between">
+                    <span class="font-bold text-brand-700">89 ₽</span>
+                    <button class="w-8 h-8 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center hover:bg-brand-500 hover:text-white transition">+</button>
+                  </div>
+                </div>
+                <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 card-hover mt-8">
+                  <div class="product-emoji mb-4">🥛</div>
+                  <h3 class="font-bold text-night">Молоко 3,2%</h3>
+                  <p class="text-sm text-slate-500 mb-3">1 л • фермерское</p>
+                  <div class="flex items-center justify-between">
+                    <span class="font-bold text-brand-700">119 ₽</span>
+                    <button class="w-8 h-8 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center hover:bg-brand-500 hover:text-white transition">+</button>
+                  </div>
+                </div>
+              </div>
+              <div class="absolute -top-6 -right-6 bg-white rounded-2xl shadow-lg p-4 border border-slate-100 animate-bounce" style="animation-duration: 3s;">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-full bg-accent-100 text-accent-600 flex items-center justify-center text-lg">🚀</div>
+                  <div>
+                    <p class="text-xs text-slate-500">До двери</p>
+                    <p class="font-bold text-night">28 мин</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-slate-50 py-16 border-y border-slate-100">
+        <div class="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div class="text-center">
+            <p class="text-4xl font-extrabold text-night mb-1">47</p>
+            <p class="text-sm text-slate-500">магазинов в сети</p>
+          </div>
+          <div class="text-center">
+            <p class="text-4xl font-extrabold text-night mb-1">12k+</p>
+            <p class="text-sm text-slate-500">товаров в ассортименте</p>
+          </div>
+          <div class="text-center">
+            <p class="text-4xl font-extrabold text-night mb-1">30 мин</p>
+            <p class="text-sm text-slate-500">среднее время доставки</p>
+          </div>
+          <div class="text-center">
+            <p class="text-4xl font-extrabold text-night mb-1">4.9</p>
+            <p class="text-sm text-slate-500">рейтинг приложения</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="py-24 bg-white">
+        <div class="max-w-7xl mx-auto px-6">
+          <div class="text-center max-w-2xl mx-auto mb-16">
+            <h2 class="text-3xl lg:text-4xl font-bold text-night mb-4">Почему Grocerly — это не просто «продукты»</h2>
+            <p class="text-slate-600">Мы переняли лучшее у технологичных ритейлеров: скорость, данные и заботу о каждом килограмме.</p>
+          </div>
+          <div class="grid md:grid-cols-3 gap-8">
+            <div class="rounded-3xl p-8 bg-slate-50 border border-slate-100 card-hover">
+              <div class="w-14 h-14 rounded-2xl bg-brand-100 text-brand-700 flex items-center justify-center text-2xl mb-6">🤖</div>
+              <h3 class="text-xl font-bold text-night mb-3">Умные рекомендации</h3>
+              <p class="text-slate-600 leading-relaxed">Наш ИИ анализирует ваши покупки и предлагает меню на неделю, учитывая диету, бюджет и сезонность.</p>
+            </div>
+            <div class="rounded-3xl p-8 bg-slate-50 border border-slate-100 card-hover">
+              <div class="w-14 h-14 rounded-2xl bg-accent-100 text-accent-600 flex items-center justify-center text-2xl mb-6">⚡</div>
+              <h3 class="text-xl font-bold text-night mb-3">Доставка за 30 минут</h3>
+              <p class="text-slate-600 leading-relaxed">Собственные хабы и алгоритмы маршрутизации курьеров делают доставку предсказуемой и быстрой.</p>
+            </div>
+            <div class="rounded-3xl p-8 bg-slate-50 border border-slate-100 card-hover">
+              <div class="w-14 h-14 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center text-2xl mb-6">🌱</div>
+              <h3 class="text-xl font-bold text-night mb-3">Прозрачное происхождение</h3>
+              <p class="text-slate-600 leading-relaxed">Каждый продукт имеет цифровой паспорт: ферма, дата упаковки, сертификаты и экологичность.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="py-24 bg-slate-50">
+        <div class="max-w-7xl mx-auto px-6">
+          <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
+            <div>
+              <h2 class="text-3xl lg:text-4xl font-bold text-night mb-3">Популярные товары</h2>
+              <p class="text-slate-600">То, что чаще всего добавляют в корзину сегодня</p>
+            </div>
+            <button onclick="navigate('/catalog')" class="text-brand-700 font-semibold hover:text-brand-900 flex items-center gap-2">Весь каталог →</button>
+          </div>
+          <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6" id="home-products"></div>
+        </div>
+      </div>
+
+      <div class="py-24 bg-white overflow-hidden">
+        <div class="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-16 items-center">
+          <div class="relative">
+            <div class="absolute inset-0 bg-gradient-to-tr from-brand-500 to-accent-500 rounded-[2.5rem] rotate-3 opacity-20 blur-lg"></div>
+            <div class="relative bg-night rounded-[2.5rem] p-10 text-white shadow-2xl">
+              <div class="flex items-center gap-4 mb-8">
+                <div class="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center text-3xl">📱</div>
+                <div>
+                  <p class="font-bold text-lg">Grocerly App</p>
+                  <p class="text-slate-400 text-sm">Всё под рукой</p>
+                </div>
+              </div>
+              <div class="space-y-4">
+                <div class="bg-white/10 rounded-2xl p-4 flex items-center gap-4">
+                  <div class="w-12 h-12 rounded-xl bg-brand-500 flex items-center justify-center text-2xl">🥗</div>
+                  <div>
+                    <p class="font-semibold">Салатный набор</p>
+                    <p class="text-slate-300 text-sm">+1 в корзину</p>
+                  </div>
+                  <span class="ml-auto font-bold">229 ₽</span>
+                </div>
+                <div class="bg-white/10 rounded-2xl p-4 flex items-center gap-4">
+                  <div class="w-12 h-12 rounded-xl bg-accent-500 flex items-center justify-center text-2xl">🍊</div>
+                  <div>
+                    <p class="font-semibold">Апельсины</p>
+                    <p class="text-slate-300 text-sm">1 кг</p>
+                  </div>
+                  <span class="ml-auto font-bold">189 ₽</span>
+                </div>
+                <div class="bg-white/10 rounded-2xl p-4 flex items-center gap-4">
+                  <div class="w-12 h-12 rounded-xl bg-blue-500 flex items-center justify-center text-2xl">🧃</div>
+                  <div>
+                    <p class="font-semibold">Свежевыжатый сок</p>
+                    <p class="text-slate-300 text-sm">0,33 л</p>
+                  </div>
+                  <span class="ml-auto font-bold">159 ₽</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <h2 class="text-3xl lg:text-4xl font-bold text-night mb-6">Управляйте покупками в пару тапов</h2>
+            <ul class="space-y-5 mb-10">
+              <li class="flex gap-4">
+                <div class="w-8 h-8 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center font-bold text-sm shrink-0">1</div>
+                <p class="text-slate-600">Повторяйте прошлые заказы одной кнопкой — мы запоминаем предпочтения.</p>
+              </li>
+              <li class="flex gap-4">
+                <div class="w-8 h-8 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center font-bold text-sm shrink-0">2</div>
+                <p class="text-slate-600">Получайте push-уведомления о скидках на любимые товары.</p>
+              </li>
+              <li class="flex gap-4">
+                <div class="w-8 h-8 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center font-bold text-sm shrink-0">3</div>
+                <p class="text-slate-600">Следите за доставкой в реальном времени на интерактивной карте.</p>
+              </li>
+            </ul>
+            <div class="flex flex-wrap gap-4">
+              <button class="btn-primary px-7 py-3.5 rounded-2xl font-semibold">Скачать для iOS</button>
+              <button class="px-7 py-3.5 rounded-2xl font-semibold bg-slate-900 text-white hover:bg-slate-800 transition">Скачать для Android</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="page-catalog" class="page">
+      <div class="bg-white border-b border-slate-100">
+        <div class="max-w-7xl mx-auto px-6 py-16">
+          <h1 class="text-4xl lg:text-5xl font-bold text-night mb-4">Каталог продуктов</h1>
+          <p class="text-lg text-slate-600 max-w-2xl">Свежие фрукты, овощи, молочка, хлеб и мясо — всё с контролем качества и быстрой доставкой.</p>
+        </div>
+      </div>
+      <div class="max-w-7xl mx-auto px-6 py-10">
+        <div class="flex flex-wrap items-center gap-3 mb-10" id="category-filters">
+          <button class="filter-btn active px-5 py-2.5 rounded-full text-sm font-semibold bg-brand-600 text-white transition" data-cat="all">Все</button>
+          <button class="filter-btn px-5 py-2.5 rounded-full text-sm font-semibold bg-white text-slate-600 border border-slate-200 hover:border-brand-500 transition" data-cat="fruits">Фрукты</button>
+          <button class="filter-btn px-5 py-2.5 rounded-full text-sm font-semibold bg-white text-slate-600 border border-slate-200 hover:border-brand-500 transition" data-cat="vegetables">Овощи</button>
+          <button class="filter-btn px-5 py-2.5 rounded-full text-sm font-semibold bg-white text-slate-600 border border-slate-200 hover:border-brand-500 transition" data-cat="dairy">Молочка</button>
+          <button class="filter-btn px-5 py-2.5 rounded-full text-sm font-semibold bg-white text-slate-600 border border-slate-200 hover:border-brand-500 transition" data-cat="bakery">Хлеб</button>
+          <button class="filter-btn px-5 py-2.5 rounded-full text-sm font-semibold bg-white text-slate-600 border border-slate-200 hover:border-brand-500 transition" data-cat="meat">Мясо</button>
+          <button class="filter-btn px-5 py-2.5 rounded-full text-sm font-semibold bg-white text-slate-600 border border-slate-200 hover:border-brand-500 transition" data-cat="sweets">Сладости</button>
+        </div>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="catalog-grid"></div>
+      </div>
+    </section>
+
+    <section id="page-stores" class="page">
+      <div class="bg-white border-b border-slate-100">
+        <div class="max-w-7xl mx-auto px-6 py-16">
+          <h1 class="text-4xl lg:text-5xl font-bold text-night mb-4">Магазины Grocerly</h1>
+          <p class="text-lg text-slate-600 max-w-2xl">47 современных магазинов с удобным расположением, круглосуточной работой и парковкой.</p>
+        </div>
+      </div>
+      <div class="max-w-7xl mx-auto px-6 py-12">
+        <div class="grid lg:grid-cols-3 gap-8">
+          <div class="lg:col-span-2">
+            <div class="rounded-3xl overflow-hidden shadow-soft border border-slate-200 h-[500px] relative bg-slate-100">
+              <div id="store-map" class="absolute inset-0">
+                <svg class="w-full h-full" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
+                  <rect width="800" height="500" fill="#f1f5f9"/>
+                  <path d="M0,350 Q200,300 400,360 T800,320 V500 H0 Z" fill="#dcfce7"/>
+                  <path d="M0,420 Q250,380 500,430 T800,400 V500 H0 Z" fill="#dbeafe"/>
+                  <circle cx="120" cy="180" r="6" fill="#94a3b8"/>
+                  <circle cx="220" cy="140" r="6" fill="#94a3b8"/>
+                  <circle cx="380" cy="220" r="6" fill="#94a3b8"/>
+                  <circle cx="540" cy="160" r="6" fill="#94a3b8"/>
+                  <circle cx="680" cy="240" r="6" fill="#94a3b8"/>
+                  <circle cx="160" cy="320" r="6" fill="#94a3b8"/>
+                  <circle cx="460" cy="340" r="6" fill="#94a3b8"/>
+                  <circle cx="620" cy="380" r="6" fill="#94a3b8"/>
+                  <path d="M120,180 L220,140 L380,220 L540,160 L680,240" fill="none" stroke="#cbd5e1" stroke-width="3" stroke-dasharray="8 6"/>
+                  <path d="M160,320 L460,340 L620,380" fill="none" stroke="#cbd5e1" stroke-width="3" stroke-dasharray="8 6"/>
+                  <g class="store-pin cursor-pointer" data-store="0" transform="translate(220,140)">
+                    <circle r="18" fill="#10b981" opacity=".2" class="animate-ping"/>
+                    <circle r="10" fill="#10b981" stroke="white" stroke-width="3"/>
+                  </g>
+                  <g class="store-pin cursor-pointer" data-store="1" transform="translate(460,340)">
+                    <circle r="18" fill="#f97316" opacity=".2" class="animate-ping"/>
+                    <circle r="10" fill="#f97316" stroke="white" stroke-width="3"/>
+                  </g>
+                  <g class="store-pin cursor-pointer" data-store="2" transform="translate(620,380)">
+                    <circle r="18" fill="#10b981" opacity=".2" class="animate-ping"/>
+                    <circle r="10" fill="#10b981" stroke="white" stroke-width="3"/>
+                  </g>
+                </svg>
+              </div>
+              <div class="absolute bottom-5 left-5 bg-white/90 backdrop-blur rounded-2xl p-4 shadow-lg border border-slate-100 text-sm">
+                <p class="font-semibold text-night">Интерактивная карта</p>
+                <p class="text-slate-500">Нажмите на точку, чтобы увидеть детали</p>
+              </div>
+            </div>
+          </div>
+          <div class="space-y-4" id="stores-list"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="page-delivery" class="page">
+      <div class="bg-white border-b border-slate-100">
+        <div class="max-w-7xl mx-auto px-6 py-16">
+          <h1 class="text-4xl lg:text-5xl font-bold text-night mb-4">Доставка и самовывоз</h1>
+          <p class="text-lg text-slate-600 max-w-2xl">Быстро, удобно и точно в срок. Отслеживайте заказ в приложении или на сайте.</p>
+        </div>
+      </div>
+      <div class="max-w-7xl mx-auto px-6 py-12">
+        <div class="grid md:grid-cols-3 gap-8 mb-16">
+          <div class="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm card-hover">
+            <div class="w-14 h-14 rounded-2xl bg-brand-100 text-brand-700 flex items-center justify-center text-2xl mb-6">🛵</div>
+            <h3 class="text-xl font-bold text-night mb-2">Экспресс 30 мин</h3>
+            <p class="text-slate-600 mb-4">Для малогабаритных заказов в радиусе 5 км от ближайшего магазина.</p>
+            <p class="text-2xl font-bold text-brand-700">199 ₽</p>
+          </div>
+          <div class="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm card-hover">
+            <div class="w-14 h-14 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center text-2xl mb-6">🚐</div>
+            <h3 class="text-xl font-bold text-night mb-2">Стандарт 2 часа</h3>
+            <p class="text-slate-600 mb-4">Подходит для плановых покупок и больших корзин.</p>
+            <p class="text-2xl font-bold text-brand-700">99 ₽</p>
+          </div>
+          <div class="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm card-hover">
+            <div class="w-14 h-14 rounded-2xl bg-accent-100 text-accent-600 flex items-center justify-center text-2xl mb-6">🛍️</div>
+            <h3 class="text-xl font-bold text-night mb-2">Самовывоз</h3>
+            <p class="text-slate-600 mb-4">Заберите заказ из ближайшего магазина бесплатно.</p>
+            <p class="text-2xl font-bold text-brand-700">0 ₽</p>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-[2.5rem] p-8 lg:p-12 shadow-soft border border-slate-100 grid lg:grid-cols-2 gap-12 items-center">
+          <div>
+            <h2 class="text-3xl font-bold text-night mb-6">Калькулятор доставки</h2>
+            <div class="space-y-5">
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">Город</label>
+                <select id="calc-city" class="w-full rounded-xl border border-slate-200 px-4 py-3 bg-white">
+                  <option>Москва</option>
+                  <option>Санкт-Петербург</option>
+                  <option>Казань</option>
+                  <option>Новосибирск</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">Сумма заказа, ₽</label>
+                <input id="calc-sum" type="number" value="1500" min="0" class="w-full rounded-xl border border-slate-200 px-4 py-3" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">Тип доставки</label>
+                <div class="grid grid-cols-2 gap-3">
+                  <button type="button" class="calc-type active px-4 py-3 rounded-xl border border-brand-500 bg-brand-50 text-brand-700 font-semibold text-sm" data-type="express">Экспресс</button>
+                  <button type="button" class="calc-type px-4 py-3 rounded-xl border border-slate-200 text-slate-600 font-semibold text-sm hover:border-brand-500" data-type="standard">Стандарт</button>
+                </div>
+              </div>
+              <div class="p-5 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between">
+                <span class="text-slate-600">Стоимость доставки:</span>
+                <span id="calc-result" class="text-2xl font-bold text-night">199 ₽</span>
+              </div>
+            </div>
+          </div>
+          <div class="bg-slate-50 rounded-3xl p-8 border border-slate-100">
+            <h3 class="font-bold text-night mb-6 text-lg">Зоны доставки</h3>
+            <div class="space-y-4">
+              <div class="flex items-center justify-between p-4 bg-white rounded-2xl shadow-sm">
+                <span class="font-medium text-slate-700">Зелёная зона</span>
+                <span class="text-sm text-slate-500">до 5 км • 30 мин</span>
+              </div>
+              <div class="flex items-center justify-between p-4 bg-white rounded-2xl shadow-sm">
+                <span class="font-medium text-slate-700">Синяя зона</span>
+                <span class="text-sm text-slate-500">5–15 км • 2 ч</span>
+              </div>
+              <div class="flex items-center justify-between p-4 bg-white rounded-2xl shadow-sm">
+                <span class="font-medium text-slate-700">Фиолетовая зона</span>
+                <span class="text-sm text-slate-500">15–25 км • 4 ч</span>
+              </div>
+            </div>
+            <div class="mt-6 p-4 rounded-2xl bg-brand-50 text-brand-800 text-sm border border-brand-100">
+              Бесплатная доставка при заказе от 3 000 ₽ в любую зону.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="page-about" class="page">
+      <div class="bg-white border-b border-slate-100">
+        <div class="max-w-7xl mx-auto px-6 py-16">
+          <h1 class="text-4xl lg:text-5xl font-bold text-night mb-4">О компании Grocerly</h1>
+          <p class="text-lg text-slate-600 max-w-2xl">Современная продуктовая сеть, где технологии помогают людям есть лучше.</p>
+        </div>
+      </div>
+      <div class="max-w-7xl mx-auto px-6 py-12 space-y-20">
+        <div class="grid lg:grid-cols-2 gap-12 items-center">
+          <div class="rounded-[2.5rem] overflow-hidden shadow-soft h-96 bg-gradient-to-br from-brand-100 to-accent-50 flex items-center justify-center">
+            <span class="text-9xl">🌾</span>
+          </div>
+          <div>
+            <h2 class="text-3xl font-bold text-night mb-5">Наша история</h2>
+            <p class="text-slate-600 leading-relaxed mb-4">Grocerly начинался как небольшой фермерский магазин на окраине Москвы в 2018 году. Мы хотели доказать, что качественные продукты могут быть доступными, а покупки — простыми.</p>
+            <p class="text-slate-600 leading-relaxed mb-4">За шесть лет мы выросли в сеть из 47 магазинов, сохранив при этом внимание к каждому поставщику и каждому клиенту. Сегодня Grocerly — это цифровой ритейлер нового поколения.</p>
+            <p class="text-slate-600 leading-relaxed">Мы инвестируем в ИИ, логистику и устойчивое развитие, чтобы делать продуктовый шопинг быстрее, полезнее и экологичнее.</p>
+          </div>
+        </div>
+
+        <div>
+          <h2 class="text-3xl font-bold text-night mb-10 text-center">Ценности, которые двигают нас</h2>
+          <div class="grid md:grid-cols-4 gap-6">
+            <div class="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm text-center card-hover">
+              <div class="text-4xl mb-4">🍏</div>
+              <h3 class="font-bold text-night mb-2">Качество</h3>
+              <p class="text-sm text-slate-600">Только проверенные поставщики и честный состав.</p>
+            </div>
+            <div class="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm text-center card-hover">
+              <div class="text-4xl mb-4">⚡</div>
+              <h3 class="font-bold text-night mb-2">Скорость</h3>
+              <p class="text-sm text-slate-600">От заказа до двери — минимум времени.</p>
+            </div>
+            <div class="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm text-center card-hover">
+              <div class="text-4xl mb-4">🤝</div>
+              <h3 class="font-bold text-night mb-2">Честность</h3>
+              <p class="text-sm text-slate-600">Прозрачные цены и реальные отзывы.</p>
+            </div>
+            <div class="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm text-center card-hover">
+              <div class="text-4xl mb-4">🌍</div>
+              <h3 class="font-bold text-night mb-2">Устойчивость</h3>
+              <p class="text-sm text-slate-600">Эко-упаковка и ответственные поставки.</p>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <h2 class="text-3xl font-bold text-night mb-10 text-center">Команда</h2>
+          <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm text-center card-hover">
+              <img src="https://i.pravatar.cc/150?img=68" alt="" class="w-24 h-24 rounded-full mx-auto mb-4 object-cover">
+              <h3 class="font-bold text-night">Алексей Воронов</h3>
+              <p class="text-sm text-slate-500 mb-3">Основатель и CEO</p>
+              <p class="text-sm text-slate-600">Бывший технический директор крупного маркетплейса.</p>
+            </div>
+            <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm text-center card-hover">
+              <img src="https://i.pravatar.cc/150?img=44" alt="" class="w-24 h-24 rounded-full mx-auto mb-4 object-cover">
+              <h3 class="font-bold text-night">Марина Соколова</h3>
+              <p class="text-sm text-slate-500 mb-3">Директор по закупкам</p>
+              <p class="text-sm text-slate-600">15 лет в ритейле и управлении цепочками поставок.</p>
+            </div>
+            <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm text-center card-hover">
+              <img src="https://i.pravatar.cc/150?img=33" alt="" class="w-24 h-24 rounded-full mx-auto mb-4 object-cover">
+              <h3 class="font-bold text-night">Иван Кузнецов</h3>
+              <p class="text-sm text-slate-500 mb-3">CTO</p>
+              <p class="text-sm text-slate-600">Строит ML-модели рекомендаций и логистики.</p>
+            </div>
+            <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm text-center card-hover">
+              <img src="https://i.pravatar.cc/150?img=9" alt="" class="w-24 h-24 rounded-full mx-auto mb-4 object-cover">
+              <h3 class="font-bold text-night">Анна Петрова</h3>
+              <p class="text-sm text-slate-500 mb-3">Директор по клиентскому опыту</p>
+              <p class="text-sm text-slate-600">Делает каждый визит удобным и приятным.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="page-careers" class="page">
+      <div class="bg-white border-b border-slate-100">
+        <div class="max-w-7xl mx-auto px-6 py-16">
+          <h1 class="text-4xl lg:text-5xl font-bold text-night mb-4">Карьера в Grocerly</h1>
+          <p class="text-lg text-slate-600 max-w-2xl">Создавайте будущее продуктового ритейла вместе с нами. Мы растём и ищем талантливых людей.</p>
+        </div>
+      </div>
+      <div class="max-w-7xl mx-auto px-6 py-12">
+        <div class="grid lg:grid-cols-3 gap-8 mb-16">
+          <div class="bg-gradient-to-br from-brand-500 to-brand-700 rounded-3xl p-8 text-white shadow-soft">
+            <h3 class="text-xl font-bold mb-3">Развитие</h3>
+            <p class="text-brand-100 leading-relaxed">Обучение, менторство и внутренние ротации между командами.</p>
+          </div>
+          <div class="bg-gradient-to-br from-accent-500 to-accent-600 rounded-3xl p-8 text-white shadow-soft">
+            <h3 class="text-xl font-bold mb-3">Комфорт</h3>
+            <p class="text-orange-100 leading-relaxed">Гибридный график, ДМС, скидки на продукты и современные офисы.</p>
+          </div>
+          <div class="bg-night rounded-3xl p-8 text-white shadow-soft">
+            <h3 class="text-xl font-bold mb-3">Влияние</h3>
+            <p class="text-slate-300 leading-relaxed">Каждый сотрудник влияет на опыт миллионов покупателей.</p>
+          </div>
+        </div>
+
+        <h2 class="text-2xl font-bold text-night mb-6">Открытые вакансии</h2>
+        <div class="space-y-4 mb-16" id="jobs-list"></div>
+
+        <div class="bg-white rounded-[2.5rem] p-8 lg:p-12 shadow-soft border border-slate-100">
+          <h2 class="text-3xl font-bold text-night mb-6">Откликнуться на вакансию</h2>
+          <form onsubmit="event.preventDefault(); showToast('Резюме отправлено! Мы свяжемся с вами.');" class="grid md:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-2">Имя и фамилия</label>
+              <input required type="text" class="w-full rounded-xl border border-slate-200 px-4 py-3" placeholder="Иван Иванов" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-2">Email</label>
+              <input required type="email" class="w-full rounded-xl border border-slate-200 px-4 py-3" placeholder="you@example.com" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-2">Вакансия</label>
+              <select class="w-full rounded-xl border border-slate-200 px-4 py-3">
+                <option>Курьер</option>
+                <option>Кассир</option>
+                <option>Управляющий магазином</option>
+                <option>Аналитик данных</option>
+                <option>Разработчик</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-2">Телефон</label>
+              <input required type="tel" class="w-full rounded-xl border border-slate-200 px-4 py-3" placeholder="+7 (999) 000-00-00" />
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-sm font-medium text-slate-700 mb-2">Сопроводительное письмо</label>
+              <textarea required rows="4" class="w-full rounded-xl border border-slate-200 px-4 py-3" placeholder="Расскажите о себе"></textarea>
+            </div>
+            <div class="md:col-span-2">
+              <button type="submit" class="btn-primary px-8 py-4 rounded-2xl font-semibold">Отправить отклик</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <section id="page-contacts" class="page">
+      <div class="bg-white border-b border-slate-100">
+        <div class="max-w-7xl mx-auto px-6 py-16">
+          <h1 class="text-4xl lg:text-5xl font-bold text-night mb-4">Контакты</h1>
+          <p class="text-lg text-slate-600 max-w-2xl">Мы на связи каждый день. Задайте вопрос, оставьте отзыв или предложите сотрудничество.</p>
+        </div>
+      </div>
+      <div class="max-w-7xl mx-auto px-6 py-12">
+        <div class="grid lg:grid-cols-2 gap-12">
+          <div class="bg-white rounded-[2.5rem] p-8 lg:p-12 shadow-soft border border-slate-100">
+            <h2 class="text-2xl font-bold text-night mb-6">Напишите нам</h2>
+            <form onsubmit="event.preventDefault(); showToast('Сообщение отправлено! Спасибо за обращение.');" class="space-y-5">
+              <div class="grid sm:grid-cols-2 gap-5">
+                <div>
+                  <label class="block text-sm font-medium text-slate-700 mb-2">Имя</label>
+                  <input required type="text" class="w-full rounded-xl border border-slate-200 px-4 py-3" placeholder="Иван" />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-slate-700 mb-2">Email</label>
+                  <input required type="email" class="w-full rounded-xl border border-slate-200 px-4 py-3" placeholder="you@example.com" />
+                </div>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">Тема</label>
+                <select class="w-full rounded-xl border border-slate-200 px-4 py-3">
+                  <option>Вопрос по заказу</option>
+                  <option>Сотрудничество</option>
+                  <option>Отзыв</option>
+                  <option>Жалоба</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">Сообщение</label>
+                <textarea required rows="5" class="w-full rounded-xl border border-slate-200 px-4 py-3" placeholder="Ваше сообщение"></textarea>
+              </div>
+              <button type="submit" class="btn-primary px-8 py-4 rounded-2xl font-semibold">Отправить сообщение</button>
+            </form>
+          </div>
+          <div class="space-y-6">
+            <div class="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm">
+              <h3 class="font-bold text-night mb-4 text-lg">Головной офис</h3>
+              <div class="space-y-3 text-slate-600">
+                <p class="flex items-start gap-3"><span class="text-xl">📍</span> Москва, ул. Садовническая, 82, офис 401</p>
+                <p class="flex items-start gap-3"><span class="text-xl">📞</span> 8 (800) 555-35-35</p>
+                <p class="flex items-start gap-3"><span class="text-xl">✉️</span> hello@grocerly.ru</p>
+              </div>
+            </div>
+            <div class="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm">
+              <h3 class="font-bold text-night mb-4 text-lg">Режим работы</h3>
+              <div class="space-y-3 text-slate-600">
+                <p class="flex justify-between"><span>Магазины</span><span class="font-medium text-night">07:00 — 23:00</span></p>
+                <p class="flex justify-between"><span>Доставка</span><span class="font-medium text-night">круглосуточно</span></p>
+                <p class="flex justify-between"><span>Служба поддержки</span><span class="font-medium text-night">24/7</span></p>
+              </div>
+            </div>
+            <div class="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm">
+              <h3 class="font-bold text-night mb-4 text-lg">Социальные сети</h3>
+              <div class="flex gap-4">
+                <a href="#" class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-2xl hover:bg-brand-100 transition">VK</a>
+                <a href="#" class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-2xl hover:bg-brand-100 transition">TG</a>
+                <a href="#" class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-2xl hover:bg-brand-100 transition">YT</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="page-cart" class="page">
+      <div class="bg-white border-b border-slate-100">
+        <div class="max-w-7xl mx-auto px-6 py-16">
+          <h1 class="text-4xl lg:text-5xl font-bold text-night mb-4">Корзина</h1>
+          <p class="text-lg text-slate-600 max-w-2xl">Проверьте состав заказа и перейдите к оформлению.</p>
+        </div>
+      </div>
+      <div class="max-w-4xl mx-auto px-6 py-12">
+        <div id="cart-empty" class="hidden text-center py-20">
+          <div class="text-7xl mb-6">🛒</div>
+          <h2 class="text-2xl font-bold text-night mb-3">Корзина пуста</h2>
+          <p class="text-slate-600 mb-8">Добавьте товары из каталога, чтобы оформить заказ.</p>
+          <button onclick="navigate('/catalog')" class="btn-primary px-8 py-4 rounded-2xl font-semibold">Перейти в каталог</button>
+        </div>
+        <div id="cart-content" class="space-y-6">
+          <div id="cart-items" class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm space-y-4"></div>
+          <div class="bg-white rounded-3xl p-8 border border-slate-100 shadow-soft">
+            <div class="flex justify-between text-lg mb-3">
+              <span class="text-slate-600">Товары</span>
+              <span id="cart-subtotal" class="font-bold text-night">0 ₽</span>
+            </div>
+            <div class="flex justify-between text-lg mb-6">
+              <span class="text-slate-600">Доставка</span>
+              <span class="font-bold text-night">199 ₽</span>
+            </div>
+            <div class="flex justify-between text-2xl font-bold text-night mb-8 pt-6 border-t border-slate-100">
+              <span>Итого</span>
+              <span id="cart-total">0 ₽</span>
+            </div>
+            <button onclick="checkout()" class="w-full btn-accent py-4 rounded-2xl font-bold text-lg">Оформить заказ</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="bg-night text-white pt-16 pb-8">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="grid md:grid-cols-4 gap-10 mb-12">
+        <div>
+          <div class="flex items-center gap-2 mb-5">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center text-white text-xl font-bold">G</div>
+            <span class="text-xl font-bold tracking-tight">Grocerly</span>
+          </div>
+          <p class="text-slate-400 text-sm leading-relaxed mb-5">Умная сеть продуктовых магазинов. Свежие продукты, быстрая доставка и технологичный сервис.</p>
+          <div class="flex gap-3">
+            <a href="#" class="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center hover:bg-brand-600 transition text-xs">VK</a>
+            <a href="#" class="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center hover:bg-brand-600 transition text-xs">TG</a>
+            <a href="#" class="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center hover:bg-brand-600 transition text-xs">YT</a>
+          </div>
+        </div>
+        <div>
+          <h4 class="font-bold mb-5">Покупателям</h4>
+          <ul class="space-y-3 text-sm text-slate-400">
+            <li><a href="#/catalog" onclick="navigate('/catalog')" class="hover:text-white transition">Каталог</a></li>
+            <li><a href="#/delivery" onclick="navigate('/delivery')" class="hover:text-white transition">Доставка</a></li>
+            <li><a href="#/stores" onclick="navigate('/stores')" class="hover:text-white transition">Магазины</a></li>
+            <li><a href="#" class="hover:text-white transition">Бонусная программа</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="font-bold mb-5">Компания</h4>
+          <ul class="space-y-3 text-sm text-slate-400">
+            <li><a href="#/about" onclick="navigate('/about')" class="hover:text-white transition">О нас</a></li>
+            <li><a href="#/careers" onclick="navigate('/careers')" class="hover:text-white transition">Карьера</a></li>
+            <li><a href="#/contacts" onclick="navigate('/contacts')" class="hover:text-white transition">Контакты</a></li>
+            <li><a href="#" class="hover:text-white transition">Поставщикам</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="font-bold mb-5">Подписка на новости</h4>
+          <p class="text-slate-400 text-sm mb-4">Получайте персональные скидки и рецепты.</p>
+          <form onsubmit="event.preventDefault(); showToast('Вы подписались на рассылку!');" class="flex gap-2">
+            <input type="email" required placeholder="Email" class="flex-1 rounded-xl bg-white/10 border border-white/10 px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:border-brand-500" />
+            <button type="submit" class="bg-brand-600 hover:bg-brand-500 text-white rounded-xl px-4 py-2.5 text-sm font-semibold transition">OK</button>
+          </form>
+        </div>
+      </div>
+      <div class="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-slate-500">
+        <p>© 2026 Grocerly. Все права защищены.</p>
+        <div class="flex gap-6">
+          <a href="#" class="hover:text-white transition">Политика конфиденциальности</a>
+          <a href="#" class="hover:text-white transition">Пользовательское соглашение</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <div id="toast" class="toast">Товар добавлен в корзину</div>
+
+  <script>
+    const products = [
+      { id: 1, name: 'Яблоки Гала', category: 'fruits', price: 149, unit: '1 кг', emoji: '🍎', badge: 'Хит' },
+      { id: 2, name: 'Авокадо Хасс', category: 'fruits', price: 279, unit: '2 шт', emoji: '🥑', badge: '' },
+      { id: 3, name: 'Бананы Эквадор', category: 'fruits', price: 129, unit: '1 кг', emoji: '🍌', badge: '' },
+      { id: 4, name: 'Апельсины Испания', category: 'fruits', price: 189, unit: '1 кг', emoji: '🍊', badge: '' },
+      { id: 5, name: 'Помидоры черри', category: 'vegetables', price: 219, unit: '500 г', emoji: '🍅', badge: '' },
+      { id: 6, name: 'Огурцы гладкие', category: 'vegetables', price: 159, unit: '1 кг', emoji: '🥒', badge: '' },
+      { id: 7, name: 'Морковь молодая', category: 'vegetables', price: 79, unit: '1 кг', emoji: '🥕', badge: 'Сезон' },
+      { id: 8, name: 'Брокколи', category: 'vegetables', price: 199, unit: '500 г', emoji: '🥦', badge: '' },
+      { id: 9, name: 'Молоко 3,2%', category: 'dairy', price: 119, unit: '1 л', emoji: '🥛', badge: '' },
+      { id: 10, name: 'Сыр Гауда', category: 'dairy', price: 349, unit: '200 г', emoji: '🧀', badge: '' },
+      { id: 11, name: 'Йогурт натуральный', category: 'dairy', price: 89, unit: '150 г', emoji: '🍶', badge: '' },
+      { id: 12, name: 'Яйца С0', category: 'dairy', price: 129, unit: '10 шт', emoji: '🥚', badge: '' },
+      { id: 13, name: 'Багет французский', category: 'bakery', price: 89, unit: '250 г', emoji: '🥖', badge: '' },
+      { id: 14, name: 'Булочки с кунжутом', category: 'bakery', price: 69, unit: '4 шт', emoji: '🍔', badge: '' },
+      { id: 15, name: 'Круассан', category: 'bakery', price: 99, unit: '1 шт', emoji: '🥐', badge: '' },
+      { id: 16, name: 'Говяжий фарш', category: 'meat', price: 459, unit: '400 г', emoji: '🥩', badge: '' },
+      { id: 17, name: 'Куриное филе', category: 'meat', price: 329, unit: '500 г', emoji: '🍗', badge: '' },
+      { id: 18, name: 'Шоколад 70%', category: 'sweets', price: 149, unit: '90 г', emoji: '🍫', badge: '' },
+      { id: 19, name: 'Мёд цветочный', category: 'sweets', price: 399, unit: '350 г', emoji: '🍯', badge: '' },
+      { id: 20, name: 'Печенье овсяное', category: 'sweets', price: 99, unit: '200 г', emoji: '🍪', badge: '' }
+    ];
+
+    const stores = [
+      { name: 'Grocerly Цветной', address: 'Москва, Цветной бульвар, 15', hours: '07:00 — 23:00', phone: '+7 (495) 123-45-67', color: '#10b981' },
+      { name: 'Grocerly Арбат', address: 'Москва, ул. Арбат, 25', hours: 'круглосуточно', phone: '+7 (495) 234-56-78', color: '#f97316' },
+      { name: 'Grocerly Бутово', address: 'Москва, ул. Скобелевская, 10', hours: '08:00 — 22:00', phone: '+7 (495) 345-67-89', color: '#10b981' },
+      { name: 'Grocerly Парк Победы', address: 'Москва, пл. Победы, 3', hours: '07:00 — 23:00', phone: '+7 (495) 456-78-90', color: '#3b82f6' }
+    ];
+
+    const jobs = [
+      { title: 'Курьер доставки', city: 'Москва', type: 'Гибкий график', salary: 'от 90 000 ₽' },
+      { title: 'Кассир-консультант', city: 'Санкт-Петербург', type: 'Сменный график', salary: 'от 65 000 ₽' },
+      { title: 'Управляющий магазином', city: 'Казань', type: 'Полный день', salary: 'от 120 000 ₽' },
+      { title: 'Аналитик данных', city: 'Москва', type: 'Гибрид', salary: 'от 180 000 ₽' },
+      { title: 'Frontend-разработчик', city: 'Удалённо', type: 'Полный день', salary: 'от 250 000 ₽' }
+    ];
+
+    let cart = JSON.parse(localStorage.getItem('grocerly_cart') || '{}');
+    let currentFilter = 'all';
+    let calcType = 'express';
+
+    function formatPrice(n) { return n.toLocaleString('ru-RU') + ' ₽'; }
+
+    function saveCart() { localStorage.setItem('grocerly_cart', JSON.stringify(cart)); updateBadge(); renderCart(); }
+
+    function updateBadge() {
+      const count = Object.values(cart).reduce((a, b) => a + b, 0);
+      const badge = document.getElementById('cart-badge');
+      badge.textContent = count;
+      badge.style.opacity = count > 0 ? '1' : '0';
+    }
+
+    function addToCart(id) {
+      cart[id] = (cart[id] || 0) + 1;
+      saveCart();
+      const p = products.find(x => x.id === id);
+      showToast(p.name + ' добавлен в корзину');
+    }
+
+    function removeFromCart(id) {
+      delete cart[id];
+      saveCart();
+    }
+
+    function changeQty(id, delta) {
+      cart[id] = (cart[id] || 0) + delta;
+      if (cart[id] <= 0) delete cart[id];
+      saveCart();
+    }
+
+    function renderProductCard(p) {
+      return `
+        <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm card-hover flex flex-col">
+          <div class="relative h-40 rounded-2xl bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center mb-5">
+            <span class="product-emoji">${p.emoji}</span>
+            ${p.badge ? `<span class="absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-bold bg-accent-500 text-white">${p.badge}</span>` : ''}
+          </div>
+          <h3 class="font-bold text-night text-lg mb-1">${p.name}</h3>
+          <p class="text-sm text-slate-500 mb-4">${p.unit}</p>
+          <div class="mt-auto flex items-center justify-between">
+            <span class="text-xl font-bold text-brand-700">${formatPrice(p.price)}</span>
+            <button onclick="addToCart(${p.id})" class="btn-primary w-11 h-11 rounded-xl flex items-center justify-center text-xl">+</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderHomeProducts() {
+      const container = document.getElementById('home-products');
+      if (!container) return;
+      container.innerHTML = products.slice(0, 8).map(renderProductCard).join('');
+    }
+
+    function renderCatalog() {
+      const grid = document.getElementById('catalog-grid');
+      if (!grid) return;
+      const filtered = currentFilter === 'all' ? products : products.filter(p => p.category === currentFilter);
+      grid.innerHTML = filtered.map(renderProductCard).join('');
+    }
+
+    function renderStores() {
+      const list = document.getElementById('stores-list');
+      if (!list) return;
+      list.innerHTML = stores.map((s, i) => `
+        <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm hover:shadow-md transition cursor-pointer" onclick="highlightStore(${i})">
+          <div class="flex items-start gap-4">
+            <div class="w-4 h-4 rounded-full mt-1.5 shrink-0" style="background:${s.color}; box-shadow:0 0 0 4px ${s.color}22"></div>
+            <div>
+              <h3 class="font-bold text-night text-lg">${s.name}</h3>
+              <p class="text-slate-500 text-sm mb-2">${s.address}</p>
+              <p class="text-sm text-slate-600"><span class="font-medium">Часы:</span> ${s.hours}</p>
+              <p class="text-sm text-slate-600"><span class="font-medium">Телефон:</span> ${s.phone}</p>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderJobs() {
+      const list = document.getElementById('jobs-list');
+      if (!list) return;
+      list.innerHTML = jobs.map(j => `
+        <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h3 class="font-bold text-night text-lg">${j.title}</h3>
+            <div class="flex flex-wrap gap-3 text-sm text-slate-500 mt-1">
+              <span class="px-2.5 py-1 rounded-lg bg-slate-100">${j.city}</span>
+              <span class="px-2.5 py-1 rounded-lg bg-slate-100">${j.type}</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-4">
+            <span class="font-bold text-brand-700 text-lg">${j.salary}</span>
+            <button onclick="showToast('Отклик отправлен на вакансию «${j.title}»')" class="btn-primary px-5 py-2.5 rounded-xl font-semibold text-sm">Откликнуться</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderCart() {
+      const itemsContainer = document.getElementById('cart-items');
+      const empty = document.getElementById('cart-empty');
+      const content = document.getElementById('cart-content');
+      if (!itemsContainer) return;
+      const ids = Object.keys(cart);
+      if (ids.length === 0) {
+        empty.classList.remove('hidden');
+        content.classList.add('hidden');
+        return;
+      }
+      empty.classList.add('hidden');
+      content.classList.remove('hidden');
+      let subtotal = 0;
+      itemsContainer.innerHTML = ids.map(id => {
+        const p = products.find(x => x.id == id);
+        const qty = cart[id];
+        const sum = p.price * qty;
+        subtotal += sum;
+        return `
+          <div class="flex items-center gap-4">
+            <div class="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center text-3xl">${p.emoji}</div>
+            <div class="flex-1">
+              <h3 class="font-bold text-night">${p.name}</h3>
+              <p class="text-sm text-slate-500">${p.unit} • ${formatPrice(p.price)}</p>
+            </div>
+            <div class="flex items-center gap-3 bg-slate-100 rounded-xl p-1">
+              <button onclick="changeQty(${p.id}, -1)" class="w-8 h-8 rounded-lg bg-white text-slate-700 font-bold shadow-sm hover:text-brand-700">−</button>
+              <span class="counter font-semibold text-night">${qty}</span>
+              <button onclick="changeQty(${p.id}, 1)" class="w-8 h-8 rounded-lg bg-white text-slate-700 font-bold shadow-sm hover:text-brand-700">+</button>
+            </div>
+            <div class="w-24 text-right font-bold text-night">${formatPrice(sum)}</div>
+            <button onclick="removeFromCart(${p.id})" class="text-slate-400 hover:text-red-500 transition">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+          </div>
+        `;
+      }).join('');
+      document.getElementById('cart-subtotal').textContent = formatPrice(subtotal);
+      document.getElementById('cart-total').textContent = formatPrice(subtotal + 199);
+    }
+
+    function checkout() {
+      if (Object.keys(cart).length === 0) return;
+      cart = {};
+      saveCart();
+      showToast('Заказ успешно оформлен! Спасибо за покупку.');
+      navigate('/');
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    function navigate(path) {
+      location.hash = '#' + path;
+      window.scrollTo(0, 0);
+    }
+
+    function renderPage() {
+      const path = location.hash.replace('#', '') || '/';
+      document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+      const pageId = 'page-' + (path === '/' ? 'home' : path.slice(1).split('/')[0]);
+      const page = document.getElementById(pageId);
+      if (page) page.classList.add('active');
+      document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.toggle('active', link.dataset.nav === path);
+      });
+      if (pageId === 'page-catalog') renderCatalog();
+      if (pageId === 'page-stores') renderStores();
+      if (pageId === 'page-careers') renderJobs();
+      if (pageId === 'page-cart') renderCart();
+    }
+
+    function highlightStore(index) {
+      document.querySelectorAll('.store-pin circle:nth-child(2)').forEach((c, i) => {
+        c.setAttribute('fill', i === index ? '#0f172a' : (i === 1 ? '#f97316' : '#10b981'));
+        c.setAttribute('r', i === index ? '14' : '10');
+      });
+    }
+
+    function updateDeliveryCalc() {
+      const sum = parseFloat(document.getElementById('calc-sum').value) || 0;
+      let cost = calcType === 'express' ? 199 : 99;
+      if (sum >= 3000) cost = 0;
+      document.getElementById('calc-result').textContent = formatPrice(cost);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderHomeProducts();
+      updateBadge();
+
+      document.getElementById('category-filters')?.addEventListener('click', e => {
+        if (!e.target.classList.contains('filter-btn')) return;
+        currentFilter = e.target.dataset.cat;
+        document.querySelectorAll('.filter-btn').forEach(b => {
+          b.classList.remove('active', 'bg-brand-600', 'text-white');
+          b.classList.add('bg-white', 'text-slate-600');
+        });
+        e.target.classList.remove('bg-white', 'text-slate-600');
+        e.target.classList.add('active', 'bg-brand-600', 'text-white');
+        renderCatalog();
+      });
+
+      document.querySelectorAll('.calc-type').forEach(btn => {
+        btn.addEventListener('click', () => {
+          calcType = btn.dataset.type;
+          document.querySelectorAll('.calc-type').forEach(b => {
+            b.classList.remove('active', 'bg-brand-50', 'text-brand-700', 'border-brand-500');
+            b.classList.add('border-slate-200', 'text-slate-600');
+          });
+          btn.classList.add('active', 'bg-brand-50', 'text-brand-700', 'border-brand-500');
+          btn.classList.remove('border-slate-200', 'text-slate-600');
+          updateDeliveryCalc();
+        });
+      });
+
+      document.getElementById('calc-sum')?.addEventListener('input', updateDeliveryCalc);
+
+      window.addEventListener('hashchange', renderPage);
+      renderPage();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FreshMarket — Premium Groceries, Delivered Fresh</title>
+<meta name="description" content="FreshMarket delivers farm-fresh produce, artisan goods, and pantry essentials straight to your door. Quality you can taste.">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        brand: {
+          50: '#eefbf2',
+          100: '#d6f5df',
+          200: '#b0ebc2',
+          300: '#7cdc9d',
+          400: '#46c475',
+          500: '#22a958',
+          600: '#0F7A40',
+          700: '#0d6937',
+          800: '#0c542e',
+          900: '#0b4527',
+          950: '#052714',
+        },
+        warm: {
+          50: '#fff8ed',
+          100: '#ffefd4',
+          200: '#ffdaa8',
+          300: '#ffc070',
+          400: '#ff9b36',
+          500: '#F5A623',
+          600: '#dd8c0c',
+          700: '#b76e0d',
+          800: '#945512',
+          900: '#784613',
+        },
+        surface: {
+          DEFAULT: '#FFFFFF',
+          alt: '#F9FAFB',
+          raised: '#FFFFFF',
+        },
+        ink: {
+          DEFAULT: '#1A1A2E',
+          muted: '#6B7280',
+          subtle: '#9CA3AF',
+          invert: '#FFFFFF',
+        }
+      },
+      fontFamily: {
+        display: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+        body: ['"Inter"', 'system-ui', 'sans-serif'],
+      },
+      borderRadius: {
+        '2xl': '1rem',
+        '3xl': '1.5rem',
+      },
+      boxShadow: {
+        'soft': '0 2px 8px rgba(15,122,64,0.06), 0 4px 24px rgba(15,122,64,0.04)',
+        'card': '0 1px 3px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.04)',
+        'elevated': '0 4px 12px rgba(0,0,0,0.06), 0 12px 40px rgba(0,0,0,0.06)',
+        'glow': '0 0 40px rgba(15,122,64,0.12)',
+      },
+      animation: {
+        'fade-up': 'fadeUp 0.6s ease-out',
+        'fade-in': 'fadeIn 0.4s ease-out',
+        'slide-right': 'slideRight 0.4s ease-out',
+        'scale-in': 'scaleIn 0.3s ease-out',
+        'float': 'float 3s ease-in-out infinite',
+        'pulse-subtle': 'pulseSubtle 2s ease-in-out infinite',
+      },
+      keyframes: {
+        fadeUp: {
+          '0%': { opacity: '0', transform: 'translateY(24px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        fadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+        slideRight: {
+          '0%': { opacity: '0', transform: 'translateX(-16px)' },
+          '100%': { opacity: '1', transform: 'translateX(0)' },
+        },
+        scaleIn: {
+          '0%': { opacity: '0', transform: 'scale(0.95)' },
+          '100%': { opacity: '1', transform: 'scale(1)' },
+        },
+        float: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-10px)' },
+        },
+        pulseSubtle: {
+          '0%, 100%': { opacity: '1' },
+          '50%': { opacity: '0.8' },
+        }
+      }
+    }
+  }
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+body { font-family: 'Inter', system-ui, sans-serif; color: #1A1A2E; background: #FAFAFA; min-height: 100vh; overflow-x: hidden; }
+body.menu-open { overflow: hidden; }
+.page { display: none; min-height: calc(100vh - 80px); }
+.page.active { display: block; animation: fadeUp 0.45s ease-out; }
+
+.nav-link { position: relative; font-size: 0.925rem; font-weight: 500; color: #6B7280; padding: 0.375rem 0; transition: color 0.2s; cursor: pointer; }
+.nav-link:hover { color: #0F7A40; }
+.nav-link.active { color: #0F7A40; }
+.nav-link.active::after { content: ''; position: absolute; bottom: -4px; left: 0; right: 0; height: 2px; background: #0F7A40; border-radius: 2px; }
+
+.btn-primary { display: inline-flex; align-items: center; gap: 0.5rem; background: #0F7A40; color: #fff; font-weight: 600; font-size: 0.9375rem; padding: 0.75rem 1.75rem; border-radius: 0.75rem; border: none; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 8px rgba(15,122,64,0.2); }
+.btn-primary:hover { background: #0d6937; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(15,122,64,0.28); }
+.btn-primary:active { transform: translateY(0); }
+.btn-secondary { display: inline-flex; align-items: center; gap: 0.5rem; background: #fff; color: #0F7A40; font-weight: 600; font-size: 0.9375rem; padding: 0.75rem 1.75rem; border-radius: 0.75rem; border: 2px solid #e8ecf0; cursor: pointer; transition: all 0.2s; }
+.btn-secondary:hover { border-color: #0F7A40; background: #eefbf2; }
+.btn-ghost { display: inline-flex; align-items: center; gap: 0.375rem; background: transparent; color: #6B7280; font-weight: 500; font-size: 0.875rem; padding: 0.5rem 1rem; border-radius: 0.75rem; border: none; cursor: pointer; transition: all 0.2s; }
+.btn-ghost:hover { background: #f3f4f6; color: #1A1A2E; }
+
+.badge { display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
+.badge-green { background: #eefbf2; color: #0F7A40; }
+.badge-warm { background: #fff8ed; color: #b76e0d; }
+.badge-sale { background: #fef2f2; color: #dc2626; }
+
+.product-card { background: #fff; border-radius: 1.25rem; padding: 1.25rem; border: 1px solid #f3f4f6; transition: all 0.3s; cursor: pointer; }
+.product-card:hover { box-shadow: 0 4px 24px rgba(0,0,0,0.06); transform: translateY(-2px); border-color: #e8ecf0; }
+
+.input-field { width: 100%; padding: 0.875rem 1rem; border: 2px solid #e8ecf0; border-radius: 0.875rem; font-size: 1rem; font-family: inherit; color: #1A1A2E; background: #fff; transition: all 0.2s; outline: none; }
+.input-field:focus { border-color: #0F7A40; box-shadow: 0 0 0 3px rgba(15,122,64,0.08); }
+.input-field::placeholder { color: #9CA3AF; }
+
+.cart-sidebar { position: fixed; top: 0; right: -420px; width: 420px; max-width: 100vw; height: 100vh; background: #fff; box-shadow: -4px 0 40px rgba(0,0,0,0.12); z-index: 100; transition: right 0.35s cubic-bezier(0.4,0,0.2,1); display: flex; flex-direction: column; }
+.cart-sidebar.open { right: 0; }
+.cart-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.35); backdrop-filter: blur(2px); z-index: 99; opacity: 0; pointer-events: none; transition: opacity 0.35s; }
+.cart-overlay.open { opacity: 1; pointer-events: auto; }
+
+.mobile-menu { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #fff; z-index: 90; transform: translateY(-100%); transition: transform 0.4s cubic-bezier(0.4,0,0.2,1); padding: 6rem 2rem 2rem; }
+.mobile-menu.open { transform: translateY(0); }
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+
+.category-pill { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.625rem 1.25rem; border-radius: 9999px; font-size: 0.875rem; font-weight: 500; border: 2px solid #e8ecf0; cursor: pointer; transition: all 0.2s; white-space: nowrap; background: #fff; color: #6B7280; }
+.category-pill:hover { border-color: #b0ebc2; color: #0F7A40; }
+.category-pill.active { background: #0F7A40; color: #fff; border-color: #0F7A40; }
+
+.faq-item { border-bottom: 1px solid #e8ecf0; }
+.faq-question { width: 100%; padding: 1.25rem 0; background: none; border: none; font-size: 1.0625rem; font-weight: 600; color: #1A1A2E; display: flex; justify-content: space-between; align-items: center; cursor: pointer; text-align: left; font-family: inherit; transition: color 0.2s; }
+.faq-question:hover { color: #0F7A40; }
+.faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.35s ease, padding 0.35s ease; }
+.faq-answer.open { max-height: 500px; padding-bottom: 1.25rem; }
+.faq-icon { transition: transform 0.3s; font-size: 1.25rem; color: #9CA3AF; }
+.faq-icon.open { transform: rotate(45deg); color: #0F7A40; }
+
+.stat-number { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; }
+
+.toast { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(100px); background: #1A1A2E; color: #fff; padding: 0.875rem 1.75rem; border-radius: 9999px; font-weight: 500; font-size: 0.9375rem; z-index: 200; opacity: 0; transition: all 0.35s cubic-bezier(0.4,0,0.2,1); pointer-events: none; box-shadow: 0 8px 32px rgba(0,0,0,0.2); }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+.gradient-hero { background: linear-gradient(135deg, #0F7A40 0%, #0d6937 30%, #0c542e 70%, #0b4527 100%); }
+.gradient-card { background: linear-gradient(135deg, #eefbf2 0%, #d6f5df 100%); }
+.gradient-warm { background: linear-gradient(135deg, #fff8ed 0%, #ffefd4 100%); }
+
+.loading-spinner { width: 24px; height: 24px; border: 3px solid #e8ecf0; border-top-color: #0F7A40; border-radius: 50%; animation: spin 0.5s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 768px) {
+  .hide-mobile { display: none !important; }
+  .show-mobile { display: block !important; }
+}
+@media (min-width: 769px) {
+  .show-mobile { display: none !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- Header / Navigation -->
+<header class="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-100">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-[72px]">
+      <!-- Logo -->
+      <div onclick="navigate('home')" class="flex items-center gap-3 cursor-pointer group" style="cursor:pointer">
+        <div class="w-10 h-10 rounded-xl bg-brand-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2C7.58 2 4 5.58 4 10c0 4 5 12 8 12s8-8 8-12c0-4.42-3.58-8-8-8z" fill="#fff"/>
+            <path d="M12 13c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z" fill="#0F7A40"/>
+            <circle cx="12" cy="8" r="3" fill="#0F7A40"/>
+            <circle cx="12" cy="8" r="2" fill="#22a958"/>
+          </svg>
+        </div>
+        <div>
+          <span class="text-lg font-bold text-brand-600 tracking-tight" style="font-family:'Plus Jakarta Sans',system-ui,sans-serif">Fresh</span><span class="text-lg font-bold text-ink tracking-tight" style="font-family:'Plus Jakarta Sans',system-ui,sans-serif">Market</span>
+        </div>
+      </div>
+      <!-- Desktop Nav -->
+      <nav class="hidden md:flex items-center gap-8">
+        <span class="nav-link active" data-page="home" onclick="navigate('home')">Home</span>
+        <span class="nav-link" data-page="shop" onclick="navigate('shop')">Shop</span>
+        <span class="nav-link" data-page="about" onclick="navigate('about')">About</span>
+        <span class="nav-link" data-page="contact" onclick="navigate('contact')">Contact</span>
+      </nav>
+      <!-- Right Actions -->
+      <div class="flex items-center gap-3">
+        <button onclick="toggleCart()" class="relative p-2.5 rounded-xl hover:bg-gray-50 transition-colors" aria-label="Cart">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1A1A2E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
+          <span id="cart-count" class="absolute -top-0.5 -right-0.5 bg-brand-600 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center" style="display:none">0</span>
+        </button>
+        <button onclick="toggleMobileMenu()" class="show-mobile p-2.5 rounded-xl hover:bg-gray-50 transition-colors" aria-label="Menu">
+          <svg id="menu-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1A1A2E" stroke-width="2.5" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Mobile Menu -->
+<div class="mobile-menu" id="mobile-menu">
+  <nav class="flex flex-col gap-4 text-xl font-semibold">
+    <span class="py-3 px-4 rounded-xl cursor-pointer hover:bg-gray-50" onclick="navigate('home');closeMobileMenu()">Home</span>
+    <span class="py-3 px-4 rounded-xl cursor-pointer hover:bg-gray-50" onclick="navigate('shop');closeMobileMenu()">Shop</span>
+    <span class="py-3 px-4 rounded-xl cursor-pointer hover:bg-gray-50" onclick="navigate('about');closeMobileMenu()">About</span>
+    <span class="py-3 px-4 rounded-xl cursor-pointer hover:bg-gray-50" onclick="navigate('contact');closeMobileMenu()">Contact</span>
+  </nav>
+</div>
+
+<!-- Cart Overlay -->
+<div class="cart-overlay" id="cart-overlay" onclick="closeCart()"></div>
+
+<!-- Cart Sidebar -->
+<div class="cart-sidebar" id="cart-sidebar">
+  <div class="flex items-center justify-between p-5 border-b border-gray-100">
+    <h3 class="text-lg font-bold" style="font-family:'Plus Jakarta Sans',system-ui,sans-serif">Shopping Cart</h3>
+    <button onclick="closeCart()" class="p-2 rounded-xl hover:bg-gray-50 transition-colors">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="flex-1 overflow-y-auto p-5" id="cart-items">
+    <div class="text-center py-12 text-ink-muted">
+      <svg class="mx-auto mb-4" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#D1D5DB" stroke-width="1.5"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
+      <p class="text-sm">Your cart is empty</p>
+      <p class="text-xs text-ink-subtle mt-1">Add some fresh groceries to get started</p>
+    </div>
+  </div>
+  <div class="border-t border-gray-100 p-5" id="cart-footer" style="display:none">
+    <div class="flex justify-between items-center mb-3">
+      <span class="text-ink-muted font-medium">Subtotal</span>
+      <span class="font-bold text-lg" id="cart-subtotal" style="font-family:'Plus Jakarta Sans',system-ui,sans-serif">$0.00</span>
+    </div>
+    <button class="btn-primary w-full justify-center text-center" onclick="checkout()">Proceed to Checkout</button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- === PAGE: HOME === -->
+<div class="page active" id="page-home">
+
+  <!-- Hero -->
+  <section class="gradient-hero relative overflow-hidden">
+    <div class="absolute inset-0 opacity-10">
+      <div class="absolute top-20 left-10 w-64 h-64 rounded-full bg-white/20 blur-3xl"></div>
+      <div class="absolute bottom-10 right-20 w-96 h-96 rounded-full bg-white/10 blur-3xl"></div>
+    </div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28 relative z-10">
+      <div class="grid lg:grid-cols-2 gap-12 items-center">
+        <div>
+          <span class="badge badge-warm mb-5 text-sm">🚚 Free delivery on orders over $50</span>
+          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white mb-6 leading-tight" style="font-family:'Plus Jakarta Sans',system-ui,sans-serif">
+            Farm-fresh groceries<br/>delivered to your door
+          </h1>
+          <p class="text-lg text-white/80 mb-8 max-w-lg leading-relaxed">
+            Hand-picked produce, artisan breads, premium meats, and pantry essentials — sourced locally and delivered within hours.
+          </p>
+          <div class="flex flex-wrap gap-3">
+            <button class="btn-primary" style="background:#fff;color:#0F7A40" onclick="navigate('shop')">
+              Shop Now
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </button>
+            <button class="btn-primary" style="background:transparent;border:2px solid rgba(255,255,255,0.3);box-shadow:none" onclick="navigate('about')">
+              Our Story
+            </button>
+          </div>
+          <div class="flex items-center gap-6 mt-10 text-white/70 text-sm">
+            <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-green-400"></span> 50K+ deliveries</div>
+            <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-green-400"></span> 200+ local farms</div>
+            <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-green-400"></span> 4.9 ★ rating</div>
+          </div>
+        </div>
+        <div class="relative hidden lg:block">
+          <div class="relative w-full aspect-square max-w-md mx-auto">
+            <div class="absolute inset-0 bg-white/10 rounded-3xl backdrop-blur-sm"></div>
+            <div class="absolute inset-4 bg-white rounded-2xl shadow-elevated p-8 flex flex-col items-center justify-center">
+              <div class="text-6xl mb-4">🥑</div>
+              <div class="text-lg font-bold text-ink">Weekly Essentials</div>
+              <div class="text-ink-muted text-sm mt-1">Starts at $34.99</div>
+              <div class="flex gap-1 mt-6">
+                <div class="w-14 h-14 rounded-2xl bg-brand-50 flex items-center justify-center text-2xl">🍎</div>
+                <div class="w-14 h-14 rounded-2xl bg-brand-50 flex items-center justify-center text-2xl">🥬</div>
+                <div class="w-14 h-14 rounded-2xl bg-brand-50 flex items-center justify-center text-2xl">🍞</div>
+                <div class="w-14 h-14 rounded-2xl bg-brand-50 flex items-center justify-center text-2xl">🧀</div>
+                <div class="w-14 h-14 rounded-2xl bg-brand-50 flex items-center justify-center text-2xl">🥚</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Categories -->
+  <section class="py-16 lg:py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <span class="badge badge-green mb-3">Categories</span>
+        <h2 class="text-3xl lg:text-4xl font-bold text-ink mb-3" style="font-family:'Plus Jakarta Sans',system-ui,sans-serif">Shop by category</h2>
+        <p class="text-ink-muted max-w-md mx-auto">Everything you need for your kitchen, curated and delivered fresh</p>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        <div onclick="navigate('shop');filterShop('vegetables')" class="group cursor-pointer bg-white rounded-2xl p-5 border border-gray-100 hover:shadow-card hover:border-brand-200 transition-all text-center">
+          <div class="w-16 h-16 rounded-2xl bg-brand-50 flex items-center justify-center text-3xl mx-auto mb-3 group-hover:scale-110 transition-transform">🥬</div>
+          <div class="font-semibold text-ink text-sm">Vegetables</div>
+          <div class="text-xs text-ink-subtle mt-1">120+ items</div>
+        </div>
+        <div onclick="navigate('shop');filterShop('fruits')" class="group cursor-pointer bg-white rounded-2xl p-5 border border-gray-100 hover:shadow-card hover:border-brand-200 transition-all text-center">
+          <div class="w-16 h-16 rounded-2xl bg-warm-50 flex items-center justify-center text-3xl mx-auto mb-3 group-hover:scale-110 transition-transform">🍎</div>
+          <div class="font-semibold text-ink text-sm">Fruits</div>
+          <div class="text-xs text-ink-subtle mt-1">80+ items</div>
+        </div>
+        <div onclick="navigate('shop');filterShop('dairy')" class="group cursor-pointer bg-white rounded-2xl p-5 border border-gray-100 hover:shadow-card hover:border-brand-200 transition-all text-center">
+          <div class="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center text-3xl mx-auto mb-3 group-hover:scale-110 transition-transform">🧀</div>
+          <div class="font-semibold text-ink text-sm">Dairy & Eggs</div>
+          <div class="text-xs text-ink-subtle mt-1">95+ items</div>
+        </div>
+        <div onclick="navigate('shop');filterShop('bakery')" class="group cursor-pointer bg-white rounded-2xl p-5 border border-gray-100 hover:shadow-card hover:border-brand-200 transition-all text-center">
+          <div class="w-16 h-16 rounded-2xl bg-amber-50 flex items-center justify-center text-3xl mx-auto mb-3 group-hover:scale-110 transition-transform">🍞</div>
+          <div class="font-semibold text-ink text-sm">Bakery</div>
+          <div class="text-xs text-ink-subtle mt-1">60+ items</div>
+        </div>
+        <div onclick="navigate('shop');filterShop('meat')" class="group cursor-pointer bg-white rounded-2xl p-5 border border-gray-100 hover:shadow-card hover:border-brand-200 transition-all text-center">
+          <div class="w-16 h-16 rounded-2xl bg-red-50 flex items-center justify-center text-3xl mx-auto mb-3 group-hover:scale-110 transition-transform">🥩</div>
+          <div class="font-semibold text-ink text-sm">Meat & Fish</div>
+          <div class="text-xs text-ink-subtle mt-1">70+ items</div>
+        </div>
+        <div onclick="navigate('shop');filterShop('pantry')" class="group cursor-pointer bg-white rounded-2xl p-5 border border-gray-100 hover:shadow-card hover:border-brand-200 transition-all text-center">
+          <div class="w-16 h-16 rounded-2xl bg-purple-50 flex items-center justify-center text-3xl mx-auto mb-3 group-hover:scale-110 transition-transform">🫘</div>
+          <div class="font-semibold text-ink text-sm">Pantry</div>
+          <div class="text-xs text-ink-subtle mt-1">150+ items</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Bestsellers -->
+  <section class="py-16 lg:py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-wrap items-end justify-between gap-4 mb-10">
+        <div>
+          <span class="badge badge-green mb-3">Bestsellers</span>
+          <h2 class="text-3xl lg:text-4xl font-bold text-ink" style="font-family:'Plus Jakarta Sans',system-ui,sans-serif">Most loved this week</h2>
+        </div>
+        <button class="btn-ghost" onclick="navigate('shop')">View all <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5" id="home-products"></div>
+    </div>
+  </section>
+
+  <!-- Promo Banner -->
+  <section class="py-16 lg:py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="gradient-card rounded-3xl p-8 lg:p-14 relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-64 h-64 rounded-full bg-brand-600/10 blur-3xl"></div>
+        <div class="absolute bottom-0 left-0 w-48 h-48 rounded-full bg-warm-500/10 blur-3xl"></div>
+        <div class="relative z-10 grid lg:grid-cols-2 gap-8 items-center">
+          <div>
+            <span class="badge badge-warm mb-4">Limited Time</span>
+            <h2 class="text-3xl lg:text-4xl font-bold text-ink mb-4" style="font-family:'Plus Jakarta Sans',system-ui,sans-serif">Get 20% off your first order</h2>
+            <p class="text-ink-muted mb-6 max-w-md">Join FreshMarket today and save on your first grocery delivery. Fresh, local, and delivered with care.</p>
+            <div class="flex gap-3">
+              <div class="input-field max-w-xs" style="background:#fff">
+                <input type="email" placeholder="Enter your email" id="promo-email" style="border:none;outline:none;width:100%;font-size:0.9375rem;font-family:inherit;color:#1A1A2E" />
+              </div>
+              <button class="btn-primary flex-shrink-0" onclick="subscribePromo()">Get Code</button>
+            </div>
+          </div>
+          <div class="hidden lg:flex justify-end">
+            <div class="relative">
+              <div class="w-48 h-48 rounded-3xl bg-white shadow-elevated flex items-center justify-center text-8xl">🎁</div>
+              <div class="absolute -top-4 -right-4 w-12 h-12 rounded-full bg-warm-500 flex items-center justify-center text-white font-bold text-sm">-20%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials -->
+  <section class="py-16 lg:py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <span class="badge badge-green mb-3">Testimonials</span>
+        <h2 class="text-3xl lg:text-4xl font-bold text-ink mb-3" style="font-family:'Plus Jakarta Sans',system-ui,sans-serif">Loved by thousands</h2>
+      </div>
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="bg-surface-alt rounded-2xl p-7 border border-gray-100">
+          <div class="flex gap-1 mb-4 text-warm-500">★ ★ ★ ★ ★</div>
+          <p class="text-ink-muted mb-5 leading-relaxed">"The quality of produce is unmatched. Everything arrives crisp and fresh — it's like having a farmer's market at my doorstep."</p>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-brand-100 flex items-center justify-center font-bold text-brand-700 text-sm">SK</div>
+            <div><div class="font-semibold text-sm">Sarah K.</div><div class="text-xs text-ink-subtle">Weekly subscriber</div></div>
+          </div>
+        </div>
+        <div class="bg-surface-alt rounded-2xl p-7 border border-gray-100">
+          <div class="flex gap-1 mb-4 text-warm-500">★ ★ ★ ★ ★</div>
+          <p class="text-ink-muted mb-5 leading-relaxed">"I switched from three different delivery services. FreshMarket's packaging and delivery speed are on another level."</p>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-warm-100 flex items-center justify-center font-bold text-warm-700 text-sm">MT</div>
+            <div><div class="font-semibold text-sm">Michael T.</div><div class="text-xs text-ink-subtle">Verified buyer</div></div>
+          </div>
+        </div>
+        <div class="bg-surface-alt rounded-2xl p-7 border border-gray-100">
+          <div class="flex gap-1 mb-4 text-warm-500">★ ★ ★ ★ ★</div>
+          <p class="text-ink-muted mb-5 leading-relaxed">"Their organic selection is incredible. Finally found a service that takes sustainability seriously without compromising on quality."</p>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-brand-100 flex items-center justify-center font-bold text-brand-700 text-sm">EL</div>
+            <div><div class="font-semibold text-sm">Elena R.</div><div class="text-xs text-ink-subtle">Organic box subscriber</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- === PAGE: SHOP === -->
+<div class="page" id="page-shop">
+  <section class="py-12 lg:py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="mb-8">
+        <h1 class="text-3xl lg:text-4xl font-bold text-ink mb-2" style="font-family:'Plus Jakarta Sans',system-ui,sans-serif">All Products</h1>
+        <p class="text-ink-muted">Browse our full catalog of fresh groceries</p>
+      </div>
+      <!-- Search + Filters -->
+      <div class="flex flex-col sm:flex-row gap-4 mb-8">
+        <div class="relative flex-1 max-w-md">
+          <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-subtle" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" placeholder="Search products..." id="shop-search" class="input-field pl-10" oninput="renderShop()" />
+        </div>
+        <div class="flex gap-2 overflow-x-auto pb-1" id="category-pills">
+          <span class="category-pill active" onclick="filterShop('all')">All</span>
+          <span class="category-pill" onclick="filterShop('vegetables')">🥬 Vegetables</span>
+          <span class="category-pill" onclick="filterShop('fruits')">🍎 Fruits</span>
+          <span class="category-pill" onclick="filterShop('dairy')">🧀 Dairy & Eggs</span>
+          <span class="category-pill" onclick="filterShop('bakery')">🍞 Bakery</span>
+          <span class="category-pill" onclick="filterShop('meat')">🥩 Meat & Fish</span>
+          <span class="category-pill" onclick="filterShop('pantry')">🫘 Pantry</span>
+        </div>
+      </div>
+      <!-- Product Grid -->
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5" id="shop-products"></div>
+      <div id="no-results" class="text-center py-20" style="display:none">
+        <div class="text-5xl mb-4">🔍</div>
+        <h3 class="text-xl font-bold text-ink mb-2">No products found</h3>
+        <p class="text-ink-muted">Try adjusting your search or filter</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- === PAGE: ABOUT === -->
+<div class="page" id="page-about">
+  <!-- Hero -->
+  <section class="gradient-hero relative overflow-hidden py-20 lg:py-24">
+    <div class="absolute inset-0 opacity-10">
+      <div class="absolute top-10 right-10 w-80 h-80 rounded-full bg-white/20 blur-3xl"></div>
+    </div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+      <span class="badge" style="background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.2)">Our Story</span>
+      <h1 class="text-4xl lg:text-5xl font-extrabold text-white mt-4 mb-5" style="font-family:'Plus Jakarta Sans',system-ui,sans-serif">Bringing the farm<br/>to your table since 2018</h1>
+      <p class="text-white/70 max-w-2xl mx-auto text-lg">We started with a simple belief: everyone deserves access to fresh, locally-sourced food without compromise.</p>
+    </div>
+  </section>
+
+  <!-- Stats -->
+  <section class="py-16 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+        <div class="p-6 rounded-2xl bg-brand-50"><div class="stat-number text-4xl font-extrabold text-brand-600 mb-1">200+</div><div class="text-ink-muted text-sm">Local farm partners</div></div>
+        <div class="p-6 rounded-2xl bg-warm-50"><div class="stat-number text-4xl font-extrabold text-warm-600 mb-1">50K+</div><div class="text-ink-muted text-sm">Happy customers</div></div>
+        <div class="p-6 rounded-2xl bg-blue-50"><div class="stat-number text-4xl font-extrabold text-blue-600 mb-1">12</div><div class="text-ink-muted text-sm">Cities served</div></div>
+        <div class="p-6 rounded-2xl bg-purple-50"><div class="stat-number text-4xl font-extrabold text-purple-600 mb-1">99.7%</div><div class="text-ink-muted text-sm">On-time delivery</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Story -->
+  <section class="py-16 lg:py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid lg:grid-cols-2 gap-12 items-center">
+        <div>
+          <span class="badge badge-green mb-4">How it started</span>
+          <h2 class="text-3xl lg:text-4xl font-bold text-ink mb-6" style="font-family:'Plus Jakarta Sans',system-ui,sans-serif">From a small stand to a nationwide network</h2>
+          <p class="text-ink-muted leading-relaxed mb-4">FreshMarket was born in a small farmer's market stall in Portland, Oregon. Our founders — two brothers from a farming family — saw firsthand how much fresh produce went to waste because there was no efficient way to connect farms directly with consumers.</p>
+          <p class="text-ink-muted leading-relaxed mb-4">In 2018, they launched FreshMarket with 5 partner farms and a single delivery van. The idea was radical: eliminate the middlemen, pay farmers fairly, and deliver produce within 24 hours of harvest.</p>
+          <p class="text-ink-muted leading-relaxed">Today, we partner with over 200 farms across the Pacific Northwest, California, and the Midwest — serving thousands of families who trust us for their weekly groceries.</p>
+        </div>
+        <div class="relative">
+          <div class="aspect-[4/3] rounded-3xl gradient-card flex items-center justify-center relative overflow-hidden">
+            <div class="text-center p-10">
+              <div class="text-7xl mb-4">🌱</div>
+              <div class="text-xl font-bold text-brand-700">Farm-to-table</div>
+              <div class="text-brand-600/70 text-sm mt-2">From our family to yours</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Values -->
+  <section class="py-16 lg:py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <span class="badge badge-green mb-3">Values</span>
+        <h2 class="text-3xl lg:text-4xl font-bold text-ink" style="font-family:'Plus Jakarta Sans',system-ui,sans-serif">What we stand for</h2>
+      </div>
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="p-7 rounded-2xl border border-gray-100 hover:shadow-card transition-all">
+          <div class="w-12 h-12 rounded-xl bg-brand-50 flex items-center justify-center text-2xl mb-4">🌍</div>
+          <h3 class="font-bold text-lg mb-2">Sustainability First</h3>
+          <p class="text-ink-muted leading-relaxed text-sm">We use 100% compostable packaging, electric delivery vehicles in urban areas, and partner exclusively with farms practicing regenerative agriculture.</p>
+        </div>
+        <div class="p-7 rounded-2xl border border-gray-100 hover:shadow-card transition-all">
+          <div class="w-12 h-12 rounded-xl bg-warm-50 flex items-center justify-center text-2xl mb-4">🤝</div>
+          <h3 class="font-bold text-lg mb-2">Fair Trade for Farmers</h3>
+          <p class="text-ink-muted leading-relaxed text-sm">We pay our partner farms an average of 35% above market rates. Every farmer sets their own prices, and we never negotiate down.</p>
+        </div>
+        <div class="p-7 rounded-2xl border border-gray-100 hover:shadow-card transition-all">
+          <div class="w-12 h-12 rounded-xl bg-purple-50 flex items-center justify-center text-2xl mb-4">🔬</div>
+          <h3 class="font-bold text-lg mb-2">Transparent Sourcing</h3>
+          <p class="text-ink-muted leading-relaxed text-sm">Every product in our catalog includes detailed origin information — you know exactly which farm grew your food and when it was harvested.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Team -->
+  <section class="py-16 lg:py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <span class="badge badge-green mb-3">Our Team</span>
+        <h2 class="text-3xl lg:text-4xl font-bold text-ink" style="font-family:'Plus Jakarta Sans',system-ui,sans-serif">Meet the people behind FreshMarket</h2>
+      </div>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="text-center p-6 rounded-2xl border border-gray-100 hover:shadow-card transition-all">
+          <div class="w-20 h-20 rounded-2xl bg-brand-100 flex items-center justify-center text-2xl font-bold text-brand-700 mx-auto mb-4">DJ</div>
+          <div class="font-bold text-lg">David Jensen</div>
+          <div class="text-sm text-ink-muted">CEO & Co-founder</div>
+          <p class="text-xs text-ink-subtle mt-2">Former organic farm manager</p>
+        </div>
+        <div class="text-center p-6 rounded-2xl border border-gray-100 hover:shadow-card transition-all">
+          <div class="w-20 h-20 rounded-2xl bg-warm-100 flex items-center justify-center text-2xl font-bold text-warm-700 mx-auto mb-4">MJ</div>
+          <div class="font-bold text-lg">Marcus Jensen</div>
+          <div class="text-sm text-ink-muted">COO & Co-founder</div>
+          <p class="text-xs text-ink-subtle mt-2">Supply chain veteran, 15 yrs</p>
+        </div>
+        <div class="text-center p-6 rounded-2xl border border-gray-100 hover:shadow-card transition-all">
+          <div class="w-20 h-20 rounded-2xl bg-purple-100 flex items-center justify-center text-2xl font-bold text-purple-700 mx-auto mb-4">LC</div>
+          <div class="font-bold text-lg">Lena Chen</div>
+          <div class="text-sm text-ink-muted">Head of Product</div>
+          <p class="text-xs text-ink-subtle mt-2">Ex-Instacart, food systems PhD</p>
+        </div>
+        <div class="text-center p-6 rounded-2xl border border-gray-100 hover:shadow-card transition-all">
+          <div class="w-20 h-20 rounded-2xl bg-blue-100 flex items-center justify-center text-2xl font-bold text-blue-700 mx-auto mb-4">RK</div>
+          <div class="font-bold text-lg">Ravi Kapoor</div>
+          <div class="text-sm text-ink-muted">Head of Engineering</div>
+          <p class="text-xs text-ink-subtle mt-2">Built logistics at Uber Freight</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- === PAGE: CONTACT === -->
+<div class="page" id="page-contact">
+  <section class="py-12 lg:py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid lg:grid-cols-2 gap-12">
+        <!-- Contact Form -->
+        <div>
+          <span class="badge badge-green mb-3">Get in touch</span>
+          <h1 class="text-3xl lg:text-4xl font-bold text-ink mb-3" style="font-family:'Plus Jakarta Sans',system-ui,sans-serif">Contact us</h1>
+          <p class="text-ink-muted mb-8">Have questions? We'd love to hear from you. Send us a message and we'll respond within 24 hours.</p>
+          <form id="contact-form" onsubmit="submitContact(event)" class="space-y-5">
+            <div class="grid sm:grid-cols-2 gap-5">
+              <div>
+                <label class="block text-sm font-medium text-ink mb-2">First name</label>
+                <input type="text" required class="input-field" placeholder="John" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-ink mb-2">Last name</label>
+                <input type="text" required class="input-field" placeholder="Doe" />
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-ink mb-2">Email</label>
+              <input type="email" required class="input-field" placeholder="john@example.com" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-ink mb-2">Subject</label>
+              <select class="input-field" style="appearance:none;background-image:url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239CA3AF' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E&quot;);background-repeat:no-repeat;background-position:right 1rem center">
+                <option value="">Select a topic</option>
+                <option>Order inquiry</option>
+                <option>Delivery issue</option>
+                <option>Partnership</option>
+                <option>Press & Media</option>
+                <option>Careers</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-ink mb-2">Message</label>
+              <textarea required class="input-field" rows="5" placeholder="Tell us how we can help..." style="resize:vertical;min-height:120px"></textarea>
+            </div>
+            <button type="submit" class="btn-primary">Send Message</button>
+          </form>
+        </div>
+        <!-- Contact Info + FAQ -->
+        <div>
+          <div class="bg-white rounded-2xl border border-gray-100 p-7 mb-8">
+            <h3 class="font-bold text-lg mb-5" style="font-family:'Plus Jakarta Sans',system-ui,sans-serif">Contact Information</h3>
+            <div class="space-y-4">
+              <div class="flex gap-3">
+                <div class="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center flex-shrink-0 text-lg">📍</div>
+                <div><div class="font-semibold text-sm">Headquarters</div><div class="text-sm text-ink-muted">1234 Market Street, Suite 500<br/>Portland, OR 97201</div></div>
+              </div>
+              <div class="flex gap-3">
+                <div class="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center flex-shrink-0 text-lg">📧</div>
+                <div><div class="font-semibold text-sm">Email</div><div class="text-sm text-ink-muted">hello@freshmarket.com</div></div>
+              </div>
+              <div class="flex gap-3">
+                <div class="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center flex-shrink-0 text-lg">📞</div>
+                <div><div class="font-semibold text-sm">Phone</div><div class="text-sm text-ink-muted">+1 (503) 555-0147</div></div>
+              </div>
+              <div class="flex gap-3">
+                <div class="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center flex-shrink-0 text-lg">🕐</div>
+                <div><div class="font-semibold text-sm">Hours</div><div class="text-sm text-ink-muted">Mon–Fri: 6AM–10PM PST<br/>Sat–Sun: 7AM–8PM PST</div></div>
+              </div>
+            </div>
+          </div>
+          <!-- FAQ -->
+          <div class="bg-white rounded-2xl border border-gray-100 p-7">
+            <h3 class="font-bold text-lg mb-1" style="font-family:'Plus Jakarta Sans',system-ui,sans-serif">Frequently Asked Questions</h3>
+            <div class="faq-item">
+              <button class="faq-question" onclick="toggleFAQ(this)">What areas do you deliver to?<span class="faq-icon">+</span></button>
+              <div class="faq-answer"><p class="text-ink-muted text-sm leading-relaxed pr-4">We currently serve 12 metropolitan areas across the West Coast, including Portland, Seattle, San Francisco, Los Angeles, San Diego, and their surrounding suburbs. Enter your ZIP code at checkout to check availability.</p></div>
+            </div>
+            <div class="faq-item">
+              <button class="faq-question" onclick="toggleFAQ(this)">How does same-day delivery work?<span class="faq-icon">+</span></button>
+              <div class="faq-answer"><p class="text-ink-muted text-sm leading-relaxed pr-4">Orders placed before 2 PM are eligible for same-day delivery. Our fleet of temperature-controlled vehicles ensures your groceries arrive fresh — typically within 2–4 hours of ordering.</p></div>
+            </div>
+            <div class="faq-item">
+              <button class="faq-question" onclick="toggleFAQ(this)">What is your return policy?<span class="faq-icon">+</span></button>
+              <div class="faq-answer"><p class="text-ink-muted text-sm leading-relaxed pr-4">If anything arrives damaged or doesn't meet your expectations, contact us within 24 hours for a full refund or replacement — no questions asked. We stand behind every item we deliver.</p></div>
+            </div>
+            <div class="faq-item">
+              <button class="faq-question" onclick="toggleFAQ(this)">Are your products organic?<span class="faq-icon">+</span></button>
+              <div class="faq-answer"><p class="text-ink-muted text-sm leading-relaxed pr-4">We offer both organic and conventional options. All organic products are USDA-certified. Every product listing clearly states its growing practices so you can make informed choices.</p></div>
+            </div>
+            <div class="faq-item">
+              <button class="faq-question" onclick="toggleFAQ(this)">How do subscriptions work?<span class="faq-icon">+</span></button>
+              <div class="faq-answer"><p class="text-ink-muted text-sm leading-relaxed pr-4">Our weekly subscription box comes in three sizes. You can customize items, skip weeks, or cancel anytime. Subscribers save 10% on every order and get priority delivery slots.</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- Footer -->
+<footer class="bg-white border-t border-gray-100 mt-12">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
+      <div class="col-span-2 md:col-span-1">
+        <div class="flex items-center gap-2 mb-4">
+          <div class="w-9 h-9 rounded-lg bg-brand-600 flex items-center justify-center">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 2C7.58 2 4 5.58 4 10c0 4 5 12 8 12s8-8 8-12c0-4.42-3.58-8-8-8z" fill="#fff"/><circle cx="12" cy="10" r="3" fill="#0F7A40"/></svg>
+          </div>
+          <span class="font-bold text-brand-600 text-lg" style="font-family:'Plus Jakarta Sans',system-ui,sans-serif">Fresh</span><span class="font-bold text-ink text-lg" style="font-family:'Plus Jakarta Sans',system-ui,sans-serif">Market</span>
+        </div>
+        <p class="text-sm text-ink-muted leading-relaxed">Fresh groceries from local farms, delivered to your door within hours.</p>
+      </div>
+      <div>
+        <h4 class="font-semibold text-ink mb-4">Shop</h4>
+        <div class="space-y-2.5">
+          <div class="text-sm text-ink-muted cursor-pointer hover:text-brand-600 transition-colors" onclick="navigate('shop');filterShop('vegetables')">Vegetables</div>
+          <div class="text-sm text-ink-muted cursor-pointer hover:text-brand-600 transition-colors" onclick="navigate('shop');filterShop('fruits')">Fruits</div>
+          <div class="text-sm text-ink-muted cursor-pointer hover:text-brand-600 transition-colors" onclick="navigate('shop');filterShop('dairy')">Dairy & Eggs</div>
+          <div class="text-sm text-ink-muted cursor-pointer hover:text-brand-600 transition-colors" onclick="navigate('shop');filterShop('bakery')">Bakery</div>
+        </div>
+      </div>
+      <div>
+        <h4 class="font-semibold text-ink mb-4">Company</h4>
+        <div class="space-y-2.5">
+          <div class="text-sm text-ink-muted cursor-pointer hover:text-brand-600 transition-colors" onclick="navigate('about')">About Us</div>
+          <div class="text-sm text-ink-muted cursor-pointer hover:text-brand-600 transition-colors" onclick="navigate('contact')">Contact</div>
+          <div class="text-sm text-ink-muted cursor-pointer hover:text-brand-600 transition-colors">Careers</div>
+          <div class="text-sm text-ink-muted cursor-pointer hover:text-brand-600 transition-colors">Press</div>
+        </div>
+      </div>
+      <div>
+        <h4 class="font-semibold text-ink mb-4">Support</h4>
+        <div class="space-y-2.5">
+          <div class="text-sm text-ink-muted cursor-pointer hover:text-brand-600 transition-colors" onclick="navigate('contact')">Help Center</div>
+          <div class="text-sm text-ink-muted cursor-pointer hover:text-brand-600 transition-colors">Privacy Policy</div>
+          <div class="text-sm text-ink-muted cursor-pointer hover:text-brand-600 transition-colors">Terms of Service</div>
+          <div class="text-sm text-ink-muted cursor-pointer hover:text-brand-600 transition-colors">Accessibility</div>
+        </div>
+      </div>
+    </div>
+    <div class="border-t border-gray-100 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+      <p class="text-sm text-ink-subtle">&copy; 2026 FreshMarket Inc. All rights reserved.</p>
+      <div class="flex gap-4">
+        <div class="w-9 h-9 rounded-lg bg-gray-50 flex items-center justify-center cursor-pointer hover:bg-brand-50 transition-colors text-ink-muted hover:text-brand-600"><span style="font-size:14px">𝕏</span></div>
+        <div class="w-9 h-9 rounded-lg bg-gray-50 flex items-center justify-center cursor-pointer hover:bg-brand-50 transition-colors text-ink-muted hover:text-brand-600"><span style="font-size:14px">📷</span></div>
+        <div class="w-9 h-9 rounded-lg bg-gray-50 flex items-center justify-center cursor-pointer hover:bg-brand-50 transition-colors text-ink-muted hover:text-brand-600"><span style="font-size:14px">📘</span></div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ===== PRODUCT DATA =====
+const products = [
+  { id:1,  name:"Organic Avocados",        emoji:"🥑", price:4.99,  category:"fruits",     tag:"Bestseller", unit:"4 pack" },
+  { id:2,  name:"Heirloom Tomatoes",       emoji:"🍅", price:3.49,  category:"vegetables", tag:"Organic",    unit:"1 lb" },
+  { id:3,  name:"Sourdough Bread",         emoji:"🍞", price:6.99,  category:"bakery",     tag:"Artisan",   unit:"loaf" },
+  { id:4,  name:"Free-Range Eggs",         emoji:"🥚", price:5.49,  category:"dairy",      tag:"Best value",unit:"dozen" },
+  { id:5,  name:"Grass-Fed Ribeye",        emoji:"🥩", price:18.99, category:"meat",       tag:"Premium",   unit:"12 oz" },
+  { id:6,  name:"Organic Baby Spinach",    emoji:"🥬", price:3.99,  category:"vegetables", tag:"Fresh",     unit:"5 oz" },
+  { id:7,  name:"Wild-Caught Salmon",      emoji:"🐟", price:14.99, category:"meat",       tag:"Wild",      unit:"8 oz" },
+  { id:8,  name:"Aged Cheddar",            emoji:"🧀", price:7.99,  category:"dairy",      tag:"Aged 18mo", unit:"8 oz" },
+  { id:9,  name:"Fresh Blueberries",       emoji:"🫐", price:4.49,  category:"fruits",     tag:"In season", unit:"pint" },
+  { id:10, name:"Organic Bananas",         emoji:"🍌", price:1.99,  category:"fruits",     tag:"Fair trade",unit:"bunch" },
+  { id:11, name:"Italian Olive Oil",       emoji:"🫒", price:12.99, category:"pantry",     tag:"Imported",  unit:"500ml" },
+  { id:12, name:"Artisan Baguette",        emoji:"🥖", price:3.99,  category:"bakery",     tag:"Fresh daily",unit:"each" },
+  { id:13, name:"Greek Yogurt",            emoji:"🥛", price:4.99,  category:"dairy",      tag:"Probiotic", unit:"32 oz" },
+  { id:14, name:"Organic Quinoa",          emoji:"🌾", price:5.99,  category:"pantry",     tag:"Protein+",  unit:"1 lb" },
+  { id:15, name:"Rainbow Chard",           emoji:"🌿", price:2.99,  category:"vegetables", tag:"Local",     unit:"bunch" },
+  { id:16, name:"Fresh Strawberries",      emoji:"🍓", price:4.99,  category:"fruits",     tag:"Sweet",     unit:"1 lb" },
+  { id:17, name:"Organic Whole Chicken",   emoji:"🍗", price:11.99, category:"meat",       tag:"Free-range",unit:"3.5 lb" },
+  { id:18, name:"Raw Honey",               emoji:"🍯", price:8.99,  category:"pantry",     tag:"Local",     unit:"12 oz" },
+  { id:19, name:"Croissant 4-Pack",        emoji:"🥐", price:5.99,  category:"bakery",     tag:"Buttery",   unit:"4 pack" },
+  { id:20, name:"Fresh Basil Bunch",       emoji:"🌱", price:2.49,  category:"vegetables", tag:"Herb",      unit:"bunch" },
+  { id:21, name:"Mozzarella di Bufala",    emoji:"🫕", price:9.99,  category:"dairy",      tag:"Imported",  unit:"8 oz" },
+  { id:22, name:"Organic Mangoes",         emoji:"🥭", price:3.99,  category:"fruits",     tag:"Tropical",  unit:"each" },
+  { id:23, name:"Black Beans",             emoji:"🫘", price:2.99,  category:"pantry",     tag:"Organic",   unit:"15 oz can" },
+  { id:24, name:"Pasture-Raised Pork Chop",emoji:"🥓", price:9.49,  category:"meat",       tag:"Heritage",  unit:"10 oz" },
+];
+
+let cart = [];
+let currentFilter = 'all';
+
+// ===== CART LOGIC =====
+function loadCart() {
+  try { cart = JSON.parse(localStorage.getItem('freshmarket_cart') || '[]'); } catch(e) { cart = []; }
+  updateCartUI();
+}
+function saveCart() {
+  localStorage.setItem('freshmarket_cart', JSON.stringify(cart));
+  updateCartUI();
+}
+function addToCart(productId) {
+  const existing = cart.find(c => c.id === productId);
+  if (existing) { existing.qty += 1; }
+  else {
+    const product = products.find(p => p.id === productId);
+    if (product) cart.push({ id: productId, qty: 1 });
+  }
+  saveCart();
+  showToast('Added to cart ✓');
+}
+function removeFromCart(productId) {
+  cart = cart.filter(c => c.id !== productId);
+  saveCart();
+}
+function updateQty(productId, delta) {
+  const item = cart.find(c => c.id === productId);
+  if (!item) return;
+  item.qty += delta;
+  if (item.qty <= 0) { removeFromCart(productId); return; }
+  saveCart();
+}
+function cartTotal() {
+  return cart.reduce((sum, c) => {
+    const p = products.find(x => x.id === c.id);
+    return sum + (p ? p.price * c.qty : 0);
+  }, 0).toFixed(2);
+}
+function cartCount() {
+  return cart.reduce((sum, c) => sum + c.qty, 0);
+}
+function updateCartUI() {
+  const countEl = document.getElementById('cart-count');
+  const count = cartCount();
+  countEl.textContent = count;
+  countEl.style.display = count > 0 ? 'flex' : 'none';
+  renderCartSidebar();
+}
+function renderCartSidebar() {
+  const container = document.getElementById('cart-items');
+  const footer = document.getElementById('cart-footer');
+  const subtotal = document.getElementById('cart-subtotal');
+  if (cart.length === 0) {
+    container.innerHTML = '<div class="text-center py-12 text-ink-muted"><svg class="mx-auto mb-4" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#D1D5DB" stroke-width="1.5"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg><p class="text-sm">Your cart is empty</p><p class="text-xs text-ink-subtle mt-1">Add some fresh groceries to get started</p></div>';
+    footer.style.display = 'none';
+  } else {
+    container.innerHTML = cart.map(c => {
+      const p = products.find(x => x.id === c.id);
+      if (!p) return '';
+      return `<div class="flex gap-3 py-3 border-b border-gray-50">
+        <div class="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center text-2xl flex-shrink-0">${p.emoji}</div>
+        <div class="flex-1 min-w-0">
+          <div class="font-semibold text-sm truncate">${p.name}</div>
+          <div class="text-xs text-ink-subtle">${p.unit}</div>
+          <div class="flex items-center gap-3 mt-1.5">
+            <button onclick="updateQty(${p.id}, -1)" class="w-7 h-7 rounded-lg border border-gray-200 flex items-center justify-center text-sm hover:bg-gray-50 transition-colors">−</button>
+            <span class="text-sm font-semibold w-6 text-center">${c.qty}</span>
+            <button onclick="updateQty(${p.id}, 1)" class="w-7 h-7 rounded-lg border border-gray-200 flex items-center justify-center text-sm hover:bg-gray-50 transition-colors">+</button>
+          </div>
+        </div>
+        <div class="text-right flex-shrink-0">
+          <div class="font-bold text-sm">$${(p.price * c.qty).toFixed(2)}</div>
+          <button onclick="removeFromCart(${p.id})" class="text-xs text-ink-subtle hover:text-red-500 transition-colors mt-1">Remove</button>
+        </div>
+      </div>`;
+    }).join('');
+    footer.style.display = 'block';
+    subtotal.textContent = '$' + cartTotal();
+  }
+}
+
+// ===== ROUTING =====
+let currentPage = 'home';
+
+function navigate(page, pushState = true) {
+  currentPage = page;
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const pageEl = document.getElementById('page-' + page);
+  if (pageEl) {
+    pageEl.classList.add('active');
+    pageEl.style.animation = 'none';
+    pageEl.offsetHeight;
+    pageEl.style.animation = '';
+  }
+  // Update nav links
+  document.querySelectorAll('.nav-link').forEach(l => {
+    l.classList.toggle('active', l.dataset.page === page);
+  });
+  // Update hash
+  if (pushState && window.location.hash !== '#' + page) {
+    history.pushState(null, '', '#' + page);
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (page === 'shop') { renderShop(); }
+  if (page === 'home') { renderHomeProducts(); }
+  closeMobileMenu();
+  closeCart();
+}
+
+window.addEventListener('hashchange', () => {
+  const page = window.location.hash.replace('#', '') || 'home';
+  navigate(page, false);
+});
+
+window.addEventListener('popstate', () => {
+  const page = window.location.hash.replace('#', '') || 'home';
+  navigate(page, false);
+});
+
+// ===== RENDER PRODUCTS =====
+function filterShop(category) {
+  currentFilter = category;
+  document.getElementById('shop-search').value = '';
+  // Update pills
+  document.querySelectorAll('#category-pills .category-pill').forEach(pill => {
+    const pillCat = pill.textContent.toLowerCase().includes('all') ? 'all' :
+      pill.textContent.toLowerCase().includes('vegetables') ? 'vegetables' :
+      pill.textContent.toLowerCase().includes('fruits') ? 'fruits' :
+      pill.textContent.toLowerCase().includes('dairy') ? 'dairy' :
+      pill.textContent.toLowerCase().includes('bakery') ? 'bakery' :
+      pill.textContent.toLowerCase().includes('meat') ? 'meat' : 'pantry';
+    pill.classList.toggle('active', pillCat === category);
+  });
+  renderShop();
+}
+
+function getFilteredProducts() {
+  let filtered = products;
+  if (currentFilter !== 'all') {
+    filtered = filtered.filter(p => p.category === currentFilter);
+  }
+  const query = (document.getElementById('shop-search')?.value || '').toLowerCase().trim();
+  if (query) {
+    filtered = filtered.filter(p => p.name.toLowerCase().includes(query) || p.category.toLowerCase().includes(query));
+  }
+  return filtered;
+}
+
+function productCardHTML(p) {
+  const tagColors = {
+    'Bestseller': 'badge-warm',
+    'Organic': 'badge-green',
+    'Artisan': 'badge-green',
+    'Best value': 'badge-warm',
+    'Premium': 'badge-warm',
+    'Fresh': 'badge-green',
+    'Wild': 'badge-green',
+    'Aged 18mo': 'badge-green',
+    'In season': 'badge-green',
+    'Fair trade': 'badge-green',
+    'Imported': 'badge-warm',
+    'Fresh daily': 'badge-green',
+    'Probiotic': 'badge-green',
+    'Protein+': 'badge-green',
+    'Local': 'badge-green',
+    'Sweet': 'badge-warm',
+    'Free-range': 'badge-green',
+    'Buttery': 'badge-warm',
+    'Herb': 'badge-green',
+    'Tropical': 'badge-warm',
+    'Heritage': 'badge-warm',
+  };
+  const tagClass = tagColors[p.tag] || 'badge-green';
+  const inCart = cart.find(c => c.id === p.id);
+  return `<div class="product-card group" onclick="event.stopPropagation();addToCart(${p.id})">
+    <div class="flex justify-between items-start mb-3">
+      <span class="badge ${tagClass} text-xs">${p.tag}</span>
+      ${inCart ? `<span class="w-6 h-6 rounded-full bg-brand-600 text-white text-xs flex items-center justify-center font-bold">${inCart.qty}</span>` : ''}
+    </div>
+    <div class="text-4xl mb-3">${p.emoji}</div>
+    <h3 class="font-semibold text-ink mb-1">${p.name}</h3>
+    <p class="text-xs text-ink-subtle mb-3">${p.unit}</p>
+    <div class="flex items-center justify-between">
+      <span class="text-lg font-bold text-ink" style="font-family:'Plus Jakarta Sans',system-ui,sans-serif">$${p.price.toFixed(2)}</span>
+      <span class="w-9 h-9 rounded-xl bg-brand-50 flex items-center justify-center text-brand-600 group-hover:bg-brand-600 group-hover:text-white transition-all flex-shrink-0">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </span>
+    </div>
+  </div>`;
+}
+
+function renderShop() {
+  const filtered = getFilteredProducts();
+  const container = document.getElementById('shop-products');
+  const noResults = document.getElementById('no-results');
+  if (filtered.length === 0) {
+    container.innerHTML = '';
+    noResults.style.display = 'block';
+  } else {
+    noResults.style.display = 'none';
+    container.innerHTML = filtered.map(p => productCardHTML(p)).join('');
+  }
+}
+
+function renderHomeProducts() {
+  const container = document.getElementById('home-products');
+  if (!container) return;
+  const bestsellers = products.filter(p => ['Bestseller','Organic','Premium','Best value','In season'].includes(p.tag)).slice(0, 8);
+  container.innerHTML = bestsellers.map(p => productCardHTML(p)).join('');
+}
+
+// ===== CART PANEL =====
+function toggleCart() {
+  const sidebar = document.getElementById('cart-sidebar');
+  const overlay = document.getElementById('cart-overlay');
+  if (sidebar.classList.contains('open')) {
+    closeCart();
+  } else {
+    sidebar.classList.add('open');
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+}
+function closeCart() {
+  document.getElementById('cart-sidebar').classList.remove('open');
+  document.getElementById('cart-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// ===== MOBILE MENU =====
+function toggleMobileMenu() {
+  const menu = document.getElementById('mobile-menu');
+  menu.classList.toggle('open');
+  document.body.classList.toggle('menu-open');
+}
+function closeMobileMenu() {
+  document.getElementById('mobile-menu').classList.remove('open');
+  document.body.classList.remove('menu-open');
+}
+
+// ===== TOAST =====
+let toastTimer;
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  clearTimeout(toastTimer);
+  toast.textContent = msg;
+  toast.classList.add('show');
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+}
+
+// ===== FAQ =====
+function toggleFAQ(btn) {
+  const answer = btn.nextElementSibling;
+  const icon = btn.querySelector('.faq-icon');
+  answer.classList.toggle('open');
+  icon.classList.toggle('open');
+}
+
+// ===== PROMO SUBSCRIPTION =====
+function subscribePromo() {
+  const email = document.getElementById('promo-email')?.value?.trim();
+  if (!email || !email.includes('@')) {
+    showToast('Please enter a valid email');
+    return;
+  }
+  showToast('Promo code sent! Check your inbox 📬');
+  document.getElementById('promo-email').value = '';
+}
+
+// ===== CONTACT FORM =====
+function submitContact(e) {
+  e.preventDefault();
+  showToast('Message sent! We'll get back to you within 24h ✓');
+  e.target.reset();
+}
+
+// ===== CHECKOUT =====
+function checkout() {
+  if (cart.length === 0) return;
+  showToast('Checkout demo — redirecting... 🛒');
+  cart = [];
+  saveCart();
+  closeCart();
+}
+
+// ===== INIT =====
+function init() {
+  loadCart();
+  renderHomeProducts();
+  const hash = window.location.hash.replace('#', '') || 'home';
+  navigate(hash, false);
+}
+
+document.addEventListener('DOMContentLoaded', init);
+
+// Close cart on Escape
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') { closeCart(); closeMobileMenu(); }
+});
+</script>
+</body>
+</html>

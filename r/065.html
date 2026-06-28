@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Список дел — Todo</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@500;600&display=swap');
+    
+    :root {
+      --primary: #6366f1;
+    }
+    
+    body {
+      font-family: 'Inter', system_ui, sans-serif;
+    }
+    
+    .font-display {
+      font-family: 'Space Grotesk', 'Inter', sans-serif;
+    }
+
+    .todo-app {
+      box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.15), 
+                  0 10px 10px -6px rgb(0 0 0 / 0.1);
+    }
+
+    .task-item {
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .task-item:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+    }
+
+    .task-item.completed {
+      opacity: 0.85;
+    }
+
+    .task-text {
+      transition: all 0.2s ease;
+    }
+    
+    .task-item.completed .task-text {
+      color: #64748b;
+      text-decoration: line-through;
+    }
+
+    .filter-btn {
+      transition: all 0.15s ease;
+      position: relative;
+    }
+    
+    .filter-btn.active {
+      background-color: #6366f1;
+      color: white;
+      box-shadow: 0 4px 14px 0 rgb(99 102 241 / 0.25);
+    }
+
+    .filter-btn.active:hover {
+      background-color: #5558e3;
+    }
+
+    .custom-checkbox {
+      width: 22px;
+      height: 22px;
+      border: 2px solid #64748b;
+      border-radius: 9999px;
+      transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+      position: relative;
+      cursor: pointer;
+    }
+    
+    .custom-checkbox:hover {
+      border-color: #6366f1;
+      box-shadow: 0 0 0 3px rgb(99 102 241 / 0.1);
+    }
+    
+    .custom-checkbox.checked {
+      background-color: #6366f1;
+      border-color: #6366f1;
+    }
+    
+    .custom-checkbox.checked::after {
+      content: '';
+      position: absolute;
+      top: 5px;
+      left: 5px;
+      width: 10px;
+      height: 6px;
+      border: solid white;
+      border-width: 0 0 2px 2px;
+      transform: rotate(-45deg);
+    }
+
+    .todo-input {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .todo-input:focus {
+      box-shadow: 0 0 0 3px rgb(99 102 241 / 0.15);
+      border-color: #6366f1;
+    }
+
+    .empty-state {
+      animation: fadeIn 0.4s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .task-row {
+      animation: slideIn 0.3s ease backwards;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .stat-number {
+      font-variant-numeric: tabular-nums;
+    }
+
+    .modern-shadow {
+      box-shadow: 0 20px 25px -15px rgb(15 23 42 / 0.1), 
+                  0 8px 10px -6px rgb(15 23 42 / 0.1);
+    }
+
+    .section-header {
+      letter-spacing: -.025em;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-200 min-h-screen py-8 px-4">
+  <div class="max-w-2xl mx-auto">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-8 px-1">
+      <div>
+        <div class="flex items-center gap-x-3">
+          <div class="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-900/50">
+            <i class="fa-solid fa-list-check text-white text-3xl"></i>
+          </div>
+          <div>
+            <h1 class="font-display text-5xl font-semibold tracking-tighter">Дела</h1>
+            <p class="text-slate-400 text-sm -mt-1">Организуй свой день</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="flex items-center gap-x-2 bg-slate-900 border border-slate-800 rounded-3xl px-1.5 py-1.5">
+        <div class="flex items-center px-4">
+          <div>
+            <div id="total-tasks" class="font-display text-3xl font-semibold tabular-nums text-indigo-400">24</div>
+            <div class="text-[10px] text-slate-500 font-medium -mt-0.5 tracking-wider">ВСЕГО</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Card -->
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl p-1 modern-shadow overflow-hidden">
+      <div class="bg-slate-900 rounded-[22px] p-6">
+        
+        <!-- Add Task -->
+        <div class="mb-6">
+          <div class="flex gap-3">
+            <div class="flex-1 relative">
+              <input 
+                id="task-input"
+                type="text" 
+                placeholder="Что нужно сделать сегодня?"
+                class="todo-input w-full bg-slate-950 border border-slate-700 focus:border-indigo-500 text-white placeholder:text-slate-500 rounded-2xl px-6 py-[18px] text-[15px] outline-none"
+                onkeypress="if (event.key === 'Enter') addTask()">
+            </div>
+            <button onclick="addTask()"
+              class="px-8 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 transition-all text-white font-semibold rounded-2xl flex items-center justify-center gap-x-2 shadow-lg shadow-indigo-900/40 text-sm tracking-wide">
+              <i class="fa-solid fa-plus"></i>
+              <span class="hidden sm:inline font-medium">Добавить</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="flex items-center gap-x-1 mb-5 px-1">
+          <div class="flex bg-slate-950 border border-slate-800 rounded-2xl p-1 flex-1 max-w-[360px]">
+            <button onclick="setFilter('all')" id="filter-all"
+              class="filter-btn active flex-1 px-5 py-[9px] text-sm font-medium rounded-[14px] flex items-center justify-center gap-x-2">
+              <i class="fa-solid fa-layer-group text-xs"></i>
+              <span>Все</span>
+            </button>
+            <button onclick="setFilter('active')" id="filter-active"
+              class="filter-btn flex-1 px-5 py-[9px] text-sm font-medium text-slate-400 hover:text-slate-200 rounded-[14px] flex items-center justify-center gap-x-2">
+              <i class="fa-solid fa-circle text-xs"></i>
+              <span>Активные</span>
+            </button>
+            <button onclick="setFilter('completed')" id="filter-completed"
+              class="filter-btn flex-1 px-5 py-[9px] text-sm font-medium text-slate-400 hover:text-slate-200 rounded-[14px] flex items-center justify-center gap-x-2">
+              <i class="fa-solid fa-check-double text-xs"></i>
+              <span>Готово</span>
+            </button>
+          </div>
+          
+          <div class="flex-1"></div>
+          
+          <button onclick="clearCompleted()" 
+            class="px-4 py-2 text-xs text-slate-400 hover:text-red-400 hover:bg-slate-950 transition-colors flex items-center gap-1.5 bg-slate-950 border border-slate-800 rounded-2xl text-[12px]">
+            <i class="fa-solid fa-trash text-xs"></i>
+            <span class="font-medium hidden md:inline">Очистить</span>
+          </button>
+        </div>
+
+        <!-- Task List -->
+        <div id="task-list" class="min-h-[320px] max-h-[380px] overflow-y-auto pr-1 custom-scroll space-y-1.5">
+          <!-- JS populated tasks -->
+        </div>
+
+        <!-- Footer Stats -->
+        <div class="flex items-center justify-between border-t border-slate-800 mt-6 pt-5 px-1 text-sm">
+          <div class="flex items-center gap-x-2">
+            <div id="active-count" 
+                 class="px-3.5 py-1 text-xs font-medium bg-slate-950 border border-slate-800 text-indigo-300 rounded-2xl flex items-center">
+              <span id="remaining-count">0</span>
+              <span class="ml-1.5 text-slate-400">осталось</span>
+            </div>
+          </div>
+          
+          <div onclick="clearCompleted()" class="cursor-pointer text-xs px-3 py-1 rounded-2xl hover:bg-slate-950 transition-colors flex items-center gap-x-2 text-slate-400 hover:text-slate-300">
+            <i class="fa-regular fa-trash-can"></i>
+            <span class="font-medium text-xs">Удалить выполненные</span>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+
+    <!-- Footer hint -->
+    <div class="text-center mt-6 text-[10px] text-slate-600 flex justify-center items-center gap-x-4">
+      <div class="flex items-center gap-1.5">
+        <div class="w-1.5 h-px bg-slate-700 flex-1"></div>
+        <span>double-click • редактировать</span>
+        <div class="w-1.5 h-px bg-slate-700 flex-1"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    // Tailwind script configuration
+    function initTailwind() {
+      document.documentElement.style.setProperty('--accent', '#6366f1');
+    }
+    
+    // State
+    let tasks = [];
+    let currentFilter = 'all';
+    
+    function loadTasks() {
+      const saved = localStorage.getItem('todo_tasks_v2');
+      if (saved) {
+        tasks = JSON.parse(saved);
+      } else {
+        // Demo tasks for first-time visitors
+        tasks = [
+          { id: Date.now() - 50000, text: "Подготовить презентацию для команды", completed: false },
+          { id: Date.now() - 40000, text: "Проверить почту и ответить коллегам", completed: true },
+          { id: Date.now() - 30000, text: "Купить продукты на неделю", completed: false },
+          { id: Date.now() - 20000, text: "Пройти 10 000 шагов", completed: true },
+          { id: Date.now() - 10000, text: "Прочитать главу из новой книги", completed: false }
+        ];
+        saveTasks();
+      }
+    }
+    
+    function saveTasks() {
+      localStorage.setItem('todo_tasks_v2', JSON.stringify(tasks));
+    }
+    
+    function renderTasks() {
+      const container = document.getElementById('task-list');
+      container.innerHTML = '';
+      
+      let filtered = tasks;
+      
+      if (currentFilter === 'active') {
+        filtered = tasks.filter(t => !t.completed);
+      } else if (currentFilter === 'completed') {
+        filtered = tasks.filter(t => t.completed);
+      }
+      
+      // Update counts
+      const remaining = tasks.filter(t => !t.completed).length;
+      const total = tasks.length;
+      const completedCount = tasks.filter(t => t.completed).length;
+      
+      document.getElementById('remaining-count').innerHTML = remaining;
+      document.getElementById('total-tasks').innerHTML = total;
+      
+      // Empty state
+      if (filtered.length === 0) {
+        let message = '';
+        let sub = '';
+        
+        if (currentFilter === 'all') {
+          message = 'Список пуст';
+          sub = 'Добавьте свою первую задачу выше';
+        } else if (currentFilter === 'active') {
+          message = 'Нет активных задач';
+          sub = 'Отличная работа!';
+        } else {
+          message = 'Готовые задачи появятся здесь';
+          sub = '';
+        }
+        
+        container.innerHTML = `
+          <div class="empty-state flex flex-col items-center justify-center py-12 text-center">
+            <div class="w-16 h-16 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-center mb-4">
+              <i class="fa-solid fa-inbox text-3xl text-slate-600"></i>
+            </div>
+            <div class="font-medium text-lg text-slate-300">${message}</div>
+            <div class="text-sm text-slate-500 mt-px">${sub}</div>
+          </div>
+        `;
+        return;
+      }
+      
+      // Render tasks
+      filtered.forEach(task => {
+        const el = createTaskElement(task);
+        container.appendChild(el);
+      });
+    }
+    
+    function createTaskElement(task) {
+      const div = document.createElement('div');
+      div.className = `task-item task-row flex items-center gap-4 bg-slate-950 border border-slate-800 hover:border-slate-700 px-5 py-[14px] rounded-2xl group`;
+      
+      if (task.completed) {
+        div.classList.add('completed');
+      }
+      
+      const checkboxHTML = task.completed 
+        ? `<div onclick="event.stopImmediatePropagation(); toggleTask(${task.id})" class="custom-checkbox checked flex-shrink-0"></div>`
+        : `<div onclick="event.stopImmediatePropagation(); toggleTask(${task.id})" class="custom-checkbox flex-shrink-0"></div>`;
+      
+      div.innerHTML = `
+        <div class="flex items-center gap-4 flex-1 min-w-0">
+          ${checkboxHTML}
+          
+          <div class="flex-1 min-w-0">
+            <div onclick="editTask(this, ${task.id})" class="task-text cursor-pointer leading-tight text-[15px] font-medium pr-4 break-words select-none">${escapeHtml(task.text)}</div>
+          </div>
+        </div>
+        
+        <div class="flex items-center gap-x-1 opacity-60 group-hover:opacity-100 transition-all">
+          <button onclick="event.stopImmediatePropagation(); deleteTask(${task.id})" 
+                  class="text-slate-400 hover:text-red-400 hover:bg-red-950/50 w-[34px] h-[34px] flex items-center justify-center rounded-[14px] transition-colors">
+            <i class="fa-solid fa-trash text-sm"></i>
+          </button>
+        </div>
+      `;
+      
+      // Double-click edit support
+      const textEl = div.querySelector('.task-text');
+      textEl.ondblclick = (e) => {
+        e.stopImmediatePropagation();
+        editTask(textEl, task.id);
+      };
+      
+      return div;
+    }
+    
+    function escapeHtml(str) {
+      return str
+        .replace(/&/g, "&")
+        .replace(/</g, "<")
+        .replace(/>/g, ">")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+    
+    function addTask() {
+      const input = document.getElementById('task-input');
+      const text = input.value.trim();
+      
+      if (!text) return;
+      
+      const newTask = {
+        id: Date.now(),
+        text: text,
+        completed: false
+      };
+      
+      tasks.unshift(newTask);
+      saveTasks();
+      input.value = '';
+      
+      renderTasks();
+      updateActiveFilterStyles();
+    }
+    
+    function toggleTask(id) {
+      tasks = tasks.map(task => {
+        if (task.id === id) {
+          return { ...task, completed: !task.completed };
+        }
+        return task;
+      });
+      
+      saveTasks();
+      renderTasks();
+    }
+    
+    function deleteTask(id) {
+      tasks = tasks.filter(t => t.id !== id);
+      saveTasks();
+      renderTasks();
+    }
+    
+    function editTask(element, id) {
+      const currentText = element.innerText.trim();
+      
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.value = currentText;
+      input.className = `w-full px-4 py-1.5 bg-slate-900 border border-indigo-700 text-white rounded-2xl text-[15px] outline-none`;
+      
+      element.innerHTML = '';
+      element.appendChild(input);
+      input.focus();
+      input.select();
+      
+      function finishEdit() {
+        const newText = input.value.trim();
+        if (newText && newText !== currentText) {
+          tasks = tasks.map(t => {
+            if (t.id === id) return { ...t, text: newText };
+            return t;
+          });
+          saveTasks();
+        }
+        renderTasks();
+      }
+      
+      input.onblur = finishEdit;
+      input.onkeypress = function(evt) {
+        if (evt.key === 'Enter') {
+          evt.preventDefault();
+          finishEdit();
+        }
+        if (evt.key === 'Escape') {
+          renderTasks();
+        }
+      };
+    }
+    
+    function setFilter(filter) {
+      currentFilter = filter;
+      
+      // update buttons
+      document.querySelectorAll('[id^="filter-"]').forEach(btn => {
+        btn.classList.remove('active');
+        btn.classList.add('text-slate-400');
+      });
+      
+      const activeBtn = document.getElementById(`filter-${filter}`);
+      activeBtn.classList.add('active');
+      activeBtn.classList.remove('text-slate-400');
+      
+      renderTasks();
+    }
+    
+    function updateActiveFilterStyles() {
+      const btns = document.querySelectorAll('[id^="filter-"]');
+      
+      btns.forEach(b => b.classList.remove('active'));
+      
+      let id = 'filter-all';
+      if (currentFilter === 'active') id = 'filter-active';
+      if (currentFilter === 'completed') id = 'filter-completed';
+      
+      const current = document.getElementById(id);
+      if (current) current.classList.add('active');
+    }
+    
+    function clearCompleted() {
+      const hasCompleted = tasks.some(t => t.completed);
+      if (!hasCompleted) return;
+      
+      if (confirm('Удалить все выполненные задачи?')) {
+        tasks = tasks.filter(t => !t.completed);
+        saveTasks();
+        renderTasks();
+      }
+    }
+    
+    function updateKeyboardShortcuts() {
+      document.addEventListener('keydown', function(e) {
+        if (e.metaKey && e.key === "/") {
+          e.preventDefault();
+          document.getElementById('task-input').focus();
+        }
+        
+        if (e.key.toLowerCase() === "?" && document.activeElement.tagName === "BODY") {
+          e.preventDefault();
+          const active = document.getElementById('filter-active');
+          active.click();
+        }
+      });
+    }
+    
+    // Boot
+    function initializeApp() {
+      initTailwind();
+      loadTasks();
+      
+      // initial render
+      renderTasks();
+      
+      // initial filter button active state
+      document.getElementById('filter-all').classList.add('active');
+      
+      // Bonus: allow enter in empty input focus
+      const inputField = document.getElementById('task-input');
+      inputField.focus();
+      
+      updateKeyboardShortcuts();
+      
+      // Easter egg: show keyboard hint once
+      setTimeout(() => {
+        if (tasks.length > 0 && window.location.search === '') {
+          // silent — no need to show
+        }
+      }, 6500);
+      
+      // Make it feel alive — random motivational reminder in console only
+      console.log('%c[Todo] Готово. Все данные хранятся в localStorage.', 'color:#64748b');
+    }
+    
+    // Start application
+    initializeApp();
+  </script>
+</body>
+</html>
