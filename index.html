@@ -2,7 +2,7 @@
 <html lang="ru"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>IGX Тест-Арена : результаты моделей</title>
-<meta name="description" content="Результаты финального теста IGX Тест-Арены: 109 генераций 10 моделей по 11 заданиям.">
+<meta name="description" content="Результаты финального теста IGX Тест-Арены: 109 генераций 10 моделей по 11 заданиям, с временем, ток/с, ценой и раннером.">
 <style>
   :root { --bg:#0a0a0b; --panel:#121214; --line:#222226; --line2:#2c2c31; --text:#ececef; --muted:#8a8a92; --faint:#5a5a61; --accent:#c9c9cf; }
   * { box-sizing:border-box; }
@@ -16,6 +16,7 @@
   .stat { color:var(--faint); font:11px ui-monospace,monospace; text-transform:uppercase; letter-spacing:1px; margin-left:auto; text-align:right; }
   .models { display:flex; gap:6px; flex-wrap:wrap; margin:14px 0 6px; }
   .chip { display:inline-flex; align-items:center; gap:6px; font:11px ui-monospace,monospace; color:var(--muted); border:1px solid var(--line2); border-radius:999px; padding:3px 9px 3px 4px; }
+  .legend { color:var(--faint); font:11px ui-monospace,monospace; margin:4px 0 0; }
   .test { margin-top:38px; }
   .thead { display:flex; align-items:baseline; gap:12px; }
   .thead .tn { font:10px ui-monospace,monospace; color:var(--faint); text-transform:uppercase; letter-spacing:2px; }
@@ -33,21 +34,23 @@
   .ph .phname { font:11px ui-monospace,monospace; color:var(--muted); }
   .badge { width:34px; height:34px; border-radius:9px; display:inline-flex; align-items:center; justify-content:center; color:#fff; font:700 16px/1 ui-monospace,monospace; }
   .badge.sm { width:20px; height:20px; border-radius:6px; font-size:11px; }
-  .meta { display:flex; align-items:center; gap:8px; padding:9px 11px; }
+  .meta { display:flex; align-items:center; gap:8px; padding:9px 11px 4px; }
   .meta .mname { font:600 12.5px sans-serif; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .meta .score { font:700 11px ui-monospace,monospace; color:#3ee89a; }
-  .meta .tps { font:11px ui-monospace,monospace; color:var(--faint); }
   .meta .open { margin-left:auto; font:10px ui-monospace,monospace; color:var(--faint); text-transform:uppercase; letter-spacing:1px; }
   .card:hover .open { color:var(--accent); }
+  .stats { display:flex; align-items:center; flex-wrap:wrap; gap:5px; padding:0 11px 10px; font:11px ui-monospace,Menlo,monospace; color:var(--muted); }
+  .stats i { color:var(--faint); font-style:normal; }
+  .stats .via { margin-left:auto; color:var(--faint); border:1px solid var(--line2); border-radius:6px; padding:1px 7px; white-space:nowrap; }
   .modal { position:fixed; inset:0; background:rgba(4,4,6,.92); display:none; z-index:50; flex-direction:column; }
   .modal.on { display:flex; }
-  .mbar { display:flex; align-items:center; gap:12px; padding:10px 16px; border-bottom:1px solid var(--line); }
+  .mbar { display:flex; align-items:center; gap:12px; padding:10px 16px; border-bottom:1px solid var(--line); flex-wrap:wrap; }
   .mbar .mt { font:600 13px sans-serif; }
   .mbar .ms { color:var(--muted); font:11px ui-monospace,monospace; }
+  .mbar .mstats { color:var(--faint); font:11px ui-monospace,monospace; }
   .mbar .x { margin-left:auto; cursor:pointer; border:1px solid var(--line2); background:var(--panel); color:var(--text); border-radius:8px; padding:6px 12px; font:12px sans-serif; }
   .mbar a.raw { color:var(--muted); font:11px ui-monospace,monospace; text-decoration:none; border:1px solid var(--line2); border-radius:8px; padding:6px 10px; }
   .modal iframe { flex:1; width:100%; border:0; background:#fff; }
-  footer { margin-top:50px; color:var(--faint); font:11px ui-monospace,monospace; border-top:1px solid var(--line); padding-top:16px; }
+  footer { margin-top:50px; color:var(--faint); font:11px/1.7 ui-monospace,monospace; border-top:1px solid var(--line); padding-top:16px; }
 </style>
 </head><body>
 <div class="wrap">
@@ -59,371 +62,484 @@
     <div class="stat">снимок 29.06.2026<br>тащите вниз &middot; клик = открыть</div>
   </header>
   <div class="models"><span class="chip"><span class="badge sm" style="background:#d97757">C</span>Claude Opus 4.8</span><span class="chip"><span class="badge sm" style="background:#10a37f">O</span>GPT-5.5</span><span class="chip"><span class="badge sm" style="background:#7c5cff">K</span>Kimi K2.7</span><span class="chip"><span class="badge sm" style="background:#ff6900">M</span>MiMo V2.5 Pro</span><span class="chip"><span class="badge sm" style="background:#5b5b5b">x</span>Grok 4.3</span><span class="chip"><span class="badge sm" style="background:#1a73e8">G</span>Gemini 3.5 Flash</span><span class="chip"><span class="badge sm" style="background:#4d6bfe">D</span>DeepSeek: DeepSeek V4 Pro</span><span class="chip"><span class="badge sm" style="background:#615ced">Q</span>Qwen: Qwen3.7 Max</span><span class="chip"><span class="badge sm" style="background:#ff4d4f">M</span>MiniMax: MiniMax M3</span><span class="chip"><span class="badge sm" style="background:#3859ff">G</span>GLM-5.2</span></div>
+  <p class="legend">на карточках: ≈время генерации &middot; токенов/с (замер) &middot; ≈цена &middot; через что сделано (раннер)</p>
   <section class="test"><div class="thead"><span class="tn">тест 17</span><h2>Магазин</h2><span class="tcount">9 моделей</span></div>
   <p class="tdesc">Создай многостраничный сайт для вымышленной сети магазина продуктов. Придумай логотип + фи</p>
-  <div class="grid"><div class="card" data-src="r/001.html" data-vw="1280" data-vh="800" data-model="Claude Opus 4.8" data-title="Магазин" tabindex="0">
+  <div class="grid"><div class="card" data-src="r/001.html" data-vw="1280" data-vh="800" data-model="Claude Opus 4.8" data-title="Магазин" data-stats="≈1м 56с · 84 ток/с · ≈$0.247 · Claude Code (CLI)" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#d97757">C</span><span class="phname">Claude Opus 4.8</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#d97757">C</span><span class="mname">Claude Opus 4.8</span><span class="tps">84 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/002.html" data-vw="1280" data-vh="800" data-model="GPT-5.5" data-title="Магазин" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#d97757">C</span><span class="mname">Claude Opus 4.8</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈1м 56с</span><i>·</i><span title="токенов в секунду (замер)">84 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.247</span><span class="via" title="через что сделано">Claude Code (CLI)</span></div>
+  </div><div class="card" data-src="r/002.html" data-vw="1280" data-vh="800" data-model="GPT-5.5" data-title="Магазин" data-stats="≈5м 12с · 29 ток/с · ≈$0.275 · OpenAI Codex (CLI)" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#10a37f">O</span><span class="phname">GPT-5.5</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#10a37f">O</span><span class="mname">GPT-5.5</span><span class="tps">29 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/003.html" data-vw="1280" data-vh="800" data-model="Kimi K2.7" data-title="Магазин" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#10a37f">O</span><span class="mname">GPT-5.5</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈5м 12с</span><i>·</i><span title="токенов в секунду (замер)">29 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.275</span><span class="via" title="через что сделано">OpenAI Codex (CLI)</span></div>
+  </div><div class="card" data-src="r/003.html" data-vw="1280" data-vh="800" data-model="Kimi K2.7" data-title="Магазин" data-stats="≈1м 08с · 233 ток/с · ≈$0.0555 · Kimi · Claude Code" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#7c5cff">K</span><span class="phname">Kimi K2.7</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#7c5cff">K</span><span class="mname">Kimi K2.7</span><span class="tps">233 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/004.html" data-vw="1280" data-vh="800" data-model="MiMo V2.5 Pro" data-title="Магазин" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#7c5cff">K</span><span class="mname">Kimi K2.7</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈1м 08с</span><i>·</i><span title="токенов в секунду (замер)">233 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0555</span><span class="via" title="через что сделано">Kimi · Claude Code</span></div>
+  </div><div class="card" data-src="r/004.html" data-vw="1280" data-vh="800" data-model="MiMo V2.5 Pro" data-title="Магазин" data-stats="≈3м 20с · 82 ток/с · MiMo · Claude Code" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#ff6900">M</span><span class="phname">MiMo V2.5 Pro</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#ff6900">M</span><span class="mname">MiMo V2.5 Pro</span><span class="tps">82 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/005.html" data-vw="1280" data-vh="800" data-model="Grok 4.3" data-title="Магазин" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#ff6900">M</span><span class="mname">MiMo V2.5 Pro</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈3м 20с</span><i>·</i><span title="токенов в секунду (замер)">82 ток/с</span><span class="via" title="через что сделано">MiMo · Claude Code</span></div>
+  </div><div class="card" data-src="r/005.html" data-vw="1280" data-vh="800" data-model="Grok 4.3" data-title="Магазин" data-stats="≈1м 57с · 86 ток/с · ≈$0.0255 · opencode · OpenRouter" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#5b5b5b">x</span><span class="phname">Grok 4.3</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#5b5b5b">x</span><span class="mname">Grok 4.3</span><span class="tps">86 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/006.html" data-vw="1280" data-vh="800" data-model="Gemini 3.5 Flash" data-title="Магазин" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#5b5b5b">x</span><span class="mname">Grok 4.3</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈1м 57с</span><i>·</i><span title="токенов в секунду (замер)">86 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0255</span><span class="via" title="через что сделано">opencode · OpenRouter</span></div>
+  </div><div class="card" data-src="r/006.html" data-vw="1280" data-vh="800" data-model="Gemini 3.5 Flash" data-title="Магазин" data-stats="≈1м 32с · 140 ток/с · ≈$0.117 · OpenRouter REST" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#1a73e8">G</span><span class="phname">Gemini 3.5 Flash</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#1a73e8">G</span><span class="mname">Gemini 3.5 Flash</span><span class="tps">140 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/007.html" data-vw="1280" data-vh="800" data-model="DeepSeek: DeepSeek V4 Pro" data-title="Магазин" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#1a73e8">G</span><span class="mname">Gemini 3.5 Flash</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈1м 32с</span><i>·</i><span title="токенов в секунду (замер)">140 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.117</span><span class="via" title="через что сделано">OpenRouter REST</span></div>
+  </div><div class="card" data-src="r/007.html" data-vw="1280" data-vh="800" data-model="DeepSeek: DeepSeek V4 Pro" data-title="Магазин" data-stats="≈3м 14с · 81 ток/с · ≈$0.0137 · opencode · OpenRouter" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#4d6bfe">D</span><span class="phname">DeepSeek: DeepSeek V4 Pro</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#4d6bfe">D</span><span class="mname">DeepSeek: DeepSeek V4 Pro</span><span class="tps">81 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/008.html" data-vw="1280" data-vh="800" data-model="Qwen: Qwen3.7 Max" data-title="Магазин" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#4d6bfe">D</span><span class="mname">DeepSeek: DeepSeek V4 Pro</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈3м 14с</span><i>·</i><span title="токенов в секунду (замер)">81 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0137</span><span class="via" title="через что сделано">opencode · OpenRouter</span></div>
+  </div><div class="card" data-src="r/008.html" data-vw="1280" data-vh="800" data-model="Qwen: Qwen3.7 Max" data-title="Магазин" data-stats="≈5м 24с · 53 ток/с · ≈$0.0650 · opencode · OpenRouter" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#615ced">Q</span><span class="phname">Qwen: Qwen3.7 Max</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#615ced">Q</span><span class="mname">Qwen: Qwen3.7 Max</span><span class="tps">53 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/009.html" data-vw="1280" data-vh="800" data-model="MiniMax: MiniMax M3" data-title="Магазин" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#615ced">Q</span><span class="mname">Qwen: Qwen3.7 Max</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈5м 24с</span><i>·</i><span title="токенов в секунду (замер)">53 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0650</span><span class="via" title="через что сделано">opencode · OpenRouter</span></div>
+  </div><div class="card" data-src="r/009.html" data-vw="1280" data-vh="800" data-model="MiniMax: MiniMax M3" data-title="Магазин" data-stats="≈18м 07с · 37 ток/с · ≈$0.0484 · opencode · OpenRouter" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#ff4d4f">M</span><span class="phname">MiniMax: MiniMax M3</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#ff4d4f">M</span><span class="mname">MiniMax: MiniMax M3</span><span class="tps">37 ток/с</span><span class="open">развернуть</span></div>
+    <div class="meta"><span class="badge sm" style="background:#ff4d4f">M</span><span class="mname">MiniMax: MiniMax M3</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈18м 07с</span><i>·</i><span title="токенов в секунду (замер)">37 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0484</span><span class="via" title="через что сделано">opencode · OpenRouter</span></div>
   </div></div></section>
 <section class="test"><div class="thead"><span class="tn">тест 18</span><h2>CS</h2><span class="tcount">10 моделей</span></div>
   <p class="tdesc">Создай 3д игру Counter Strike 1.6 карта de_dust 2 / Сохрани механики и звук + задеплой</p>
-  <div class="grid"><div class="card" data-src="r/010.html" data-vw="1280" data-vh="800" data-model="Claude Opus 4.8" data-title="CS" tabindex="0">
+  <div class="grid"><div class="card" data-src="r/010.html" data-vw="1280" data-vh="800" data-model="Claude Opus 4.8" data-title="CS" data-stats="≈3м 34с · 69 ток/с · ≈$0.369 · Claude Code (CLI)" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#d97757">C</span><span class="phname">Claude Opus 4.8</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#d97757">C</span><span class="mname">Claude Opus 4.8</span><span class="tps">69 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/011.html" data-vw="1280" data-vh="800" data-model="GPT-5.5" data-title="CS" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#d97757">C</span><span class="mname">Claude Opus 4.8</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈3м 34с</span><i>·</i><span title="токенов в секунду (замер)">69 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.369</span><span class="via" title="через что сделано">Claude Code (CLI)</span></div>
+  </div><div class="card" data-src="r/011.html" data-vw="1280" data-vh="800" data-model="GPT-5.5" data-title="CS" data-stats="≈4м 26с · 32 ток/с · ≈$0.255 · OpenAI Codex (CLI)" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#10a37f">O</span><span class="phname">GPT-5.5</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#10a37f">O</span><span class="mname">GPT-5.5</span><span class="tps">32 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/012.html" data-vw="1280" data-vh="800" data-model="GLM-5.2" data-title="CS" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#10a37f">O</span><span class="mname">GPT-5.5</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈4м 26с</span><i>·</i><span title="токенов в секунду (замер)">32 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.255</span><span class="via" title="через что сделано">OpenAI Codex (CLI)</span></div>
+  </div><div class="card" data-src="r/012.html" data-vw="1280" data-vh="800" data-model="GLM-5.2" data-title="CS" data-stats="≈3м 56с · 58 ток/с · ≈$0.0603 · GLM Coding Plan · Claude Code" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#3859ff">G</span><span class="phname">GLM-5.2</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#3859ff">G</span><span class="mname">GLM-5.2</span><span class="tps">58 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/013.html" data-vw="1280" data-vh="800" data-model="Kimi K2.7" data-title="CS" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#3859ff">G</span><span class="mname">GLM-5.2</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈3м 56с</span><i>·</i><span title="токенов в секунду (замер)">58 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0603</span><span class="via" title="через что сделано">GLM Coding Plan · Claude Code</span></div>
+  </div><div class="card" data-src="r/013.html" data-vw="1280" data-vh="800" data-model="Kimi K2.7" data-title="CS" data-stats="≈4м 28с · 45 ток/с · ≈$0.0422 · Kimi · Claude Code" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#7c5cff">K</span><span class="phname">Kimi K2.7</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#7c5cff">K</span><span class="mname">Kimi K2.7</span><span class="tps">45 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/014.html" data-vw="1280" data-vh="800" data-model="MiMo V2.5 Pro" data-title="CS" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#7c5cff">K</span><span class="mname">Kimi K2.7</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈4м 28с</span><i>·</i><span title="токенов в секунду (замер)">45 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0422</span><span class="via" title="через что сделано">Kimi · Claude Code</span></div>
+  </div><div class="card" data-src="r/014.html" data-vw="1280" data-vh="800" data-model="MiMo V2.5 Pro" data-title="CS" data-stats="≈2м 13с · 75 ток/с · MiMo · Claude Code" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#ff6900">M</span><span class="phname">MiMo V2.5 Pro</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#ff6900">M</span><span class="mname">MiMo V2.5 Pro</span><span class="tps">75 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/015.html" data-vw="1280" data-vh="800" data-model="Grok 4.3" data-title="CS" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#ff6900">M</span><span class="mname">MiMo V2.5 Pro</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈2м 13с</span><i>·</i><span title="токенов в секунду (замер)">75 ток/с</span><span class="via" title="через что сделано">MiMo · Claude Code</span></div>
+  </div><div class="card" data-src="r/015.html" data-vw="1280" data-vh="800" data-model="Grok 4.3" data-title="CS" data-stats="≈2м 11с · 29 ток/с · ≈$0.0099 · opencode · OpenRouter" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#5b5b5b">x</span><span class="phname">Grok 4.3</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#5b5b5b">x</span><span class="mname">Grok 4.3</span><span class="tps">29 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/016.html" data-vw="1280" data-vh="800" data-model="Gemini 3.5 Flash" data-title="CS" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#5b5b5b">x</span><span class="mname">Grok 4.3</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈2м 11с</span><i>·</i><span title="токенов в секунду (замер)">29 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0099</span><span class="via" title="через что сделано">opencode · OpenRouter</span></div>
+  </div><div class="card" data-src="r/016.html" data-vw="1280" data-vh="800" data-model="Gemini 3.5 Flash" data-title="CS" data-stats="≈1м 30с · 130 ток/с · ≈$0.105 · OpenRouter REST" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#1a73e8">G</span><span class="phname">Gemini 3.5 Flash</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#1a73e8">G</span><span class="mname">Gemini 3.5 Flash</span><span class="tps">130 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/017.html" data-vw="1280" data-vh="800" data-model="DeepSeek: DeepSeek V4 Pro" data-title="CS" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#1a73e8">G</span><span class="mname">Gemini 3.5 Flash</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈1м 30с</span><i>·</i><span title="токенов в секунду (замер)">130 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.105</span><span class="via" title="через что сделано">OpenRouter REST</span></div>
+  </div><div class="card" data-src="r/017.html" data-vw="1280" data-vh="800" data-model="DeepSeek: DeepSeek V4 Pro" data-title="CS" data-stats="≈5м 50с · 39 ток/с · ≈$0.0119 · opencode · OpenRouter" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#4d6bfe">D</span><span class="phname">DeepSeek: DeepSeek V4 Pro</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#4d6bfe">D</span><span class="mname">DeepSeek: DeepSeek V4 Pro</span><span class="tps">39 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/018.html" data-vw="1280" data-vh="800" data-model="Qwen: Qwen3.7 Max" data-title="CS" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#4d6bfe">D</span><span class="mname">DeepSeek: DeepSeek V4 Pro</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈5м 50с</span><i>·</i><span title="токенов в секунду (замер)">39 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0119</span><span class="via" title="через что сделано">opencode · OpenRouter</span></div>
+  </div><div class="card" data-src="r/018.html" data-vw="1280" data-vh="800" data-model="Qwen: Qwen3.7 Max" data-title="CS" data-stats="≈3м 55с · 44 ток/с · ≈$0.0393 · opencode · OpenRouter" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#615ced">Q</span><span class="phname">Qwen: Qwen3.7 Max</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#615ced">Q</span><span class="mname">Qwen: Qwen3.7 Max</span><span class="tps">44 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/019.html" data-vw="1280" data-vh="800" data-model="MiniMax: MiniMax M3" data-title="CS" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#615ced">Q</span><span class="mname">Qwen: Qwen3.7 Max</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈3м 55с</span><i>·</i><span title="токенов в секунду (замер)">44 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0393</span><span class="via" title="через что сделано">opencode · OpenRouter</span></div>
+  </div><div class="card" data-src="r/019.html" data-vw="1280" data-vh="800" data-model="MiniMax: MiniMax M3" data-title="CS" data-stats="≈10м 17с · 58 ток/с · ≈$0.0430 · opencode · OpenRouter" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#ff4d4f">M</span><span class="phname">MiniMax: MiniMax M3</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#ff4d4f">M</span><span class="mname">MiniMax: MiniMax M3</span><span class="tps">58 ток/с</span><span class="open">развернуть</span></div>
+    <div class="meta"><span class="badge sm" style="background:#ff4d4f">M</span><span class="mname">MiniMax: MiniMax M3</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈10м 17с</span><i>·</i><span title="токенов в секунду (замер)">58 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0430</span><span class="via" title="через что сделано">opencode · OpenRouter</span></div>
   </div></div></section>
 <section class="test"><div class="thead"><span class="tn">тест 19</span><h2>Барабаны</h2><span class="tcount">10 моделей</span></div>
   <p class="tdesc">Создай 3д барабанные инструменты на студии что воспроизводят звуки. threejs &gt; Задеплой</p>
-  <div class="grid"><div class="card" data-src="r/020.html" data-vw="1280" data-vh="800" data-model="Claude Opus 4.8" data-title="Барабаны" tabindex="0">
+  <div class="grid"><div class="card" data-src="r/020.html" data-vw="1280" data-vh="800" data-model="Claude Opus 4.8" data-title="Барабаны" data-stats="≈1м 21с · 92 ток/с · ≈$0.187 · Claude Code (CLI)" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#d97757">C</span><span class="phname">Claude Opus 4.8</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#d97757">C</span><span class="mname">Claude Opus 4.8</span><span class="tps">92 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/021.html" data-vw="1280" data-vh="800" data-model="GPT-5.5" data-title="Барабаны" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#d97757">C</span><span class="mname">Claude Opus 4.8</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈1м 21с</span><i>·</i><span title="токенов в секунду (замер)">92 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.187</span><span class="via" title="через что сделано">Claude Code (CLI)</span></div>
+  </div><div class="card" data-src="r/021.html" data-vw="1280" data-vh="800" data-model="GPT-5.5" data-title="Барабаны" data-stats="≈5м 35с · 30 ток/с · ≈$0.305 · OpenAI Codex (CLI)" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#10a37f">O</span><span class="phname">GPT-5.5</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#10a37f">O</span><span class="mname">GPT-5.5</span><span class="tps">30 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/022.html" data-vw="1280" data-vh="800" data-model="GLM-5.2" data-title="Барабаны" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#10a37f">O</span><span class="mname">GPT-5.5</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈5м 35с</span><i>·</i><span title="токенов в секунду (замер)">30 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.305</span><span class="via" title="через что сделано">OpenAI Codex (CLI)</span></div>
+  </div><div class="card" data-src="r/022.html" data-vw="1280" data-vh="800" data-model="GLM-5.2" data-title="Барабаны" data-stats="≈2м 43с · 66 ток/с · ≈$0.0474 · GLM Coding Plan · Claude Code" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#3859ff">G</span><span class="phname">GLM-5.2</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#3859ff">G</span><span class="mname">GLM-5.2</span><span class="tps">66 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/023.html" data-vw="1280" data-vh="800" data-model="Kimi K2.7" data-title="Барабаны" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#3859ff">G</span><span class="mname">GLM-5.2</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈2м 43с</span><i>·</i><span title="токенов в секунду (замер)">66 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0474</span><span class="via" title="через что сделано">GLM Coding Plan · Claude Code</span></div>
+  </div><div class="card" data-src="r/023.html" data-vw="1280" data-vh="800" data-model="Kimi K2.7" data-title="Барабаны" data-stats="≈33 с · 235 ток/с · ≈$0.0274 · Kimi · Claude Code" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#7c5cff">K</span><span class="phname">Kimi K2.7</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#7c5cff">K</span><span class="mname">Kimi K2.7</span><span class="tps">235 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/024.html" data-vw="1280" data-vh="800" data-model="MiMo V2.5 Pro" data-title="Барабаны" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#7c5cff">K</span><span class="mname">Kimi K2.7</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈33 с</span><i>·</i><span title="токенов в секунду (замер)">235 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0274</span><span class="via" title="через что сделано">Kimi · Claude Code</span></div>
+  </div><div class="card" data-src="r/024.html" data-vw="1280" data-vh="800" data-model="MiMo V2.5 Pro" data-title="Барабаны" data-stats="≈2м 14с · 81 ток/с · MiMo · Claude Code" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#ff6900">M</span><span class="phname">MiMo V2.5 Pro</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#ff6900">M</span><span class="mname">MiMo V2.5 Pro</span><span class="tps">81 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/025.html" data-vw="1280" data-vh="800" data-model="Grok 4.3" data-title="Барабаны" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#ff6900">M</span><span class="mname">MiMo V2.5 Pro</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈2м 14с</span><i>·</i><span title="токенов в секунду (замер)">81 ток/с</span><span class="via" title="через что сделано">MiMo · Claude Code</span></div>
+  </div><div class="card" data-src="r/025.html" data-vw="1280" data-vh="800" data-model="Grok 4.3" data-title="Барабаны" data-stats="≈1м 22с · 55 ток/с · ≈$0.0117 · opencode · OpenRouter" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#5b5b5b">x</span><span class="phname">Grok 4.3</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#5b5b5b">x</span><span class="mname">Grok 4.3</span><span class="tps">55 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/026.html" data-vw="1280" data-vh="800" data-model="Gemini 3.5 Flash" data-title="Барабаны" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#5b5b5b">x</span><span class="mname">Grok 4.3</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈1м 22с</span><i>·</i><span title="токенов в секунду (замер)">55 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0117</span><span class="via" title="через что сделано">opencode · OpenRouter</span></div>
+  </div><div class="card" data-src="r/026.html" data-vw="1280" data-vh="800" data-model="Gemini 3.5 Flash" data-title="Барабаны" data-stats="≈57 с · 201 ток/с · ≈$0.104 · OpenRouter REST" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#1a73e8">G</span><span class="phname">Gemini 3.5 Flash</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#1a73e8">G</span><span class="mname">Gemini 3.5 Flash</span><span class="tps">201 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/027.html" data-vw="1280" data-vh="800" data-model="DeepSeek: DeepSeek V4 Pro" data-title="Барабаны" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#1a73e8">G</span><span class="mname">Gemini 3.5 Flash</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈57 с</span><i>·</i><span title="токенов в секунду (замер)">201 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.104</span><span class="via" title="через что сделано">OpenRouter REST</span></div>
+  </div><div class="card" data-src="r/027.html" data-vw="1280" data-vh="800" data-model="DeepSeek: DeepSeek V4 Pro" data-title="Барабаны" data-stats="≈2м 34с · 67 ток/с · ≈$0.0090 · opencode · OpenRouter" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#4d6bfe">D</span><span class="phname">DeepSeek: DeepSeek V4 Pro</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#4d6bfe">D</span><span class="mname">DeepSeek: DeepSeek V4 Pro</span><span class="tps">67 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/028.html" data-vw="1280" data-vh="800" data-model="Qwen: Qwen3.7 Max" data-title="Барабаны" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#4d6bfe">D</span><span class="mname">DeepSeek: DeepSeek V4 Pro</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈2м 34с</span><i>·</i><span title="токенов в секунду (замер)">67 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0090</span><span class="via" title="через что сделано">opencode · OpenRouter</span></div>
+  </div><div class="card" data-src="r/028.html" data-vw="1280" data-vh="800" data-model="Qwen: Qwen3.7 Max" data-title="Барабаны" data-stats="≈2м 46с · 47 ток/с · ≈$0.0292 · opencode · OpenRouter" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#615ced">Q</span><span class="phname">Qwen: Qwen3.7 Max</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#615ced">Q</span><span class="mname">Qwen: Qwen3.7 Max</span><span class="tps">47 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/029.html" data-vw="1280" data-vh="800" data-model="MiniMax: MiniMax M3" data-title="Барабаны" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#615ced">Q</span><span class="mname">Qwen: Qwen3.7 Max</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈2м 46с</span><i>·</i><span title="токенов в секунду (замер)">47 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0292</span><span class="via" title="через что сделано">opencode · OpenRouter</span></div>
+  </div><div class="card" data-src="r/029.html" data-vw="1280" data-vh="800" data-model="MiniMax: MiniMax M3" data-title="Барабаны" data-stats="≈12м 25с · 20 ток/с · ≈$0.0180 · opencode · OpenRouter" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#ff4d4f">M</span><span class="phname">MiniMax: MiniMax M3</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#ff4d4f">M</span><span class="mname">MiniMax: MiniMax M3</span><span class="tps">20 ток/с</span><span class="open">развернуть</span></div>
+    <div class="meta"><span class="badge sm" style="background:#ff4d4f">M</span><span class="mname">MiniMax: MiniMax M3</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈12м 25с</span><i>·</i><span title="токенов в секунду (замер)">20 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0180</span><span class="via" title="через что сделано">opencode · OpenRouter</span></div>
   </div></div></section>
 <section class="test"><div class="thead"><span class="tn">тест 20</span><h2>Flappy Bird</h2><span class="tcount">10 моделей</span></div>
   <p class="tdesc">Создай 3д игру Flappy Bird и задеплой</p>
-  <div class="grid"><div class="card" data-src="r/030.html" data-vw="1280" data-vh="800" data-model="Claude Opus 4.8" data-title="Flappy Bird" tabindex="0">
+  <div class="grid"><div class="card" data-src="r/030.html" data-vw="1280" data-vh="800" data-model="Claude Opus 4.8" data-title="Flappy Bird" data-stats="≈60 с · 83 ток/с · ≈$0.126 · Claude Code (CLI)" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#d97757">C</span><span class="phname">Claude Opus 4.8</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#d97757">C</span><span class="mname">Claude Opus 4.8</span><span class="tps">83 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/031.html" data-vw="1280" data-vh="800" data-model="GPT-5.5" data-title="Flappy Bird" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#d97757">C</span><span class="mname">Claude Opus 4.8</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈60 с</span><i>·</i><span title="токенов в секунду (замер)">83 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.126</span><span class="via" title="через что сделано">Claude Code (CLI)</span></div>
+  </div><div class="card" data-src="r/031.html" data-vw="1280" data-vh="800" data-model="GPT-5.5" data-title="Flappy Bird" data-stats="≈5м 32с · 29 ток/с · ≈$0.286 · OpenAI Codex (CLI)" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#10a37f">O</span><span class="phname">GPT-5.5</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#10a37f">O</span><span class="mname">GPT-5.5</span><span class="tps">29 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/032.html" data-vw="1280" data-vh="800" data-model="GLM-5.2" data-title="Flappy Bird" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#10a37f">O</span><span class="mname">GPT-5.5</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈5м 32с</span><i>·</i><span title="токенов в секунду (замер)">29 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.286</span><span class="via" title="через что сделано">OpenAI Codex (CLI)</span></div>
+  </div><div class="card" data-src="r/032.html" data-vw="1280" data-vh="800" data-model="GLM-5.2" data-title="Flappy Bird" data-stats="≈2м 31с · 57 ток/с · ≈$0.0380 · GLM Coding Plan · Claude Code" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#3859ff">G</span><span class="phname">GLM-5.2</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#3859ff">G</span><span class="mname">GLM-5.2</span><span class="tps">57 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/033.html" data-vw="1280" data-vh="800" data-model="Kimi K2.7" data-title="Flappy Bird" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#3859ff">G</span><span class="mname">GLM-5.2</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈2м 31с</span><i>·</i><span title="токенов в секунду (замер)">57 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0380</span><span class="via" title="через что сделано">GLM Coding Plan · Claude Code</span></div>
+  </div><div class="card" data-src="r/033.html" data-vw="1280" data-vh="800" data-model="Kimi K2.7" data-title="Flappy Bird" data-stats="≈35 с · 208 ток/с · ≈$0.0254 · Kimi · Claude Code" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#7c5cff">K</span><span class="phname">Kimi K2.7</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#7c5cff">K</span><span class="mname">Kimi K2.7</span><span class="tps">208 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/034.html" data-vw="1280" data-vh="800" data-model="MiMo V2.5 Pro" data-title="Flappy Bird" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#7c5cff">K</span><span class="mname">Kimi K2.7</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈35 с</span><i>·</i><span title="токенов в секунду (замер)">208 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0254</span><span class="via" title="через что сделано">Kimi · Claude Code</span></div>
+  </div><div class="card" data-src="r/034.html" data-vw="1280" data-vh="800" data-model="MiMo V2.5 Pro" data-title="Flappy Bird" data-stats="≈1м 52с · 75 ток/с · MiMo · Claude Code" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#ff6900">M</span><span class="phname">MiMo V2.5 Pro</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#ff6900">M</span><span class="mname">MiMo V2.5 Pro</span><span class="tps">75 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/035.html" data-vw="1280" data-vh="800" data-model="Grok 4.3" data-title="Flappy Bird" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#ff6900">M</span><span class="mname">MiMo V2.5 Pro</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈1м 52с</span><i>·</i><span title="токенов в секунду (замер)">75 ток/с</span><span class="via" title="через что сделано">MiMo · Claude Code</span></div>
+  </div><div class="card" data-src="r/035.html" data-vw="1280" data-vh="800" data-model="Grok 4.3" data-title="Flappy Bird" data-stats="≈59 с · 42 ток/с · ≈$0.0066 · opencode · OpenRouter" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#5b5b5b">x</span><span class="phname">Grok 4.3</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#5b5b5b">x</span><span class="mname">Grok 4.3</span><span class="tps">42 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/036.html" data-vw="1280" data-vh="800" data-model="Gemini 3.5 Flash" data-title="Flappy Bird" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#5b5b5b">x</span><span class="mname">Grok 4.3</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈59 с</span><i>·</i><span title="токенов в секунду (замер)">42 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0066</span><span class="via" title="через что сделано">opencode · OpenRouter</span></div>
+  </div><div class="card" data-src="r/036.html" data-vw="1280" data-vh="800" data-model="Gemini 3.5 Flash" data-title="Flappy Bird" data-stats="≈39 с · 194 ток/с · ≈$0.0687 · OpenRouter REST" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#1a73e8">G</span><span class="phname">Gemini 3.5 Flash</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#1a73e8">G</span><span class="mname">Gemini 3.5 Flash</span><span class="tps">194 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/037.html" data-vw="1280" data-vh="800" data-model="DeepSeek: DeepSeek V4 Pro" data-title="Flappy Bird" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#1a73e8">G</span><span class="mname">Gemini 3.5 Flash</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈39 с</span><i>·</i><span title="токенов в секунду (замер)">194 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0687</span><span class="via" title="через что сделано">OpenRouter REST</span></div>
+  </div><div class="card" data-src="r/037.html" data-vw="1280" data-vh="800" data-model="DeepSeek: DeepSeek V4 Pro" data-title="Flappy Bird" data-stats="≈2м 49с · 47 ток/с · ≈$0.0070 · opencode · OpenRouter" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#4d6bfe">D</span><span class="phname">DeepSeek: DeepSeek V4 Pro</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#4d6bfe">D</span><span class="mname">DeepSeek: DeepSeek V4 Pro</span><span class="tps">47 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/038.html" data-vw="1280" data-vh="800" data-model="Qwen: Qwen3.7 Max" data-title="Flappy Bird" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#4d6bfe">D</span><span class="mname">DeepSeek: DeepSeek V4 Pro</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈2м 49с</span><i>·</i><span title="токенов в секунду (замер)">47 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0070</span><span class="via" title="через что сделано">opencode · OpenRouter</span></div>
+  </div><div class="card" data-src="r/038.html" data-vw="1280" data-vh="800" data-model="Qwen: Qwen3.7 Max" data-title="Flappy Bird" data-stats="≈2м 26с · 46 ток/с · ≈$0.0256 · opencode · OpenRouter" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#615ced">Q</span><span class="phname">Qwen: Qwen3.7 Max</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#615ced">Q</span><span class="mname">Qwen: Qwen3.7 Max</span><span class="tps">46 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/039.html" data-vw="1280" data-vh="800" data-model="MiniMax: MiniMax M3" data-title="Flappy Bird" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#615ced">Q</span><span class="mname">Qwen: Qwen3.7 Max</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈2м 26с</span><i>·</i><span title="токенов в секунду (замер)">46 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0256</span><span class="via" title="через что сделано">opencode · OpenRouter</span></div>
+  </div><div class="card" data-src="r/039.html" data-vw="1280" data-vh="800" data-model="MiniMax: MiniMax M3" data-title="Flappy Bird" data-stats="≈1м 48с · 74 ток/с · ≈$0.0097 · opencode · OpenRouter" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#ff4d4f">M</span><span class="phname">MiniMax: MiniMax M3</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#ff4d4f">M</span><span class="mname">MiniMax: MiniMax M3</span><span class="tps">74 ток/с</span><span class="open">развернуть</span></div>
+    <div class="meta"><span class="badge sm" style="background:#ff4d4f">M</span><span class="mname">MiniMax: MiniMax M3</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈1м 48с</span><i>·</i><span title="токенов в секунду (замер)">74 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0097</span><span class="via" title="через что сделано">opencode · OpenRouter</span></div>
   </div></div></section>
 <section class="test"><div class="thead"><span class="tn">тест 21</span><h2>Приставка</h2><span class="tcount">10 моделей</span></div>
   <p class="tdesc">Создай свой PlayStation с интерфейсом и базовым функционалом добавь туда игры рабочие в 3д</p>
-  <div class="grid"><div class="card" data-src="r/040.html" data-vw="1280" data-vh="800" data-model="Claude Opus 4.8" data-title="Приставка" tabindex="0">
+  <div class="grid"><div class="card" data-src="r/040.html" data-vw="1280" data-vh="800" data-model="Claude Opus 4.8" data-title="Приставка" data-stats="≈2м 34с · 83 ток/с · ≈$0.323 · Claude Code (CLI)" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#d97757">C</span><span class="phname">Claude Opus 4.8</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#d97757">C</span><span class="mname">Claude Opus 4.8</span><span class="tps">83 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/041.html" data-vw="1280" data-vh="800" data-model="GPT-5.5" data-title="Приставка" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#d97757">C</span><span class="mname">Claude Opus 4.8</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈2м 34с</span><i>·</i><span title="токенов в секунду (замер)">83 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.323</span><span class="via" title="через что сделано">Claude Code (CLI)</span></div>
+  </div><div class="card" data-src="r/041.html" data-vw="1280" data-vh="800" data-model="GPT-5.5" data-title="Приставка" data-stats="≈6м 17с · 18 ток/с · ≈$0.206 · OpenAI Codex (CLI)" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#10a37f">O</span><span class="phname">GPT-5.5</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#10a37f">O</span><span class="mname">GPT-5.5</span><span class="tps">18 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/042.html" data-vw="1280" data-vh="800" data-model="GLM-5.2" data-title="Приставка" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#10a37f">O</span><span class="mname">GPT-5.5</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈6м 17с</span><i>·</i><span title="токенов в секунду (замер)">18 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.206</span><span class="via" title="через что сделано">OpenAI Codex (CLI)</span></div>
+  </div><div class="card" data-src="r/042.html" data-vw="1280" data-vh="800" data-model="GLM-5.2" data-title="Приставка" data-stats="≈2м 51с · 86 ток/с · ≈$0.0649 · GLM Coding Plan · Claude Code" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#3859ff">G</span><span class="phname">GLM-5.2</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#3859ff">G</span><span class="mname">GLM-5.2</span><span class="tps">86 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/043.html" data-vw="1280" data-vh="800" data-model="Kimi K2.7" data-title="Приставка" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#3859ff">G</span><span class="mname">GLM-5.2</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈2м 51с</span><i>·</i><span title="токенов в секунду (замер)">86 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0649</span><span class="via" title="через что сделано">GLM Coding Plan · Claude Code</span></div>
+  </div><div class="card" data-src="r/043.html" data-vw="1280" data-vh="800" data-model="Kimi K2.7" data-title="Приставка" data-stats="≈3м 02с · 47 ток/с · ≈$0.0301 · Kimi · Claude Code" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#7c5cff">K</span><span class="phname">Kimi K2.7</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#7c5cff">K</span><span class="mname">Kimi K2.7</span><span class="tps">47 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/044.html" data-vw="1280" data-vh="800" data-model="MiMo V2.5 Pro" data-title="Приставка" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#7c5cff">K</span><span class="mname">Kimi K2.7</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈3м 02с</span><i>·</i><span title="токенов в секунду (замер)">47 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0301</span><span class="via" title="через что сделано">Kimi · Claude Code</span></div>
+  </div><div class="card" data-src="r/044.html" data-vw="1280" data-vh="800" data-model="MiMo V2.5 Pro" data-title="Приставка" data-stats="≈2м 32с · 65 ток/с · MiMo · Claude Code" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#ff6900">M</span><span class="phname">MiMo V2.5 Pro</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#ff6900">M</span><span class="mname">MiMo V2.5 Pro</span><span class="tps">65 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/045.html" data-vw="1280" data-vh="800" data-model="Grok 4.3" data-title="Приставка" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#ff6900">M</span><span class="mname">MiMo V2.5 Pro</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈2м 32с</span><i>·</i><span title="токенов в секунду (замер)">65 ток/с</span><span class="via" title="через что сделано">MiMo · Claude Code</span></div>
+  </div><div class="card" data-src="r/045.html" data-vw="1280" data-vh="800" data-model="Grok 4.3" data-title="Приставка" data-stats="≈2м 10с · 54 ток/с · ≈$0.0178 · opencode · OpenRouter" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#5b5b5b">x</span><span class="phname">Grok 4.3</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#5b5b5b">x</span><span class="mname">Grok 4.3</span><span class="tps">54 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/046.html" data-vw="1280" data-vh="800" data-model="Gemini 3.5 Flash" data-title="Приставка" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#5b5b5b">x</span><span class="mname">Grok 4.3</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈2м 10с</span><i>·</i><span title="токенов в секунду (замер)">54 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0178</span><span class="via" title="через что сделано">opencode · OpenRouter</span></div>
+  </div><div class="card" data-src="r/046.html" data-vw="1280" data-vh="800" data-model="Gemini 3.5 Flash" data-title="Приставка" data-stats="≈55 с · 184 ток/с · ≈$0.0915 · OpenRouter REST" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#1a73e8">G</span><span class="phname">Gemini 3.5 Flash</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#1a73e8">G</span><span class="mname">Gemini 3.5 Flash</span><span class="tps">184 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/047.html" data-vw="1280" data-vh="800" data-model="DeepSeek: DeepSeek V4 Pro" data-title="Приставка" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#1a73e8">G</span><span class="mname">Gemini 3.5 Flash</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈55 с</span><i>·</i><span title="токенов в секунду (замер)">184 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0915</span><span class="via" title="через что сделано">OpenRouter REST</span></div>
+  </div><div class="card" data-src="r/047.html" data-vw="1280" data-vh="800" data-model="DeepSeek: DeepSeek V4 Pro" data-title="Приставка" data-stats="≈3м 18с · 59 ток/с · ≈$0.0103 · opencode · OpenRouter" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#4d6bfe">D</span><span class="phname">DeepSeek: DeepSeek V4 Pro</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#4d6bfe">D</span><span class="mname">DeepSeek: DeepSeek V4 Pro</span><span class="tps">59 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/048.html" data-vw="1280" data-vh="800" data-model="Qwen: Qwen3.7 Max" data-title="Приставка" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#4d6bfe">D</span><span class="mname">DeepSeek: DeepSeek V4 Pro</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈3м 18с</span><i>·</i><span title="токенов в секунду (замер)">59 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0103</span><span class="via" title="через что сделано">opencode · OpenRouter</span></div>
+  </div><div class="card" data-src="r/048.html" data-vw="1280" data-vh="800" data-model="Qwen: Qwen3.7 Max" data-title="Приставка" data-stats="≈3м 48с · 46 ток/с · ≈$0.0395 · opencode · OpenRouter" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#615ced">Q</span><span class="phname">Qwen: Qwen3.7 Max</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#615ced">Q</span><span class="mname">Qwen: Qwen3.7 Max</span><span class="tps">46 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/049.html" data-vw="1280" data-vh="800" data-model="MiniMax: MiniMax M3" data-title="Приставка" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#615ced">Q</span><span class="mname">Qwen: Qwen3.7 Max</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈3м 48с</span><i>·</i><span title="токенов в секунду (замер)">46 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0395</span><span class="via" title="через что сделано">opencode · OpenRouter</span></div>
+  </div><div class="card" data-src="r/049.html" data-vw="1280" data-vh="800" data-model="MiniMax: MiniMax M3" data-title="Приставка" data-stats="≈6м 36с · 39 ток/с · ≈$0.0187 · opencode · OpenRouter" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#ff4d4f">M</span><span class="phname">MiniMax: MiniMax M3</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#ff4d4f">M</span><span class="mname">MiniMax: MiniMax M3</span><span class="tps">39 ток/с</span><span class="open">развернуть</span></div>
+    <div class="meta"><span class="badge sm" style="background:#ff4d4f">M</span><span class="mname">MiniMax: MiniMax M3</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈6м 36с</span><i>·</i><span title="токенов в секунду (замер)">39 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0187</span><span class="via" title="через что сделано">opencode · OpenRouter</span></div>
   </div></div></section>
 <section class="test"><div class="thead"><span class="tn">тест 23</span><h2>Лендинг кофейни</h2><span class="tcount">10 моделей</span></div>
   <p class="tdesc">Лендинг кофейни: hero с градиентом, меню из 6 позиций карточками, секция «о нас», галерея-</p>
-  <div class="grid"><div class="card" data-src="r/050.html" data-vw="1280" data-vh="800" data-model="Claude Opus 4.8" data-title="Лендинг кофейни" tabindex="0">
+  <div class="grid"><div class="card" data-src="r/050.html" data-vw="1280" data-vh="800" data-model="Claude Opus 4.8" data-title="Лендинг кофейни" data-stats="≈1м 41с · 89 ток/с · ≈$0.224 · Claude Code (CLI)" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#d97757">C</span><span class="phname">Claude Opus 4.8</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#d97757">C</span><span class="mname">Claude Opus 4.8</span><span class="tps">89 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/051.html" data-vw="1280" data-vh="800" data-model="GPT-5.5" data-title="Лендинг кофейни" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#d97757">C</span><span class="mname">Claude Opus 4.8</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈1м 41с</span><i>·</i><span title="токенов в секунду (замер)">89 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.224</span><span class="via" title="через что сделано">Claude Code (CLI)</span></div>
+  </div><div class="card" data-src="r/051.html" data-vw="1280" data-vh="800" data-model="GPT-5.5" data-title="Лендинг кофейни" data-stats="≈5м 35с · 35 ток/с · ≈$0.353 · OpenAI Codex (CLI)" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#10a37f">O</span><span class="phname">GPT-5.5</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#10a37f">O</span><span class="mname">GPT-5.5</span><span class="tps">35 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/052.html" data-vw="1280" data-vh="800" data-model="GLM-5.2" data-title="Лендинг кофейни" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#10a37f">O</span><span class="mname">GPT-5.5</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈5м 35с</span><i>·</i><span title="токенов в секунду (замер)">35 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.353</span><span class="via" title="через что сделано">OpenAI Codex (CLI)</span></div>
+  </div><div class="card" data-src="r/052.html" data-vw="1280" data-vh="800" data-model="GLM-5.2" data-title="Лендинг кофейни" data-stats="≈2м 24с · 72 ток/с · ≈$0.0463 · GLM Coding Plan · Claude Code" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#3859ff">G</span><span class="phname">GLM-5.2</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#3859ff">G</span><span class="mname">GLM-5.2</span><span class="tps">72 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/053.html" data-vw="1280" data-vh="800" data-model="Kimi K2.7" data-title="Лендинг кофейни" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#3859ff">G</span><span class="mname">GLM-5.2</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈2м 24с</span><i>·</i><span title="токенов в секунду (замер)">72 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0463</span><span class="via" title="через что сделано">GLM Coding Plan · Claude Code</span></div>
+  </div><div class="card" data-src="r/053.html" data-vw="1280" data-vh="800" data-model="Kimi K2.7" data-title="Лендинг кофейни" data-stats="≈45 с · 226 ток/с · ≈$0.0360 · Kimi · Claude Code" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#7c5cff">K</span><span class="phname">Kimi K2.7</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#7c5cff">K</span><span class="mname">Kimi K2.7</span><span class="tps">226 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/054.html" data-vw="1280" data-vh="800" data-model="MiMo V2.5 Pro" data-title="Лендинг кофейни" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#7c5cff">K</span><span class="mname">Kimi K2.7</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈45 с</span><i>·</i><span title="токенов в секунду (замер)">226 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0360</span><span class="via" title="через что сделано">Kimi · Claude Code</span></div>
+  </div><div class="card" data-src="r/054.html" data-vw="1280" data-vh="800" data-model="MiMo V2.5 Pro" data-title="Лендинг кофейни" data-stats="≈2м 36с · 73 ток/с · MiMo · Claude Code" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#ff6900">M</span><span class="phname">MiMo V2.5 Pro</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#ff6900">M</span><span class="mname">MiMo V2.5 Pro</span><span class="tps">73 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/055.html" data-vw="1280" data-vh="800" data-model="Grok 4.3" data-title="Лендинг кофейни" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#ff6900">M</span><span class="mname">MiMo V2.5 Pro</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈2м 36с</span><i>·</i><span title="токенов в секунду (замер)">73 ток/с</span><span class="via" title="через что сделано">MiMo · Claude Code</span></div>
+  </div><div class="card" data-src="r/055.html" data-vw="1280" data-vh="800" data-model="Grok 4.3" data-title="Лендинг кофейни" data-stats="≈1м 15с · 50 ток/с · ≈$0.0097 · opencode · OpenRouter" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#5b5b5b">x</span><span class="phname">Grok 4.3</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#5b5b5b">x</span><span class="mname">Grok 4.3</span><span class="tps">50 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/056.html" data-vw="1280" data-vh="800" data-model="Gemini 3.5 Flash" data-title="Лендинг кофейни" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#5b5b5b">x</span><span class="mname">Grok 4.3</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈1м 15с</span><i>·</i><span title="токенов в секунду (замер)">50 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0097</span><span class="via" title="через что сделано">opencode · OpenRouter</span></div>
+  </div><div class="card" data-src="r/056.html" data-vw="1280" data-vh="800" data-model="Gemini 3.5 Flash" data-title="Лендинг кофейни" data-stats="≈1м 13с · 131 ток/с · ≈$0.0860 · OpenRouter REST" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#1a73e8">G</span><span class="phname">Gemini 3.5 Flash</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#1a73e8">G</span><span class="mname">Gemini 3.5 Flash</span><span class="tps">131 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/057.html" data-vw="1280" data-vh="800" data-model="DeepSeek: DeepSeek V4 Pro" data-title="Лендинг кофейни" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#1a73e8">G</span><span class="mname">Gemini 3.5 Flash</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈1м 13с</span><i>·</i><span title="токенов в секунду (замер)">131 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0860</span><span class="via" title="через что сделано">OpenRouter REST</span></div>
+  </div><div class="card" data-src="r/057.html" data-vw="1280" data-vh="800" data-model="DeepSeek: DeepSeek V4 Pro" data-title="Лендинг кофейни" data-stats="≈3м 01с · 64 ток/с · ≈$0.0102 · opencode · OpenRouter" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#4d6bfe">D</span><span class="phname">DeepSeek: DeepSeek V4 Pro</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#4d6bfe">D</span><span class="mname">DeepSeek: DeepSeek V4 Pro</span><span class="tps">64 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/058.html" data-vw="1280" data-vh="800" data-model="Qwen: Qwen3.7 Max" data-title="Лендинг кофейни" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#4d6bfe">D</span><span class="mname">DeepSeek: DeepSeek V4 Pro</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈3м 01с</span><i>·</i><span title="токенов в секунду (замер)">64 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0102</span><span class="via" title="через что сделано">opencode · OpenRouter</span></div>
+  </div><div class="card" data-src="r/058.html" data-vw="1280" data-vh="800" data-model="Qwen: Qwen3.7 Max" data-title="Лендинг кофейни" data-stats="≈4м 03с · 50 ток/с · ≈$0.0459 · opencode · OpenRouter" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#615ced">Q</span><span class="phname">Qwen: Qwen3.7 Max</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#615ced">Q</span><span class="mname">Qwen: Qwen3.7 Max</span><span class="tps">50 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/059.html" data-vw="1280" data-vh="800" data-model="MiniMax: MiniMax M3" data-title="Лендинг кофейни" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#615ced">Q</span><span class="mname">Qwen: Qwen3.7 Max</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈4м 03с</span><i>·</i><span title="токенов в секунду (замер)">50 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0459</span><span class="via" title="через что сделано">opencode · OpenRouter</span></div>
+  </div><div class="card" data-src="r/059.html" data-vw="1280" data-vh="800" data-model="MiniMax: MiniMax M3" data-title="Лендинг кофейни" data-stats="≈2м 46с · 84 ток/с · ≈$0.0169 · opencode · OpenRouter" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#ff4d4f">M</span><span class="phname">MiniMax: MiniMax M3</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#ff4d4f">M</span><span class="mname">MiniMax: MiniMax M3</span><span class="tps">84 ток/с</span><span class="open">развернуть</span></div>
+    <div class="meta"><span class="badge sm" style="background:#ff4d4f">M</span><span class="mname">MiniMax: MiniMax M3</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈2м 46с</span><i>·</i><span title="токенов в секунду (замер)">84 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0169</span><span class="via" title="через что сделано">opencode · OpenRouter</span></div>
   </div></div></section>
 <section class="test"><div class="thead"><span class="tn">тест 24</span><h2>Todo</h2><span class="tcount">10 моделей</span></div>
   <p class="tdesc">To-do список: добавление/удаление/отметка, фильтры (все/активные/выполненные), сохранение </p>
-  <div class="grid"><div class="card" data-src="r/060.html" data-vw="1280" data-vh="800" data-model="Claude Opus 4.8" data-title="Todo" tabindex="0">
+  <div class="grid"><div class="card" data-src="r/060.html" data-vw="1280" data-vh="800" data-model="Claude Opus 4.8" data-title="Todo" data-stats="≈35 с · 95 ток/с · ≈$0.0851 · Claude Code (CLI)" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#d97757">C</span><span class="phname">Claude Opus 4.8</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#d97757">C</span><span class="mname">Claude Opus 4.8</span><span class="tps">95 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/061.html" data-vw="1280" data-vh="800" data-model="GPT-5.5" data-title="Todo" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#d97757">C</span><span class="mname">Claude Opus 4.8</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈35 с</span><i>·</i><span title="токенов в секунду (замер)">95 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0851</span><span class="via" title="через что сделано">Claude Code (CLI)</span></div>
+  </div><div class="card" data-src="r/061.html" data-vw="1280" data-vh="800" data-model="GPT-5.5" data-title="Todo" data-stats="≈4м 22с · 35 ток/с · ≈$0.280 · OpenAI Codex (CLI)" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#10a37f">O</span><span class="phname">GPT-5.5</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#10a37f">O</span><span class="mname">GPT-5.5</span><span class="tps">35 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/062.html" data-vw="1280" data-vh="800" data-model="GLM-5.2" data-title="Todo" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#10a37f">O</span><span class="mname">GPT-5.5</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈4м 22с</span><i>·</i><span title="токенов в секунду (замер)">35 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.280</span><span class="via" title="через что сделано">OpenAI Codex (CLI)</span></div>
+  </div><div class="card" data-src="r/062.html" data-vw="1280" data-vh="800" data-model="GLM-5.2" data-title="Todo" data-stats="≈2м 25с · 61 ток/с · ≈$0.0392 · GLM Coding Plan · Claude Code" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#3859ff">G</span><span class="phname">GLM-5.2</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#3859ff">G</span><span class="mname">GLM-5.2</span><span class="tps">61 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/063.html" data-vw="1280" data-vh="800" data-model="Kimi K2.7" data-title="Todo" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#3859ff">G</span><span class="mname">GLM-5.2</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈2м 25с</span><i>·</i><span title="токенов в секунду (замер)">61 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0392</span><span class="via" title="через что сделано">GLM Coding Plan · Claude Code</span></div>
+  </div><div class="card" data-src="r/063.html" data-vw="1280" data-vh="800" data-model="Kimi K2.7" data-title="Todo" data-stats="≈49 с · 245 ток/с · ≈$0.0425 · Kimi · Claude Code" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#7c5cff">K</span><span class="phname">Kimi K2.7</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#7c5cff">K</span><span class="mname">Kimi K2.7</span><span class="tps">245 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/064.html" data-vw="1280" data-vh="800" data-model="MiMo V2.5 Pro" data-title="Todo" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#7c5cff">K</span><span class="mname">Kimi K2.7</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈49 с</span><i>·</i><span title="токенов в секунду (замер)">245 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0425</span><span class="via" title="через что сделано">Kimi · Claude Code</span></div>
+  </div><div class="card" data-src="r/064.html" data-vw="1280" data-vh="800" data-model="MiMo V2.5 Pro" data-title="Todo" data-stats="≈1м 26с · 75 ток/с · MiMo · Claude Code" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#ff6900">M</span><span class="phname">MiMo V2.5 Pro</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#ff6900">M</span><span class="mname">MiMo V2.5 Pro</span><span class="tps">75 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/065.html" data-vw="1280" data-vh="800" data-model="Grok 4.3" data-title="Todo" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#ff6900">M</span><span class="mname">MiMo V2.5 Pro</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈1м 26с</span><i>·</i><span title="токенов в секунду (замер)">75 ток/с</span><span class="via" title="через что сделано">MiMo · Claude Code</span></div>
+  </div><div class="card" data-src="r/065.html" data-vw="1280" data-vh="800" data-model="Grok 4.3" data-title="Todo" data-stats="≈1м 03с · 72 ток/с · ≈$0.0116 · opencode · OpenRouter" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#5b5b5b">x</span><span class="phname">Grok 4.3</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#5b5b5b">x</span><span class="mname">Grok 4.3</span><span class="tps">72 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/066.html" data-vw="1280" data-vh="800" data-model="Gemini 3.5 Flash" data-title="Todo" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#5b5b5b">x</span><span class="mname">Grok 4.3</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈1м 03с</span><i>·</i><span title="токенов в секунду (замер)">72 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0116</span><span class="via" title="через что сделано">opencode · OpenRouter</span></div>
+  </div><div class="card" data-src="r/066.html" data-vw="1280" data-vh="800" data-model="Gemini 3.5 Flash" data-title="Todo" data-stats="≈36 с · 167 ток/с · ≈$0.0547 · OpenRouter REST" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#1a73e8">G</span><span class="phname">Gemini 3.5 Flash</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#1a73e8">G</span><span class="mname">Gemini 3.5 Flash</span><span class="tps">167 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/067.html" data-vw="1280" data-vh="800" data-model="DeepSeek: DeepSeek V4 Pro" data-title="Todo" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#1a73e8">G</span><span class="mname">Gemini 3.5 Flash</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈36 с</span><i>·</i><span title="токенов в секунду (замер)">167 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0547</span><span class="via" title="через что сделано">OpenRouter REST</span></div>
+  </div><div class="card" data-src="r/067.html" data-vw="1280" data-vh="800" data-model="DeepSeek: DeepSeek V4 Pro" data-title="Todo" data-stats="≈1м 38с · 53 ток/с · ≈$0.0046 · opencode · OpenRouter" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#4d6bfe">D</span><span class="phname">DeepSeek: DeepSeek V4 Pro</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#4d6bfe">D</span><span class="mname">DeepSeek: DeepSeek V4 Pro</span><span class="tps">53 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/068.html" data-vw="1280" data-vh="800" data-model="Qwen: Qwen3.7 Max" data-title="Todo" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#4d6bfe">D</span><span class="mname">DeepSeek: DeepSeek V4 Pro</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈1м 38с</span><i>·</i><span title="токенов в секунду (замер)">53 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0046</span><span class="via" title="через что сделано">opencode · OpenRouter</span></div>
+  </div><div class="card" data-src="r/068.html" data-vw="1280" data-vh="800" data-model="Qwen: Qwen3.7 Max" data-title="Todo" data-stats="≈2м 58с · 43 ток/с · ≈$0.0287 · opencode · OpenRouter" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#615ced">Q</span><span class="phname">Qwen: Qwen3.7 Max</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#615ced">Q</span><span class="mname">Qwen: Qwen3.7 Max</span><span class="tps">43 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/069.html" data-vw="1280" data-vh="800" data-model="MiniMax: MiniMax M3" data-title="Todo" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#615ced">Q</span><span class="mname">Qwen: Qwen3.7 Max</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈2м 58с</span><i>·</i><span title="токенов в секунду (замер)">43 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0287</span><span class="via" title="через что сделано">opencode · OpenRouter</span></div>
+  </div><div class="card" data-src="r/069.html" data-vw="1280" data-vh="800" data-model="MiniMax: MiniMax M3" data-title="Todo" data-stats="≈8м 37с · 25 ток/с · ≈$0.0157 · opencode · OpenRouter" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#ff4d4f">M</span><span class="phname">MiniMax: MiniMax M3</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#ff4d4f">M</span><span class="mname">MiniMax: MiniMax M3</span><span class="tps">25 ток/с</span><span class="open">развернуть</span></div>
+    <div class="meta"><span class="badge sm" style="background:#ff4d4f">M</span><span class="mname">MiniMax: MiniMax M3</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈8м 37с</span><i>·</i><span title="токенов в секунду (замер)">25 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0157</span><span class="via" title="через что сделано">opencode · OpenRouter</span></div>
   </div></div></section>
 <section class="test"><div class="thead"><span class="tn">тест 25</span><h2>2048</h2><span class="tcount">10 моделей</span></div>
   <p class="tdesc">Игра 2048: сетка 4×4, управление стрелками, слияние плиток, счёт, проигрыш и победа</p>
-  <div class="grid"><div class="card" data-src="r/070.html" data-vw="1280" data-vh="800" data-model="Claude Opus 4.8" data-title="2048" tabindex="0">
+  <div class="grid"><div class="card" data-src="r/070.html" data-vw="1280" data-vh="800" data-model="Claude Opus 4.8" data-title="2048" data-stats="≈46 с · 94 ток/с · ≈$0.111 · Claude Code (CLI)" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#d97757">C</span><span class="phname">Claude Opus 4.8</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#d97757">C</span><span class="mname">Claude Opus 4.8</span><span class="tps">94 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/071.html" data-vw="1280" data-vh="800" data-model="GPT-5.5" data-title="2048" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#d97757">C</span><span class="mname">Claude Opus 4.8</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈46 с</span><i>·</i><span title="токенов в секунду (замер)">94 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.111</span><span class="via" title="через что сделано">Claude Code (CLI)</span></div>
+  </div><div class="card" data-src="r/071.html" data-vw="1280" data-vh="800" data-model="GPT-5.5" data-title="2048" data-stats="≈3м 41с · 36 ток/с · ≈$0.243 · OpenAI Codex (CLI)" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#10a37f">O</span><span class="phname">GPT-5.5</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#10a37f">O</span><span class="mname">GPT-5.5</span><span class="tps">36 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/072.html" data-vw="1280" data-vh="800" data-model="GLM-5.2" data-title="2048" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#10a37f">O</span><span class="mname">GPT-5.5</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈3м 41с</span><i>·</i><span title="токенов в секунду (замер)">36 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.243</span><span class="via" title="через что сделано">OpenAI Codex (CLI)</span></div>
+  </div><div class="card" data-src="r/072.html" data-vw="1280" data-vh="800" data-model="GLM-5.2" data-title="2048" data-stats="≈1м 36с · 64 ток/с · ≈$0.0273 · GLM Coding Plan · Claude Code" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#3859ff">G</span><span class="phname">GLM-5.2</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#3859ff">G</span><span class="mname">GLM-5.2</span><span class="tps">64 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/073.html" data-vw="1280" data-vh="800" data-model="Kimi K2.7" data-title="2048" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#3859ff">G</span><span class="mname">GLM-5.2</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈1м 36с</span><i>·</i><span title="токенов в секунду (замер)">64 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0273</span><span class="via" title="через что сделано">GLM Coding Plan · Claude Code</span></div>
+  </div><div class="card" data-src="r/073.html" data-vw="1280" data-vh="800" data-model="Kimi K2.7" data-title="2048" data-stats="≈30 с · 210 ток/с · ≈$0.0224 · Kimi · Claude Code" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#7c5cff">K</span><span class="phname">Kimi K2.7</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#7c5cff">K</span><span class="mname">Kimi K2.7</span><span class="tps">210 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/074.html" data-vw="1280" data-vh="800" data-model="MiMo V2.5 Pro" data-title="2048" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#7c5cff">K</span><span class="mname">Kimi K2.7</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈30 с</span><i>·</i><span title="токенов в секунду (замер)">210 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0224</span><span class="via" title="через что сделано">Kimi · Claude Code</span></div>
+  </div><div class="card" data-src="r/074.html" data-vw="1280" data-vh="800" data-model="MiMo V2.5 Pro" data-title="2048" data-stats="≈1м 43с · 77 ток/с · MiMo · Claude Code" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#ff6900">M</span><span class="phname">MiMo V2.5 Pro</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#ff6900">M</span><span class="mname">MiMo V2.5 Pro</span><span class="tps">77 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/075.html" data-vw="1280" data-vh="800" data-model="Grok 4.3" data-title="2048" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#ff6900">M</span><span class="mname">MiMo V2.5 Pro</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈1м 43с</span><i>·</i><span title="токенов в секунду (замер)">77 ток/с</span><span class="via" title="через что сделано">MiMo · Claude Code</span></div>
+  </div><div class="card" data-src="r/075.html" data-vw="1280" data-vh="800" data-model="Grok 4.3" data-title="2048" data-stats="≈54 с · 58 ток/с · ≈$0.0081 · opencode · OpenRouter" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#5b5b5b">x</span><span class="phname">Grok 4.3</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#5b5b5b">x</span><span class="mname">Grok 4.3</span><span class="tps">58 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/076.html" data-vw="1280" data-vh="800" data-model="Gemini 3.5 Flash" data-title="2048" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#5b5b5b">x</span><span class="mname">Grok 4.3</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈54 с</span><i>·</i><span title="токенов в секунду (замер)">58 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0081</span><span class="via" title="через что сделано">opencode · OpenRouter</span></div>
+  </div><div class="card" data-src="r/076.html" data-vw="1280" data-vh="800" data-model="Gemini 3.5 Flash" data-title="2048" data-stats="≈1м 16с · 114 ток/с · ≈$0.0784 · OpenRouter REST" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#1a73e8">G</span><span class="phname">Gemini 3.5 Flash</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#1a73e8">G</span><span class="mname">Gemini 3.5 Flash</span><span class="tps">114 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/077.html" data-vw="1280" data-vh="800" data-model="DeepSeek: DeepSeek V4 Pro" data-title="2048" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#1a73e8">G</span><span class="mname">Gemini 3.5 Flash</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈1м 16с</span><i>·</i><span title="токенов в секунду (замер)">114 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0784</span><span class="via" title="через что сделано">OpenRouter REST</span></div>
+  </div><div class="card" data-src="r/077.html" data-vw="1280" data-vh="800" data-model="DeepSeek: DeepSeek V4 Pro" data-title="2048" data-stats="≈2м 35с · 35 ток/с · ≈$0.0048 · opencode · OpenRouter" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#4d6bfe">D</span><span class="phname">DeepSeek: DeepSeek V4 Pro</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#4d6bfe">D</span><span class="mname">DeepSeek: DeepSeek V4 Pro</span><span class="tps">35 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/078.html" data-vw="1280" data-vh="800" data-model="Qwen: Qwen3.7 Max" data-title="2048" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#4d6bfe">D</span><span class="mname">DeepSeek: DeepSeek V4 Pro</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈2м 35с</span><i>·</i><span title="токенов в секунду (замер)">35 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0048</span><span class="via" title="через что сделано">opencode · OpenRouter</span></div>
+  </div><div class="card" data-src="r/078.html" data-vw="1280" data-vh="800" data-model="Qwen: Qwen3.7 Max" data-title="2048" data-stats="≈2м 18с · 41 ток/с · ≈$0.0215 · opencode · OpenRouter" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#615ced">Q</span><span class="phname">Qwen: Qwen3.7 Max</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#615ced">Q</span><span class="mname">Qwen: Qwen3.7 Max</span><span class="tps">41 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/079.html" data-vw="1280" data-vh="800" data-model="MiniMax: MiniMax M3" data-title="2048" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#615ced">Q</span><span class="mname">Qwen: Qwen3.7 Max</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈2м 18с</span><i>·</i><span title="токенов в секунду (замер)">41 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0215</span><span class="via" title="через что сделано">opencode · OpenRouter</span></div>
+  </div><div class="card" data-src="r/079.html" data-vw="1280" data-vh="800" data-model="MiniMax: MiniMax M3" data-title="2048" data-stats="≈2м 23с · 51 ток/с · ≈$0.0089 · opencode · OpenRouter" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#ff4d4f">M</span><span class="phname">MiniMax: MiniMax M3</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#ff4d4f">M</span><span class="mname">MiniMax: MiniMax M3</span><span class="tps">51 ток/с</span><span class="open">развернуть</span></div>
+    <div class="meta"><span class="badge sm" style="background:#ff4d4f">M</span><span class="mname">MiniMax: MiniMax M3</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈2м 23с</span><i>·</i><span title="токенов в секунду (замер)">51 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0089</span><span class="via" title="через что сделано">opencode · OpenRouter</span></div>
   </div></div></section>
 <section class="test"><div class="thead"><span class="tn">тест 26</span><h2>Страница сравнения тарифов</h2><span class="tcount">10 моделей</span></div>
   <p class="tdesc">Страница сравнения тарифов: таблица «фичи × 3 плана» с галочками, переключатель месяц/год,</p>
-  <div class="grid"><div class="card" data-src="r/080.html" data-vw="1280" data-vh="800" data-model="Claude Opus 4.8" data-title="Страница сравнения тарифов" tabindex="0">
+  <div class="grid"><div class="card" data-src="r/080.html" data-vw="1280" data-vh="800" data-model="Claude Opus 4.8" data-title="Страница сравнения тарифов" data-stats="≈49 с · 94 ток/с · ≈$0.118 · Claude Code (CLI)" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#d97757">C</span><span class="phname">Claude Opus 4.8</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#d97757">C</span><span class="mname">Claude Opus 4.8</span><span class="tps">94 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/081.html" data-vw="1280" data-vh="800" data-model="GPT-5.5" data-title="Страница сравнения тарифов" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#d97757">C</span><span class="mname">Claude Opus 4.8</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈49 с</span><i>·</i><span title="токенов в секунду (замер)">94 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.118</span><span class="via" title="через что сделано">Claude Code (CLI)</span></div>
+  </div><div class="card" data-src="r/081.html" data-vw="1280" data-vh="800" data-model="GPT-5.5" data-title="Страница сравнения тарифов" data-stats="≈4м 25с · 33 ток/с · ≈$0.267 · OpenAI Codex (CLI)" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#10a37f">O</span><span class="phname">GPT-5.5</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#10a37f">O</span><span class="mname">GPT-5.5</span><span class="tps">33 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/082.html" data-vw="1280" data-vh="800" data-model="GLM-5.2" data-title="Страница сравнения тарифов" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#10a37f">O</span><span class="mname">GPT-5.5</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈4м 25с</span><i>·</i><span title="токенов в секунду (замер)">33 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.267</span><span class="via" title="через что сделано">OpenAI Codex (CLI)</span></div>
+  </div><div class="card" data-src="r/082.html" data-vw="1280" data-vh="800" data-model="GLM-5.2" data-title="Страница сравнения тарифов" data-stats="≈2м 45с · 75 ток/с · ≈$0.0550 · GLM Coding Plan · Claude Code" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#3859ff">G</span><span class="phname">GLM-5.2</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#3859ff">G</span><span class="mname">GLM-5.2</span><span class="tps">75 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/083.html" data-vw="1280" data-vh="800" data-model="Kimi K2.7" data-title="Страница сравнения тарифов" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#3859ff">G</span><span class="mname">GLM-5.2</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈2м 45с</span><i>·</i><span title="токенов в секунду (замер)">75 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0550</span><span class="via" title="через что сделано">GLM Coding Plan · Claude Code</span></div>
+  </div><div class="card" data-src="r/083.html" data-vw="1280" data-vh="800" data-model="Kimi K2.7" data-title="Страница сравнения тарифов" data-stats="≈52 с · 234 ток/с · ≈$0.0432 · Kimi · Claude Code" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#7c5cff">K</span><span class="phname">Kimi K2.7</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#7c5cff">K</span><span class="mname">Kimi K2.7</span><span class="tps">234 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/084.html" data-vw="1280" data-vh="800" data-model="MiMo V2.5 Pro" data-title="Страница сравнения тарифов" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#7c5cff">K</span><span class="mname">Kimi K2.7</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈52 с</span><i>·</i><span title="токенов в секунду (замер)">234 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0432</span><span class="via" title="через что сделано">Kimi · Claude Code</span></div>
+  </div><div class="card" data-src="r/084.html" data-vw="1280" data-vh="800" data-model="MiMo V2.5 Pro" data-title="Страница сравнения тарифов" data-stats="≈55 с · 70 ток/с · MiMo · Claude Code" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#ff6900">M</span><span class="phname">MiMo V2.5 Pro</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#ff6900">M</span><span class="mname">MiMo V2.5 Pro</span><span class="tps">70 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/085.html" data-vw="1280" data-vh="800" data-model="Grok 4.3" data-title="Страница сравнения тарифов" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#ff6900">M</span><span class="mname">MiMo V2.5 Pro</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈55 с</span><i>·</i><span title="токенов в секунду (замер)">70 ток/с</span><span class="via" title="через что сделано">MiMo · Claude Code</span></div>
+  </div><div class="card" data-src="r/085.html" data-vw="1280" data-vh="800" data-model="Grok 4.3" data-title="Страница сравнения тарифов" data-stats="≈1м 32с · 38 ток/с · ≈$0.0090 · opencode · OpenRouter" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#5b5b5b">x</span><span class="phname">Grok 4.3</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#5b5b5b">x</span><span class="mname">Grok 4.3</span><span class="tps">38 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/086.html" data-vw="1280" data-vh="800" data-model="Gemini 3.5 Flash" data-title="Страница сравнения тарифов" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#5b5b5b">x</span><span class="mname">Grok 4.3</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈1м 32с</span><i>·</i><span title="токенов в секунду (замер)">38 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0090</span><span class="via" title="через что сделано">opencode · OpenRouter</span></div>
+  </div><div class="card" data-src="r/086.html" data-vw="1280" data-vh="800" data-model="Gemini 3.5 Flash" data-title="Страница сравнения тарифов" data-stats="≈1м 02с · 185 ток/с · ≈$0.104 · OpenRouter REST" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#1a73e8">G</span><span class="phname">Gemini 3.5 Flash</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#1a73e8">G</span><span class="mname">Gemini 3.5 Flash</span><span class="tps">185 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/087.html" data-vw="1280" data-vh="800" data-model="DeepSeek: DeepSeek V4 Pro" data-title="Страница сравнения тарифов" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#1a73e8">G</span><span class="mname">Gemini 3.5 Flash</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈1м 02с</span><i>·</i><span title="токенов в секунду (замер)">185 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.104</span><span class="via" title="через что сделано">OpenRouter REST</span></div>
+  </div><div class="card" data-src="r/087.html" data-vw="1280" data-vh="800" data-model="DeepSeek: DeepSeek V4 Pro" data-title="Страница сравнения тарифов" data-stats="≈4м 14с · 42 ток/с · ≈$0.0094 · opencode · OpenRouter" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#4d6bfe">D</span><span class="phname">DeepSeek: DeepSeek V4 Pro</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#4d6bfe">D</span><span class="mname">DeepSeek: DeepSeek V4 Pro</span><span class="tps">42 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/088.html" data-vw="1280" data-vh="800" data-model="Qwen: Qwen3.7 Max" data-title="Страница сравнения тарифов" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#4d6bfe">D</span><span class="mname">DeepSeek: DeepSeek V4 Pro</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈4м 14с</span><i>·</i><span title="токенов в секунду (замер)">42 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0094</span><span class="via" title="через что сделано">opencode · OpenRouter</span></div>
+  </div><div class="card" data-src="r/088.html" data-vw="1280" data-vh="800" data-model="Qwen: Qwen3.7 Max" data-title="Страница сравнения тарифов" data-stats="≈3м 27с · 48 ток/с · ≈$0.0373 · opencode · OpenRouter" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#615ced">Q</span><span class="phname">Qwen: Qwen3.7 Max</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#615ced">Q</span><span class="mname">Qwen: Qwen3.7 Max</span><span class="tps">48 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/089.html" data-vw="1280" data-vh="800" data-model="MiniMax: MiniMax M3" data-title="Страница сравнения тарифов" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#615ced">Q</span><span class="mname">Qwen: Qwen3.7 Max</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈3м 27с</span><i>·</i><span title="токенов в секунду (замер)">48 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0373</span><span class="via" title="через что сделано">opencode · OpenRouter</span></div>
+  </div><div class="card" data-src="r/089.html" data-vw="1280" data-vh="800" data-model="MiniMax: MiniMax M3" data-title="Страница сравнения тарифов" data-stats="≈5м 09с · 101 ток/с · ≈$0.0374 · opencode · OpenRouter" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#ff4d4f">M</span><span class="phname">MiniMax: MiniMax M3</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#ff4d4f">M</span><span class="mname">MiniMax: MiniMax M3</span><span class="tps">101 ток/с</span><span class="open">развернуть</span></div>
+    <div class="meta"><span class="badge sm" style="background:#ff4d4f">M</span><span class="mname">MiniMax: MiniMax M3</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈5м 09с</span><i>·</i><span title="токенов в секунду (замер)">101 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0374</span><span class="via" title="через что сделано">opencode · OpenRouter</span></div>
   </div></div></section>
 <section class="test"><div class="thead"><span class="tn">тест 27</span><h2>Планеты</h2><span class="tcount">10 моделей</span></div>
   <p class="tdesc">Создай 3д проекцию солнечной системы на three js &gt; деплой</p>
-  <div class="grid"><div class="card" data-src="r/090.html" data-vw="1280" data-vh="800" data-model="Claude Opus 4.8" data-title="Планеты" tabindex="0">
+  <div class="grid"><div class="card" data-src="r/090.html" data-vw="1280" data-vh="800" data-model="Claude Opus 4.8" data-title="Планеты" data-stats="≈1м 16с · 87 ток/с · ≈$0.165 · Claude Code (CLI)" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#d97757">C</span><span class="phname">Claude Opus 4.8</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#d97757">C</span><span class="mname">Claude Opus 4.8</span><span class="tps">87 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/091.html" data-vw="1280" data-vh="800" data-model="GPT-5.5" data-title="Планеты" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#d97757">C</span><span class="mname">Claude Opus 4.8</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈1м 16с</span><i>·</i><span title="токенов в секунду (замер)">87 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.165</span><span class="via" title="через что сделано">Claude Code (CLI)</span></div>
+  </div><div class="card" data-src="r/091.html" data-vw="1280" data-vh="800" data-model="GPT-5.5" data-title="Планеты" data-stats="≈18м 31с · 9 ток/с · ≈$0.311 · OpenAI Codex (CLI)" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#10a37f">O</span><span class="phname">GPT-5.5</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#10a37f">O</span><span class="mname">GPT-5.5</span><span class="tps">9 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/092.html" data-vw="1280" data-vh="800" data-model="GLM-5.2" data-title="Планеты" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#10a37f">O</span><span class="mname">GPT-5.5</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈18м 31с</span><i>·</i><span title="токенов в секунду (замер)">9 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.311</span><span class="via" title="через что сделано">OpenAI Codex (CLI)</span></div>
+  </div><div class="card" data-src="r/092.html" data-vw="1280" data-vh="800" data-model="GLM-5.2" data-title="Планеты" data-stats="≈2м 33с · 70 ток/с · ≈$0.0473 · GLM Coding Plan · Claude Code" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#3859ff">G</span><span class="phname">GLM-5.2</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#3859ff">G</span><span class="mname">GLM-5.2</span><span class="tps">70 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/093.html" data-vw="1280" data-vh="800" data-model="Kimi K2.7" data-title="Планеты" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#3859ff">G</span><span class="mname">GLM-5.2</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈2м 33с</span><i>·</i><span title="токенов в секунду (замер)">70 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0473</span><span class="via" title="через что сделано">GLM Coding Plan · Claude Code</span></div>
+  </div><div class="card" data-src="r/093.html" data-vw="1280" data-vh="800" data-model="Kimi K2.7" data-title="Планеты" data-stats="≈26 с · 219 ток/с · ≈$0.0200 · Kimi · Claude Code" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#7c5cff">K</span><span class="phname">Kimi K2.7</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#7c5cff">K</span><span class="mname">Kimi K2.7</span><span class="tps">219 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/094.html" data-vw="1280" data-vh="800" data-model="MiMo V2.5 Pro" data-title="Планеты" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#7c5cff">K</span><span class="mname">Kimi K2.7</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈26 с</span><i>·</i><span title="токенов в секунду (замер)">219 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0200</span><span class="via" title="через что сделано">Kimi · Claude Code</span></div>
+  </div><div class="card" data-src="r/094.html" data-vw="1280" data-vh="800" data-model="MiMo V2.5 Pro" data-title="Планеты" data-stats="≈1м 38с · 69 ток/с · MiMo · Claude Code" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#ff6900">M</span><span class="phname">MiMo V2.5 Pro</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#ff6900">M</span><span class="mname">MiMo V2.5 Pro</span><span class="tps">69 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/095.html" data-vw="1280" data-vh="800" data-model="Grok 4.3" data-title="Планеты" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#ff6900">M</span><span class="mname">MiMo V2.5 Pro</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈1м 38с</span><i>·</i><span title="токенов в секунду (замер)">69 ток/с</span><span class="via" title="через что сделано">MiMo · Claude Code</span></div>
+  </div><div class="card" data-src="r/095.html" data-vw="1280" data-vh="800" data-model="Grok 4.3" data-title="Планеты" data-stats="≈1м 06с · 49 ток/с · ≈$0.0085 · opencode · OpenRouter" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#5b5b5b">x</span><span class="phname">Grok 4.3</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#5b5b5b">x</span><span class="mname">Grok 4.3</span><span class="tps">49 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/096.html" data-vw="1280" data-vh="800" data-model="Gemini 3.5 Flash" data-title="Планеты" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#5b5b5b">x</span><span class="mname">Grok 4.3</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈1м 06с</span><i>·</i><span title="токенов в секунду (замер)">49 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0085</span><span class="via" title="через что сделано">opencode · OpenRouter</span></div>
+  </div><div class="card" data-src="r/096.html" data-vw="1280" data-vh="800" data-model="Gemini 3.5 Flash" data-title="Планеты" data-stats="≈1м 01с · 179 ток/с · ≈$0.0986 · OpenRouter REST" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#1a73e8">G</span><span class="phname">Gemini 3.5 Flash</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#1a73e8">G</span><span class="mname">Gemini 3.5 Flash</span><span class="tps">179 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/097.html" data-vw="1280" data-vh="800" data-model="DeepSeek: DeepSeek V4 Pro" data-title="Планеты" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#1a73e8">G</span><span class="mname">Gemini 3.5 Flash</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈1м 01с</span><i>·</i><span title="токенов в секунду (замер)">179 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0986</span><span class="via" title="через что сделано">OpenRouter REST</span></div>
+  </div><div class="card" data-src="r/097.html" data-vw="1280" data-vh="800" data-model="DeepSeek: DeepSeek V4 Pro" data-title="Планеты" data-stats="≈2м 23с · 59 ток/с · ≈$0.0075 · opencode · OpenRouter" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#4d6bfe">D</span><span class="phname">DeepSeek: DeepSeek V4 Pro</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#4d6bfe">D</span><span class="mname">DeepSeek: DeepSeek V4 Pro</span><span class="tps">59 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/098.html" data-vw="1280" data-vh="800" data-model="Qwen: Qwen3.7 Max" data-title="Планеты" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#4d6bfe">D</span><span class="mname">DeepSeek: DeepSeek V4 Pro</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈2м 23с</span><i>·</i><span title="токенов в секунду (замер)">59 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0075</span><span class="via" title="через что сделано">opencode · OpenRouter</span></div>
+  </div><div class="card" data-src="r/098.html" data-vw="1280" data-vh="800" data-model="Qwen: Qwen3.7 Max" data-title="Планеты" data-stats="≈2м 09с · 41 ток/с · ≈$0.0200 · opencode · OpenRouter" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#615ced">Q</span><span class="phname">Qwen: Qwen3.7 Max</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#615ced">Q</span><span class="mname">Qwen: Qwen3.7 Max</span><span class="tps">41 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/099.html" data-vw="1280" data-vh="800" data-model="MiniMax: MiniMax M3" data-title="Планеты" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#615ced">Q</span><span class="mname">Qwen: Qwen3.7 Max</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈2м 09с</span><i>·</i><span title="токенов в секунду (замер)">41 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0200</span><span class="via" title="через что сделано">opencode · OpenRouter</span></div>
+  </div><div class="card" data-src="r/099.html" data-vw="1280" data-vh="800" data-model="MiniMax: MiniMax M3" data-title="Планеты" data-stats="≈3м 11с · 71 ток/с · ≈$0.0164 · opencode · OpenRouter" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#ff4d4f">M</span><span class="phname">MiniMax: MiniMax M3</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#ff4d4f">M</span><span class="mname">MiniMax: MiniMax M3</span><span class="tps">71 ток/с</span><span class="open">развернуть</span></div>
+    <div class="meta"><span class="badge sm" style="background:#ff4d4f">M</span><span class="mname">MiniMax: MiniMax M3</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈3м 11с</span><i>·</i><span title="токенов в секунду (замер)">71 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0164</span><span class="via" title="через что сделано">opencode · OpenRouter</span></div>
   </div></div></section>
 <section class="test"><div class="thead"><span class="tn">тест 28</span><h2>Океан</h2><span class="tcount">10 моделей</span></div>
   <p class="tdesc">Создай 3д эмуляцию океана, наполни его жизнью, дай возможность спустится на глубину three </p>
-  <div class="grid"><div class="card" data-src="r/100.html" data-vw="1280" data-vh="800" data-model="Claude Opus 4.8" data-title="Океан" tabindex="0">
+  <div class="grid"><div class="card" data-src="r/100.html" data-vw="1280" data-vh="800" data-model="Claude Opus 4.8" data-title="Океан" data-stats="≈2м 15с · 82 ток/с · ≈$0.279 · Claude Code (CLI)" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#d97757">C</span><span class="phname">Claude Opus 4.8</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#d97757">C</span><span class="mname">Claude Opus 4.8</span><span class="tps">82 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/101.html" data-vw="1280" data-vh="800" data-model="GPT-5.5" data-title="Океан" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#d97757">C</span><span class="mname">Claude Opus 4.8</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈2м 15с</span><i>·</i><span title="токенов в секунду (замер)">82 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.279</span><span class="via" title="через что сделано">Claude Code (CLI)</span></div>
+  </div><div class="card" data-src="r/101.html" data-vw="1280" data-vh="800" data-model="GPT-5.5" data-title="Океан" data-stats="≈8м 24с · 22 ток/с · ≈$0.336 · OpenAI Codex (CLI)" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#10a37f">O</span><span class="phname">GPT-5.5</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#10a37f">O</span><span class="mname">GPT-5.5</span><span class="tps">22 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/102.html" data-vw="1280" data-vh="800" data-model="GLM-5.2" data-title="Океан" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#10a37f">O</span><span class="mname">GPT-5.5</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈8м 24с</span><i>·</i><span title="токенов в секунду (замер)">22 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.336</span><span class="via" title="через что сделано">OpenAI Codex (CLI)</span></div>
+  </div><div class="card" data-src="r/102.html" data-vw="1280" data-vh="800" data-model="GLM-5.2" data-title="Океан" data-stats="≈2м 40с · 78 ток/с · ≈$0.0556 · GLM Coding Plan · Claude Code" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#3859ff">G</span><span class="phname">GLM-5.2</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#3859ff">G</span><span class="mname">GLM-5.2</span><span class="tps">78 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/103.html" data-vw="1280" data-vh="800" data-model="Kimi K2.7" data-title="Океан" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#3859ff">G</span><span class="mname">GLM-5.2</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈2м 40с</span><i>·</i><span title="токенов в секунду (замер)">78 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0556</span><span class="via" title="через что сделано">GLM Coding Plan · Claude Code</span></div>
+  </div><div class="card" data-src="r/103.html" data-vw="1280" data-vh="800" data-model="Kimi K2.7" data-title="Океан" data-stats="≈3м 12с · 48 ток/с · ≈$0.0324 · Kimi · Claude Code" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#7c5cff">K</span><span class="phname">Kimi K2.7</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#7c5cff">K</span><span class="mname">Kimi K2.7</span><span class="tps">48 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/104.html" data-vw="1280" data-vh="800" data-model="MiMo V2.5 Pro" data-title="Океан" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#7c5cff">K</span><span class="mname">Kimi K2.7</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈3м 12с</span><i>·</i><span title="токенов в секунду (замер)">48 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0324</span><span class="via" title="через что сделано">Kimi · Claude Code</span></div>
+  </div><div class="card" data-src="r/104.html" data-vw="1280" data-vh="800" data-model="MiMo V2.5 Pro" data-title="Океан" data-stats="≈2м 54с · 76 ток/с · MiMo · Claude Code" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#ff6900">M</span><span class="phname">MiMo V2.5 Pro</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#ff6900">M</span><span class="mname">MiMo V2.5 Pro</span><span class="tps">76 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/105.html" data-vw="1280" data-vh="800" data-model="Grok 4.3" data-title="Океан" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#ff6900">M</span><span class="mname">MiMo V2.5 Pro</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈2м 54с</span><i>·</i><span title="токенов в секунду (замер)">76 ток/с</span><span class="via" title="через что сделано">MiMo · Claude Code</span></div>
+  </div><div class="card" data-src="r/105.html" data-vw="1280" data-vh="800" data-model="Grok 4.3" data-title="Океан" data-stats="≈1м 26с · 38 ток/с · ≈$0.0084 · opencode · OpenRouter" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#5b5b5b">x</span><span class="phname">Grok 4.3</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#5b5b5b">x</span><span class="mname">Grok 4.3</span><span class="tps">38 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/106.html" data-vw="1280" data-vh="800" data-model="Gemini 3.5 Flash" data-title="Океан" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#5b5b5b">x</span><span class="mname">Grok 4.3</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈1м 26с</span><i>·</i><span title="токенов в секунду (замер)">38 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0084</span><span class="via" title="через что сделано">opencode · OpenRouter</span></div>
+  </div><div class="card" data-src="r/106.html" data-vw="1280" data-vh="800" data-model="Gemini 3.5 Flash" data-title="Океан" data-stats="≈57 с · 187 ток/с · ≈$0.0956 · OpenRouter REST" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#1a73e8">G</span><span class="phname">Gemini 3.5 Flash</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#1a73e8">G</span><span class="mname">Gemini 3.5 Flash</span><span class="tps">187 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/107.html" data-vw="1280" data-vh="800" data-model="DeepSeek: DeepSeek V4 Pro" data-title="Океан" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#1a73e8">G</span><span class="mname">Gemini 3.5 Flash</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈57 с</span><i>·</i><span title="токенов в секунду (замер)">187 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0956</span><span class="via" title="через что сделано">OpenRouter REST</span></div>
+  </div><div class="card" data-src="r/107.html" data-vw="1280" data-vh="800" data-model="DeepSeek: DeepSeek V4 Pro" data-title="Океан" data-stats="≈3м 39с · 53 ток/с · ≈$0.0102 · opencode · OpenRouter" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#4d6bfe">D</span><span class="phname">DeepSeek: DeepSeek V4 Pro</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#4d6bfe">D</span><span class="mname">DeepSeek: DeepSeek V4 Pro</span><span class="tps">53 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/108.html" data-vw="1280" data-vh="800" data-model="Qwen: Qwen3.7 Max" data-title="Океан" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#4d6bfe">D</span><span class="mname">DeepSeek: DeepSeek V4 Pro</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈3м 39с</span><i>·</i><span title="токенов в секунду (замер)">53 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0102</span><span class="via" title="через что сделано">opencode · OpenRouter</span></div>
+  </div><div class="card" data-src="r/108.html" data-vw="1280" data-vh="800" data-model="Qwen: Qwen3.7 Max" data-title="Океан" data-stats="≈3м 60с · 46 ток/с · ≈$0.0416 · opencode · OpenRouter" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#615ced">Q</span><span class="phname">Qwen: Qwen3.7 Max</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#615ced">Q</span><span class="mname">Qwen: Qwen3.7 Max</span><span class="tps">46 ток/с</span><span class="open">развернуть</span></div>
-  </div><div class="card" data-src="r/109.html" data-vw="1280" data-vh="800" data-model="MiniMax: MiniMax M3" data-title="Океан" tabindex="0">
+    <div class="meta"><span class="badge sm" style="background:#615ced">Q</span><span class="mname">Qwen: Qwen3.7 Max</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈3м 60с</span><i>·</i><span title="токенов в секунду (замер)">46 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0416</span><span class="via" title="через что сделано">opencode · OpenRouter</span></div>
+  </div><div class="card" data-src="r/109.html" data-vw="1280" data-vh="800" data-model="MiniMax: MiniMax M3" data-title="Океан" data-stats="≈2м 38с · 93 ток/с · ≈$0.0177 · opencode · OpenRouter" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#ff4d4f">M</span><span class="phname">MiniMax: MiniMax M3</span></div></div>
-    <div class="meta"><span class="badge sm" style="background:#ff4d4f">M</span><span class="mname">MiniMax: MiniMax M3</span><span class="tps">93 ток/с</span><span class="open">развернуть</span></div>
+    <div class="meta"><span class="badge sm" style="background:#ff4d4f">M</span><span class="mname">MiniMax: MiniMax M3</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈2м 38с</span><i>·</i><span title="токенов в секунду (замер)">93 ток/с</span><i>·</i><span title="цена (оценка)">≈$0.0177</span><span class="via" title="через что сделано">opencode · OpenRouter</span></div>
   </div></div></section>
-  <footer>Каждая карточка : самодостаточный HTML, сгенерированный моделью по заданию. Превью подгружаются лениво (видимые рендерятся, ушедшие из вида выгружаются). Клик открывает интерактивную версию.</footer>
+  <footer>
+    Каждая карточка : самодостаточный HTML, сгенерированный моделью по заданию. Превью грузятся лениво (видимые рендерятся, ушедшие из вида выгружаются); клик открывает интерактивную версию.<br>
+    Токенов/с : реальный замер во время прогона. Время и цена помечены ≈ : это оценка (выходные токены = размер HTML / 4; цена по тарифам OpenRouter, снимок 2026-06; точный wall-clock в снимок не попал). MiMo : публичной цены нет.
+  </footer>
 </div>
 
 <div class="modal" id="modal">
-  <div class="mbar"><span class="mt" id="mt"></span><span class="ms" id="ms"></span><a class="raw" id="mraw" target="_blank" rel="noopener">открыть в новой вкладке</a><button class="x" id="mx">закрыть</button></div>
+  <div class="mbar"><span class="mt" id="mt"></span><span class="ms" id="ms"></span><span class="mstats" id="mstats"></span><a class="raw" id="mraw" target="_blank" rel="noopener">открыть в новой вкладке</a><button class="x" id="mx">закрыть</button></div>
   <iframe id="mframe" title="result"></iframe>
 </div>
 
@@ -443,8 +559,8 @@
   var cards = [].slice.call(document.querySelectorAll('.card'));
   cards.forEach(function(c){ io.observe(c); });
 
-  var modal=document.getElementById('modal'), mframe=document.getElementById('mframe'), mt=document.getElementById('mt'), ms=document.getElementById('ms'), mraw=document.getElementById('mraw');
-  function open(card){ mframe.src = card.dataset.src; mt.textContent = card.dataset.model; ms.textContent = card.dataset.title; mraw.href = card.dataset.src; modal.classList.add('on'); document.body.style.overflow='hidden'; }
+  var modal=document.getElementById('modal'), mframe=document.getElementById('mframe'), mt=document.getElementById('mt'), ms=document.getElementById('ms'), mstats=document.getElementById('mstats'), mraw=document.getElementById('mraw');
+  function open(card){ mframe.src = card.dataset.src; mt.textContent = card.dataset.model; ms.textContent = card.dataset.title; mstats.textContent = card.dataset.stats; mraw.href = card.dataset.src; modal.classList.add('on'); document.body.style.overflow='hidden'; }
   function close(){ modal.classList.remove('on'); mframe.src='about:blank'; document.body.style.overflow=''; }
   cards.forEach(function(c){ c.addEventListener('click', function(){ open(c); }); c.addEventListener('keydown', function(e){ if(e.key==='Enter') open(c); }); });
   document.getElementById('mx').addEventListener('click', close);
