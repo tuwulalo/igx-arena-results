@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Солнечная система · Обсерватория</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-deep:#03040a;
+    --bg-panel:rgba(10,14,28,0.72);
+    --bg-panel-soft:rgba(12,17,34,0.55);
+    --border-gold:rgba(245,166,35,0.35);
+    --border-blue:rgba(120,160,255,0.18);
+    --accent:#f5a623;
+    --accent-soft:#ffd699;
+    --text-main:#dbe6ff;
+    --text-dim:#7d8bb0;
+    --text-faint:#4d597a;
+    --mono:'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --disp:'Rajdhani', sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0; padding:0; width:100%; height:100%; overflow:hidden;
+    background: radial-gradient(ellipse at 50% 30%, #0a1024 0%, #05070f 55%, #020208 100%);
+    font-family: var(--mono);
+    color: var(--text-main);
+    -webkit-font-smoothing: antialiased;
+  }
+  #scene-canvas{ position:fixed; inset:0; display:block; outline:none; touch-action:none; cursor:grab; }
+  #scene-canvas.dragging{ cursor:grabbing; }
+
+  /* ---------- vignette / scanline atmosphere ---------- */
+  #vignette{
+    position:fixed; inset:0; pointer-events:none; z-index:5;
+    background:
+      radial-gradient(ellipse at 50% 50%, transparent 45%, rgba(0,2,8,0.55) 100%);
+  }
+  #scanlines{
+    position:fixed; inset:0; pointer-events:none; z-index:6; opacity:0.035;
+    background-image: repeating-linear-gradient(0deg, #fff 0px, #fff 1px, transparent 1px, transparent 3px);
+    mix-blend-mode: overlay;
+  }
+
+  /* ---------- loader ---------- */
+  #loader{
+    position:fixed; inset:0; z-index:100; background:#03040a;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px;
+    transition: opacity .6s ease, visibility .6s ease;
+  }
+  #loader.hidden{ opacity:0; visibility:hidden; pointer-events:none; }
+  .loader-ring{
+    width:46px; height:46px; border-radius:50%;
+    border:2px solid rgba(245,166,35,0.18);
+    border-top-color: var(--accent);
+    animation: spin 0.9s linear infinite;
+  }
+  @keyframes spin{ to{ transform: rotate(360deg);} }
+  #loader-text{ font-size:11px; letter-spacing:.25em; color: var(--text-dim); text-transform:uppercase; }
+
+  /* ---------- top status panel ---------- */
+  #hud-top{
+    position:fixed; top:18px; left:18px; z-index:10;
+    background: var(--bg-panel);
+    border:1px solid var(--border-gold);
+    border-radius:10px;
+    padding:14px 18px;
+    backdrop-filter: blur(10px) saturate(140%);
+    -webkit-backdrop-filter: blur(10px) saturate(140%);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.04);
+    max-width: min(78vw, 360px);
+  }
+  #hud-top h1{
+    margin:0; font-family: var(--disp); font-weight:700; font-size:18px; letter-spacing:.06em;
+    color:#fff; text-transform:uppercase;
+    display:flex; align-items:center; gap:9px;
+  }
+  #hud-top h1 .dot{
+    width:8px; height:8px; border-radius:50%; background: var(--accent);
+    box-shadow: 0 0 8px 2px rgba(245,166,35,0.8);
+    animation: pulse 2.2s ease-in-out infinite;
+    flex-shrink:0;
+  }
+  @keyframes pulse{ 0%,100%{ opacity:1; transform:scale(1);} 50%{ opacity:.45; transform:scale(0.78);} }
+  #hud-top .sub{ margin:3px 0 10px; font-size:10.5px; color: var(--text-dim); letter-spacing:.08em; text-transform:uppercase; }
+  .readout-line{
+    font-size:11.5px; color: var(--text-main); display:flex; gap:8px; padding:3px 0;
+    border-top:1px solid rgba(255,255,255,0.05);
+  }
+  .readout-line:first-of-type{ border-top:none; padding-top:0; }
+  .readout-line .k{ color: var(--text-faint); min-width:96px; flex-shrink:0; }
+  .readout-line .v{ color: var(--accent-soft); font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+  /* ---------- planet quick-select chips ---------- */
+  #chips{
+    position:fixed; top:18px; right:18px; z-index:10;
+    display:flex; flex-direction:column; gap:6px;
+    background: var(--bg-panel);
+    border:1px solid var(--border-blue);
+    border-radius:10px;
+    padding:10px;
+    backdrop-filter: blur(10px) saturate(140%);
+    -webkit-backdrop-filter: blur(10px) saturate(140%);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.45);
+    max-height: 86vh;
+    overflow-y:auto;
+  }
+  #chips::-webkit-scrollbar{ width:4px; }
+  #chips::-webkit-scrollbar-thumb{ background: rgba(245,166,35,0.3); border-radius:4px; }
+  .chip{
+    display:flex; align-items:center; gap:8px;
+    background: rgba(255,255,255,0.03);
+    border:1px solid rgba(255,255,255,0.06);
+    border-radius:7px;
+    padding:6px 10px 6px 8px;
+    font-family: var(--mono); font-size:11px; color: var(--text-main);
+    cursor:pointer; transition: background .15s ease, border-color .15s ease, transform .15s ease;
+    white-space:nowrap;
+  }
+  .chip:hover{ background: rgba(245,166,35,0.10); border-color: rgba(245,166,35,0.3); transform: translateX(-2px); }
+  .chip.active{ background: rgba(245,166,35,0.18); border-color: var(--accent); color:#fff; }
+  .chip .swatch{ width:9px; height:9px; border-radius:50%; flex-shrink:0; box-shadow: 0 0 6px currentColor; }
+
+  /* ---------- tooltip ---------- */
+  #tooltip{
+    position:fixed; z-index:20; pointer-events:none;
+    background: var(--bg-panel);
+    border:1px solid var(--border-gold);
+    border-left:3px solid var(--accent);
+    border-radius:8px;
+    padding:10px 14px;
+    min-width:200px;
+    backdrop-filter: blur(12px) saturate(150%);
+    -webkit-backdrop-filter: blur(12px) saturate(150%);
+    box-shadow: 0 10px 34px rgba(0,0,0,0.55);
+    opacity:0; transform: translate(-50%, -100%) scale(0.96);
+    transition: opacity .12s ease, transform .12s ease;
+  }
+  #tooltip.visible{ opacity:1; transform: translate(-50%, -100%) scale(1); }
+  #tooltip .t-name{
+    font-family: var(--disp); font-size:16px; font-weight:700; color:#fff;
+    letter-spacing:.03em; margin-bottom:6px; text-transform:uppercase;
+  }
+  #tooltip .t-row{ font-size:11px; color: var(--text-dim); display:flex; justify-content:space-between; gap:16px; padding:1.5px 0; }
+  #tooltip .t-row b{ color: var(--accent-soft); font-weight:600; }
+
+  /* ---------- planet labels (always-on names) ---------- */
+  .planet-label{
+    position:fixed; z-index:8; pointer-events:none;
+    font-size:10.5px; letter-spacing:.06em; color: var(--text-main);
+    background: rgba(6,9,20,0.55);
+    border:1px solid rgba(255,255,255,0.08);
+    padding:2px 7px; border-radius:5px;
+    transform: translate(-50%, 8px);
+    white-space:nowrap;
+    opacity:0; transition: opacity .2s ease;
+    text-transform:uppercase;
+  }
+  .planet-label.shown{ opacity:0.92; }
+
+  /* ---------- bottom control bar ---------- */
+  #hud-bottom{
+    position:fixed; left:50%; bottom:18px; transform:translateX(-50%); z-index:10;
+    display:flex; align-items:center; gap:18px;
+    background: var(--bg-panel);
+    border:1px solid var(--border-gold);
+    border-radius:14px;
+    padding:12px 20px;
+    backdrop-filter: blur(12px) saturate(150%);
+    -webkit-backdrop-filter: blur(12px) saturate(150%);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
+    max-width: 94vw;
+    flex-wrap: wrap;
+    justify-content:center;
+  }
+  .ctrl-group{ display:flex; align-items:center; gap:9px; }
+  .divider{ width:1px; height:26px; background: rgba(255,255,255,0.08); flex-shrink:0; }
+
+  #btn-play{
+    width:38px; height:38px; border-radius:50%;
+    background: linear-gradient(160deg, #ffcf7a, var(--accent));
+    border:none; cursor:pointer; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow: 0 4px 14px rgba(245,166,35,0.4);
+    transition: transform .12s ease;
+  }
+  #btn-play:hover{ transform: scale(1.07); }
+  #btn-play:active{ transform: scale(0.95); }
+  #btn-play svg{ width:15px; height:15px; fill:#1a1206; }
+
+  .slider-wrap{ display:flex; flex-direction:column; gap:3px; min-width:128px; }
+  .slider-label{ font-size:9.5px; color: var(--text-dim); letter-spacing:.1em; text-transform:uppercase; display:flex; justify-content:space-between; }
+  .slider-label .val{ color: var(--accent-soft); font-weight:600; }
+  input[type="range"]{
+    -webkit-appearance:none; appearance:none; width:128px; height:3px;
+    background: rgba(255,255,255,0.12); border-radius:3px; outline:none; cursor:pointer;
+  }
+  input[type="range"]::-webkit-slider-thumb{
+    -webkit-appearance:none; width:13px; height:13px; border-radius:50%;
+    background: var(--accent); cursor:pointer; box-shadow: 0 0 8px rgba(245,166,35,0.7);
+    border:2px solid #1a1206;
+  }
+  input[type="range"]::-moz-range-thumb{
+    width:13px; height:13px; border-radius:50%; background: var(--accent); cursor:pointer;
+    border:2px solid #1a1206; box-shadow: 0 0 8px rgba(245,166,35,0.7);
+  }
+
+  .toggle-pill{
+    display:flex; align-items:center; gap:7px;
+    background: rgba(255,255,255,0.04);
+    border:1px solid rgba(255,255,255,0.08);
+    border-radius:20px; padding:7px 12px;
+    font-size:10.5px; letter-spacing:.06em; color: var(--text-dim);
+    cursor:pointer; user-select:none; text-transform:uppercase;
+    transition: background .15s ease, border-color .15s ease, color .15s ease;
+  }
+  .toggle-pill:hover{ border-color: rgba(245,166,35,0.3); }
+  .toggle-pill .led{
+    width:8px; height:8px; border-radius:50%; background:#3a4360; flex-shrink:0;
+    transition: background .15s ease, box-shadow .15s ease;
+  }
+  .toggle-pill.on{ color:#fff; border-color: rgba(245,166,35,0.4); background: rgba(245,166,35,0.08); }
+  .toggle-pill.on .led{ background: var(--accent); box-shadow: 0 0 7px 1px rgba(245,166,35,0.8); }
+
+  #btn-reset{
+    background: rgba(255,255,255,0.04);
+    border:1px solid rgba(255,255,255,0.1);
+    border-radius:20px; padding:8px 16px;
+    font-family: var(--mono); font-size:10.5px; letter-spacing:.08em; color: var(--text-main);
+    cursor:pointer; text-transform:uppercase; transition: all .15s ease;
+    display:flex; align-items:center; gap:6px;
+  }
+  #btn-reset:hover{ background: rgba(245,166,35,0.12); border-color: var(--accent); color:#fff; }
+  #btn-reset svg{ width:12px; height:12px; fill: currentColor; }
+
+  /* ---------- hint panel ---------- */
+  #hint{
+    position:fixed; right:18px; bottom:94px; z-index:9;
+    background: var(--bg-panel-soft);
+    border:1px solid var(--border-blue);
+    border-radius:9px; padding:10px 14px;
+    font-size:10.5px; color: var(--text-dim); line-height:1.7; letter-spacing:.02em;
+    backdrop-filter: blur(8px);
+    transition: opacity .6s ease, transform .6s ease;
+    max-width:230px;
+  }
+  #hint.fade{ opacity:0; transform: translateY(8px); pointer-events:none; }
+  #hint b{ color: var(--accent-soft); }
+
+  @media (max-width: 720px){
+    #hud-top{ max-width: 70vw; padding:10px 12px; }
+    #hud-top h1{ font-size:14px; }
+    #chips{ display:none; }
+    #hud-bottom{ gap:10px; padding:10px 12px; bottom:10px; }
+    .slider-wrap{ min-width:90px; }
+    input[type="range"]{ width:90px; }
+    #hint{ display:none; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="scene-canvas"></canvas>
+<div id="vignette"></div>
+<div id="scanlines"></div>
+
+<div id="loader">
+  <div class="loader-ring"></div>
+  <div id="loader-text">Загрузка обсерватории…</div>
+</div>
+
+<div id="hud-top">
+  <h1><span class="dot"></span>Солнечная система</h1>
+  <div class="sub">панель наблюдения · 3D-симуляция</div>
+  <div class="readout-line"><span class="k">ФОКУС:</span><span class="v" id="readout-focus">свободная камера</span></div>
+  <div class="readout-line"><span class="k">ТЕЧЕНИЕ ВРЕМЕНИ:</span><span class="v" id="readout-time">×1.0</span></div>
+  <div class="readout-line"><span class="k">СОСТОЯНИЕ:</span><span class="v" id="readout-state">воспроизведение</span></div>
+</div>
+
+<div id="chips"></div>
+
+<div id="tooltip">
+  <div class="t-name" id="tt-name">—</div>
+  <div class="t-row"><span>Диаметр</span><b id="tt-diam">—</b></div>
+  <div class="t-row"><span>Расстояние от Солнца</span><b id="tt-dist">—</b></div>
+  <div class="t-row"><span>Период обращения</span><b id="tt-period">—</b></div>
+  <div class="t-row"><span>Период вращения</span><b id="tt-rot">—</b></div>
+</div>
+
+<div id="hint"><b>ЛКМ + тяни</b> — вращение камеры<br><b>колесо / щипок</b> — масштаб<br><b>клик по планете</b> — фокус</div>
+
+<div id="hud-bottom">
+  <div class="ctrl-group">
+    <button id="btn-play" aria-label="Пауза/воспроизведение" title="Пауза/воспроизведение">
+      <svg id="icon-pause" viewBox="0 0 24 24"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+      <svg id="icon-play" viewBox="0 0 24 24" style="display:none"><path d="M7 5l12 7-12 7z"/></svg>
+    </button>
+  </div>
+  <div class="divider"></div>
+  <div class="ctrl-group">
+    <div class="slider-wrap">
+      <span class="slider-label"><span>Скорость времени</span><span class="val" id="speed-val">×1.0</span></span>
+      <input type="range" id="speed-slider" min="0" max="8" step="0.1" value="1">
+    </div>
+  </div>
+  <div class="divider"></div>
+  <div class="ctrl-group">
+    <div class="toggle-pill on" id="toggle-orbits"><span class="led"></span>Орбиты</div>
+    <div class="toggle-pill" id="toggle-labels"><span class="led"></span>Названия</div>
+  </div>
+  <div class="divider"></div>
+  <div class="ctrl-group">
+    <button id="btn-reset" aria-label="Сбросить вид">
+      <svg viewBox="0 0 24 24"><path d="M12 5V2L7 7l5 5V8c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
+      Сбросить вид
+    </button>
+  </div>
+</div>
+
+<script type="module">
+import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
+
+/* ============================================================================
+   СОЛНЕЧНАЯ СИСТЕМА — интерактивная 3D-модель на чистом three.js
+   Масштаб размеров и расстояний условный (сжатый), чтобы сцена читалась целиком.
+   Все текстуры генерируются процедурно на canvas — внешних ассетов нет.
+   ============================================================================ */
+
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------------------------------------------------------------------------
+   1. БАЗОВАЯ НАСТРОЙКА: рендерер, сцена, камера
+--------------------------------------------------------------------------- */
+const canvas = document.getElementById('scene-canvas');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+const scene = new THREE.Scene();
+
+const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 4000);
+
+window.addEventListener('resize', onResize);
+function onResize(){
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+/* ---------------------------------------------------------------------------
+   2. ПОМОЩНИКИ: процедурные текстуры на canvas
+--------------------------------------------------------------------------- */
+function makeTexture(draw, w = 512, h = 256) {
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  const ctx = c.getContext('2d');
+  draw(ctx, w, h);
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.wrapS = THREE.RepeatWrapping;
+  tex.anisotropy = 4;
+  return tex;
+}
+
+function texRocky(base, dark, light, craterCount = 120) {
+  return makeTexture((ctx, w, h) => {
+    ctx.fillStyle = base; ctx.fillRect(0, 0, w, h);
+    for (let i = 0; i < craterCount; i++) {
+      const x = Math.random() * w, y = Math.random() * h, r = 4 + Math.random() * 20;
+      const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+      const c = Math.random() > 0.5 ? dark : light;
+      g.addColorStop(0, c + 'aa'); g.addColorStop(1, c + '00');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+    }
+    const img = ctx.getImageData(0, 0, w, h);
+    for (let i = 0; i < img.data.length; i += 4) {
+      const n = (Math.random() - 0.5) * 16;
+      img.data[i] += n; img.data[i + 1] += n; img.data[i + 2] += n;
+    }
+    ctx.putImageData(img, 0, 0);
+  });
+}
+
+function texBanded(colors) {
+  return makeTexture((ctx, w, h) => {
+    const grad = ctx.createLinearGradient(0, 0, 0, h);
+    colors.forEach((c, i) => grad.addColorStop(i / (colors.length - 1), c));
+    ctx.fillStyle = grad; ctx.fillRect(0, 0, w, h);
+    for (let i = 0; i < 110; i++) {
+      const y = Math.random() * h, x = Math.random() * w;
+      const len = 30 + Math.random() * 130, hgt = 2 + Math.random() * 9;
+      ctx.fillStyle = `rgba(255,255,255,${(Math.random() * 0.09).toFixed(3)})`;
+      ctx.beginPath(); ctx.ellipse(x, y, len, hgt, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = `rgba(0,0,0,${(Math.random() * 0.08).toFixed(3)})`;
+      ctx.beginPath(); ctx.ellipse(x, y + hgt * 1.4, len * 0.7, hgt * 0.6, 0, 0, Math.PI * 2); ctx.fill();
+    }
+  });
+}
+
+function texEarth() {
+  return makeTexture((ctx, w, h) => {
+    const ocean = ctx.createLinearGradient(0, 0, 0, h);
+    ocean.addColorStop(0, '#16447a'); ocean.addColorStop(0.5, '#1d5fa3'); ocean.addColorStop(1, '#123a66');
+    ctx.fillStyle = ocean; ctx.fillRect(0, 0, w, h);
+    const landColors = ['#3f7d3a', '#5d8f43', '#8a7038', '#6b8f3c', '#476b2e'];
+    for (let i = 0; i < 24; i++) {
+      const cx = Math.random() * w, cy = h * 0.14 + Math.random() * h * 0.72;
+      ctx.fillStyle = landColors[i % landColors.length];
+      ctx.beginPath();
+      const pts = 6 + Math.floor(Math.random() * 5);
+      const baseR = 16 + Math.random() * 42;
+      for (let p = 0; p <= pts; p++) {
+        const ang = (p / pts) * Math.PI * 2;
+        const rr = baseR * (0.5 + Math.random() * 0.7);
+        const px = cx + Math.cos(ang) * rr, py = cy + Math.sin(ang) * rr * 0.6;
+        if (p === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      }
+      ctx.closePath(); ctx.fill();
+    }
+    ctx.fillStyle = '#eef6ff';
+    ctx.fillRect(0, 0, w, h * 0.06);
+    ctx.fillRect(0, h * 0.94, w, h * 0.06);
+    for (let i = 0; i < 55; i++) {
+      const x = Math.random() * w, y = Math.random() * h, len = 18 + Math.random() * 65;
+      ctx.fillStyle = `rgba(255,255,255,${(0.05 + Math.random() * 0.13).toFixed(3)})`;
+      ctx.beginPath(); ctx.ellipse(x, y, len, 5 + Math.random() * 7, Math.random() * Math.PI, 0, Math.PI * 2); ctx.fill();
+    }
+  });
+}
+
+function texVenus() {
+  return makeTexture((ctx, w, h) => {
+    const grad = ctx.createLinearGradient(0, 0, 0, h);
+    grad.addColorStop(0, '#f0deab'); grad.addColorStop(0.5, '#dcbd80'); grad.addColorStop(1, '#c8a05f');
+    ctx.fillStyle = grad; ctx.fillRect(0, 0, w, h);
+    for (let i = 0; i < 80; i++) {
+      const y = Math.random() * h, x = Math.random() * w;
+      ctx.strokeStyle = `rgba(255,250,230,${(0.05 + Math.random() * 0.11).toFixed(3)})`;
+      ctx.lineWidth = 2 + Math.random() * 4;
+      ctx.beginPath(); ctx.moveTo(x, y);
+      ctx.bezierCurveTo(x + 35, y - 12, x + 75, y + 16, x + 130, y - 2);
+      ctx.stroke();
+    }
+  });
+}
+
+function texSun() {
+  return makeTexture((ctx, w, h) => {
+    const grad = ctx.createLinearGradient(0, 0, 0, h);
+    grad.addColorStop(0, '#fff3c4'); grad.addColorStop(0.5, '#ffb74d'); grad.addColorStop(1, '#ff8a3d');
+    ctx.fillStyle = grad; ctx.fillRect(0, 0, w, h);
+    for (let i = 0; i < 220; i++) {
+      const x = Math.random() * w, y = Math.random() * h, r = 3 + Math.random() * 14;
+      const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+      const bright = Math.random() > 0.5;
+      g.addColorStop(0, bright ? 'rgba(255,255,220,0.55)' : 'rgba(170,55,0,0.4)');
+      g.addColorStop(1, 'rgba(255,180,60,0)');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+    }
+  }, 512, 256);
+}
+
+function texRing() {
+  return makeTexture((ctx, w, h) => {
+    for (let x = 0; x < w; x++) {
+      const t = x / w;
+      let alpha = 0.5 + 0.38 * Math.sin(t * 42) * (Math.random() * 0.3 + 0.7);
+      alpha *= (1 - Math.pow(Math.abs(t - 0.5) * 2, 4) * 0.4);
+      if (Math.random() < 0.025) alpha *= 0.15;
+      const shade = 205 + Math.floor(Math.random() * 35 - 15);
+      ctx.fillStyle = `rgba(${shade},${shade - 12},${shade - 45},${Math.max(0, Math.min(1, alpha)).toFixed(3)})`;
+      ctx.fillRect(x, 0, 1, h);
+    }
+  }, 512, 6);
+}
+
+function makeGlowTexture(inner, mid, outer) {
+  const c = document.createElement('canvas'); c.width = c.height = 256;
+  const ctx = c.getContext('2d');
+  const g = ctx.createRadialGradient(128, 128, 0, 128, 128, 128);
+  g.addColorStop(0, inner); g.addColorStop(0.28, mid); g.addColorStop(1, outer);
+  ctx.fillStyle = g; ctx.fillRect(0, 0, 256, 256);
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+
+/* fix RingGeometry UVs so the radial ring texture maps correctly along radius */
+function fixRingUVs(geometry, innerRadius, outerRadius) {
+  const pos = geometry.attributes.position;
+  const uv = geometry.attributes.uv;
+  const v3 = new THREE.Vector3();
+  for (let i = 0; i < pos.count; i++) {
+    v3.fromBufferAttribute(pos, i);
+    const r = Math.sqrt(v3.x * v3.x + v3.y * v3.y);
+    const u = (r - innerRadius) / (outerRadius - innerRadius);
+    uv.setXY(i, u, 1);
+  }
+  uv.needsUpdate = true;
+}
+
+/* ---------------------------------------------------------------------------
+   3. ЗВЁЗДНОЕ НЕБО
+--------------------------------------------------------------------------- */
+function makeStars(count = 4500) {
+  const geo = new THREE.BufferGeometry();
+  const positions = new Float32Array(count * 3);
+  const colors = new Float32Array(count * 3);
+  const sizes = new Float32Array(count);
+  for (let i = 0; i < count; i++) {
+    const r = 420 * (0.55 + Math.random() * 0.45);
+    const theta = Math.random() * Math.PI * 2;
+    const phi = Math.acos(2 * Math.random() - 1);
+    positions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+    positions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+    positions[i * 3 + 2] = r * Math.cos(phi);
+    const tint = 0.7 + Math.random() * 0.3;
+    const warm = Math.random() < 0.18;
+    colors[i * 3]     = warm ? tint : tint * 0.85 + 0.15;
+    colors[i * 3 + 1] = warm ? tint * 0.82 : tint;
+    colors[i * 3 + 2] = warm ? tint * 0.55 + 0.1 : tint;
+    sizes[i] = Math.random() * 1.6 + 0.4;
+  }
+  geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  const mat = new THREE.PointsMaterial({
+    size: 1.3, vertexColors: true, sizeAttenuation: true,
+    transparent: true, opacity: 0.95, depthWrite: false
+  });
+  return new THREE.Points(geo, mat);
+}
+scene.add(makeStars());
+
+/* ---------------------------------------------------------------------------
+   4. СОЛНЦЕ
+--------------------------------------------------------------------------- */
+const SUN_RADIUS = 4.2;
+const sunGroup = new THREE.Group();
+scene.add(sunGroup);
+
+const sunMesh = new THREE.Mesh(
+  new THREE.SphereGeometry(SUN_RADIUS, 48, 48),
+  new THREE.MeshBasicMaterial({ map: texSun() })
+);
+sunGroup.add(sunMesh);
+
+const glowTexInner = makeGlowTexture('rgba(255,248,222,0.95)', 'rgba(255,200,110,0.45)', 'rgba(255,140,50,0)');
+const glowTexOuter = makeGlowTexture('rgba(255,210,140,0.55)', 'rgba(255,160,70,0.22)', 'rgba(255,120,40,0)');
+
+const glowInner = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTexInner, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true }));
+glowInner.scale.set(SUN_RADIUS * 3.4, SUN_RADIUS * 3.4, 1);
+sunGroup.add(glowInner);
+
+const glowOuter = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTexOuter, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0.8 }));
+glowOuter.scale.set(SUN_RADIUS * 7.5, SUN_RADIUS * 7.5, 1);
+sunGroup.add(glowOuter);
+
+const sunLight = new THREE.PointLight(0xfff2da, 3.4, 0, 0); // decay 0 — упрощённое, стилизованное затухание
+sunGroup.add(sunLight);
+scene.add(new THREE.AmbientLight(0x5a6da8, 0.22));
+
+/* ---------------------------------------------------------------------------
+   5. ДАННЫЕ ПЛАНЕТ (визуальный масштаб условный; факты в подсказках — реальные)
+--------------------------------------------------------------------------- */
+const SIM_DAYS_PER_SEC = 9;      // скорость орбитального времени при ×1
+const SIM_HOURS_PER_SEC = 700;   // скорость осевого вращения при ×1
+
+const PLANET_DATA = [
+  {
+    key: 'mercury', name: 'Меркурий', color: 0x9c9690,
+    radius: 0.42, distance: 8.5, periodDays: 88, rotationHours: 1407.6,
+    diameterKm: 4879, distanceMkm: 57.9, tilt: 0.03,
+    texture: () => texRocky('#9c9690', '#5e564f', '#c9c2b8', 130)
+  },
+  {
+    key: 'venus', name: 'Венера', color: 0xdcbd80,
+    radius: 0.92, distance: 11.5, periodDays: 224.7, rotationHours: -5832.5,
+    diameterKm: 12104, distanceMkm: 108.2, tilt: 0.05,
+    texture: () => texVenus()
+  },
+  {
+    key: 'earth', name: 'Земля', color: 0x1d5fa3,
+    radius: 0.98, distance: 15.5, periodDays: 365.25, rotationHours: 23.93,
+    diameterKm: 12742, distanceMkm: 149.6, tilt: 0.41,
+    texture: () => texEarth(), hasMoon: true
+  },
+  {
+    key: 'mars', name: 'Марс', color: 0xb5582f,
+    radius: 0.62, distance: 19, periodDays: 687, rotationHours: 24.62,
+    diameterKm: 6779, distanceMkm: 227.9, tilt: 0.44,
+    texture: () => texRocky('#b5582f', '#7a3318', '#d98e5b', 110)
+  },
+  {
+    key: 'jupiter', name: 'Юпитер', color: 0xcfa97a,
+    radius: 3.1, distance: 26.5, periodDays: 4331, rotationHours: 9.93,
+    diameterKm: 139820, distanceMkm: 778.5, tilt: 0.05,
+    texture: () => texBanded(['#caa074', '#e8c9a0', '#b9885a', '#e0bd8e', '#a87a4f', '#dcb88c'])
+  },
+  {
+    key: 'saturn', name: 'Сатурн', color: 0xe3cf9b,
+    radius: 2.7, distance: 34, periodDays: 10747, rotationHours: 10.7,
+    diameterKm: 116460, distanceMkm: 1434, tilt: 0.47,
+    texture: () => texBanded(['#e8dcb0', '#f2e6c4', '#dcc890', '#ecdcb4']), hasRing: true
+  },
+  {
+    key: 'uranus', name: 'Уран', color: 0x9fd6e0,
+    radius: 1.7, distance: 41, periodDays: 30589, rotationHours: -17.24,
+    diameterKm: 50724, distanceMkm: 2871, tilt: 1.71, // ~98° — наклон "на бок"
+    texture: () => texBanded(['#9fd6e0', '#bfe8ee', '#8fc8d4', '#aedce4'])
+  },
+  {
+    key: 'neptune', name: 'Нептун', color: 0x4566e8,
+    radius: 1.65, distance: 47.5, periodDays: 59800, rotationHours: 16.11,
+    diameterKm: 49244, distanceMkm: 4495, tilt: 0.49,
+    texture: () => texBanded(['#3b56c9', '#5777e8', '#2d44a8', '#4a66d6'])
+  }
+];
+
+function fmtPeriod(days) {
+  if (days < 1) return Math.round(days * 24) + ' ч';
+  if (days < 700) return (Math.round(days * 10) / 10).toLocaleString('ru-RU') + ' сут.';
+  const years = days / 365.25;
+  return (Math.round(years * 100) / 100).toLocaleString('ru-RU') + ' лет';
+}
+function fmtRotation(hours) {
+  const abs = Math.abs(hours);
+  const retro = hours < 0 ? ' (обратное)' : '';
+  if (abs < 48) return (Math.round(abs * 10) / 10) + ' ч' + retro;
+  return (Math.round(abs / 24 * 10) / 10) + ' сут.' + retro;
+}
+
+/* ---------------------------------------------------------------------------
+   6. ПОСТРОЕНИЕ ПЛАНЕТ: иерархия orbitPivot -> tiltPivot -> spinGroup -> mesh
+--------------------------------------------------------------------------- */
+const planets = [];
+const orbitLines = [];
+const pickables = [];
+const labelsContainer = document.body;
+
+function makeOrbitLine(radius) {
+  const segments = 160;
+  const pts = [];
+  for (let i = 0; i <= segments; i++) {
+    const a = (i / segments) * Math.PI * 2;
+    pts.push(new THREE.Vector3(Math.cos(a) * radius, 0, Math.sin(a) * radius));
+  }
+  const geo = new THREE.BufferGeometry().setFromPoints(pts);
+  const mat = new THREE.LineBasicMaterial({ color: 0x5276b8, transparent: true, opacity: 0.32 });
+  return new THREE.LineLoop(geo, mat);
+}
+
+PLANET_DATA.forEach((data) => {
+  const orbitPivot = new THREE.Object3D();
+  orbitPivot.rotation.y = Math.random() * Math.PI * 2; // случайная стартовая фаза
+  scene.add(orbitPivot);
+
+  const orbitLine = makeOrbitLine(data.distance);
+  scene.add(orbitLine);
+  orbitLines.push(orbitLine);
+
+  const anchor = new THREE.Object3D();
+  anchor.position.set(data.distance, 0, 0);
+  orbitPivot.add(anchor);
+
+  const tiltPivot = new THREE.Object3D();
+  tiltPivot.rotation.x = data.tilt;
+  anchor.add(tiltPivot);
+
+  const spinGroup = new THREE.Object3D();
+  spinGroup.rotation.y = Math.random() * Math.PI * 2;
+  tiltPivot.add(spinGroup);
+
+  const mat = new THREE.MeshStandardMaterial({
+    map: data.texture(), roughness: 0.85, metalness: 0.0,
+    emissive: new THREE.Color(data.color).multiplyScalar(0.04)
+  });
+  const mesh = new THREE.Mesh(new THREE.SphereGeometry(data.radius, 40, 40), mat);
+  mesh.userData = { key: data.key, baseScale: 1, targetScale: 1 };
+  spinGroup.add(mesh);
+  pickables.push(mesh);
+
+  // тонкое атмосферное свечение для Земли и Венеры
+  if (data.key === 'earth' || data.key === 'venus') {
+    const atmoColor = data.key === 'earth' ? 0x5fb3ff : 0xffe9b0;
+    const atmo = new THREE.Mesh(
+      new THREE.SphereGeometry(data.radius * 1.06, 32, 32),
+      new THREE.MeshBasicMaterial({ color: atmoColor, transparent: true, opacity: 0.16, side: THREE.BackSide, blending: THREE.AdditiveBlending })
+    );
+    spinGroup.add(atmo);
+  }
+
+  // кольца Сатурна
+  if (data.hasRing) {
+    const inner = data.radius * 1.35, outer = data.radius * 2.5;
+    const ringGeo = new THREE.RingGeometry(inner, outer, 96, 1);
+    fixRingUVs(ringGeo, inner, outer);
+    const ringMat = new THREE.MeshBasicMaterial({
+      map: texRing(), side: THREE.DoubleSide, transparent: true, opacity: 0.92
+    });
+    const ring = new THREE.Mesh(ringGeo, ringMat);
+    ring.rotation.x = -Math.PI / 2;
+    spinGroup.add(ring);
+  }
+
+  // Луна Земли
+  let moonMesh = null, moonPivot = null;
+  if (data.hasMoon) {
+    moonPivot = new THREE.Object3D();
+    moonPivot.rotation.y = Math.random() * Math.PI * 2;
+    anchor.add(moonPivot); // вращается вокруг Земли независимо от наклона/спина Земли
+
+    const moonAnchor = new THREE.Object3D();
+    moonAnchor.position.set(data.radius * 2.4, 0, 0);
+    moonPivot.add(moonAnchor);
+
+    moonMesh = new THREE.Mesh(
+      new THREE.SphereGeometry(data.radius * 0.27, 24, 24),
+      new THREE.MeshStandardMaterial({ map: texRocky('#bdbdbd', '#717171', '#e6e6e6', 90), roughness: 0.9 })
+    );
+    moonMesh.userData = { key: 'moon', baseScale: 1, targetScale: 1, isMoon: true };
+    moonAnchor.add(moonMesh);
+    pickables.push(moonMesh);
+  }
+
+  // HTML-метка с названием
+  const label = document.createElement('div');
+  label.className = 'planet-label';
+  label.textContent = data.name;
+  labelsContainer.appendChild(label);
+
+  planets.push({
+    data, orbitPivot, anchor, tiltPivot, spinGroup, mesh,
+    orbitSpeed: (Math.PI * 2 / data.periodDays) * SIM_DAYS_PER_SEC,
+    spinSpeed: Math.sign(data.rotationHours || 1) * (Math.PI * 2 / Math.abs(data.rotationHours)) * SIM_HOURS_PER_SEC,
+    moonPivot, moonMesh,
+    moonOrbitSpeed: 1.6,
+    label
+  });
+});
+
+// карта меш -> данные планеты (для подсказок/фокуса, включая Луну -> родитель Земля)
+const meshToPlanet = new Map();
+planets.forEach(p => meshToPlanet.set(p.mesh, p));
+function moonTooltipData(){
+  return {
+    name: 'Луна', diameterKm: 3474, distanceMkm: 0.384, periodDays: 27.3, rotationHours: 655.7,
+    key:'moon'
+  };
+}
+
+/* ---------------------------------------------------------------------------
+   7. ПОЛЬЗОВАТЕЛЬСКИЕ ORBIT-КОНТРОЛЫ (без аддонов): drag-вращение, колесо/pinch-зум
+--------------------------------------------------------------------------- */
+const controls = {
+  target: new THREE.Vector3(0, 0, 0),
+  radius: 72,
+  minRadius: 6,
+  maxRadius: 230,
+  phi: 1.15,        // полярный угол
+  theta: 0.6,       // азимутальный угол
+  phiDelta: 0,
+  thetaDelta: 0,
+  radiusDelta: 0,
+  damping: reduceMotion ? 1 : 0.12,
+  followObject: null,
+  pendingReset: false,
+  resetT: 0,
+};
+
+function clampPhi(p) { return Math.max(0.12, Math.min(Math.PI - 0.12, p)); }
+
+function updateCameraFromSpherical() {
+  const sinPhiRadius = Math.sin(controls.phi) * controls.radius;
+  const x = sinPhiRadius * Math.sin(controls.theta);
+  const y = Math.cos(controls.phi) * controls.radius;
+  const z = sinPhiRadius * Math.cos(controls.theta);
+  camera.position.set(controls.target.x + x, controls.target.y + y, controls.target.z + z);
+  camera.lookAt(controls.target);
+}
+controls.theta = 0.6; controls.phi = 1.15;
+updateCameraFromSpherical();
+
+let isPointerDown = false;
+let lastPointer = { x: 0, y: 0 };
+let pointerDownPos = { x: 0, y: 0 };
+let pointerMoved = false;
+const activePointers = new Map();
+let pinchStartDist = 0;
+let pinchStartRadius = 0;
+
+canvas.addEventListener('pointerdown', (e) => {
+  canvas.setPointerCapture(e.pointerId);
+  activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (activePointers.size === 1) {
+    isPointerDown = true;
+    pointerMoved = false;
+    lastPointer = { x: e.clientX, y: e.clientY };
+    pointerDownPos = { x: e.clientX, y: e.clientY };
+    canvas.classList.add('dragging');
+  } else if (activePointers.size === 2) {
+    isPointerDown = false;
+    const pts = Array.from(activePointers.values());
+    pinchStartDist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+    pinchStartRadius = controls.radius;
+  }
+  hideHint();
+});
+
+canvas.addEventListener('pointermove', (e) => {
+  if (activePointers.has(e.pointerId)) activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+  if (activePointers.size === 2) {
+    const pts = Array.from(activePointers.values());
+    const dist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+    const scale = pinchStartDist / Math.max(dist, 1);
+    controls.radius = clampRadius(pinchStartRadius * scale);
+    return;
+  }
+
+  if (isPointerDown) {
+    const dx = e.clientX - lastPointer.x;
+    const dy = e.clientY - lastPointer.y;
+    if (Math.abs(e.clientX - pointerDownPos.x) > 4 || Math.abs(e.clientY - pointerDownPos.y) > 4) pointerMoved = true;
+    controls.thetaDelta -= dx * 0.0042;
+    controls.phiDelta -= dy * 0.0042;
+    lastPointer = { x: e.clientX, y: e.clientY };
+  }
+
+  handleHover(e);
+});
+
+function endPointer(e) {
+  activePointers.delete(e.pointerId);
+  if (activePointers.size === 0) {
+    if (isPointerDown && !pointerMoved) handleClick(e);
+    isPointerDown = false;
+    canvas.classList.remove('dragging');
+  }
+}
+canvas.addEventListener('pointerup', endPointer);
+canvas.addEventListener('pointercancel', endPointer);
+canvas.addEventListener('pointerleave', () => { hideTooltip(); });
+
+function clampRadius(r) { return Math.max(controls.minRadius, Math.min(controls.maxRadius, r)); }
+
+canvas.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  controls.radius = clampRadius(controls.radius * (1 + e.deltaY * 0.0011));
+  hideHint();
+}, { passive: false });
+
+/* ---------------------------------------------------------------------------
+   8. RAYCASTER: наведение (подсказка) и клик (фокус камеры)
+--------------------------------------------------------------------------- */
+const raycaster = new THREE.Raycaster();
+const pointerNDC = new THREE.Vector2();
+let hoveredMesh = null;
+const tooltipEl = document.getElementById('tooltip');
+
+function getPointerNDC(e) {
+  pointerNDC.x = (e.clientX / window.innerWidth) * 2 - 1;
+  pointerNDC.y = -(e.clientY / window.innerHeight) * 2 + 1;
+  return pointerNDC;
+}
+
+function handleHover(e) {
+  raycaster.setFromCamera(getPointerNDC(e), camera);
+  const hits = raycaster.intersectObjects(pickables, false);
+  if (hits.length > 0) {
+    const mesh = hits[0].object;
+    if (hoveredMesh !== mesh) {
+      if (hoveredMesh) hoveredMesh.userData.targetScale = 1;
+      hoveredMesh = mesh;
+      hoveredMesh.userData.targetScale = 1.12;
+      showTooltipFor(mesh);
+    }
+    positionTooltip(e.clientX, e.clientY);
+  } else if (hoveredMesh) {
+    hoveredMesh.userData.targetScale = 1;
+    hoveredMesh = null;
+    hideTooltip();
+  }
+}
+
+function showTooltipFor(mesh) {
+  const d = mesh.userData.isMoon ? moonTooltipData() : meshToPlanet.get(mesh).data;
+  document.getElementById('tt-name').textContent = d.name;
+  document.getElementById('tt-diam').textContent = d.diameterKm.toLocaleString('ru-RU') + ' км';
+  document.getElementById('tt-dist').textContent = d.distanceMkm.toLocaleString('ru-RU') + ' млн км';
+  document.getElementById('tt-period').textContent = fmtPeriod(d.periodDays);
+  document.getElementById('tt-rot').textContent = fmtRotation(d.rotationHours);
+  tooltipEl.classList.add('visible');
+}
+function positionTooltip(x, y) {
+  tooltipEl.style.left = x + 'px';
+  tooltipEl.style.top = (y - 14) + 'px';
+}
+function hideTooltip() { tooltipEl.classList.remove('visible'); }
+
+function handleClick(e) {
+  raycaster.setFromCamera(getPointerNDC(e), camera);
+  const hits = raycaster.intersectObjects(pickables, false);
+  if (hits.length > 0) {
+    const mesh = hits[0].object;
+    const targetPlanet = mesh.userData.isMoon ? planets.find(p => p.moonMesh === mesh) : meshToPlanet.get(mesh);
+    focusOnPlanet(targetPlanet, mesh);
+  }
+}
+
+function focusOnPlanet(planet, mesh) {
+  controls.followObject = mesh;
+  const desired = clampRadius(planet.data.radius * (mesh.userData.isMoon ? 14 : 9) + 5);
+  controls.radius = desired;
+  setActiveChip(planet.data.key);
+  document.getElementById('readout-focus').textContent = mesh.userData.isMoon ? 'Луна' : planet.data.name;
+}
+
+function resetView() {
+  controls.followObject = null;
+  controls.pendingReset = true;
+  controls.resetT = 0;
+  controls.resetFrom = controls.target.clone();
+  controls.resetRadiusFrom = controls.radius;
+  setActiveChip(null);
+  document.getElementById('readout-focus').textContent = 'свободная камера';
+}
+
+/* ---------------------------------------------------------------------------
+   9. UI: воспроизведение, скорость, переключатели, кнопки, чипы планет
+--------------------------------------------------------------------------- */
+let isPlaying = !reduceMotion;
+let timeScale = 1;
+let showOrbits = true;
+let showLabels = false;
+
+const btnPlay = document.getElementById('btn-play');
+const iconPlay = document.getElementById('icon-play');
+const iconPause = document.getElementById('icon-pause');
+const readoutState = document.getElementById('readout-state');
+
+function setPlaying(v) {
+  isPlaying = v;
+  iconPlay.style.display = isPlaying ? 'none' : 'block';
+  iconPause.style.display = isPlaying ? 'block' : 'none';
+  readoutState.textContent = isPlaying ? 'воспроизведение' : 'пауза';
+}
+setPlaying(isPlaying);
+btnPlay.addEventListener('click', () => setPlaying(!isPlaying));
+
+const speedSlider = document.getElementById('speed-slider');
+const speedVal = document.getElementById('speed-val');
+const readoutTime = document.getElementById('readout-time');
+speedSlider.value = reduceMotion ? 0.3 : 1;
+function setSpeed(v) {
+  timeScale = parseFloat(v);
+  const label = '×' + timeScale.toFixed(1);
+  speedVal.textContent = label;
+  readoutTime.textContent = label;
+}
+setSpeed(speedSlider.value);
+speedSlider.addEventListener('input', (e) => setSpeed(e.target.value));
+
+const toggleOrbits = document.getElementById('toggle-orbits');
+toggleOrbits.addEventListener('click', () => {
+  showOrbits = !showOrbits;
+  toggleOrbits.classList.toggle('on', showOrbits);
+  orbitLines.forEach(l => l.visible = showOrbits);
+});
+
+const toggleLabels = document.getElementById('toggle-labels');
+toggleLabels.addEventListener('click', () => {
+  showLabels = !showLabels;
+  toggleLabels.classList.toggle('on', showLabels);
+});
+
+document.getElementById('btn-reset').addEventListener('click', resetView);
+
+const hintEl = document.getElementById('hint');
+let hintHidden = false;
+function hideHint() {
+  if (hintHidden) return;
+  hintHidden = true;
+  hintEl.classList.add('fade');
+}
+if (reduceMotion) hideHint();
+
+const chipsContainer = document.getElementById('chips');
+const chipEls = {};
+planets.forEach(p => {
+  const chip = document.createElement('div');
+  chip.className = 'chip';
+  const colorHex = '#' + new THREE.Color(p.data.color).getHexString();
+  chip.innerHTML = `<span class="swatch" style="background:${colorHex}; color:${colorHex}"></span>${p.data.name}`;
+  chip.addEventListener('click', () => focusOnPlanet(p, p.mesh));
+  chipsContainer.appendChild(chip);
+  chipEls[p.data.key] = chip;
+});
+function setActiveChip(key) {
+  Object.entries(chipEls).forEach(([k, el]) => el.classList.toggle('active', k === key));
+}
+
+/* ---------------------------------------------------------------------------
+   10. ЦИКЛ АНИМАЦИИ
+--------------------------------------------------------------------------- */
+const clock = new THREE.Clock();
+const tmpVec = new THREE.Vector3();
+
+function projectLabel(object3D, el) {
+  object3D.getWorldPosition(tmpVec);
+  tmpVec.project(camera);
+  const behind = tmpVec.z > 1;
+  if (behind) { el.style.opacity = 0; el.classList.remove('shown'); return; }
+  const x = (tmpVec.x * 0.5 + 0.5) * window.innerWidth;
+  const y = (-tmpVec.y * 0.5 + 0.5) * window.innerHeight;
+  el.style.left = x + 'px';
+  el.style.top = y + 'px';
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+  const rawDelta = Math.min(clock.getDelta(), 0.05);
+  const delta = isPlaying ? rawDelta * timeScale : 0;
+
+  // вращение солнца
+  sunMesh.rotation.y += rawDelta * 0.04;
+  glowInner.material.rotation += rawDelta * 0.02;
+
+  // орбиты и спин планет
+  planets.forEach(p => {
+    p.orbitPivot.rotation.y += p.orbitSpeed * delta;
+    p.spinGroup.rotation.y += p.spinSpeed * delta;
+    if (p.moonPivot) p.moonPivot.rotation.y += p.moonOrbitSpeed * delta;
+    if (p.moonMesh) p.moonMesh.rotation.y += p.moonOrbitSpeed * delta * 0.6;
+
+    // плавный hover-пульс масштаба
+    const cur = p.mesh.scale.x;
+    const tgt = p.mesh.userData.targetScale;
+    if (Math.abs(cur - tgt) > 0.0005) {
+      const ns = THREE.MathUtils.lerp(cur, tgt, reduceMotion ? 1 : 0.18);
+      p.mesh.scale.setScalar(ns);
+    }
+    if (p.moonMesh) {
+      const mc = p.moonMesh.scale.x, mt = p.moonMesh.userData.targetScale;
+      if (Math.abs(mc - mt) > 0.0005) p.moonMesh.scale.setScalar(THREE.MathUtils.lerp(mc, mt, reduceMotion ? 1 : 0.18));
+    }
+
+    // метки названий
+    projectLabel(p.mesh, p.label);
+    const isFollowed = controls.followObject === p.mesh;
+    p.label.classList.toggle('shown', showLabels || isFollowed);
+  });
+
+  // следование камеры за выбранной планетой
+  if (controls.followObject) {
+    controls.followObject.getWorldPosition(tmpVec);
+    controls.target.lerp(tmpVec, reduceMotion ? 1 : 0.12);
+  } else if (controls.pendingReset) {
+    controls.resetT += rawDelta / (reduceMotion ? 0.001 : 0.9);
+    const t = Math.min(1, controls.resetT);
+    const ease = 1 - Math.pow(1 - t, 3);
+    controls.target.lerpVectors(controls.resetFrom, new THREE.Vector3(0, 0, 0), ease);
+    controls.radius = THREE.MathUtils.lerp(controls.resetRadiusFrom, 72, ease);
+    if (t >= 1) controls.pendingReset = false;
+  }
+
+  // инерция drag-вращения
+  controls.theta += controls.thetaDelta;
+  controls.phi = clampPhi(controls.phi + controls.phiDelta);
+  controls.thetaDelta *= (1 - controls.damping);
+  controls.phiDelta *= (1 - controls.damping);
+  updateCameraFromSpherical();
+
+  renderer.render(scene, camera);
+}
+
+/* ---------------------------------------------------------------------------
+   11. ЗАПУСК
+--------------------------------------------------------------------------- */
+onResize();
+animate();
+requestAnimationFrame(() => {
+  document.getElementById('loader').classList.add('hidden');
+});
+</script>
+</body>
+</html>

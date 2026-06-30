@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ru"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IGX Тест-Арена : результаты моделей</title>
+<meta name="description" content="Галерея результатов Claude Sonnet 5 в IGX Тест-Арене: 6 интерактивных веб-приложений (магазин, игра, барабаны, приставка, 3D-планеты, часы), сгенерированных по одному заданию каждое.">
+<style>
+  :root { --bg:#0a0a0b; --panel:#121214; --line:#222226; --line2:#2c2c31; --text:#ececef; --muted:#8a8a92; --faint:#5a5a61; --accent:#c9c9cf; }
+  * { box-sizing:border-box; }
+  html,body { margin:0; background:var(--bg); color:var(--text); font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+  a { color:inherit; }
+  .wrap { max-width:1400px; margin:0 auto; padding:28px 20px 80px; }
+  header.top { display:flex; align-items:flex-end; gap:18px; flex-wrap:wrap; border-bottom:1px solid var(--line); padding-bottom:18px; margin-bottom:8px; }
+  header.top h1 { font-size:22px; margin:0; letter-spacing:.5px; }
+  header.top h1 b { color:#fff; }
+  .sub { color:var(--muted); font:12px/1.4 ui-monospace,Menlo,Consolas,monospace; }
+  .stat { color:var(--faint); font:11px ui-monospace,monospace; text-transform:uppercase; letter-spacing:1px; margin-left:auto; text-align:right; }
+  .models { display:flex; gap:6px; flex-wrap:wrap; margin:14px 0 6px; }
+  .chip { display:inline-flex; align-items:center; gap:6px; font:11px ui-monospace,monospace; color:var(--muted); border:1px solid var(--line2); border-radius:999px; padding:3px 9px 3px 4px; }
+  .legend { color:var(--faint); font:11px ui-monospace,monospace; margin:4px 0 0; }
+  .test { margin-top:38px; }
+  .thead { display:flex; align-items:baseline; gap:12px; }
+  .thead .tn { font:10px ui-monospace,monospace; color:var(--faint); text-transform:uppercase; letter-spacing:2px; }
+  .thead h2 { font-size:18px; margin:0; }
+  .thead .tcount { margin-left:auto; font:11px ui-monospace,monospace; color:var(--faint); }
+  .tdesc { color:var(--muted); font-size:12.5px; margin:6px 0 14px; max-width:900px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:16px; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:12px; overflow:hidden; cursor:pointer; transition:border-color .15s, transform .15s; }
+  .card:hover { border-color:var(--line2); transform:translateY(-2px); }
+  .card:focus-visible { outline:2px solid var(--accent); }
+  .frame { position:relative; width:100%; aspect-ratio:16/10; background:#08080a; overflow:hidden; border-bottom:1px solid var(--line); }
+  .frame.v { aspect-ratio:16/12; }
+  .frame iframe { position:absolute; top:0; left:0; border:0; transform-origin:top left; pointer-events:none; background:#fff; }
+  .frame .ph { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; color:var(--faint); }
+  .ph .phname { font:11px ui-monospace,monospace; color:var(--muted); }
+  .badge { width:34px; height:34px; border-radius:9px; display:inline-flex; align-items:center; justify-content:center; color:#fff; font:700 16px/1 ui-monospace,monospace; }
+  .badge.sm { width:20px; height:20px; border-radius:6px; font-size:11px; }
+  .meta { display:flex; align-items:center; gap:8px; padding:9px 11px 4px; }
+  .meta .mname { font:600 12.5px sans-serif; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .meta .open { margin-left:auto; font:10px ui-monospace,monospace; color:var(--faint); text-transform:uppercase; letter-spacing:1px; }
+  .card:hover .open { color:var(--accent); }
+  .stats { display:flex; align-items:center; flex-wrap:wrap; gap:5px; padding:0 11px 10px; font:11px ui-monospace,Menlo,monospace; color:var(--muted); }
+  .stats i { color:var(--faint); font-style:normal; }
+  .stats .via { margin-left:auto; color:var(--faint); border:1px solid var(--line2); border-radius:6px; padding:1px 7px; white-space:nowrap; }
+  .modal { position:fixed; inset:0; background:rgba(4,4,6,.92); display:none; z-index:50; flex-direction:column; }
+  .modal.on { display:flex; }
+  .mbar { display:flex; align-items:center; gap:12px; padding:10px 16px; border-bottom:1px solid var(--line); flex-wrap:wrap; }
+  .mbar .mt { font:600 13px sans-serif; }
+  .mbar .ms { color:var(--muted); font:11px ui-monospace,monospace; }
+  .mbar .mstats { color:var(--faint); font:11px ui-monospace,monospace; }
+  .mbar .x { margin-left:auto; cursor:pointer; border:1px solid var(--line2); background:var(--panel); color:var(--text); border-radius:8px; padding:6px 12px; font:12px sans-serif; }
+  .mbar a.raw { color:var(--muted); font:11px ui-monospace,monospace; text-decoration:none; border:1px solid var(--line2); border-radius:8px; padding:6px 10px; }
+  .modal iframe { flex:1; width:100%; border:0; background:#fff; }
+  footer { margin-top:50px; color:var(--faint); font:11px/1.7 ui-monospace,monospace; border-top:1px solid var(--line); padding-top:16px; }
+</style>
+</head><body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>IGX <b>Тест-Арена</b> &middot; результаты</h1>
+      <div class="sub">Claude Sonnet 5 · 6 генераций по 6 заданиям (сьюты IGX Тест-Арены)</div>
+    </div>
+    <div class="stat">снимок 30.06.2026<br>тащите вниз &middot; клик = открыть</div>
+  </header>
+  <div class="models"><span class="chip"><span class="badge sm" style="background:#d97757">C</span>Claude Sonnet 5</span></div>
+  <p class="legend">на карточках: ≈время генерации &middot; токенов/с (замер) &middot; ≈цена &middot; через что сделано (раннер)</p>
+  <section class="test"><div class="thead"><span class="tn">тест 17</span><h2>Магазин</h2><span class="tcount">Claude Sonnet 5</span></div>
+  <p class="tdesc">Действуй как Senior Frontend-разработчик и UI/UX дизайнер уровня бигтех-компаний (Apple, S</p>
+  <div class="grid"><div class="card" data-src="r/001.html" data-vw="1280" data-vh="800" data-model="Claude Sonnet 5" data-title="Магазин" data-stats="≈1м 56с · 92 ток/с · opencode · OpenRouter" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#d97757">C</span><span class="phname">Claude Sonnet 5</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#d97757">C</span><span class="mname">Claude Sonnet 5</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈1м 56с</span><i>·</i><span title="токенов в секунду (замер)">92 ток/с</span><span class="via" title="через что сделано">opencode · OpenRouter</span></div>
+  </div></div></section>
+<section class="test"><div class="thead"><span class="tn">тест 18</span><h2>CS</h2><span class="tcount">Claude Sonnet 5</span></div>
+  <p class="tdesc">Действуй как Senior Game Developer (клиентские веб-игры). Создай играбельный 3D-прототип ш</p>
+  <div class="grid"><div class="card" data-src="r/002.html" data-vw="1280" data-vh="800" data-model="Claude Sonnet 5" data-title="CS" data-stats="≈1м 25с · 120 ток/с · opencode · OpenRouter" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#d97757">C</span><span class="phname">Claude Sonnet 5</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#d97757">C</span><span class="mname">Claude Sonnet 5</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈1м 25с</span><i>·</i><span title="токенов в секунду (замер)">120 ток/с</span><span class="via" title="через что сделано">opencode · OpenRouter</span></div>
+  </div></div></section>
+<section class="test"><div class="thead"><span class="tn">тест 19</span><h2>Барабаны</h2><span class="tcount">Claude Sonnet 5</span></div>
+  <p class="tdesc">Действуй как Senior Creative Developer. Создай интерактивное веб-приложение — трехмерную б</p>
+  <div class="grid"><div class="card" data-src="r/003.html" data-vw="1280" data-vh="800" data-model="Claude Sonnet 5" data-title="Барабаны" data-stats="≈1м 28с · 93 ток/с · opencode · OpenRouter" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#d97757">C</span><span class="phname">Claude Sonnet 5</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#d97757">C</span><span class="mname">Claude Sonnet 5</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈1м 28с</span><i>·</i><span title="токенов в секунду (замер)">93 ток/с</span><span class="via" title="через что сделано">opencode · OpenRouter</span></div>
+  </div></div></section>
+<section class="test"><div class="thead"><span class="tn">тест 21</span><h2>Приставка</h2><span class="tcount">Claude Sonnet 5</span></div>
+  <p class="tdesc">Создай интерактивное веб-приложение — симулятор игровой консоли (в стиле PlayStation Dashb</p>
+  <div class="grid"><div class="card" data-src="r/004.html" data-vw="1280" data-vh="800" data-model="Claude Sonnet 5" data-title="Приставка" data-stats="≈2м 07с · 105 ток/с · opencode · OpenRouter" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#d97757">C</span><span class="phname">Claude Sonnet 5</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#d97757">C</span><span class="mname">Claude Sonnet 5</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈2м 07с</span><i>·</i><span title="токенов в секунду (замер)">105 ток/с</span><span class="via" title="через что сделано">opencode · OpenRouter</span></div>
+  </div></div></section>
+<section class="test"><div class="thead"><span class="tn">тест 27</span><h2>Планеты</h2><span class="tcount">Claude Sonnet 5</span></div>
+  <p class="tdesc">Задача: Создай интерактивную 3D-модель Солнечной системы на чистом three.js. Верни ОДИН са</p>
+  <div class="grid"><div class="card" data-src="r/005.html" data-vw="1280" data-vh="800" data-model="Claude Sonnet 5" data-title="Планеты" data-stats="≈1м 50с · 100 ток/с · opencode · OpenRouter" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#d97757">C</span><span class="phname">Claude Sonnet 5</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#d97757">C</span><span class="mname">Claude Sonnet 5</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈1м 50с</span><i>·</i><span title="токенов в секунду (замер)">100 ток/с</span><span class="via" title="через что сделано">opencode · OpenRouter</span></div>
+  </div></div></section>
+<section class="test"><div class="thead"><span class="tn">тест 31</span><h2>Часы</h2><span class="tcount">Claude Sonnet 5</span></div>
+  <p class="tdesc">Создай архитектуру многостраничного премиального сайта для бренда механических часов. Прое</p>
+  <div class="grid"><div class="card" data-src="r/006.html" data-vw="1280" data-vh="800" data-model="Claude Sonnet 5" data-title="Часы" data-stats="≈1м 21с · 99 ток/с · opencode · OpenRouter" tabindex="0">
+    <div class="frame h"><div class="ph"><span class="badge" style="background:#d97757">C</span><span class="phname">Claude Sonnet 5</span></div></div>
+    <div class="meta"><span class="badge sm" style="background:#d97757">C</span><span class="mname">Claude Sonnet 5</span><span class="open">развернуть</span></div>
+    <div class="stats"><span title="время генерации (оценка)">≈1м 21с</span><i>·</i><span title="токенов в секунду (замер)">99 ток/с</span><span class="via" title="через что сделано">opencode · OpenRouter</span></div>
+  </div></div></section>
+  <footer>
+    Каждая карточка : самодостаточный HTML, сгенерированный моделью по заданию. Превью грузятся лениво (видимые рендерятся, ушедшие из вида выгружаются); клик открывает интерактивную версию.<br>
+    Токенов/с : реальный замер во время прогона. Время и цена помечены ≈ : это оценка (выходные токены = размер HTML / 4; цена по тарифам OpenRouter, снимок 2026-06; точный wall-clock в снимок не попал). MiMo : публичной цены нет.
+  </footer>
+</div>
+
+<div class="modal" id="modal">
+  <div class="mbar"><span class="mt" id="mt"></span><span class="ms" id="ms"></span><span class="mstats" id="mstats"></span><a class="raw" id="mraw" target="_blank" rel="noopener">открыть в новой вкладке</a><button class="x" id="mx">закрыть</button></div>
+  <iframe id="mframe" title="result"></iframe>
+</div>
+
+<script>
+(function(){
+  function mount(card){
+    var frame = card.querySelector('.frame'); if(frame.dataset.loaded) return;
+    var vw = +card.dataset.vw, vh = +card.dataset.vh;
+    var ifr = document.createElement('iframe');
+    ifr.src = card.dataset.src; ifr.loading='lazy'; ifr.tabIndex=-1; ifr.setAttribute('scrolling','no'); ifr.setAttribute('sandbox','allow-scripts allow-same-origin');
+    function scale(){ var w = frame.clientWidth, h = frame.clientHeight; var s = Math.max(w/vw, h/vh); ifr.style.width=vw+'px'; ifr.style.height=vh+'px'; ifr.style.transform='scale('+s+')'; }
+    frame.appendChild(ifr); frame.dataset.loaded='1'; scale();
+    frame._scale = scale; window.addEventListener('resize', scale);
+  }
+  function unmount(card){ var frame=card.querySelector('.frame'); if(!frame.dataset.loaded) return; if(frame._scale) window.removeEventListener('resize', frame._scale); var f=frame.querySelector('iframe'); if(f) f.remove(); delete frame.dataset.loaded; }
+  var io = new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting) mount(e.target); else unmount(e.target); }); }, { rootMargin:'500px 0px' });
+  var cards = [].slice.call(document.querySelectorAll('.card'));
+  cards.forEach(function(c){ io.observe(c); });
+
+  var modal=document.getElementById('modal'), mframe=document.getElementById('mframe'), mt=document.getElementById('mt'), ms=document.getElementById('ms'), mstats=document.getElementById('mstats'), mraw=document.getElementById('mraw');
+  function open(card){ mframe.src = card.dataset.src; mt.textContent = card.dataset.model; ms.textContent = card.dataset.title; mstats.textContent = card.dataset.stats; mraw.href = card.dataset.src; modal.classList.add('on'); document.body.style.overflow='hidden'; }
+  function close(){ modal.classList.remove('on'); mframe.src='about:blank'; document.body.style.overflow=''; }
+  cards.forEach(function(c){ c.addEventListener('click', function(){ open(c); }); c.addEventListener('keydown', function(e){ if(e.key==='Enter') open(c); }); });
+  document.getElementById('mx').addEventListener('click', close);
+  modal.addEventListener('click', function(e){ if(e.target===modal) close(); });
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape') close(); });
+})();
+</script>
+</body></html>

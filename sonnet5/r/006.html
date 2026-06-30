@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NOCTURNE — Швейцарская мануфактура часов</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --gold:#c9a463;
+  --gold-light:#e7cd96;
+  --gold-dim: rgba(201,164,99,.35);
+  --black:#08080a;
+  --black-2:#111114;
+  --ivory:#f4efe4;
+  --muted: rgba(244,239,228,.58);
+  --muted-2: rgba(244,239,228,.34);
+  --serif: 'Playfair Display', Georgia, serif;
+  --sans: 'Jost', sans-serif;
+  --ease: cubic-bezier(.22,1,.36,1);
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+html,body{height:100%;}
+body{
+  background: var(--black);
+  color: var(--ivory);
+  font-family: var(--sans);
+  font-weight: 300;
+  overflow-x: hidden;
+  cursor: default;
+  -webkit-font-smoothing: antialiased;
+}
+::selection{ background: var(--gold); color:#0a0a0a; }
+::-webkit-scrollbar{ display:none; }
+
+canvas#webgl{
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  display:block;
+}
+
+.vignette{
+  position: fixed; inset:0; z-index:2; pointer-events:none;
+  background:
+    radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,.55) 100%),
+    linear-gradient(180deg, rgba(0,0,0,.45) 0%, transparent 14%, transparent 86%, rgba(0,0,0,.55) 100%);
+}
+.grain{
+  position fixed; inset:0; z-index:3; pointer-events:none; opacity:.025; mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ---------- LOADER ---------- */
+#loader{
+  position: fixed; inset:0; z-index:999; background:#08080a;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1.1rem;
+}
+#loader .ld-mark{ font-family:var(--serif); letter-spacing:.5em; font-size:1.1rem; color:var(--gold-light); padding-left:.5em; }
+#loader .ld-bar{ width:160px; height:1px; background:rgba(244,239,228,.12); position:relative; overflow:hidden; }
+#loader .ld-bar::after{ content:''; position:absolute; left:-40%; top:0; width:40%; height:100%; background:var(--gold); animation:ld 1.1s ease-in-out infinite; }
+@keyframes ld{ 0%{left:-40%;} 100%{left:100%;} }
+
+/* ---------- HEADER ---------- */
+header.site-header{
+  position: fixed; top:0; left:0; right:0; z-index:20;
+  display:flex; align-items:center; justify-content:space-between;
+  padding: 2.1rem 4.5vw;
+  border-bottom: 1px solid rgba(244,239,228,.08);
+  backdrop-filter: blur(2px);
+}
+.logo{
+  font-family: var(--serif); font-weight:600; font-size:1.25rem;
+  letter-spacing:.42em; color: var(--ivory); padding-left:.42em;
+  text-shadow: 0 0 24px rgba(201,164,99,.25);
+}
+.logo span{ color: var(--gold-light); }
+nav.tabs{ display:flex; gap: clamp(1.4rem, 3vw, 3rem); }
+.tab{
+  background:none; border:none; cursor:pointer;
+  font-family: var(--sans); font-weight:400; font-size:.74rem;
+  letter-spacing:.22em; text-transform:uppercase;
+  color: var(--muted); padding:.4rem 0; position:relative;
+  transition: color .45s var(--ease);
+}
+.tab::after{
+  content:''; position:absolute; left:0; bottom:-2px; width:0; height:1px;
+  background: linear-gradient(90deg, var(--gold), var(--gold-light));
+  transition: width .45s var(--ease);
+}
+.tab:hover{ color: var(--ivory); }
+.tab.active{ color: var(--gold-light); }
+.tab.active::after{ width:100%; }
+
+footer.site-footer{
+  position: fixed; bottom:0; left:0; right:0; z-index:18;
+  display:flex; justify-content:space-between; align-items:center;
+  padding: 1.3rem 4.5vw; pointer-events:none;
+  font-size:.66rem; letter-spacing:.16em; text-transform:uppercase; color: var(--muted-2);
+}
+
+/* ---------- PAGES ---------- */
+main#pages{ position:relative; z-index:10; height:100vh; width:100vw; }
+.page{
+  position:fixed; inset:0; display:flex; align-items:center;
+  opacity:0; visibility:hidden; pointer-events:none;
+  padding: 0 4.5vw;
+}
+.page.active{ opacity:1; visibility:visible; pointer-events:auto; }
+
+.eyebrow{
+  font-size:.72rem; letter-spacing:.34em; text-transform:uppercase;
+  color: var(--gold-light); margin-bottom:1.1rem; font-weight:400;
+}
+.eyebrow::before{ content:'—'; margin-right:.6em; color: var(--gold-dim); }
+
+/* HOME */
+#page-home .home-content{
+  position:absolute; bottom: 9vh; left:0; right:0;
+  display:flex; flex-direction:column; align-items:center; text-align:center;
+  gap: 1.4rem;
+}
+.home-h1{
+  font-family: var(--serif); font-weight:500; font-style:italic;
+  font-size: clamp(2rem, 4.6vw, 3.6rem); line-height:1.18; color: var(--ivory);
+  text-shadow: 0 4px 40px rgba(0,0,0,.6);
+  max-width: 18ch;
+}
+.home-h1 em{ color: var(--gold-light); font-style:italic; }
+.home-p{
+  max-width: 46ch; font-size:.92rem; line-height:1.85; color: var(--muted); font-weight:300;
+}
+.home-actions{ display:flex; gap:1rem; margin-top:.4rem; }
+.btn{
+  font-family: var(--sans); font-size:.74rem; letter-spacing:.18em; text-transform:uppercase;
+  padding: .95rem 2rem; border-radius:1px; cursor:pointer; transition: all .4s var(--ease);
+  border:1px solid var(--gold-dim); background:transparent; color: var(--ivory);
+}
+.btn:hover{ border-color: var(--gold); background: rgba(201,164,99,.08); color: var(--gold-light); }
+.btn.primary{ background: linear-gradient(135deg, var(--gold), #a87f43); color:#100c04; border-color:transparent; font-weight:500; }
+.btn.primary:hover{ box-shadow: 0 8px 30px rgba(201,164,99,.3); transform: translateY(-1px); }
+.home-meta{
+  display:flex; gap:1.6rem; margin-top:.6rem; font-size:.66rem; letter-spacing:.14em;
+  text-transform:uppercase; color: var(--muted-2);
+}
+.home-meta span:not(:last-child)::after{ content:'·'; margin-left:1.6rem; color: var(--gold-dim); }
+.home-side{
+  position:absolute; left: 4.5vw; top:50%; transform: translateY(-50%) rotate(180deg);
+  writing-mode: vertical-rl; font-size:.66rem; letter-spacing:.3em; color: var(--muted-2);
+  text-transform:uppercase;
+}
+
+/* COLLECTION */
+#page-collection .col-wrap{ width:100%; display:flex; justify-content:flex-start; }
+.col-inner{ max-width: 640px; width:100%; }
+.col-inner h2{ font-family:var(--serif); font-weight:500; font-size: clamp(1.8rem,3.4vw,2.6rem); margin-bottom:.6rem; }
+.col-intro{ font-size:.86rem; color:var(--muted); max-width:48ch; line-height:1.8; margin-bottom:2.4rem; }
+.card-grid{
+  display:grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;
+  max-height: 56vh; overflow-y:auto; padding-right:.5rem;
+}
+.card{
+  border:1px solid rgba(244,239,228,.1); padding:1.2rem 1.2rem 1.4rem;
+  display:flex; gap:1rem; align-items:flex-start; cursor:pointer;
+  transition: border-color .4s var(--ease), background .4s var(--ease), transform .4s var(--ease);
+  background: rgba(255,255,255,.012);
+}
+.card:hover{ border-color: var(--gold-dim); background: rgba(201,164,99,.05); transform: translateY(-2px); }
+.card-face{
+  flex-shrink:0; width:48px; height:48px; border-radius:50%;
+  background: radial-gradient(circle at 35% 30%, #2a2a2e, #0c0c0e 70%);
+  border:1px solid var(--gold-dim); position:relative;
+}
+.card-face::before{
+  content:''; position:absolute; inset:7px; border-radius:50%; border:1px solid rgba(201,164,99,.25);
+}
+.card-face::after{
+  content:''; position:absolute; left:50%; top:50%; width:1px; height:34%;
+  background: var(--gold-light); transform-origin: bottom center; transform: translate(-50%,-100%) rotate(35deg);
+}
+.card-body h3{ font-family:var(--serif); font-weight:500; font-size:.98rem; margin-bottom:.35rem; color:var(--ivory); }
+.card-body .spec{ font-size:.68rem; color: var(--muted-2); letter-spacing:.03em; line-height:1.6; }
+.card-body .price{ font-size:.74rem; color: var(--gold-light); margin-top:.5rem; letter-spacing:.04em; }
+.card-cta{ display:inline-block; margin-top:.5rem; font-size:.62rem; letter-spacing:.16em; text-transform:uppercase; color:var(--muted-2); }
+.card:hover .card-cta{ color: var(--gold-light); }
+
+/* ANATOMY */
+#page-anatomy .anat-wrap{ position:absolute; inset:0; pointer-events:none; }
+.anat-top{
+  position:absolute; top: 11vh; left:0; right:0; text-align:center;
+  font-size:.7rem; letter-spacing:.26em; text-transform:uppercase; color: var(--muted-2);
+}
+.anat-top b{ color: var(--gold-light); font-weight:500; }
+.callout{
+  position:absolute; max-width:230px; pointer-events:auto;
+}
+.callout .num{ font-family:var(--serif); font-style:italic; color: var(--gold-light); font-size:.78rem; margin-bottom:.3rem; display:block; }
+.callout h4{ font-family:var(--serif); font-weight:500; font-size:.95rem; margin-bottom:.4rem; color:var(--ivory); }
+.callout p{ font-size:.72rem; line-height:1.65; color: var(--muted); }
+.callout::before{ content:''; position:absolute; top:.4rem; width:26px; height:1px; background: var(--gold-dim); }
+.c-1{ top:16vh; left:5vw; text-align:left; } .c-1::before{ left:-32px; }
+.c-2{ top:16vh; right:5vw; text-align:right; } .c-2::before{ right:-32px; }
+.c-3{ top:46vh; left:3.2vw; text-align:left; } .c-3::before{ left:-32px; }
+.c-4{ top:46vh; right:3.2vw; text-align:right; } .c-4::before{ right:-32px; }
+.c-5{ bottom:13vh; left:5vw; text-align:left; } .c-5::before{ left:-32px; }
+.c-6{ bottom:13vh; right:5vw; text-align:right; } .c-6::before{ right:-32px; }
+
+/* CONTACTS */
+#page-contacts .contacts-wrap{
+  width:100%; display:grid; grid-template-columns: .9fr 1fr; gap: 5vw; align-items:center;
+}
+.contacts-wrap h2{ font-family:var(--serif); font-weight:500; font-size: clamp(1.8rem,3.2vw,2.5rem); margin-bottom:1.6rem; }
+.boutique{ margin-bottom:1.5rem; padding-bottom:1.5rem; border-bottom:1px solid rgba(244,239,228,.08); }
+.boutique:last-of-type{ border-bottom:none; }
+.boutique h4{ font-family:var(--serif); font-style:italic; font-weight:500; color: var(--gold-light); font-size:1rem; margin-bottom:.4rem; }
+.boutique p{ font-size:.78rem; color: var(--muted); line-height:1.7; }
+.social-row{ display:flex; gap:1.4rem; margin-top:1.2rem; }
+.social-row a{ font-size:.68rem; letter-spacing:.14em; text-transform:uppercase; color: var(--muted-2); text-decoration:none; transition: color .3s; }
+.social-row a:hover{ color: var(--gold-light); }
+
+.form-card{ border:1px solid rgba(244,239,228,.1); padding: 2.4rem; background: rgba(255,255,255,.015); }
+.field{ margin-bottom:1.3rem; position:relative; }
+.field label{ display:block; font-size:.66rem; letter-spacing:.16em; text-transform:uppercase; color: var(--muted-2); margin-bottom:.55rem; }
+.field input, .field textarea{
+  width:100%; background:transparent; border:none; border-bottom:1px solid rgba(244,239,228,.18);
+  color: var(--ivory); font-family: var(--sans); font-size:.88rem; font-weight:300; padding:.5rem 0;
+  outline:none; transition: border-color .35s;
+}
+.field input:focus, .field textarea:focus{ border-color: var(--gold); }
+.field textarea{ resize:none; height:64px; }
+.form-card .btn{ width:100%; margin-top:.4rem; }
+.success-msg{ display:none; text-align:center; padding: 2rem 0; }
+.success-msg .ok-mark{ font-family:var(--serif); font-style:italic; color: var(--gold-light); font-size:1.3rem; margin-bottom:.6rem; }
+.success-msg p{ color: var(--muted); font-size:.82rem; }
+
+@media (max-width: 920px){
+  header.site-header{ padding: 1.4rem 5vw; }
+  nav.tabs{ gap:1.1rem; }
+  .tab{ font-size:.62rem; letter-spacing:.12em; }
+  .logo{ font-size:1rem; letter-spacing:.3em; }
+  .card-grid{ grid-template-columns: 1fr; max-height:42vh; }
+  .contacts-wrap{ grid-template-columns:1fr; }
+  .home-side{ display:none; }
+  .callout{ display:none; }
+  .anat-top{ top:9vh; }
+  footer.site-footer{ display:none; }
+}
+</style>
+</head>
+<body>
+
+<div id="loader"><div class="ld-mark">NOCTURNE</div><div class="ld-bar"></div></div>
+
+<canvas id="webgl"></canvas>
+<div class="vignette"></div>
+<div class="grain"></div>
+
+<header class="site-header">
+  <div class="logo">NOCT<span>URNE</span></div>
+  <nav class="tabs">
+    <button class="tab active" data-page="home">Главная</button>
+    <button class="tab" data-page="collection">Коллекция</button>
+    <button class="tab" data-page="anatomy">Анатомия</button>
+    <button class="tab" data-page="contacts">Контакты</button>
+  </nav>
+</header>
+
+<main id="pages">
+
+  <section class="page active" id="page-home">
+    <div class="home-side">Référence Nº 01 — Automatique</div>
+    <div class="home-content">
+      <div class="eyebrow">Швейцарская мануфактура · Женева, осн. 1924</div>
+      <h1 class="home-h1">Время, <em>выверенное</em> вручную</h1>
+      <p class="home-p">Каждый механизм NOCTURNE собирается одним мастером — от первой шестерни до финальной полировки моста. Это не аксессуар, а инструмент, переживающий поколения.</p>
+      <div class="home-actions">
+        <button class="btn primary" data-goto="collection">Коллекция</button>
+        <button class="btn" data-goto="anatomy">Анатомия механизма</button>
+      </div>
+      <div class="home-meta"><span>Кал. NCT-72</span><span>70 ч запас хода</span><span>Сапфировое стекло</span></div>
+    </div>
+  </section>
+
+  <section class="page" id="page-collection">
+    <div class="col-wrap">
+      <div class="col-inner">
+        <div class="eyebrow">Коллекция 2026</div>
+        <h2>Избранные референсы</h2>
+        <p class="col-intro">Шесть мануфактурных линий — от спортивного автомата до скелетонизированного турбийона. Каждая модель ограничена годовым тиражом мастерской.</p>
+        <div class="card-grid">
+          <div class="card"><div class="card-face"></div><div class="card-body"><h3>Meridian Automatique</h3><div class="spec">41 мм · сталь 904L · автоподзавод</div><div class="price">от 412 000 ₽</div><span class="card-cta">Подробнее →</span></div></div>
+          <div class="card"><div class="card-face"></div><div class="card-body"><h3>Lumière Squelette</h3><div class="spec">39 мм · розовое золото · скелетон</div><div class="price">от 1 280 000 ₽</div><span class="card-cta">Подробнее →</span></div></div>
+          <div class="card"><div class="card-face"></div><div class="card-body"><h3>Abyssal GMT</h3><div class="spec">43 мм · титан · две зоны времени</div><div class="price">от 365 000 ₽</div><span class="card-cta">Подробнее →</span></div></div>
+          <div class="card"><div class="card-face"></div><div class="card-body"><h3>Vendôme Perpetual</h3><div class="spec">40 мм · платина · вечный календарь</div><div class="price">от 3 950 000 ₽</div><span class="card-cta">Подробнее →</span></div></div>
+          <div class="card"><div class="card-face"></div><div class="card-body"><h3>Noir Chronographe</h3><div class="spec">42 мм · керамика · хронограф</div><div class="price">от 540 000 ₽</div><span class="card-cta">Подробнее →</span></div></div>
+          <div class="card"><div class="card-face"></div><div class="card-body"><h3>Étoile Tourbillon</h3><div class="spec">38 мм · белое золото · турбийон</div><div class="price">от 6 100 000 ₽</div><span class="card-cta">Подробнее →</span></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="page" id="page-anatomy">
+    <div class="anat-wrap">
+      <div class="anat-top">Калибр <b>NCT-72</b> · Ручная сборка · 38 камней · 28 800 пол/ч</div>
+      <div class="callout c-1"><span class="num">01</span><h4>Корпус</h4><p>Сталь 904L, монолитная полировка задней крышки, водозащита 100 м.</p></div>
+      <div class="callout c-2"><span class="num">02</span><h4>Сапфировое стекло</h4><p>Двустороннее антибликовое покрытие, твёрдость 9 по шкале Мооса.</p></div>
+      <div class="callout c-3"><span class="num">03</span><h4>Заводной барабан</h4><p>Главная пружина, запас хода 70 часов при полной заводке.</p></div>
+      <div class="callout c-4"><span class="num">04</span><h4>Анкерный механизм</h4><p>Частота колебаний 28 800 пол/ч — 4 герца, хронометрическая точность.</p></div>
+      <div class="callout c-5"><span class="num">05</span><h4>Стрелки</h4><p>Родированная сталь, люминесцентное покрытие Super-LumiNova.</p></div>
+      <div class="callout c-6"><span class="num">06</span><h4>Циферблат</h4><p>Гильоше вручную, индексы из 18-каратного золота.</p></div>
+    </div>
+  </section>
+
+  <section class="page" id="page-contacts">
+    <div class="contacts-wrap">
+      <div>
+        <div class="eyebrow">Связь с мануфактурой</div>
+        <h2>Бутики и&nbsp;консультации</h2>
+        <div class="boutique"><h4>Москва</h4><p>Столешников пер., 9<br>+7 495 120-44-01 · Пн–Вс, 10:00–21:00</p></div>
+        <div class="boutique"><h4>Женева</h4><p>Rue du Rhône 23<br>+41 22 318-90-12 · Пн–Сб, 10:00–19:00</p></div>
+        <div class="boutique"><h4>Дубай</h4><p>DIFC, Gate Village 7<br>+971 4 401-22-30 · Пн–Сб, 10:00–22:00</p></div>
+        <div class="social-row"><a href="#" onclick="return false">Instagram</a><a href="#" onclick="return false">WhatsApp</a><a href="#" onclick="return false">Telegram</a></div>
+      </div>
+      <div class="form-card">
+        <form id="contact-form">
+          <div class="field"><label>Имя</label><input type="text" required placeholder="Ваше имя"></div>
+          <div class="field"><label>Email</label><input type="email" required placeholder="you@mail.com"></div>
+          <div class="field"><label>Сообщение</label><textarea required placeholder="Расскажите, чем мы можем помочь"></textarea></div>
+          <button type="submit" class="btn primary">Отправить запрос</button>
+        </form>
+        <div class="success-msg" id="success-msg"><div class="ok-mark">Благодарим вас</div><p>Консьерж-служба NOCTURNE свяжется с вами в течение 24 часов.</p></div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <span>© 2026 Nocturne Manufacture</span>
+  <span>Женева · Москва · Дубай</span>
+</footer>
+
+<script src="https://unpkg.com/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+'use strict';
+
+/* ===================== GEOMETRY HELPERS ===================== */
+
+function diskGeometry(radius, depth, segments){
+  const g = new THREE.CylinderGeometry(radius, radius, depth, segments || 56);
+  g.rotateX(Math.PI/2);
+  return g;
+}
+
+function createGear(opts){
+  const radius = opts.radius, depth = opts.depth, teeth = opts.teeth, color = opts.color;
+  const metalness = opts.metalness !== undefined ? opts.metalness : 0.85;
+  const roughness = opts.roughness !== undefined ? opts.roughness : 0.35;
+
+  const group = new THREE.Group();
+  const mat = new THREE.MeshStandardMaterial({ color: color, metalness: metalness, roughness: roughness });
+
+  const body = new THREE.Mesh(diskGeometry(radius, depth, 48), mat);
+  group.add(body);
+
+  const holeMat = new THREE.MeshStandardMaterial({ color: 0x050505, metalness: 0.5, roughness: 0.7 });
+  const hole = new THREE.Mesh(diskGeometry(radius*0.16, depth+0.02, 20), holeMat);
+  group.add(hole);
+
+  const toothDepth = radius * 0.18;
+  const toothWidth = (2*Math.PI*radius/teeth) * 0.5;
+  const toothGeo = new THREE.BoxGeometry(toothDepth, toothWidth, depth*0.92);
+
+  for(let i=0;i<teeth;i++){
+    const angle = (i/teeth) * Math.PI*2;
+    const tooth = new THREE.Mesh(toothGeo, mat);
+    const r = radius + toothDepth/2;
+    tooth.position.set(Math.cos(angle)*r, Math.sin(angle)*r, 0);
+    tooth.rotation.z = angle;
+    group.add(tooth);
+  }
+
+  return { group: group, radius: radius, mat: mat };
+}
+
+function createHand(length, width, depth, color){
+  const tail = length * 0.18;
+  const geo = new THREE.BoxGeometry(width, length, depth);
+  geo.translate(0, length/2 - tail, 0);
+  const mat = new THREE.MeshStandardMaterial({ color: color, metalness: 0.85, roughness: 0.25 });
+  return new THREE.Mesh(geo, mat);
+}
+
+/* ===================== PAGE CONFIG ===================== */
+
+const PAGE_CONFIGS = {
+  home:       { xR:0.5,  yR:0.46, z:0,    scale:1.00, rotX:-0.05, rotY: 0.22 },
+  collection: { xR:0.79, yR:0.50, z:0,    scale:0.60, rotX:-0.04, rotY: 0.60 },
+  anatomy:    { xR:0.5,  yR:0.44, z:1.0,  scale:1.08, rotX: 0.00, rotY: 0.30 },
+  contacts:   { xR:0.24, yR:0.60, z:-1.0, scale:0.42, rotX: 0.08, rotY:-0.35 }
+};
+
+/* ===================== WATCH SCENE CLASS ===================== */
+
+class WatchScene{
+  constructor(canvas){
+    this.canvas = canvas;
+    this.scene = new THREE.Scene();
+
+    this.camera = new THREE.PerspectiveCamera(32, window.innerWidth/window.innerHeight, 0.1, 100);
+    this.camera.position.set(0, 0, 9);
+
+    this.renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    if (THREE.sRGBEncoding) this.renderer.outputEncoding = THREE.sRGBEncoding;
+    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    this.renderer.toneMappingExposure = 1.05;
+
+    this.currentPageName = 'home';
+    this.exploded = false;
+
+    this.mouse = { x:0, y:0 };
+    this.tilt = { x:0, y:0, vx:0, vy:0 };
+
+    this._setupLights();
+    this._buildWatch();
+    this._resize();
+
+    this.clock = new THREE.Clock();
+
+    window.addEventListener('resize', () => this._resize());
+    window.addEventListener('mousemove', (e) => {
+      this.mouse.x = (e.clientX / window.innerWidth - 0.5) * 2;
+      this.mouse.y = (e.clientY / window.innerHeight - 0.5) * 2;
+    });
+  }
+
+  _setupLights(){
+    const ambient = new THREE.AmbientLight(0x332c20, 0.8);
+    this.scene.add(ambient);
+
+    const keyLight = new THREE.DirectionalLight(0xffe9c2, 1.15);
+    keyLight.position.set(5, 6, 7);
+    this.scene.add(keyLight);
+
+    const fillLight = new THREE.DirectionalLight(0x88aaff, 0.35);
+    fillLight.position.set(-6, -3, 4);
+    this.scene.add(fillLight);
+
+    const rim = new THREE.PointLight(0xc9a463, 0.6, 30);
+    rim.position.set(0, 2, 5);
+    this.scene.add(rim);
+  }
+
+  _buildWatch(){
+    this.root = new THREE.Group();
+    this.tiltGroup = new THREE.Group();
+    this.watch = new THREE.Group();
+
+    this.root.add(this.tiltGroup);
+    this.tiltGroup.add(this.watch);
+    this.scene.add(this.root);
+
+    /* Case back */
+    this.caseMat = new THREE.MeshStandardMaterial({ color:0x222226, metalness:0.9, roughness:0.28, transparent:true, opacity:1 });
+    this.caseMesh = new THREE.Mesh(diskGeometry(1.55, 0.5, 64), this.caseMat);
+    this.caseMesh.position.z = -0.5;
+    this.watch.add(this.caseMesh);
+
+    /* Bezel ring */
+    this.bezelMat = new THREE.MeshStandardMaterial({ color:0xc9a463, metalness:1, roughness:0.22, transparent:true, opacity:1 });
+    this.bezel = new THREE.Mesh(new THREE.TorusGeometry(1.55, 0.09, 24, 64), this.bezelMat);
+    this.bezel.position.z = 0.05;
+    this.watch.add(this.bezel);
+
+    /* Crown */
+    const crownGeo = new THREE.CylinderGeometry(0.12, 0.12, 0.35, 16);
+    crownGeo.rotateZ(-Math.PI/2);
+    const crown = new THREE.Mesh(crownGeo, this.bezelMat);
+    crown.position.set(1.75, 0, -0.45);
+    this.watch.add(crown);
+
+    /* Dial */
+    this.dialMat = new THREE.MeshStandardMaterial({ color:0x0c0c0d, metalness:0.35, roughness:0.55, transparent:true, opacity:1 });
+    this.dial = new THREE.Mesh(diskGeometry(1.42, 0.06, 64), this.dialMat);
+    this.dial.position.z = -0.05;
+    this.watch.add(this.dial);
+
+    /* Hour markers */
+    this.markerMat = new THREE.MeshStandardMaterial({ color:0xc9a463, metalness:0.9, roughness:0.3 });
+    for(let i=0;i<12;i++){
+      const angle = (i/12) * Math.PI*2;
+      const isQuarter = i % 3 === 0;
+      const markGeo = new THREE.BoxGeometry(isQuarter?0.06:0.035, isQuarter?0.22:0.13, 0.04);
+      const mark = new THREE.Mesh(markGeo, this.markerMat);
+      const r = 1.2;
+      mark.position.set(Math.sin(angle)*r, Math.cos(angle)*r, -0.005);
+      mark.rotation.z = -angle;
+      this.watch.add(mark);
+    }
+
+    /* Movement gears (behind dial) */
+    this.gearSmall = createGear({ radius:0.26, depth:0.07, teeth:10, color:0xb8c0c6 });
+    this.gearSmall.group.position.set(0, 0, -0.25);
+
+    this.gearMed = createGear({ radius:0.42, depth:0.07, teeth:14, color:0x8d8f93 });
+    this.gearMed.group.position.set(0.5, 0.32, -0.32);
+
+    this.gearLarge = createGear({ radius:0.64, depth:0.09, teeth:20, color:0xb08d57 });
+    this.gearLarge.group.position.set(-0.45, -0.25, -0.4);
+
+    this.watch.add(this.gearSmall.group, this.gearMed.group, this.gearLarge.group);
+
+    this.gearsOriginal = [
+      { obj:this.gearSmall.group, z:this.gearSmall.group.position.z },
+      { obj:this.gearMed.group,   z:this.gearMed.group.position.z },
+      { obj:this.gearLarge.group, z:this.gearLarge.group.position.z }
+    ];
+
+    /* Hands */
+    this.hourPivot = new THREE.Group();
+    this.minutePivot = new THREE.Group();
+    this.secondPivot = new THREE.Group();
+    this.watch.add(this.hourPivot, this.minutePivot, this.secondPivot);
+
+    this.hourHand = createHand(0.62, 0.06, 0.08, 0xf4efe4);
+    this.hourPivot.add(this.hourHand);
+    this.hourPivot.position.z = 0.06;
+
+    this.minuteHand = createHand(0.92, 0.045, 0.08, 0xf4efe4);
+    this.minutePivot.add(this.minuteHand);
+    this.minutePivot.position.z = 0.10;
+
+    this.secondHand = createHand(1.05, 0.016, 0.08, 0xc9a463);
+    this.secondPivot.add(this.secondHand);
+    this.secondPivot.position.z = 0.14;
+
+    this.handsOriginal = [
+      { obj:this.hourPivot,   z:this.hourPivot.position.z },
+      { obj:this.minutePivot, z:this.minutePivot.position.z },
+      { obj:this.secondPivot, z:this.secondPivot.position.z }
+    ];
+
+    /* Glass */
+    this.glassMat = new THREE.MeshPhysicalMaterial({ color:0xffffff, metalness:0, roughness:0.05, transparent:true, opacity:0.1 });
+    this.glass = new THREE.Mesh(diskGeometry(1.46, 0.04, 64), this.glassMat);
+    this.glass.position.z = 0.32;
+    this.watch.add(this.glass);
+  }
+
+  screenToWorld(xR, yR, z){
+    z = z || 0;
+    const dist = this.camera.position.z - z;
+    const vFOV = this.camera.fov * Math.PI / 180;
+    const height = 2 * Math.tan(vFOV/2) * dist;
+    const width = height * this.camera.aspect;
+    return { x: (xR - 0.5) * width, y: -(yR - 0.5) * height };
+  }
+
+  applyPageTransform(name, immediate){
+    const cfg = PAGE_CONFIGS[name];
+    const pos = this.screenToWorld(cfg.xR, cfg.yR, cfg.z);
+    const dur = immediate ? 0.6 : 1.25;
+    const wasCollection = this.currentPageName === 'collection';
+
+    gsap.to(this.root.position, { x:pos.x, y:pos.y, z:cfg.z, duration:dur, ease:'power3.inOut' });
+    gsap.to(this.root.scale,    { x:cfg.scale, y:cfg.scale, z:cfg.scale, duration:dur, ease:'power3.inOut' });
+    gsap.to(this.root.rotation, { x:cfg.rotX, y:cfg.rotY, z:cfg.rotZ||0, duration:dur, ease:'power3.inOut' });
+
+    this.currentPageName = name;
+
+    if(wasCollection && name !== 'collection'){
+      gsap.to(this.watch.rotation, { y:0, duration:1, ease:'power2.out' });
+    }
+  }
+
+  setExplode(on){
+    this.exploded = on;
+    const step = 0.55;
+    const g = this.gearsOriginal, h = this.handsOriginal;
+
+    const targets = [
+      { o:g[0].obj, z: on ? g[0].z - step*1.0 : g[0].z },
+      { o:g[1].obj, z: on ? g[1].z - step*1.8 : g[1].z },
+      { o:g[2].obj, z: on ? g[2].z - step*2.6 : g[2].z },
+      { o:h[0].obj, z: on ? h[0].z + step*1.4 : h[0].z },
+      { o:h[1].obj, z: on ? h[1].z + step*2.1 : h[1].z },
+      { o:h[2].obj, z: on ? h[2].z + step*2.8 : h[2].z }
+    ];
+
+    targets.forEach((t, i) => {
+      gsap.to(t.o.position, { z:t.z, duration:1.1, delay:i*0.045, ease:'power3.inOut' });
+    });
+
+    gsap.to(this.caseMat,  { opacity: on?0:1,    duration:0.9, ease:'power2.inOut' });
+    gsap.to(this.bezelMat, { opacity: on?0.12:1, duration:0.9, ease:'power2.inOut' });
+    gsap.to(this.glassMat, { opacity: on?0:0.1,  duration:0.7, ease:'power2.inOut' });
+    gsap.to(this.dialMat,  { opacity: on?0.08:1, duration:0.9, ease:'power2.inOut' });
+  }
+
+  _resize(){
+    const w = window.innerWidth, h = window.innerHeight;
+    this.camera.aspect = w/h;
+    this.camera.updateProjectionMatrix();
+    this.renderer.setSize(w, h);
+    if(this.currentPageName) this.applyPageTransform(this.currentPageName, true);
+  }
+
+  update(){
+    const delta = this.clock.getDelta();
+    const elapsed = this.clock.getElapsedTime();
+
+    /* Hands — driven by real system time, smooth sweeping seconds */
+    const now = new Date();
+    const ms = now.getMilliseconds();
+    const s = now.getSeconds() + ms/1000;
+    const m = now.getMinutes() + s/60;
+    const hh = (now.getHours() % 12) + m/60;
+
+    this.secondPivot.rotation.z = -(s/60) * Math.PI*2;
+    this.minutePivot.rotation.z = -(m/60) * Math.PI*2;
+    this.hourPivot.rotation.z = -(hh/12) * Math.PI*2;
+
+    /* Gear train — meshed ratio, small fast / large barely visible */
+    const smallSpeed = (Math.PI*2) / 2.0;
+    this.gearSmall.group.rotation.z = elapsed * smallSpeed;
+
+    const medSpeed = smallSpeed * (this.gearSmall.radius / this.gearMed.radius);
+    this.gearMed.group.rotation.z = -elapsed * medSpeed;
+
+    const largeSpeed = medSpeed * (this.gearMed.radius / this.gearLarge.radius);
+    this.gearLarge.group.rotation.z = elapsed * largeSpeed;
+
+    /* Mouse pendulum (home only) — spring/inertia */
+    const targetTiltX = this.currentPageName === 'home' ? this.mouse.y * 0.32 : 0;
+    const targetTiltY = this.currentPageName === 'home' ? this.mouse.x * 0.46 : 0;
+    const stiffness = 0.05, damping = 0.85;
+
+    this.tilt.vx = (this.tilt.vx + (targetTiltX - this.tilt.x) * stiffness) * damping;
+    this.tilt.x += this.tilt.vx;
+    this.tilt.vy = (this.tilt.vy + (targetTiltY - this.tilt.y) * stiffness) * damping;
+    this.tilt.y += this.tilt.vy;
+
+    this.tiltGroup.rotation.x = this.tilt.x;
+    this.tiltGroup.rotation.y = this.tilt.y;
+
+    /* Idle showcase spin — collection page only */
+    if(this.currentPageName === 'collection'){
+      this.watch.rotation.y += delta * 0.15;
+    }
+
+    this.renderer.render(this.scene, this.camera);
+  }
+}
+
+/* ===================== APP WIRING ===================== */
+
+document.addEventListener('DOMContentLoaded', () => {
+  const canvas = document.getElementById('webgl');
+  const watchScene = new WatchScene(canvas);
+  watchScene.applyPageTransform('home', true);
+
+  function tick(){
+    watchScene.update();
+    requestAnimationFrame(tick);
+  }
+  tick();
+
+  const tabs = Array.prototype.slice.call(document.querySelectorAll('.tab'));
+  let currentPage = 'home';
+
+  function switchPage(name){
+    if(name === currentPage) return;
+
+    tabs.forEach(t => t.classList.toggle('active', t.dataset.page === name));
+
+    const oldEl = document.getElementById('page-' + currentPage);
+    const newEl = document.getElementById('page-' + name);
+
+    gsap.to(oldEl, {
+      opacity: 0, y: -18, duration: 0.5, ease: 'power2.in',
+      onComplete: () => { oldEl.classList.remove('active'); }
+    });
+
+    newEl.classList.add('active');
+    gsap.fromTo(newEl,
+      { opacity:0, y:18 },
+      { opacity:1, y:0, duration:0.7, delay:0.25, ease:'power2.out' }
+    );
+
+    watchScene.applyPageTransform(name, false);
+    watchScene.setExplode(name === 'anatomy');
+
+    currentPage = name;
+  }
+
+  tabs.forEach(t => t.addEventListener('click', () => switchPage(t.dataset.page)));
+  document.querySelectorAll('[data-goto]').forEach(btn => {
+    btn.addEventListener('click', () => switchPage(btn.dataset.goto));
+  });
+
+  /* Contact form — front-end only */
+  const form = document.getElementById('contact-form');
+  const success = document.getElementById('success-msg');
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    gsap.to(form, {
+      opacity:0, y:-10, duration:0.4, ease:'power2.in',
+      onComplete: () => {
+        form.style.display = 'none';
+        success.style.display = 'block';
+        gsap.fromTo(success, { opacity:0, y:10 }, { opacity:1, y:0, duration:0.5, ease:'power2.out' });
+      }
+    });
+  });
+
+  /* Loader */
+  const loader = document.getElementById('loader');
+  gsap.to(loader, {
+    opacity: 0, duration: 0.8, delay: 0.5, ease:'power2.inOut',
+    onComplete: () => loader.remove()
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>3D Drum Kit Studio</title>
+<style>
+  :root{
+    --bg:#121214;
+    --panel:#1a1a1d;
+    --neon-cyan:#28e0e0;
+    --neon-pink:#ff2bd6;
+    --neon-amber:#ffb02e;
+    --text:#e8e8ec;
+    --muted:#8a8a92;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0;padding:0;width:100%;height:100%;overflow:hidden;
+    background:var(--bg);
+    font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,'Roboto',sans-serif;
+    color:var(--text);
+  }
+  #canvas-wrap{
+    position:fixed;inset:0;
+  }
+  canvas{display:block;width:100%;height:100%;touch-action:none;cursor:pointer;}
+
+  #vignette{
+    position:fixed;inset:0;pointer-events:none;
+    background:radial-gradient(ellipse at center, rgba(0,0,0,0) 40%, rgba(0,0,0,0.55) 100%);
+    z-index:5;
+  }
+
+  #hud{
+    position:fixed;top:0;left:0;right:0;
+    display:flex;justify-content:space-between;align-items:flex-start;
+    padding:22px 28px;z-index:10;pointer-events:none;
+  }
+  #title{
+    pointer-events:auto;
+  }
+  #title h1{
+    margin:0;font-size:18px;letter-spacing:3px;font-weight:600;
+    text-transform:uppercase;color:var(--text);
+    text-shadow:0 0 14px rgba(40,224,224,0.45);
+  }
+  #title span{
+    display:block;margin-top:4px;font-size:11px;letter-spacing:1.5px;color:var(--muted);
+    text-transform:uppercase;
+  }
+
+  #status{
+    pointer-events:auto;
+    display:flex;align-items:center;gap:8px;
+    background:rgba(255,255,255,0.04);
+    border:1px solid rgba(255,255,255,0.08);
+    padding:8px 14px;border-radius:30px;
+    font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);
+    backdrop-filter:blur(6px);
+  }
+  #status .dot{
+    width:8px;height:8px;border-radius:50%;
+    background:#555;box-shadow:0 0 8px #555;
+    transition:all .25s ease;
+  }
+  #status.ready .dot{background:var(--neon-cyan);box-shadow:0 0 10px var(--neon-cyan);}
+  #status.ready::after{content:'Audio Engine Ready';}
+  #status:not(.ready)::after{content:'Click anywhere to start audio';}
+
+  #legend{
+    position:fixed;left:0;right:0;bottom:0;
+    display:flex;justify-content:center;
+    padding:0 16px 22px;z-index:10;pointer-events:none;
+  }
+  #legend .row{
+    pointer-events:auto;
+    display:flex;gap:10px;flex-wrap:wrap;justify-content:center;
+    background:rgba(255,255,255,0.04);
+    border:1px solid rgba(255,255,255,0.08);
+    padding:12px 16px;border-radius:18px;
+    backdrop-filter:blur(8px);
+    box-shadow:0 8px 30px rgba(0,0,0,0.4);
+  }
+  .key-chip{
+    display:flex;align-items:center;gap:8px;
+    padding:7px 12px;border-radius:12px;
+    background:rgba(255,255,255,0.03);
+    border:1px solid rgba(255,255,255,0.06);
+    transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+  }
+  .key-chip.active{
+    transform:translateY(-3px) scale(1.04);
+    border-color:var(--chip-color, var(--neon-cyan));
+    box-shadow:0 0 18px var(--chip-color, var(--neon-cyan));
+  }
+  .key-chip .key{
+    min-width:26px;height:26px;display:flex;align-items:center;justify-content:center;
+    background:#0e0e10;border:1px solid rgba(255,255,255,0.15);
+    border-radius:6px;font-size:12px;font-weight:700;color:var(--text);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.05);
+  }
+  .key-chip .label{
+    font-size:11px;letter-spacing:0.8px;text-transform:uppercase;color:var(--muted);
+  }
+  .key-chip.active .label{color:var(--text);}
+
+  #loader{
+    position:fixed;inset:0;z-index:50;
+    display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;
+    background:var(--bg);
+    transition:opacity .6s ease, visibility .6s ease;
+  }
+  #loader.hidden{opacity:0;visibility:hidden;}
+  #loader .ring{
+    width:46px;height:46px;border-radius:50%;
+    border:3px solid rgba(255,255,255,0.08);
+    border-top-color:var(--neon-cyan);
+    animation:spin 0.9s linear infinite;
+  }
+  #loader p{font-size:12px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  @media (max-width:720px){
+    #title h1{font-size:14px;letter-spacing:2px;}
+    #title span{font-size:9px;}
+    #status{font-size:9px;padding:6px 10px;}
+    .key-chip{padding:5px 9px;}
+    .key-chip .key{min-width:20px;height:20px;font-size:10px;}
+    .key-chip .label{font-size:9px;}
+    #legend .row{gap:6px;padding:8px 10px;}
+  }
+</style>
+</head>
+<body>
+
+<div id="loader"><div class="ring"></div><p>Tuning the kit…</p></div>
+
+<div id="canvas-wrap"></div>
+<div id="vignette"></div>
+
+<div id="hud">
+  <div id="title">
+    <h1>Drum Kit Studio</h1>
+    <span>Three.js &middot; WebAudio &middot; GSAP</span>
+  </div>
+  <div id="status"><div class="dot"></div></div>
+</div>
+
+<div id="legend">
+  <div class="row">
+    <div class="key-chip" id="chip-kick" style="--chip-color:#ff5a3c;"><div class="key">␣</div><div class="label">Kick</div></div>
+    <div class="key-chip" id="chip-snare" style="--chip-color:#28e0e0;"><div class="key">J</div><div class="label">Snare</div></div>
+    <div class="key-chip" id="chip-hihat" style="--chip-color:#ffd24d;"><div class="key">K</div><div class="label">Hi-Hat</div></div>
+    <div class="key-chip" id="chip-crash" style="--chip-color:#ff2bd6;"><div class="key">L</div><div class="label">Crash</div></div>
+    <div class="key-chip" id="chip-ride" style="--chip-color:#7bffb0;"><div class="key">F</div><div class="label">Ride</div></div>
+    <div class="key-chip" id="chip-tom1" style="--chip-color:#b08bff;"><div class="key">D</div><div class="label">Tom 1</div></div>
+    <div class="key-chip" id="chip-tom2" style="--chip-color:#ffa6e0;"><div class="key">S</div><div class="label">Tom 2</div></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+(function(){
+"use strict";
+
+/* =========================================================================
+   AUDIO ENGINE — Web Audio API, zero-latency synthesis, no <audio> tags
+   ========================================================================= */
+var AudioEngine = (function(){
+  var ctx = null;
+  var master = null;
+  var convolver = null;
+  var ready = false;
+
+  function init(){
+    if(ctx) return;
+    var AC = window.AudioContext || window.webkitAudioContext;
+    ctx = new AC();
+    master = ctx.createGain();
+    master.gain.value = 0.9;
+    master.connect(ctx.destination);
+
+    // Build a small synthetic impulse response for cymbal "air" / reverb tail
+    convolver = ctx.createConvolver();
+    convolver.buffer = buildImpulseResponse(2.2, 2.2);
+    var convGain = ctx.createGain();
+    convGain.gain.value = 0.35;
+    convolver.connect(convGain);
+    convGain.connect(master);
+
+    ready = true;
+  }
+
+  function resume(){
+    if(!ctx) init();
+    if(ctx.state === 'suspended') ctx.resume();
+  }
+
+  function buildImpulseResponse(duration, decay){
+    var rate = ctx.sampleRate;
+    var length = Math.max(1, Math.floor(rate * duration));
+    var impulse = ctx.createBuffer(2, length, rate);
+    for(var ch=0; ch<2; ch++){
+      var data = impulse.getChannelData(ch);
+      for(var i=0; i<length; i++){
+        data[i] = (Math.random()*2 - 1) * Math.pow(1 - i/length, decay);
+      }
+    }
+    return impulse;
+  }
+
+  // Reusable white-noise buffer source factory
+  function createNoiseBuffer(durationSec){
+    var rate = ctx.sampleRate;
+    var length = Math.max(1, Math.floor(rate * durationSec));
+    var buffer = ctx.createBuffer(1, length, rate);
+    var data = buffer.getChannelData(0);
+    for(var i=0; i<length; i++){
+      data[i] = Math.random() * 2 - 1;
+    }
+    return buffer;
+  }
+
+  /* ---- KICK: fast pitch sweep 150Hz -> 40Hz over 0.1s, punchy amp envelope ---- */
+  function playKick(){
+    resume();
+    var t = ctx.currentTime;
+    var osc = ctx.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(150, t);
+    osc.frequency.exponentialRampToValueAtTime(40, t + 0.1);
+
+    var gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.exponentialRampToValueAtTime(1.6, t + 0.008);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.38);
+
+    // subtle click transient for attack definition
+    var clickOsc = ctx.createOscillator();
+    clickOsc.type = 'square';
+    clickOsc.frequency.setValueAtTime(800, t);
+    var clickGain = ctx.createGain();
+    clickGain.gain.setValueAtTime(0.4, t);
+    clickGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.018);
+
+    var shaper = ctx.createWaveShaper();
+    shaper.curve = makeSaturationCurve(8);
+
+    osc.connect(gain);
+    gain.connect(shaper);
+    shaper.connect(master);
+
+    clickOsc.connect(clickGain);
+    clickGain.connect(master);
+
+    osc.start(t); osc.stop(t + 0.4);
+    clickOsc.start(t); clickOsc.stop(t + 0.02);
+  }
+
+  function makeSaturationCurve(amount){
+    var n = 256, curve = new Float32Array(n);
+    for(var i=0;i<n;i++){
+      var x = (i*2)/n - 1;
+      curve[i] = Math.tanh(amount * x) / Math.tanh(amount);
+    }
+    return curve;
+  }
+
+  /* ---- SNARE: white noise burst + tonal body, sharp decay ---- */
+  function playSnare(){
+    resume();
+    var t = ctx.currentTime;
+
+    var noiseSrc = ctx.createBufferSource();
+    noiseSrc.buffer = createNoiseBuffer(0.3);
+
+    var noiseFilter = ctx.createBiquadFilter();
+    noiseFilter.type = 'highpass';
+    noiseFilter.frequency.value = 900;
+
+    var noiseGain = ctx.createGain();
+    noiseGain.gain.setValueAtTime(1.0, t);
+    noiseGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.18);
+
+    noiseSrc.connect(noiseFilter);
+    noiseFilter.connect(noiseGain);
+    noiseGain.connect(master);
+
+    // tonal "body" component
+    var osc = ctx.createOscillator();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(190, t);
+    osc.frequency.exponentialRampToValueAtTime(120, t + 0.12);
+    var oscGain = ctx.createGain();
+    oscGain.gain.setValueAtTime(0.7, t);
+    oscGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.14);
+    osc.connect(oscGain);
+    oscGain.connect(master);
+
+    noiseSrc.start(t); noiseSrc.stop(t + 0.3);
+    osc.start(t); osc.stop(t + 0.15);
+  }
+
+  /* ---- HI-HAT: metallic high-frequency noise via bandpass-stacked square oscs ---- */
+  function playHihat(open){
+    resume();
+    var t = ctx.currentTime;
+    var duration = open ? 0.55 : 0.09;
+
+    var fundamentals = [2050, 3060, 4140, 5220, 6920, 8460];
+    var bandpass = ctx.createBiquadFilter();
+    bandpass.type = 'bandpass';
+    bandpass.frequency.value = 9000;
+    bandpass.Q.value = 0.7;
+
+    var highpass = ctx.createBiquadFilter();
+    highpass.type = 'highpass';
+    highpass.frequency.value = 6500;
+
+    var gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.exponentialRampToValueAtTime(0.9, t + 0.004);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + duration);
+
+    bandpass.connect(highpass);
+    highpass.connect(gain);
+    gain.connect(master);
+
+    fundamentals.forEach(function(f){
+      var osc = ctx.createOscillator();
+      osc.type = 'square';
+      osc.frequency.value = f;
+      osc.connect(bandpass);
+      osc.start(t); osc.stop(t + duration + 0.02);
+    });
+  }
+
+  /* ---- CRASH / RIDE: noise burst through resonant bandpass + convolver tail ---- */
+  function playCymbal(kind){
+    resume();
+    var t = ctx.currentTime;
+    var isCrash = kind === 'crash';
+    var duration = isCrash ? 2.4 : 1.2;
+
+    var noiseSrc = ctx.createBufferSource();
+    noiseSrc.buffer = createNoiseBuffer(duration);
+
+    var bandpass = ctx.createBiquadFilter();
+    bandpass.type = 'bandpass';
+    bandpass.frequency.value = isCrash ? 6000 : 7500;
+    bandpass.Q.value = isCrash ? 0.5 : 1.1;
+
+    var highshelf = ctx.createBiquadFilter();
+    highshelf.type = 'highshelf';
+    highshelf.frequency.value = 5000;
+    highshelf.gain.value = isCrash ? 6 : 2;
+
+    var gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.exponentialRampToValueAtTime(isCrash ? 1.1 : 0.7, t + 0.006);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + duration);
+
+    noiseSrc.connect(bandpass);
+    bandpass.connect(highshelf);
+    highshelf.connect(gain);
+    gain.connect(master);
+    gain.connect(convolver);
+
+    // shimmering tonal partials for metallic ring character
+    [261, 415, 587, 932].forEach(function(f, idx){
+      var osc = ctx.createOscillator();
+      osc.type = 'triangle';
+      osc.frequency.value = f * (isCrash ? 2.0 : 3.1);
+      var og = ctx.createGain();
+      og.gain.setValueAtTime(0.0001, t);
+      og.gain.exponentialRampToValueAtTime(0.12 / (idx+1), t + 0.01);
+      og.gain.exponentialRampToValueAtTime(0.0001, t + duration * 0.8);
+      osc.connect(og);
+      og.connect(master);
+      og.connect(convolver);
+      osc.start(t); osc.stop(t + duration);
+    });
+
+    noiseSrc.start(t); noiseSrc.stop(t + duration + 0.05);
+  }
+
+  /* ---- TOM: pitched sine sweep, mid frequency body ---- */
+  function playTom(freqStart, freqEnd){
+    resume();
+    var t = ctx.currentTime;
+    var osc = ctx.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(freqStart, t);
+    osc.frequency.exponentialRampToValueAtTime(freqEnd, t + 0.22);
+
+    var gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.exponentialRampToValueAtTime(1.1, t + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.42);
+
+    osc.connect(gain);
+    gain.connect(master);
+    osc.start(t); osc.stop(t + 0.45);
+  }
+
+  return {
+    init: init,
+    resume: resume,
+    playKick: playKick,
+    playSnare: playSnare,
+    playHihat: playHihat,
+    playCymbal: playCymbal,
+    playTom: playTom,
+    isReady: function(){ return ready; }
+  };
+})();
+
+/* =========================================================================
+   THREE.JS SCENE
+   ========================================================================= */
+var wrap = document.getElementById('canvas-wrap');
+var scene = new THREE.Scene();
+scene.background = new THREE.Color(0x121214);
+scene.fog = new THREE.Fog(0x121214, 14, 34);
+
+var camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 100);
+camera.position.set(0, 5.2, 11.5);
+camera.lookAt(0, 1.6, 0);
+
+var renderer = new THREE.WebGLRenderer({ antialias:true, alpha:false });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputEncoding = THREE.sRGBEncoding;
+wrap.appendChild(renderer.domElement);
+
+/* ---- Lighting: dark studio with soft neon rim lights ---- */
+var ambient = new THREE.AmbientLight(0x2a2a32, 0.7);
+scene.add(ambient);
+
+var keyLight = new THREE.SpotLight(0xffffff, 0.9, 30, Math.PI/5, 0.4, 1.2);
+keyLight.position.set(4, 10, 6);
+keyLight.castShadow = true;
+keyLight.shadow.mapSize.set(1024,1024);
+keyLight.shadow.bias = -0.0015;
+scene.add(keyLight);
+scene.add(keyLight.target);
+
+var cyanRim = new THREE.PointLight(0x28e0e0, 6, 16, 2);
+cyanRim.position.set(-6, 3.4, -3);
+scene.add(cyanRim);
+
+var pinkRim = new THREE.PointLight(0xff2bd6, 6, 16, 2);
+pinkRim.position.set(6, 2.6, -2);
+scene.add(pinkRim);
+
+var amberFill = new THREE.PointLight(0xffb02e, 3, 14, 2);
+amberFill.position.set(0, 4.5, 5);
+scene.add(amberFill);
+
+/* ---- Floor: dark glossy reflective-ish disc ---- */
+var floorGeo = new THREE.CircleGeometry(16, 64);
+var floorMat = new THREE.MeshStandardMaterial({
+  color:0x18181b, metalness:0.4, roughness:0.35
+});
+var floor = new THREE.Mesh(floorGeo, floorMat);
+floor.rotation.x = -Math.PI/2;
+floor.receiveShadow = true;
+scene.add(floor);
+
+/* subtle neon ring on the floor under the kit */
+var ringGeo = new THREE.RingGeometry(5.6, 5.75, 80);
+var ringMat = new THREE.MeshBasicMaterial({color:0x28e0e0, transparent:true, opacity:0.25, side:THREE.DoubleSide});
+var floorRing = new THREE.Mesh(ringGeo, ringMat);
+floorRing.rotation.x = -Math.PI/2;
+floorRing.position.y = 0.01;
+scene.add(floorRing);
+
+/* backdrop wall, faint */
+var wallGeo = new THREE.PlaneGeometry(40, 18);
+var wallMat = new THREE.MeshStandardMaterial({color:0x16161a, roughness:0.9, metalness:0.05});
+var wall = new THREE.Mesh(wallGeo, wallMat);
+wall.position.set(0, 9, -9);
+wall.receiveShadow = true;
+scene.add(wall);
+
+/* =========================================================================
+   MATERIALS
+   ========================================================================= */
+var hihatGold = new THREE.MeshStandardMaterial({ color:0xdcb24a, metalness:0.92, roughness:0.18 });
+var crashGold = new THREE.MeshStandardMaterial({ color:0xe0b94e, metalness:0.93, roughness:0.16 });
+var rideGold  = new THREE.MeshStandardMaterial({ color:0xcf9f3c, metalness:0.9, roughness:0.24 });
+
+var drumShellRed = new THREE.MeshStandardMaterial({ color:0x8a1f2b, metalness:0.15, roughness:0.55 });
+var drumShellDark = new THREE.MeshStandardMaterial({ color:0x1d1d20, metalness:0.2, roughness:0.6 });
+var drumHeadWhite = new THREE.MeshStandardMaterial({ color:0xe9e5da, metalness:0.05, roughness:0.85 });
+var chrome = new THREE.MeshStandardMaterial({ color:0xd8d8dc, metalness:1.0, roughness:0.12 });
+var standDark = new THREE.MeshStandardMaterial({ color:0x222226, metalness:0.7, roughness:0.4 });
+
+/* =========================================================================
+   DRUM KIT GROUP
+   ========================================================================= */
+var kit = new THREE.Group();
+scene.add(kit);
+
+function addChromeRim(parent, radius, y, tubeRadius){
+  var rim = new THREE.Mesh(new THREE.TorusGeometry(radius, tubeRadius || 0.035, 12, 48), chrome);
+  rim.rotation.x = Math.PI/2;
+  rim.position.y = y;
+  rim.castShadow = true;
+  parent.add(rim);
+  return rim;
+}
+
+/* ---- BASS / KICK DRUM: large horizontal cylinder, center ---- */
+var kickGroup = new THREE.Group();
+kickGroup.position.set(0, 1.55, -1.2);
+var kickShell = new THREE.Mesh(new THREE.CylinderGeometry(1.55, 1.55, 1.15, 40, 1, true), drumShellRed);
+kickShell.rotation.z = Math.PI/2;
+kickShell.castShadow = true; kickShell.receiveShadow = true;
+kickGroup.add(kickShell);
+
+var kickHeadFront = new THREE.Mesh(new THREE.CircleGeometry(1.5, 40), drumHeadWhite);
+kickHeadFront.position.x = 0.58;
+kickHeadFront.rotation.y = Math.PI/2;
+kickHeadFront.castShadow = true;
+kickGroup.add(kickHeadFront);
+
+var kickHeadBack = new THREE.Mesh(new THREE.CircleGeometry(1.5, 40), drumHeadWhite);
+kickHeadBack.position.x = -0.58;
+kickHeadBack.rotation.y = -Math.PI/2;
+kickGroup.add(kickHeadBack);
+
+addChromeRimVertical(kickGroup, 1.5, 0.575);
+addChromeRimVertical(kickGroup, 1.5, -0.575);
+
+function addChromeRimVertical(parent, radius, x){
+  var rim = new THREE.Mesh(new THREE.TorusGeometry(radius, 0.04, 12, 48), chrome);
+  rim.rotation.y = Math.PI/2;
+  rim.position.x = x;
+  rim.castShadow = true;
+  parent.add(rim);
+}
+
+// small legs for kick
+[-0.5, 0.5].forEach(function(zOff){
+  var leg = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.9, 8), standDark);
+  leg.position.set(0.2, -1.0, zOff*1.1);
+  leg.rotation.z = 0.18 * (zOff>0?1:-1);
+  leg.castShadow = true;
+  kickGroup.add(leg);
+});
+
+kit.add(kickGroup);
+
+/* ---- SNARE DRUM: flat cylinder on stand, left ---- */
+var snareGroup = new THREE.Group();
+snareGroup.position.set(-2.5, 1.18, 1.1);
+var snareShell = new THREE.Mesh(new THREE.CylinderGeometry(0.62, 0.62, 0.42, 32), drumShellDark);
+snareShell.castShadow = true; snareShell.receiveShadow = true;
+snareGroup.add(snareShell);
+var snareHeadTop = new THREE.Mesh(new THREE.CircleGeometry(0.6, 32), drumHeadWhite);
+snareHeadTop.rotation.x = -Math.PI/2;
+snareHeadTop.position.y = 0.215;
+snareHeadTop.castShadow = true;
+snareGroup.add(snareHeadTop);
+addChromeRim(snareGroup, 0.6, 0.215, 0.03);
+addChromeRim(snareGroup, 0.6, -0.215, 0.03);
+
+var snareStand = new THREE.Group();
+var snarePole = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.95, 10), standDark);
+snarePole.position.y = -0.7;
+snarePole.castShadow = true;
+snareStand.add(snarePole);
+for(var i=0;i<3;i++){
+  var leg = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.85, 8), standDark);
+  var ang = (i/3) * Math.PI*2;
+  leg.position.set(Math.cos(ang)*0.5, -1.15, Math.sin(ang)*0.5);
+  leg.rotation.z = Math.cos(ang)*0.5;
+  leg.rotation.x = Math.sin(ang)*-0.5;
+  leg.castShadow = true;
+  snareStand.add(leg);
+}
+snareGroup.add(snareStand);
+kit.add(snareGroup);
+
+/* ---- HI-HAT: two thin cymbals stacked on a stand ---- */
+var hihatGroup = new THREE.Group();
+hihatGroup.position.set(-3.6, 0, 0.0);
+var hihatPole = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 2.3, 10), standDark);
+hihatPole.position.y = 1.15;
+hihatPole.castShadow = true;
+hihatGroup.add(hihatPole);
+for(var hi=0; hi<3; hi++){
+  var leg = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.85, 8), standDark);
+  var hang = (hi/3) * Math.PI*2;
+  leg.position.set(Math.cos(hang)*0.5, 0.0, Math.sin(hang)*0.5);
+  leg.rotation.z = Math.cos(hang)*0.5;
+  leg.rotation.x = Math.sin(hang)*-0.5;
+  leg.castShadow = true;
+  hihatGroup.add(leg);
+}
+var hihatBottomCymbal = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.46, 0.025, 32), hihatGold);
+hihatBottomCymbal.position.y = 1.78;
+hihatBottomCymbal.castShadow = true;
+hihatGroup.add(hihatBottomCymbal);
+
+var hihatTopGroup = new THREE.Group();
+hihatTopGroup.position.y = 1.92;
+var hihatTopCymbal = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.46, 0.025, 32), hihatGold);
+hihatTopGroup.add(hihatTopCymbal);
+hihatGroup.add(hihatTopGroup);
+kit.add(hihatGroup);
+
+/* ---- CRASH CYMBAL: wide flattened cone on thin stand, right-back ---- */
+function buildCymbalStand(x,z,height){
+  var g = new THREE.Group();
+  g.position.set(x, 0, z);
+  var pole = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.028, height, 10), standDark);
+  pole.position.y = height/2;
+  pole.castShadow = true;
+  g.add(pole);
+  for(var i=0;i<3;i++){
+    var leg = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.028, 0.8, 8), standDark);
+    var ang = (i/3) * Math.PI*2;
+    leg.position.set(Math.cos(ang)*0.48, 0.0, Math.sin(ang)*0.48);
+    leg.rotation.z = Math.cos(ang)*0.5;
+    leg.rotation.x = Math.sin(ang)*-0.5;
+    leg.castShadow = true;
+    g.add(leg);
+  }
+  return g;
+}
+
+var crashStand = buildCymbalStand(2.9, 0.4, 2.55);
+var crashTilt = new THREE.Group();
+crashTilt.position.y = 2.55;
+crashTilt.rotation.z = -0.32;
+crashTilt.rotation.x = -0.12;
+var crashCymbal = new THREE.Mesh(new THREE.ConeGeometry(0.66, 0.12, 32, 1, true), crashGold);
+crashCymbal.rotation.x = Math.PI;
+crashCymbal.castShadow = true;
+crashTilt.add(crashCymbal);
+var crashCap = new THREE.Mesh(new THREE.SphereGeometry(0.07, 16, 12), crashGold);
+crashCap.position.y = 0.05;
+crashTilt.add(crashCap);
+crashStand.add(crashTilt);
+kit.add(crashStand);
+
+/* ---- RIDE CYMBAL: wide flattened cone, right side, lower & bigger than crash ---- */
+var rideStand = buildCymbalStand(2.5, 2.6, 2.15);
+var rideTilt = new THREE.Group();
+rideTilt.position.y = 2.15;
+rideTilt.rotation.z = -0.18;
+rideTilt.rotation.x = 0.05;
+var rideCymbal = new THREE.Mesh(new THREE.ConeGeometry(0.82, 0.1, 32, 1, true), rideGold);
+rideCymbal.rotation.x = Math.PI;
+rideCymbal.castShadow = true;
+rideTilt.add(rideCymbal);
+var rideCap = new THREE.Mesh(new THREE.SphereGeometry(0.08, 16, 12), rideGold);
+rideCap.position.y = 0.045;
+rideTilt.add(rideCap);
+rideStand.add(rideTilt);
+kit.add(rideStand);
+
+/* ---- TOMS: two small toms mounted above the kick ---- */
+function buildTom(x, radius, height){
+  var g = new THREE.Group();
+  g.position.set(x, 2.15, -1.9);
+  g.rotation.x = -0.25;
+  var shell = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, height, 28), drumShellDark);
+  shell.castShadow = true; shell.receiveShadow = true;
+  g.add(shell);
+  var head = new THREE.Mesh(new THREE.CircleGeometry(radius-0.02, 28), drumHeadWhite);
+  head.rotation.x = -Math.PI/2;
+  head.position.y = height/2;
+  head.castShadow = true;
+  g.add(head);
+  addChromeRim(g, radius-0.02, height/2, 0.025);
+  return g;
+}
+var tom1 = buildTom(-0.85, 0.42, 0.5);
+var tom2 = buildTom(0.85, 0.48, 0.55);
+kit.add(tom1, tom2);
+
+/* tom support arm visuals (simple chrome bars from kick to toms) */
+[tom1, tom2].forEach(function(tom){
+  var bar = new THREE.Mesh(new THREE.CylinderGeometry(0.025,0.025,0.9,8), chrome);
+  bar.position.set(tom.position.x, 1.85, tom.position.z + 0.35);
+  bar.rotation.x = 0.5;
+  bar.castShadow = true;
+  kit.add(bar);
+});
+
+/* center kit slightly for nicer framing */
+kit.position.x = 0.6;
+
+/* =========================================================================
+   INTERACTIVE INSTRUMENT REGISTRY
+   ========================================================================= */
+var instruments = {};
+
+function registerInstrument(key, opts){
+  instruments[key] = opts;
+  opts.objects.forEach(function(obj){
+    obj.userData.instrumentKey = key;
+  });
+}
+
+registerInstrument('kick', {
+  objects: [kickShell, kickHeadFront, kickHeadBack],
+  chipId: 'chip-kick',
+  trigger: function(){
+    AudioEngine.playKick();
+    gsap.killTweensOf(kickGroup.scale);
+    gsap.killTweensOf(kickGroup.position);
+    gsap.timeline()
+      .to(kickGroup.scale, { x:0.9, duration:0.05, ease:'power2.out' }, 0)
+      .to(kickGroup.position, { x: kickGroup.position.x + 0.12, duration:0.05, ease:'power2.out' }, 0)
+      .to(kickGroup.scale, { x:1, duration:0.32, ease:'elastic.out(1,0.4)' })
+      .to(kickGroup.position, { x: kickGroup.position.x, duration:0.32, ease:'elastic.out(1,0.4)' }, '<');
+  }
+});
+
+registerInstrument('snare', {
+  objects: [snareShell, snareHeadTop],
+  chipId: 'chip-snare',
+  trigger: function(){
+    AudioEngine.playSnare();
+    gsap.killTweensOf(snareHeadTop.position);
+    gsap.killTweensOf(snareHeadTop.scale);
+    gsap.timeline()
+      .to(snareHeadTop.position, { y:0.16, duration:0.04, ease:'power2.out' })
+      .to(snareHeadTop.scale, { x:1.04, z:1.04, duration:0.04 }, '<')
+      .to(snareHeadTop.position, { y:0.215, duration:0.28, ease:'elastic.out(1,0.35)' })
+      .to(snareHeadTop.scale, { x:1, z:1, duration:0.28, ease:'elastic.out(1,0.35)' }, '<');
+    gsap.killTweensOf(snareGroup.rotation);
+    gsap.timeline()
+      .to(snareGroup.rotation, { z: 0.04, duration:0.05 })
+      .to(snareGroup.rotation, { z: 0, duration:0.4, ease:'elastic.out(1,0.3)' });
+  }
+});
+
+registerInstrument('hihat', {
+  objects: [hihatTopCymbal, hihatBottomCymbal],
+  chipId: 'chip-hihat',
+  trigger: function(){
+    AudioEngine.playHihat(false);
+    gsap.killTweensOf(hihatTopGroup.position);
+    gsap.killTweensOf(hihatTopGroup.rotation);
+    gsap.timeline()
+      .to(hihatTopGroup.position, { y:1.83, duration:0.05, ease:'power2.out' })
+      .to(hihatTopGroup.rotation, { x:0.06, z:0.04, duration:0.06 }, '<')
+      .to(hihatTopGroup.position, { y:1.92, duration:0.22, ease:'power2.out' })
+      .to(hihatTopGroup.rotation, { x:0, z:0, duration:0.35, ease:'elastic.out(1,0.25)' }, '<');
+  }
+});
+
+registerInstrument('crash', {
+  objects: [crashCymbal, crashCap],
+  chipId: 'chip-crash',
+  trigger: function(){
+    AudioEngine.playCymbal('crash');
+    gsap.killTweensOf(crashTilt.rotation);
+    gsap.timeline()
+      .to(crashTilt.rotation, { z: -0.32 - 0.35, x: -0.12 + 0.18, duration:0.08, ease:'power2.out' })
+      .to(crashTilt.rotation, { z: -0.32 + 0.12, x: -0.12 - 0.08, duration:0.16, ease:'sine.inOut' })
+      .to(crashTilt.rotation, { z: -0.32 - 0.06, x: -0.12 + 0.04, duration:0.22, ease:'sine.inOut' })
+      .to(crashTilt.rotation, { z: -0.32, x: -0.12, duration:0.9, ease:'elastic.out(1,0.2)' });
+  }
+});
+
+registerInstrument('ride', {
+  objects: [rideCymbal, rideCap],
+  chipId: 'chip-ride',
+  trigger: function(){
+    AudioEngine.playCymbal('ride');
+    gsap.killTweensOf(rideTilt.rotation);
+    gsap.timeline()
+      .to(rideTilt.rotation, { z: -0.18 - 0.28, x: 0.05 + 0.14, duration:0.08, ease:'power2.out' })
+      .to(rideTilt.rotation, { z: -0.18 + 0.1, x: 0.05 - 0.06, duration:0.18, ease:'sine.inOut' })
+      .to(rideTilt.rotation, { z: -0.18, x: 0.05, duration:0.7, ease:'elastic.out(1,0.25)' });
+  }
+});
+
+registerInstrument('tom1', {
+  objects: [tom1.children[0], tom1.children[1]],
+  chipId: 'chip-tom1',
+  trigger: function(){
+    AudioEngine.playTom(210, 140);
+    gsap.killTweensOf(tom1.position);
+    gsap.timeline()
+      .to(tom1.position, { y: tom1.position.y - 0.08, duration:0.05, ease:'power2.out' })
+      .to(tom1.position, { y: 2.15, duration:0.3, ease:'elastic.out(1,0.35)' });
+  }
+});
+
+registerInstrument('tom2', {
+  objects: [tom2.children[0], tom2.children[1]],
+  chipId: 'chip-tom2',
+  trigger: function(){
+    AudioEngine.playTom(160, 100);
+    gsap.killTweensOf(tom2.position);
+    gsap.timeline()
+      .to(tom2.position, { y: tom2.position.y - 0.08, duration:0.05, ease:'power2.out' })
+      .to(tom2.position, { y: 2.15, duration:0.3, ease:'elastic.out(1,0.35)' });
+  }
+});
+
+/* =========================================================================
+   INPUT: keyboard + mouse raycasting
+   ========================================================================= */
+var statusEl = document.getElementById('status');
+
+function markAudioReady(){
+  if(!statusEl.classList.contains('ready')){
+    statusEl.classList.add('ready');
+  }
+}
+
+function unlockAudio(){
+  AudioEngine.init();
+  AudioEngine.resume();
+  markAudioReady();
+}
+
+var KEY_MAP = {
+  ' ': 'kick', 'spacebar':'kick',
+  'j': 'snare',
+  'k': 'hihat',
+  'l': 'crash',
+  'f': 'ride',
+  'd': 'tom1',
+  's': 'tom2'
+};
+
+function flashChip(chipId){
+  var chip = document.getElementById(chipId);
+  if(!chip) return;
+  chip.classList.add('active');
+  clearTimeout(chip._t);
+  chip._t = setTimeout(function(){ chip.classList.remove('active'); }, 220);
+}
+
+function triggerInstrument(key){
+  var inst = instruments[key];
+  if(!inst) return;
+  unlockAudio();
+  inst.trigger();
+  flashChip(inst.chipId);
+}
+
+var heldKeys = {};
+window.addEventListener('keydown', function(e){
+  var k = e.key.toLowerCase();
+  if(k === ' '){ e.preventDefault(); }
+  var mapped = KEY_MAP[k];
+  if(!mapped) return;
+  if(heldKeys[k]) return; // prevent OS key-repeat re-trigger spam
+  heldKeys[k] = true;
+  triggerInstrument(mapped);
+});
+window.addEventListener('keyup', function(e){
+  heldKeys[e.key.toLowerCase()] = false;
+});
+
+/* mouse / touch raycasting */
+var raycaster = new THREE.Raycaster();
+var pointer = new THREE.Vector2();
+
+function getInstrumentKeyFromIntersect(object){
+  var obj = object;
+  while(obj){
+    if(obj.userData && obj.userData.instrumentKey) return obj.userData.instrumentKey;
+    obj = obj.parent;
+  }
+  return null;
+}
+
+var allInteractiveMeshes = [];
+Object.keys(instruments).forEach(function(key){
+  instruments[key].objects.forEach(function(o){ allInteractiveMeshes.push(o); });
+});
+
+function handlePointer(clientX, clientY){
+  var rect = renderer.domElement.getBoundingClientRect();
+  pointer.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+  pointer.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+  raycaster.setFromCamera(pointer, camera);
+  var hits = raycaster.intersectObjects(allInteractiveMeshes, false);
+  if(hits.length > 0){
+    var key = getInstrumentKeyFromIntersect(hits[0].object);
+    if(key) triggerInstrument(key);
+  } else {
+    unlockAudio();
+  }
+}
+
+renderer.domElement.addEventListener('pointerdown', function(e){
+  handlePointer(e.clientX, e.clientY);
+});
+
+/* =========================================================================
+   RESIZE & RENDER LOOP (locked to display refresh, GSAP ticker driven)
+   ========================================================================= */
+function onResize(){
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+window.addEventListener('resize', onResize);
+
+var clock = new THREE.Clock();
+var camAngle = 0;
+
+function animate(){
+  var dt = clock.getDelta();
+  camAngle += dt * 0.05;
+  camera.position.x = Math.sin(camAngle) * 0.6;
+  camera.position.y = 5.2 + Math.sin(camAngle*1.3) * 0.15;
+  camera.lookAt(kit.position.x, 1.6, kit.position.z);
+
+  cyanRim.intensity = 5.5 + Math.sin(camAngle*3)*0.8;
+  pinkRim.intensity = 5.5 + Math.cos(camAngle*2.4)*0.8;
+
+  renderer.render(scene, camera);
+  requestAnimationFrame(animate);
+}
+
+/* point key spotlight target at kit */
+keyLight.target.position.set(kit.position.x, 1.2, kit.position.z);
+
+/* =========================================================================
+   BOOT
+   ========================================================================= */
+window.addEventListener('pointerdown', unlockAudio, { once:true });
+window.addEventListener('keydown', unlockAudio, { once:true });
+
+onResize();
+animate();
+
+var loader = document.getElementById('loader');
+setTimeout(function(){
+  loader.classList.add('hidden');
+}, 450);
+
+})();
+</script>
+</body>
+</html>
