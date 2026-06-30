@@ -2,7 +2,7 @@
 <html lang="ru"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>IGX Тест-Арена : результаты моделей</title>
-<meta name="description" content="Галерея результатов Claude Sonnet 5 в IGX Тест-Арене: 6 интерактивных веб-приложений (магазин, игра, барабаны, приставка, 3D-планеты, часы), сгенерированных по одному заданию каждое.">
+<meta name="description" content="Галерея результатов Claude Sonnet 5 в IGX Тест-Арене: 6 интерактивных веб-приложений (магазин, игра, барабаны, приставка, 3D-планеты, часы), с полным промптом, реальным временем прогона, ток/с и ценой.">
 <style>
   :root { --bg:#0a0a0b; --panel:#121214; --line:#222226; --line2:#2c2c31; --text:#ececef; --muted:#8a8a92; --faint:#5a5a61; --accent:#c9c9cf; }
   * { box-sizing:border-box; }
@@ -22,7 +22,11 @@
   .thead .tn { font:10px ui-monospace,monospace; color:var(--faint); text-transform:uppercase; letter-spacing:2px; }
   .thead h2 { font-size:18px; margin:0; }
   .thead .tcount { margin-left:auto; font:11px ui-monospace,monospace; color:var(--faint); }
-  .tdesc { color:var(--muted); font-size:12.5px; margin:6px 0 14px; max-width:900px; }
+  .tdesc { color:var(--muted); font-size:12.5px; margin:6px 0 10px; max-width:900px; }
+  .prompt { margin:0 0 14px; max-width:900px; }
+  .prompt summary { cursor:pointer; color:var(--accent); font:11px ui-monospace,monospace; text-transform:uppercase; letter-spacing:1px; user-select:none; }
+  .prompt summary:hover { color:#fff; }
+  .prompt pre { white-space:pre-wrap; word-break:break-word; background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:12px 14px; margin:8px 0 0; color:var(--text); font:12px/1.55 ui-monospace,Menlo,Consolas,monospace; max-height:360px; overflow:auto; }
   .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:16px; }
   .card { background:var(--panel); border:1px solid var(--line); border-radius:12px; overflow:hidden; cursor:pointer; transition:border-color .15s, transform .15s; }
   .card:hover { border-color:var(--line2); transform:translateY(-2px); }
@@ -65,49 +69,198 @@
   <p class="legend">на карточках: ≈время генерации &middot; токенов/с (замер) &middot; ≈цена &middot; через что сделано (раннер)</p>
   <section class="test"><div class="thead"><span class="tn">тест 17</span><h2>Магазин</h2><span class="tcount">Claude Sonnet 5</span></div>
   <p class="tdesc">Действуй как Senior Frontend-разработчик и UI/UX дизайнер уровня бигтех-компаний (Apple, S</p>
-  <div class="grid"><div class="card" data-src="r/001.html" data-vw="1280" data-vh="800" data-model="Claude Sonnet 5" data-title="Магазин" data-stats="≈1м 56с · 92 ток/с · opencode · OpenRouter" tabindex="0">
+  <details class="prompt"><summary>полный промпт</summary><pre>Действуй как Senior Frontend-разработчик и UI/UX дизайнер уровня бигтех-компаний (Apple, Stripe, Vercel). Твоя задача — создать «под ключ» многостраничное веб-приложение для футуристической сети продуктовых магазинов будущего &quot;NEXUS GROCERY&quot; (NXG). 
+
+Стек: Next.js 14+ (App Router), Tailwind CSS v3/v4, TypeScript, Lucide Icons и Framer Motion. Код должен быть полностью адаптивным, строго типизированным и готовым к немедленному деплою на Vercel.
+
+1. ФИРМЕННЫЙ СТИЛЬ И ЛОГОТИП (BigTech Эстетика):
+   - Визуальный язык: Абсолютный минимализм, обилие свободного пространства (white space), ультра-тонкие границы (1px border-zinc-800/50), эффект матового стекла (backdrop-blur-md) и «живые» тени.
+   - Цветовая палитра: Строгая Dark Theme. Фон: #09090B (deep-zinc). Текст: #FFFFFF и приглушенный серый #A1A1AA. Акцент: Ядовито-зеленый неоновый (#22C55E) с кастомным свечением.
+   - Логотип: Сделай его компонентом &lt;Logo /&gt; на чистом SVG. Форма — абстрактный светящийся куб или гексагон, сплетенный из технологических линий (символ фуд-теха и логистики). Добавь к нему легкую бесконечную CSS-анимацию пульсации.
+
+2. АРХИТЕКТУРА И МНОГОСТРАНИЧНОСТЬ (App Router):
+   Разверни и напиши код для следующих страниц и макетов без каких-либо сокращений:
+   - app/layout.tsx: Глобальный макет с подключением шрифта Inter, глобальными стилями Tailwind, шапкой (Navbar) и футером. Шапка должна быть фиксированной (sticky), иметь эффект размытия заднего плана и содержать работающий индикатор добавленных в корзину товаров.
+   - app/page.tsx (Главная): Эпический первый экран (Hero) со слоганом &quot;ЭКОСИСТЕМА СВЕЖЕСТИ&quot;. Интерактивные бенчмарки (доставка дронами за 10 минут, сканирование продуктов ИИ на свежесть, вертикальные эко-фермы). Секция с хитами продаж.
+   - app/catalog/page.tsx (Каталог): Страница с фильтрацией на клиенте ('use client'). Сетка карточек товаров. Категории: [Био-синтезированный белок, Гидропоника, Нейро-напитки, Молекулярные капсулы]. Реализуй мгновенную фильтрацию по табам без перезагрузки страницы.
+   - app/tech/page.tsx (О технологиях): Презентационный интерактивный лонгрид о том, как NXG использует алгоритмы для контроля спелости фруктов и автоматизации цепочек поставок. Примени Framer Motion для staggered-анимации появления карточек.
+
+3. КОМПОНЕНТЫ И УПРАВЛЕНИЕ СОСТОЯНИЕМ (State Management):
+   - Создай файл components/ProductCard.tsx: Карточка премиального вида. При ховере плавно увеличивается (scale-102), а ее границы подсвечиваются неоновым зеленым.
+   - Реализуй глобальный React Context или простую стейт-логику прямо в общем лейауте для функции «Добавить в корзину». При нажатии на кнопку в карточке товара, иконка корзины в Navbar должна динамически увеличивать счетчик, а сама кнопка — менять состояние на &quot;В корзине&quot; и окрашиваться в зеленый цвет.
+
+4. СТРОГИЕ ПРАВИЛА КОДИРОВАНИЯ И ДЕПЛОЙ:
+   - Пиши код ОТ начала ДО конца. Запрещено использовать заглушки вида &quot;// Напишите логику здесь&quot; или &quot;// Оставшийся код компонента&quot;. Нам нужен 100% рабочий код каждого файла.
+   - Настрой tailwind.config.js: добавь кастомные утилиты для размытия фона и анимацию неонового свечения (pulse-glow).
+   - В самом конце выведи четкую пошаговую инструкцию: как инициализировать проект локально, какие команды прописать в терминале и как задеплоить этот Next.js проект на Vercel через CLI или GitHub.</pre></details>
+  <div class="grid"><div class="card" data-src="r/001.html" data-vw="1280" data-vh="800" data-model="Claude Sonnet 5" data-title="Магазин" data-stats="6м 05с · 92 ток/с · $0.937 · Claude Code (CLI)" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#d97757">C</span><span class="phname">Claude Sonnet 5</span></div></div>
     <div class="meta"><span class="badge sm" style="background:#d97757">C</span><span class="mname">Claude Sonnet 5</span><span class="open">развернуть</span></div>
-    <div class="stats"><span title="время генерации (оценка)">≈1м 56с</span><i>·</i><span title="токенов в секунду (замер)">92 ток/с</span><span class="via" title="через что сделано">opencode · OpenRouter</span></div>
+    <div class="stats"><span title="время прогона (замер; включает ожидание лимитов)">6м 05с</span><i>·</i><span title="токенов в секунду (замер)">92 ток/с</span><i>·</i><span title="цена (замер)">$0.937</span><span class="via" title="через что сделано">Claude Code (CLI)</span></div>
   </div></div></section>
 <section class="test"><div class="thead"><span class="tn">тест 18</span><h2>CS</h2><span class="tcount">Claude Sonnet 5</span></div>
   <p class="tdesc">Действуй как Senior Game Developer (клиентские веб-игры). Создай играбельный 3D-прототип ш</p>
-  <div class="grid"><div class="card" data-src="r/002.html" data-vw="1280" data-vh="800" data-model="Claude Sonnet 5" data-title="CS" data-stats="≈1м 25с · 120 ток/с · opencode · OpenRouter" tabindex="0">
+  <details class="prompt"><summary>полный промпт</summary><pre>Действуй как Senior Game Developer (клиентские веб-игры). Создай играбельный 3D-прототип шутера от первого лица (FPS) по мотивам Counter-Strike 1.6 на карте de_dust2. 
+
+Стек разработки: Vanilla JS / TS, Three.js (WebGL), HTML5 Web Audio API и Pointer Lock API. Игра должна выдавать стабильные 60 FPS.
+
+1. УПРАВЛЕНИЕ И КАМЕРА (Pointer Lock API):
+   - Реализуй классическое управление FPS: мышь управляет обзором камеры, фиксация курсора через Pointer Lock API при клике на экран.
+   - Движение персонажа: WASD + Space (прыжок). Настрой физику гравитации и коллизий (столкновений) с землей и стенами, чтобы игрок не проваливался под карту.
+
+2. КАРТА (Упрощенный de_dust2 через примитивы):
+   - Сформируй геометрию легендарной зоны карты de_dust2 (например, Плент А и Длина) БЕЗ загрузки тяжелых внешних файлов. Построй её из базовых мешей Three.js (BoxGeometry).
+   - Текстурирование: Окрась стены в песчано-желтые и ближневосточные оттенки (#d2b48c, #c2a677), добавь несколько ящиков (с деревянной текстурой или кастомным CSS-артом) в качестве укрытий.
+
+3. ОРУЖИЕ, СТРЕЛЬБА И ЗВУК (Геймплейные механики):
+   - Оружие на экране: Закрепи перед камерой (в правом нижнем углу) 3D-модель автомата (АК-47 или M4A1, собранную из вытянутых цилиндров и боксов), которая слегка покачивается (bobbing эффект) при ходьбе.
+   - Механика стрельбы: Левый клик мыши — выстрел. Используй THREE.Raycaster, бьющий точно из центра экрана (прицела), чтобы определять попадания в объекты или мишени. В точке попадания на стене должен на 3 секунды появляться след от пули (декаль или маленький черный спрайт).
+   - Web Audio API: Сгенерируй синтетический звук выстрела и перезарядки кодом с помощью AudioContext (или добавь загрузку коротких аудио-плейсхолдеров), чтобы при стрельбе был звуковой отклик. Добавь анимацию отдачи (камера и оружие на долю секунды дергаются вверх).
+
+4. ВРАГИ (ИИ-боты):
+   - Добавь на сцену 2-3 простейших врагов (3D-капсулы или цилиндры синего/красного цвета).
+   - Напиши базовую логику: боты должны медленно перемещаться в сторону игрока. У каждого бота есть полоска здоровья (HP). При успешном выстреле через Raycaster уменьшай их HP. При 0 HP бот исчезает со сцены и респавнится через 5 секунд.
+
+5. ИНТЕРФЕЙС (HUD) И ОПТИМИЗАЦИЯ ПОД 60 FPS:
+   - По центру экрана нарисуй минималистичный прицел (crosshair) средствами HTML/CSS поверх Canvas. Внизу экрана выведи классический счетчик здоровья (HP: 100) и патронов (Ammo: 30/90).
+   - Оптимизируй рендеринг: используй один цикл requestAnimationFrame, делай очистку неиспользуемой геометрии из памяти (dispose), чтобы игра не лагала.
+
+Выдай код игры в виде единого самодостаточного HTML-файла с инлайновыми стилями и JS-скриптом. В конце добавь краткую инструкцию, как запустить игру локально и задеплоить её на GitHub Pages или Vercel.</pre></details>
+  <div class="grid"><div class="card" data-src="r/002.html" data-vw="1280" data-vh="800" data-model="Claude Sonnet 5" data-title="CS" data-stats="3м 12с · 120 ток/с · $0.348 · Claude Code (CLI)" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#d97757">C</span><span class="phname">Claude Sonnet 5</span></div></div>
     <div class="meta"><span class="badge sm" style="background:#d97757">C</span><span class="mname">Claude Sonnet 5</span><span class="open">развернуть</span></div>
-    <div class="stats"><span title="время генерации (оценка)">≈1м 25с</span><i>·</i><span title="токенов в секунду (замер)">120 ток/с</span><span class="via" title="через что сделано">opencode · OpenRouter</span></div>
+    <div class="stats"><span title="время прогона (замер; включает ожидание лимитов)">3м 12с</span><i>·</i><span title="токенов в секунду (замер)">120 ток/с</span><i>·</i><span title="цена (замер)">$0.348</span><span class="via" title="через что сделано">Claude Code (CLI)</span></div>
   </div></div></section>
 <section class="test"><div class="thead"><span class="tn">тест 19</span><h2>Барабаны</h2><span class="tcount">Claude Sonnet 5</span></div>
   <p class="tdesc">Действуй как Senior Creative Developer. Создай интерактивное веб-приложение — трехмерную б</p>
-  <div class="grid"><div class="card" data-src="r/003.html" data-vw="1280" data-vh="800" data-model="Claude Sonnet 5" data-title="Барабаны" data-stats="≈1м 28с · 93 ток/с · opencode · OpenRouter" tabindex="0">
+  <details class="prompt"><summary>полный промпт</summary><pre>Действуй как Senior Creative Developer. Создай интерактивное веб-приложение — трехмерную барабанную установку (Drum Kit) в пространстве музыкальной студии. 
+
+Стек разработки: Vanilla JS / TS, Three.js (WebGL), GSAP (для сочных анимаций удара) и Web Audio API. Приложение должно работать строго в 60 FPS с нулевой задержкой звука.
+
+1. ВИЗУАЛ И СЦЕНА (Three.js):
+   - Окружение: Тёмная минималистичная музыкальная студия (глубокий серый или матовый черный фон #121214) с мягким неоновым освещением вокруг.
+   - Барабанная установка: Собери из базовых 3D-фигур Three.js (CylinderGeometry, TorusGeometry) основные элементы установки:
+     * Большой барабан (Bass Drum / Kick) — массивный горизонтальный цилиндр по центру.
+     * Малый барабан (Snare Drum) — плоский цилиндр на подставке слева.
+     * Хэт (Hi-Hat) — две тонкие плоские тарелки друг над другом.
+     * Крэш/Райд (Crash/Ride Cymbals) — широкие конусы или сплющенные сферы на тонких стойках.
+   - Материалы: Для тарелок используй золотой глянцевый металл (MeshStandardMaterial, metalness: 0.9, roughness: 0.2), для барабанов — матовый пластик или дерево с хромированными ободками.
+
+2. СИНТЕЗ ЗВУКА С НУЛЕВОЙ ЗАДЕРЖКОЙ (Web Audio API):
+   - Запрещено использовать стандартные теги &lt;audio&gt;! Звук должен извлекаться мгновенно. 
+   - Напиши аудио-движок на базе Web Audio API (AudioContext). Для каждого инструмента запрограммируй свой синтезированный звук (через генераторы частот OscillatorNode и узлы GainNode для настройки огибающей громкости / ADSR-эффекта):
+     * Kick: быстрый спад частоты от 150Гц до 40Гц за 0.1 секунды.
+     * Snare: белый шум (White Noise Buffer) с резким затуханием (Gain decay).
+     * Hi-Hat / Cymbal: высокочастотный металлический шум с коротким (для хэта) или длинным (для крэша) хвостом реверберации.
+
+3. ИНТЕРАКТИВ И ФИЗИКА УДАРА (Управление):
+   - Клавиатура: Назначь клавиши для игры (например: Пробел — Kick, J — Snare, K — Hi-Hat, L — Crash).
+   - Мышь: Используй THREE.Raycaster, чтобы пользователь мог кликать по тарелкам и барабанам мышкой.
+   - Анимация удара (GSAP): В момент нажатия клавиши или клика мыши соответствующий 3D-объект должен физически реагировать: барабан слегка прожимается вниз, а тарелка — покачивается по осям вращения (эффект вибрации металла), после чего плавно возвращается в исходное состояние.
+
+4. ОПТИМИЗАЦИЯ И ДЕПЛОЙ:
+   - Сделай интерфейс адаптивным, добавь на экран небольшую визуальную подсказку, какая клавиша за какой барабан отвечает.
+   - Код должен быть монолитным (без сокращений типа &quot;// код звука здесь&quot;). Нам нужен готовый рабочий скрипт.
+   - В конце выведи краткую инструкцию, как запустить этот проект локально и задеплоить его в один клик на Vercel или Netlify.</pre></details>
+  <div class="grid"><div class="card" data-src="r/003.html" data-vw="1280" data-vh="800" data-model="Claude Sonnet 5" data-title="Барабаны" data-stats="10м 01с · 93 ток/с · $1.01 · Claude Code (CLI)" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#d97757">C</span><span class="phname">Claude Sonnet 5</span></div></div>
     <div class="meta"><span class="badge sm" style="background:#d97757">C</span><span class="mname">Claude Sonnet 5</span><span class="open">развернуть</span></div>
-    <div class="stats"><span title="время генерации (оценка)">≈1м 28с</span><i>·</i><span title="токенов в секунду (замер)">93 ток/с</span><span class="via" title="через что сделано">opencode · OpenRouter</span></div>
+    <div class="stats"><span title="время прогона (замер; включает ожидание лимитов)">10м 01с</span><i>·</i><span title="токенов в секунду (замер)">93 ток/с</span><i>·</i><span title="цена (замер)">$1.01</span><span class="via" title="через что сделано">Claude Code (CLI)</span></div>
   </div></div></section>
 <section class="test"><div class="thead"><span class="tn">тест 21</span><h2>Приставка</h2><span class="tcount">Claude Sonnet 5</span></div>
   <p class="tdesc">Создай интерактивное веб-приложение — симулятор игровой консоли (в стиле PlayStation Dashb</p>
-  <div class="grid"><div class="card" data-src="r/004.html" data-vw="1280" data-vh="800" data-model="Claude Sonnet 5" data-title="Приставка" data-stats="≈2м 07с · 105 ток/с · opencode · OpenRouter" tabindex="0">
+  <details class="prompt"><summary>полный промпт</summary><pre>Создай интерактивное веб-приложение — симулятор игровой консоли (в стиле PlayStation Dashboard), работающее строго в 60 FPS с использованием Three.js (WebGL) и GSAP. 
+
+Проект должен быть единым SPA (Single Page Application) с плавным интерфейсом и тремя мини-играми.
+
+Техническая архитектура и требования:
+
+1. Главный интерфейс (ОС Консоли):
+   - Задний план: Динамический интерактивный фон на Three.js (плавные светящиеся волны или парящие частицы, как в меню PS4/PS5), реагирующий на движение мыши.
+   - Меню: Горизонтальная лента карточек (игр). Кнопки управления, звуковые эффекты при переключении (используй Web Audio API для генерации простых &quot;кликов&quot;).
+   - Навигация: Поддержи управление как с клавиатуры (стрелки + Enter), так и мышью. При выборе игры карточка увеличивается, а фон меняет оттенок.
+
+2. Игровой блок (3D мини-игры на Three.js / Canvas):
+   Реализуй упрощенные, но полностью играбельные 3D-прототипы трех игр:
+   - &quot;Minecraft Mini&quot;: Небольшая сцена из кубов (Voxels). Игрок может ходить (WASD) и кликом мыши разрушать/ставить кубы перед собой. Оптимизируй через THREE.InstancedMesh, чтобы не падал FPS.
+   - &quot;GTA Chase Mini&quot;: Лоу-поли машинка на бесконечной трехполосной дороге. Задача — уворачиваться от встречных кубических машин. Управление стрелками.
+   - &quot;UFC Box Mini&quot;: 3D-арена (цилиндр) и два упрощенных бойца из сфер и капсул. Игрок нажимает Space для удара, ИИ-противник отвечает случайными атаками. Реализуй полоски здоровья (HP).
+
+3. Оптимизация под 60 FPS:
+   - Используй единый requestAnimationFrame цикл для рендеринга.
+   - Включи shadowMap только если это не роняет FPS, или используй запеченные тени.
+   - Все неактивные сцены (игры, которые сейчас закрыты) должны полностью выгружаться из памяти (scene.remove) и приостанавливать свои циклы расчетов, чтобы экономить ресурсы ЦП.
+
+4. Инструкция по деплою (Подготовка):
+   - Напиши чистый, самодостаточный код (HTML/CSS/JS или Next.js/Tailwind, если это v0/Bolt). 
+   - Выведи в конце кода краткую пошаговую инструкцию, как мне запустить этот проект локально и как задеплоить его в один клик на платформы Vercel, Netlify или GitHub Pages.</pre></details>
+  <div class="grid"><div class="card" data-src="r/004.html" data-vw="1280" data-vh="800" data-model="Claude Sonnet 5" data-title="Приставка" data-stats="15м 47с · 105 ток/с · $1.63 · Claude Code (CLI)" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#d97757">C</span><span class="phname">Claude Sonnet 5</span></div></div>
     <div class="meta"><span class="badge sm" style="background:#d97757">C</span><span class="mname">Claude Sonnet 5</span><span class="open">развернуть</span></div>
-    <div class="stats"><span title="время генерации (оценка)">≈2м 07с</span><i>·</i><span title="токенов в секунду (замер)">105 ток/с</span><span class="via" title="через что сделано">opencode · OpenRouter</span></div>
+    <div class="stats"><span title="время прогона (замер; включает ожидание лимитов)">15м 47с</span><i>·</i><span title="токенов в секунду (замер)">105 ток/с</span><i>·</i><span title="цена (замер)">$1.63</span><span class="via" title="через что сделано">Claude Code (CLI)</span></div>
   </div></div></section>
 <section class="test"><div class="thead"><span class="tn">тест 27</span><h2>Планеты</h2><span class="tcount">Claude Sonnet 5</span></div>
   <p class="tdesc">Задача: Создай интерактивную 3D-модель Солнечной системы на чистом three.js. Верни ОДИН са</p>
-  <div class="grid"><div class="card" data-src="r/005.html" data-vw="1280" data-vh="800" data-model="Claude Sonnet 5" data-title="Планеты" data-stats="≈1м 50с · 100 ток/с · opencode · OpenRouter" tabindex="0">
+  <details class="prompt"><summary>полный промпт</summary><pre>Задача: Создай интерактивную 3D-модель Солнечной системы на чистом three.js. Верни ОДИН самодостаточный HTML-файл (весь CSS и JS внутри, three.js — через CDN, без сборщиков и внешних файлов ассетов; текстуры генерируй процедурно на canvas).
+Содержание сцены:
+
+Солнце в центре со свечением (эмиссия + additive-glow) и точечным источником света.
+8 планет от Меркурия до Нептуна в правильном порядке; у Земли — Луна, у Сатурна — кольца, у Урана — наклон оси «на бок».
+Каждая планета: обращается по своей орбите и вращается вокруг своей оси; скорости различаются (внутренние быстрее).
+Орбиты показаны тонкими линиями; звёздное небо на фоне.
+Масштаб размеров и расстояний сжатый/условный (не реальный), чтобы всё помещалось и читалось.
+
+Интерактив:
+
+При наведении на планету — всплывающая подсказка с названием и краткими фактами (диаметр, расстояние от Солнца, период обращения). Реализуй через Raycaster.
+Управление камерой: вращение мышью (drag), зум колесом, поддержка тача (drag + pinch).
+Клик по планете — плавный фокус/следование камеры за ней; кнопка «Сбросить вид».
+Панель управления: ползунок скорости времени, пауза/проигрывание, переключатель орбит, переключатель «показать все названия».
+
+Визуальный стиль: тёмный космос (глубокий сине-чёрный), тёплый акцент под цвет Солнца, аккуратный HUD в стиле приборной панели обсерватории, моноширинный шрифт для данных. Весь текст интерфейса — на русском.
+Технические требования:
+
+three.js (укажи конкретную версию с CDN), antialiasing, ACES tone mapping, ограничение pixelRatio, корректная обработка resize.
+Свои лёгкие orbit-controls (без зависимости от аддонов), чтобы файл был полностью автономным.
+60 FPS на средней машине; уважать prefers-reduced-motion.
+Чистый, прокомментированный код; никаких ошибок в консоли.</pre></details>
+  <div class="grid"><div class="card" data-src="r/005.html" data-vw="1280" data-vh="800" data-model="Claude Sonnet 5" data-title="Планеты" data-stats="8м 53с · 100 ток/с · $1.13 · Claude Code (CLI)" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#d97757">C</span><span class="phname">Claude Sonnet 5</span></div></div>
     <div class="meta"><span class="badge sm" style="background:#d97757">C</span><span class="mname">Claude Sonnet 5</span><span class="open">развернуть</span></div>
-    <div class="stats"><span title="время генерации (оценка)">≈1м 50с</span><i>·</i><span title="токенов в секунду (замер)">100 ток/с</span><span class="via" title="через что сделано">opencode · OpenRouter</span></div>
+    <div class="stats"><span title="время прогона (замер; включает ожидание лимитов)">8м 53с</span><i>·</i><span title="токенов в секунду (замер)">100 ток/с</span><i>·</i><span title="цена (замер)">$1.13</span><span class="via" title="через что сделано">Claude Code (CLI)</span></div>
   </div></div></section>
 <section class="test"><div class="thead"><span class="tn">тест 31</span><h2>Часы</h2><span class="tcount">Claude Sonnet 5</span></div>
   <p class="tdesc">Создай архитектуру многостраничного премиального сайта для бренда механических часов. Прое</p>
-  <div class="grid"><div class="card" data-src="r/006.html" data-vw="1280" data-vh="800" data-model="Claude Sonnet 5" data-title="Часы" data-stats="≈1м 21с · 99 ток/с · opencode · OpenRouter" tabindex="0">
+  <details class="prompt"><summary>полный промпт</summary><pre>Создай архитектуру многостраничного премиального сайта для бренда механических часов. Проект должен состоять из системы табов (или страниц), где центральным элементом является интерактивный 3D-холст (Three.js), а контент вокруг него динамически меняется.
+
+Технические требования к логике и верстке:
+
+1. Навигация и структура страниц:
+   - Шапка содержит табы: [ГЛАВНАЯ, КОЛЛЕКЦИЯ, АНАТОМИЯ, КОНТАКТЫ].
+   - При переключении табов JS должен плавно (через GSAP) менять положение, масштаб (scale) и угол наклона 3D-часов на экране, подстраивая их под контекст страницы.
+
+2. Реализация 3D-механизма часов (Three.js):
+   - Создай полноценные механические часы. Внутри часов должны быть: Корпус, Циферблат, Стекло и минимум 3 шестеренки разного диаметра (THREE.CylinderGeometry с зазубринами).
+   - Стрелки (Часовая, Минутная, Секундная) должны работать по реальному системному времени (new Date()), как независимые объекты. Секундная стрелка должна двигаться плавно (плавающий ход).
+   - Шестеренки внутри механизма должны вращаться! Напиши математическую зависимость: маленькая шестеренка крутится быстро (привязана к секундам), средняя — медленнее, большая (основной барабан) — едва заметно.
+
+3. Логика страниц:
+   - На вкладке &quot;ГЛАВНАЯ&quot;: Часы по центру. При mousemove они плавно покачиваются с эффектом инерции физического маятника.
+   - На вкладке &quot;КОЛЛЕКЦИЯ&quot;: Часы уходят в правый угол экрана (scale: 0.6). Слева появляется стильная сетка с карточками моделей.
+   - На вкладке &quot;АНАТОМИЯ&quot;: Часы центрируются, корпус исчезает (material.opacity -&gt; 0), а шестеренки и стрелки разлетаются по оси Z (explode эффект), открывая внутреннее устройство механизма.
+
+4. Стилистика:
+   - Глубокий черный матовый фон. Тонкая золотая и белая типографика (шрифты с засечками для заголовков). Плавные переходы (fade/slide) при смене страниц.
+
+Напиши модульную структуру кода (HTML, CSS, JS), где вся логика 3D-часов вынесена в отдельный класс или функции инициализации.</pre></details>
+  <div class="grid"><div class="card" data-src="r/006.html" data-vw="1280" data-vh="800" data-model="Claude Sonnet 5" data-title="Часы" data-stats="9м 09с · 99 ток/с · $1.23 · Claude Code (CLI)" tabindex="0">
     <div class="frame h"><div class="ph"><span class="badge" style="background:#d97757">C</span><span class="phname">Claude Sonnet 5</span></div></div>
     <div class="meta"><span class="badge sm" style="background:#d97757">C</span><span class="mname">Claude Sonnet 5</span><span class="open">развернуть</span></div>
-    <div class="stats"><span title="время генерации (оценка)">≈1м 21с</span><i>·</i><span title="токенов в секунду (замер)">99 ток/с</span><span class="via" title="через что сделано">opencode · OpenRouter</span></div>
+    <div class="stats"><span title="время прогона (замер; включает ожидание лимитов)">9м 09с</span><i>·</i><span title="токенов в секунду (замер)">99 ток/с</span><i>·</i><span title="цена (замер)">$1.23</span><span class="via" title="через что сделано">Claude Code (CLI)</span></div>
   </div></div></section>
   <footer>
     Каждая карточка : самодостаточный HTML, сгенерированный моделью по заданию. Превью грузятся лениво (видимые рендерятся, ушедшие из вида выгружаются); клик открывает интерактивную версию.<br>
-    Токенов/с : реальный замер во время прогона. Время и цена помечены ≈ : это оценка (выходные токены = размер HTML / 4; цена по тарифам OpenRouter, снимок 2026-06; точный wall-clock в снимок не попал). MiMo : публичной цены нет.
+    Токенов/с, время прогона и цена : реальный замер, снятый во время прогона на VPS (время прогона включает ожидание лимитов частоты провайдера, поэтому оно заметно больше чистой генерации). Значения с ≈ : оценка, когда точный замер недоступен.
   </footer>
 </div>
 
